@@ -1,0 +1,2577 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[    110247,       2569]
+NotebookOptionsPosition[    105157,       2466]
+NotebookOutlinePosition[    105552,       2482]
+CellTagsIndexPosition[    105509,       2479]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Epid-CRN-Example with Paclet:", "Chapter",
+ CellChangeTimes->{{3.941172712903111*^9, 
+  3.941172722218356*^9}},ExpressionUUID->"b1d65030-ff46-44b3-b5a1-\
+47182dc41d1c"],
+
+Cell[CellGroupData[{
+
+Cell["Install the paclet (only need to do this once)", "Item",
+ CellChangeTimes->{{3.941107586754539*^9, 
+  3.94110760853871*^9}},ExpressionUUID->"e8f79ec1-03b2-46e5-8d51-\
+5d15b31282c9"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"ClearAll", "[", "\"\<Global\[OpenCurlyQuote]*\>\"", 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"SetDirectory", "[", 
+   RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";", 
+  RowBox[{"SetOptions", "[", 
+   RowBox[{"$FrontEndSession", ",", " ", 
+    RowBox[{"NotebookAutoSave", " ", "->", " ", "True"}]}], "]"}], 
+  ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"NotebookSave", "[", "]"}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"PacletInstall", "[", "\"\<RobertNachbar/CompartmentalModeling\>\"", 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.941107653440631*^9, 3.941107721514695*^9}, {
+  3.9411727394508476`*^9, 3.941172741859857*^9}},
+ CellLabel->"In[2]:=",ExpressionUUID->"1eca366d-b44e-4f73-9a72-f760fb6014d4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["PacletObject",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False, Typeset`embedState$$ = "Ready"}, 
+    TemplateBox[{
+      PaneSelectorBox[{False -> GridBox[{{
+            PaneBox[
+             ButtonBox[
+              DynamicBox[
+               FEPrivate`FrontEndResource["FEBitmaps", "SummaryBoxOpener"]], 
+              ButtonFunction :> (Typeset`open$$ = True), Appearance -> None, 
+              BaseStyle -> {}, Evaluator -> Automatic, Method -> 
+              "Preemptive"], Alignment -> {Center, Center}, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}]], 
+            GraphicsBox[{
+              Thickness[0.0416667], {
+               FaceForm[{
+                 RGBColor[0.961, 0.961, 0.961], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{12.5454, 
+                22.5972}, {7.5464, 20.5002}, {2.5454, 18.4022}, {2.5454, 
+                12.5982}, {2.5454, 12.5972}, {2.5454, 6.7952}, {7.5454, 
+                4.6962}, {7.546, 4.6972}, {12.5454, 2.5992}, {17.5454, 
+                4.6972}, {17.5454, 4.6962}, {22.5454, 6.7952}, {22.5454, 
+                12.5972}, {22.5454, 12.5982}, {22.5454, 18.4022}}}]}, {
+               FaceForm[{
+                 RGBColor[0.898, 0.898, 0.898], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{17.125, 8.3359}, {17.125, 
+                14.0569}, {16.875, 14.0569}, {16.875, 8.3359}, {17., 
+                8.1169}, {21.952, 6.0399}, {22.049, 6.2709}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{7.125, 8.3359}, {7.125, 14.0569}, {
+                6.875, 14.0569}, {6.875, 8.3359}, {1.952, 6.2709}, {2.048, 
+                6.0399}, {7., 8.1169}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{11.8745, 6.2383}, {6.9515, 4.1733}, {7.0475, 
+                3.9423}, {11.9995, 6.0193}, {16.9515, 3.9423}, {17.0475, 
+                4.1733}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{17.125, 14.1392}, {17.125, 
+                19.8602}, {16.875, 19.8602}, {16.875, 14.1392}, {17., 
+                13.9202}, {21.952, 11.8432}, {22.049, 12.0742}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{7.125, 14.1392}, {7.125, 19.8602}, {
+                6.875, 19.8602}, {6.875, 14.1392}, {1.952, 12.0742}, {2.048, 
+                11.8432}, {7., 13.9202}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{11.8746, 21.3633}, {11.8746, 18.3563}, {
+                11.9996, 18.3033}, {12.1246, 18.3563}, {12.1246, 21.3633}, {
+                11.9996, 21.4153}}}]}, {
+               FaceForm[{
+                 RGBColor[0.749, 0.749, 0.749], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {1, 3, 
+                 3}}}, {{{8.292, 19.8594}, {12., 21.4154}, {15.707, 
+                 19.8594}, {12., 18.3034}}, {{17.5, 19.5274}, {17.5, 
+                 20.1924}, {12., 22.5004}, {6.5, 20.1924}, {6.5, 19.5284}, {
+                 12., 17.2194}, {12., 17.2194}, {15.7, 18.7724}, {17.5, 
+                 19.5274}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{11.5, 8.5156}, {11.5, 6.4876}, {11.5, 
+                5.4026}, {12.5, 5.8226}, {12.5, 8.5156}, {12., 8.3056}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}}}, {{{21.5, 6.4873}, {17.5, 4.8083}, {17.5, 
+                 9.5283}, {21.5, 11.2073}}, {{21.5, 12.7113}, {21.5, 
+                 12.2913}, {17., 10.4033}, {16.5, 10.6133}, {16.5, 10.1943}, {
+                 15.707, 9.8613}, {16.5, 9.5283}, {16.5, 4.8083}, {16.5, 
+                 4.8093}, {16.5, 4.3903}, {15.707, 4.0573}, {17., 3.5143}, {
+                 22.5, 5.8223}, {22.5, 12.2913}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}}}, {{{6.5, 4.8086}, {2.5, 6.4876}, {2.5, 
+                 11.2066}, {6.5, 9.5286}}, {{7.5, 9.1096}, {7.5, 9.1096}, {
+                 7.5, 9.5286}, {8.292, 9.8616}, {7.5, 10.1936}, {7.5, 
+                 10.6136}, {7., 10.4036}, {2.5, 12.2906}, {2.5, 12.7106}, {
+                 1.5, 12.2916}, {1.5, 5.8226}, {7., 3.5146}, {8.293, 
+                 4.0576}, {7.5, 4.3906}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}}}, {{{3.2925, 17.7622}, {7.0005, 
+                 19.3182}, {10.7075, 17.7622}, {7.0005, 16.2062}}, {{6.5005, 
+                 10.6122}, {2.5005, 12.2912}, {2.5005, 17.0102}, {6.5005, 
+                 15.3322}}, {{7.5005, 10.1932}, {7.5005, 10.6122}, {7.5005, 
+                 15.3322}, {12.0005, 17.2202}, {12.5005, 17.0102}, {12.5005, 
+                 18.0952}, {7.0005, 20.4032}, {1.5005, 18.0952}, {1.5005, 
+                 11.6262}, {7.0005, 9.3182}, {8.2935, 9.8612}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}}}, {{{21.5, 12.291}, {17.5, 10.612}, {
+                 17.5, 15.332}, {21.5, 17.01}}, {{13.293, 17.762}, {17., 
+                 19.318}, {20.708, 17.762}, {17., 16.207}}, {{17., 20.403}, {
+                 11.5, 18.095}, {11.5, 17.01}, {12., 17.22}, {16.5, 15.332}, {
+                 16.5, 10.612}, {16.5, 10.194}, {15.706, 9.861}, {17., 
+                 9.318}, {22.5, 11.626}, {22.5, 18.095}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}}}, {{{16.4995, 4.3906}, {12.4995, 
+                 2.7116}, {12.4995, 7.4316}, {16.4995, 9.1096}}, {{11.4995, 
+                 2.7116}, {7.4995, 4.3906}, {7.4995, 9.1096}, {11.4995, 
+                 7.4316}}, {{16.4995, 10.6136}, {16.4995, 10.1946}, {11.9995, 
+                 8.3056}, {8.2915, 9.8616}, {7.4995, 10.1936}, {7.4995, 
+                 10.6146}, {6.4995, 10.1946}, {6.4995, 3.7256}, {11.9995, 
+                 1.4176}, {17.4995, 3.7256}, {17.4995, 10.1946}}}]}, {
+               FaceForm[{
+                 RGBColor[0.965, 0.765, 0.749], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{12., 17.6616}, {16.945, 15.5856}, {16.945, 
+                9.9376}, {12., 7.8636}, {7.055, 9.9376}, {7.055, 
+                15.5856}}}]}, {
+               FaceForm[{
+                 RGBColor[0.91, 0.655, 0.635], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{12.125, 
+                17.7627}, {11.875, 17.7627}, {11.875, 12.0407}, {6.952, 
+                9.9757}, {7.048, 9.7447}, {12., 11.8227}, {16.952, 9.7447}, {
+                17.048, 9.9757}, {12.125, 12.0407}}}]}, {
+               FaceForm[{
+                 RGBColor[0.867, 0.067, 0.], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                 0}}}, {{{12.5, 8.5146}, {12.5, 13.2336}, {16.5, 14.9116}, {
+                 16.5, 10.1926}}, {{7.5, 14.9116}, {11.5, 13.2336}, {11.5, 
+                 8.5146}, {7.5, 10.1926}}, {{15.708, 15.6636}, {12., 
+                 14.1086}, {8.292, 15.6636}, {12., 17.2206}}, {{12., 
+                 18.3046}, {6.5, 15.9956}, {6.5, 9.5286}, {12., 7.2206}, {
+                 17.5, 9.5286}, {17.5, 15.9956}}}]}}, AspectRatio -> 
+             Automatic, ImageSize -> {24., 24.}, 
+             PlotRange -> {{0., 24.}, {0., 24.}}], 
+            GridBox[{{
+               RowBox[{
+                 TagBox["\"Name: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                 "\"RobertNachbar/CompartmentalModeling\"", 
+                  "SummaryItem"]}]}, {
+               RowBox[{
+                 TagBox["\"Version: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["\"1.11.1\"", "SummaryItem"]}]}}, 
+             GridBoxAlignment -> {
+              "Columns" -> {{Left}}, "Rows" -> {{Automatic}}}, AutoDelete -> 
+             False, GridBoxItemSize -> {
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+             GridBoxSpacings -> {"Columns" -> {{2}}, "Rows" -> {{Automatic}}},
+              BaseStyle -> {
+              ShowStringCharacters -> False, NumberMarks -> False, 
+               PrintPrecision -> 3, ShowSyntaxStyles -> False}]}}, 
+          GridBoxAlignment -> {"Columns" -> {{Left}}, "Rows" -> {{Top}}}, 
+          AutoDelete -> False, 
+          GridBoxItemSize -> {
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+          BaselinePosition -> {1, 1}], True -> GridBox[{{
+            PaneBox[
+             ButtonBox[
+              DynamicBox[
+               FEPrivate`FrontEndResource["FEBitmaps", "SummaryBoxCloser"]], 
+              ButtonFunction :> (Typeset`open$$ = False), Appearance -> None, 
+              BaseStyle -> {}, Evaluator -> Automatic, Method -> 
+              "Preemptive"], Alignment -> {Center, Center}, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}]], 
+            GraphicsBox[{
+              Thickness[0.0416667], {
+               FaceForm[{
+                 RGBColor[0.961, 0.961, 0.961], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{12.5454, 
+                22.5972}, {7.5464, 20.5002}, {2.5454, 18.4022}, {2.5454, 
+                12.5982}, {2.5454, 12.5972}, {2.5454, 6.7952}, {7.5454, 
+                4.6962}, {7.546, 4.6972}, {12.5454, 2.5992}, {17.5454, 
+                4.6972}, {17.5454, 4.6962}, {22.5454, 6.7952}, {22.5454, 
+                12.5972}, {22.5454, 12.5982}, {22.5454, 18.4022}}}]}, {
+               FaceForm[{
+                 RGBColor[0.898, 0.898, 0.898], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{17.125, 8.3359}, {17.125, 
+                14.0569}, {16.875, 14.0569}, {16.875, 8.3359}, {17., 
+                8.1169}, {21.952, 6.0399}, {22.049, 6.2709}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{7.125, 8.3359}, {7.125, 14.0569}, {
+                6.875, 14.0569}, {6.875, 8.3359}, {1.952, 6.2709}, {2.048, 
+                6.0399}, {7., 8.1169}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{11.8745, 6.2383}, {6.9515, 4.1733}, {7.0475, 
+                3.9423}, {11.9995, 6.0193}, {16.9515, 3.9423}, {17.0475, 
+                4.1733}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{17.125, 14.1392}, {17.125, 
+                19.8602}, {16.875, 19.8602}, {16.875, 14.1392}, {17., 
+                13.9202}, {21.952, 11.8432}, {22.049, 12.0742}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}}}, {{{7.125, 14.1392}, {7.125, 19.8602}, {
+                6.875, 19.8602}, {6.875, 14.1392}, {1.952, 12.0742}, {2.048, 
+                11.8432}, {7., 13.9202}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{11.8746, 21.3633}, {11.8746, 18.3563}, {
+                11.9996, 18.3033}, {12.1246, 18.3563}, {12.1246, 21.3633}, {
+                11.9996, 21.4153}}}]}, {
+               FaceForm[{
+                 RGBColor[0.749, 0.749, 0.749], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {1, 3, 
+                 3}}}, {{{8.292, 19.8594}, {12., 21.4154}, {15.707, 
+                 19.8594}, {12., 18.3034}}, {{17.5, 19.5274}, {17.5, 
+                 20.1924}, {12., 22.5004}, {6.5, 20.1924}, {6.5, 19.5284}, {
+                 12., 17.2194}, {12., 17.2194}, {15.7, 18.7724}, {17.5, 
+                 19.5274}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{11.5, 8.5156}, {11.5, 6.4876}, {11.5, 
+                5.4026}, {12.5, 5.8226}, {12.5, 8.5156}, {12., 8.3056}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}}}, {{{21.5, 6.4873}, {17.5, 4.8083}, {17.5, 
+                 9.5283}, {21.5, 11.2073}}, {{21.5, 12.7113}, {21.5, 
+                 12.2913}, {17., 10.4033}, {16.5, 10.6133}, {16.5, 10.1943}, {
+                 15.707, 9.8613}, {16.5, 9.5283}, {16.5, 4.8083}, {16.5, 
+                 4.8093}, {16.5, 4.3903}, {15.707, 4.0573}, {17., 3.5143}, {
+                 22.5, 5.8223}, {22.5, 12.2913}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}}}, {{{6.5, 4.8086}, {2.5, 6.4876}, {2.5, 
+                 11.2066}, {6.5, 9.5286}}, {{7.5, 9.1096}, {7.5, 9.1096}, {
+                 7.5, 9.5286}, {8.292, 9.8616}, {7.5, 10.1936}, {7.5, 
+                 10.6136}, {7., 10.4036}, {2.5, 12.2906}, {2.5, 12.7106}, {
+                 1.5, 12.2916}, {1.5, 5.8226}, {7., 3.5146}, {8.293, 
+                 4.0576}, {7.5, 4.3906}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}}}, {{{3.2925, 17.7622}, {7.0005, 
+                 19.3182}, {10.7075, 17.7622}, {7.0005, 16.2062}}, {{6.5005, 
+                 10.6122}, {2.5005, 12.2912}, {2.5005, 17.0102}, {6.5005, 
+                 15.3322}}, {{7.5005, 10.1932}, {7.5005, 10.6122}, {7.5005, 
+                 15.3322}, {12.0005, 17.2202}, {12.5005, 17.0102}, {12.5005, 
+                 18.0952}, {7.0005, 20.4032}, {1.5005, 18.0952}, {1.5005, 
+                 11.6262}, {7.0005, 9.3182}, {8.2935, 9.8612}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}}}, {{{21.5, 12.291}, {17.5, 10.612}, {
+                 17.5, 15.332}, {21.5, 17.01}}, {{13.293, 17.762}, {17., 
+                 19.318}, {20.708, 17.762}, {17., 16.207}}, {{17., 20.403}, {
+                 11.5, 18.095}, {11.5, 17.01}, {12., 17.22}, {16.5, 15.332}, {
+                 16.5, 10.612}, {16.5, 10.194}, {15.706, 9.861}, {17., 
+                 9.318}, {22.5, 11.626}, {22.5, 18.095}}}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                 0, 1, 0}, {0, 1, 0}}}, {{{16.4995, 4.3906}, {12.4995, 
+                 2.7116}, {12.4995, 7.4316}, {16.4995, 9.1096}}, {{11.4995, 
+                 2.7116}, {7.4995, 4.3906}, {7.4995, 9.1096}, {11.4995, 
+                 7.4316}}, {{16.4995, 10.6136}, {16.4995, 10.1946}, {11.9995, 
+                 8.3056}, {8.2915, 9.8616}, {7.4995, 10.1936}, {7.4995, 
+                 10.6146}, {6.4995, 10.1946}, {6.4995, 3.7256}, {11.9995, 
+                 1.4176}, {17.4995, 3.7256}, {17.4995, 10.1946}}}]}, {
+               FaceForm[{
+                 RGBColor[0.965, 0.765, 0.749], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}}}, {{{12., 17.6616}, {16.945, 15.5856}, {16.945, 
+                9.9376}, {12., 7.8636}, {7.055, 9.9376}, {7.055, 
+                15.5856}}}]}, {
+               FaceForm[{
+                 RGBColor[0.91, 0.655, 0.635], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {
+                0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}}}, {{{12.125, 
+                17.7627}, {11.875, 17.7627}, {11.875, 12.0407}, {6.952, 
+                9.9757}, {7.048, 9.7447}, {12., 11.8227}, {16.952, 9.7447}, {
+                17.048, 9.9757}, {12.125, 12.0407}}}]}, {
+               FaceForm[{
+                 RGBColor[0.867, 0.067, 0.], 
+                 Opacity[1.]}], 
+               
+               FilledCurveBox[{{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 
+                 0}, {0, 1, 0}, {0, 1, 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 
+                 0}}, {{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 
+                 0}}}, {{{12.5, 8.5146}, {12.5, 13.2336}, {16.5, 14.9116}, {
+                 16.5, 10.1926}}, {{7.5, 14.9116}, {11.5, 13.2336}, {11.5, 
+                 8.5146}, {7.5, 10.1926}}, {{15.708, 15.6636}, {12., 
+                 14.1086}, {8.292, 15.6636}, {12., 17.2206}}, {{12., 
+                 18.3046}, {6.5, 15.9956}, {6.5, 9.5286}, {12., 7.2206}, {
+                 17.5, 9.5286}, {17.5, 15.9956}}}]}}, AspectRatio -> 
+             Automatic, ImageSize -> {24., 24.}, 
+             PlotRange -> {{0., 24.}, {0., 24.}}], 
+            GridBox[{{
+               RowBox[{
+                 TagBox["\"Name: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                 "\"RobertNachbar/CompartmentalModeling\"", 
+                  "SummaryItem"]}]}, {
+               RowBox[{
+                 TagBox["\"Version: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["\"1.11.1\"", "SummaryItem"]}]}, {
+               RowBox[{
+                 TagBox["\"Location: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                 "\"C:\\\\Users\\\\DELL\\\\AppData\\\\Roaming\\\\Mathematica\\\
+\\Paclets\\\\Repository\\\\RobertNachbar__CompartmentalModeling-1.11.1\"", 
+                  "SummaryItem"]}]}, {
+               RowBox[{
+                 TagBox["\"Description: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  TagBox[
+                  "\"Build, visualize, analyze, and simulate compartmental \
+models\"", Short], "SummaryItem"]}]}}, 
+             GridBoxAlignment -> {
+              "Columns" -> {{Left}}, "Rows" -> {{Automatic}}}, AutoDelete -> 
+             False, GridBoxItemSize -> {
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+             GridBoxSpacings -> {"Columns" -> {{2}}, "Rows" -> {{Automatic}}},
+              BaseStyle -> {
+              ShowStringCharacters -> False, NumberMarks -> False, 
+               PrintPrecision -> 3, ShowSyntaxStyles -> False}]}}, 
+          GridBoxAlignment -> {"Columns" -> {{Left}}, "Rows" -> {{Top}}}, 
+          AutoDelete -> False, 
+          GridBoxItemSize -> {
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+          BaselinePosition -> {1, 1}]}, 
+       Dynamic[Typeset`open$$], ImageSize -> Automatic]},
+     "SummaryPanel"],
+    DynamicModuleValues:>{}], "]"}],
+  PacletObject[
+   Association[
+   "Name" -> "RobertNachbar/CompartmentalModeling", "Description" -> 
+    "Build, visualize, analyze, and simulate compartmental models", "Creator" -> 
+    "rnachbar@wolfram.com", "License" -> "MIT", "PublisherID" -> 
+    "RobertNachbar", "Version" -> "1.11.1", "WolframVersion" -> "12.1+", 
+    "Extensions" -> {{"Documentation", "Language" -> "English"}, {
+      "Kernel", "Root" -> "Kernel", 
+       "Context" -> {
+        "RobertNachbar`CompartmentalModeling`", 
+         "RobertNachbar`EpidemiologyModeling`", 
+         "RobertNachbar`EpidemiologyModels`", 
+         "RobertNachbar`SystemsBiologyModeling`"}, 
+       "Symbols" -> {
+        "RobertNachbar`CompartmentalModeling`$C", 
+         "RobertNachbar`CompartmentalModeling`$CompartmentalModelingVersion", 
+         "RobertNachbar`CompartmentalModeling`$R", 
+         "RobertNachbar`CompartmentalModeling`CompartmentalModelGraph", 
+         "RobertNachbar`CompartmentalModeling`DefinePropensityFunction", 
+         "RobertNachbar`CompartmentalModeling`DeriveTransitions", 
+         "RobertNachbar`CompartmentalModeling`KineticCompartmentalModel", 
+         "RobertNachbar`CompartmentalModeling`NullCompartment", 
+         "RobertNachbar`CompartmentalModeling`ResolveCompartmentalModel", 
+         "RobertNachbar`CompartmentalModeling`StochasticSolve", 
+         "RobertNachbar`CompartmentalModeling`StoichiometryTable", 
+         "RobertNachbar`CompartmentalModeling`Transition", 
+         "RobertNachbar`EpidemiologyModeling`$EpidemiologyColor", 
+         "RobertNachbar`EpidemiologyModeling`$EpidemiologyModelingVersion", 
+         "RobertNachbar`EpidemiologyModeling`CollectModel", 
+         "RobertNachbar`EpidemiologyModeling`DynamicTransmissionModel", 
+         "RobertNachbar`EpidemiologyModeling`EpidemiologyModel", 
+         "RobertNachbar`EpidemiologyModeling`EpidemiologyModelData", 
+         "RobertNachbar`EpidemiologyModeling`ExpandModel", 
+         "RobertNachbar`EpidemiologyModeling`ForceOfInfection", 
+         "RobertNachbar`EpidemiologyModeling`Incidence", 
+         "RobertNachbar`EpidemiologyModeling`NextGenerationMatrix", 
+         "RobertNachbar`EpidemiologyModeling`StratifyModel", 
+         "RobertNachbar`EpidemiologyModeling`VitalDemographicsModel", 
+         "RobertNachbar`SystemsBiologyModeling`$\
+SystemsBiologyModelingVersion", 
+         "RobertNachbar`SystemsBiologyModeling`CompetitiveInhibitorKinetics", 
+         "RobertNachbar`SystemsBiologyModeling`EnzymeReaction", 
+         "RobertNachbar`SystemsBiologyModeling`HillKinetics", 
+         "RobertNachbar`SystemsBiologyModeling`KineticReactionNetworkModel", 
+         "RobertNachbar`SystemsBiologyModeling`MichaelisMentenKinetics", 
+         "RobertNachbar`SystemsBiologyModeling`\
+NoncompetitiveInhibitorKinetics", 
+         "RobertNachbar`SystemsBiologyModeling`\
+UncompetitiveInhibitorKinetics"}}, {
+      "Asset", "Assets" -> {{"License", "LICENSE.txt"}}}}, "Location" -> 
+    "C:\\Users\\DELL\\AppData\\Roaming\\Mathematica\\Paclets\\Repository\\\
+RobertNachbar__CompartmentalModeling-1.11.1"]],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{{3.941107709613474*^9, 3.941107723599476*^9}, 
+   3.941172669045121*^9, 3.94117274318375*^9},
+ CellLabel->"Out[5]=",ExpressionUUID->"7028b730-14f8-4e18-ac0f-f7d233a327f2"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Load the ",
+ Cell[BoxData[
+  FormBox["\"\<RobertNachbar`SystemsBiologyModeling`\>\"", TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "2932da84-b294-4edd-a57a-3cd8f58fa3af"],
+ " context"
+}], "Item",
+ CellChangeTimes->{{3.941107739170785*^9, 
+  3.941107769358212*^9}},ExpressionUUID->"6103c6f6-8f07-4af3-847c-\
+49908e0fb845"],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<RobertNachbar`SystemsBiologyModeling`\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.941099735847357*^9, 3.9410997389013643`*^9}},
+ CellLabel->"In[6]:=",ExpressionUUID->"2294169d-e2f7-4361-a3c7-3e38350ebb8e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Define the model reactions", "Item",
+ CellChangeTimes->{{3.94110781394769*^9, 
+  3.941107825177643*^9}},ExpressionUUID->"e7ea9743-a8fa-47c4-8347-\
+b98b476b56a7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"model", "=", 
+   RowBox[{"{", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"\[ScriptCapitalX]", 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "1"]], "\[ScriptCapitalX]\[ScriptT]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"\[ScriptCapitalX]\[ScriptT]", 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "2"]], "\[ScriptCapitalX]\[ScriptP]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{
+      "\[ScriptCapitalX]\[ScriptT]", "+", "\[ScriptCapitalY]\[ScriptP]"}], 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "4"]], 
+      RowBox[{"\[ScriptCapitalX]\[ScriptT]", "+", "\[ScriptCapitalY]"}]}], 
+     ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"\[ScriptCapitalX]\[ScriptP]", "+", "\[ScriptCapitalY]"}], 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "3"]], 
+      RowBox[{"\[ScriptCapitalX]", "+", "\[ScriptCapitalY]\[ScriptP]"}]}]}], 
+    "\[IndentingNewLine]", "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.941099374283115*^9, 3.9410993837613163`*^9}, {
+  3.9410999216854877`*^9, 3.941100047029871*^9}, {3.94110329255046*^9, 
+  3.941103334344062*^9}, {3.941103620295034*^9, 3.9411036216125383`*^9}},
+ CellLabel->"In[7]:=",ExpressionUUID->"df130e1d-d57b-4c6a-a839-92ede2079dc2"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"CompartmentalModelGraph", "[", 
+  RowBox[{"model", ",", 
+   RowBox[{"\"\<GraphTheme\>\"", "->", "\"\<PetriNet\>\""}], ",", 
+   RowBox[{"GraphLayout", "->", 
+    RowBox[{"{", 
+     RowBox[{"\"\<LayeredDigraphEmbedding\>\"", ",", 
+      RowBox[{"\"\<RootVertex\>\"", "->", "\[ScriptCapitalX]"}], ",", 
+      RowBox[{"\"\<Orientation\>\"", "->", "Left"}]}], "}"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.941103346569407*^9, 3.9411033532181177`*^9}, {
+  3.94110339860851*^9, 3.941103413768771*^9}, {3.941103464695612*^9, 
+  3.9411034835613337`*^9}, {3.941103740946065*^9, 3.941103765560584*^9}, {
+  3.941103802751706*^9, 3.941103883404154*^9}},
+ CellLabel->"In[8]:=",ExpressionUUID->"36bbbeb0-6674-44d9-928b-31c8713ec85e"],
+
+Cell[BoxData[
+ GraphicsBox[
+  NamespaceBox["NetworkGraphics",
+   DynamicModuleBox[{Typeset`graph = HoldComplete[
+     Graph[{
+       RobertNachbar`CompartmentalModeling`$C[$CellContext`\[ScriptCapitalX]], 
+       RobertNachbar`CompartmentalModeling`$C[$CellContext`\[ScriptCapitalX]\
+\[ScriptP]], 
+       RobertNachbar`CompartmentalModeling`$C[$CellContext`\[ScriptCapitalX]\
+\[ScriptT]], 
+       RobertNachbar`CompartmentalModeling`$C[$CellContext`\[ScriptCapitalY]], 
+       RobertNachbar`CompartmentalModeling`$C[$CellContext`\[ScriptCapitalY]\
+\[ScriptP]], 
+       RobertNachbar`CompartmentalModeling`$R[1][
+        Subscript[$CellContext`k, 1]], 
+       RobertNachbar`CompartmentalModeling`$R[2][
+        Subscript[$CellContext`k, 2]], 
+       RobertNachbar`CompartmentalModeling`$R[3][
+        Subscript[$CellContext`k, 4]], 
+       RobertNachbar`CompartmentalModeling`$R[4][
+        Subscript[$CellContext`k, 3]]}, {{{1, 6}, {6, 3}, {3, 7}, {7, 2}, {3, 
+       8}, {5, 8}, {8, 3}, {8, 4}, {2, 9}, {4, 9}, {9, 1}, {9, 5}}, Null}, {
+      EdgeStyle -> {DirectedEdge[
+           RobertNachbar`CompartmentalModeling`$R[3][
+            Subscript[$CellContext`k, 4]], 
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalY]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalY]], 
+           RobertNachbar`CompartmentalModeling`$R[4][
+            Subscript[$CellContext`k, 3]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]\[ScriptT]], 
+           RobertNachbar`CompartmentalModeling`$R[2][
+            Subscript[$CellContext`k, 2]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]\[ScriptP]], 
+           RobertNachbar`CompartmentalModeling`$R[4][
+            Subscript[$CellContext`k, 3]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalY]\[ScriptP]], 
+           RobertNachbar`CompartmentalModeling`$R[3][
+            Subscript[$CellContext`k, 4]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           RobertNachbar`CompartmentalModeling`$R[4][
+            Subscript[$CellContext`k, 3]], 
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalY]\[ScriptP]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           RobertNachbar`CompartmentalModeling`$R[4][
+            Subscript[$CellContext`k, 3]], 
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           RobertNachbar`CompartmentalModeling`$R[2][
+            Subscript[$CellContext`k, 2]], 
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]\[ScriptP]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]], 
+           RobertNachbar`CompartmentalModeling`$R[1][
+            Subscript[$CellContext`k, 1]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           RobertNachbar`CompartmentalModeling`$R[1][
+            Subscript[$CellContext`k, 1]], 
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]\[ScriptT]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]\[ScriptT]], 
+           RobertNachbar`CompartmentalModeling`$R[3][
+            Subscript[$CellContext`k, 4]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, DirectedEdge[
+           RobertNachbar`CompartmentalModeling`$R[3][
+            Subscript[$CellContext`k, 4]], 
+           
+           RobertNachbar`CompartmentalModeling`$C[$CellContext`\
+\[ScriptCapitalX]\[ScriptT]]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}}, 
+       GraphLayout -> {
+        "LayeredDigraphEmbedding", "RootVertex" -> 
+         RobertNachbar`CompartmentalModeling`$C[$CellContext`\[ScriptCapitalX]\
+], "Orientation" -> Left}, PerformanceGoal -> "Quality", VertexShapeFunction -> {
+         Function[{
+          RobertNachbar`CompartmentalModeling`Private`position$, 
+           RobertNachbar`CompartmentalModeling`Private`vertex$, 
+           RobertNachbar`CompartmentalModeling`Private`box$}, 
+          Switch[RobertNachbar`CompartmentalModeling`Private`vertex$, 
+           RobertNachbar`CompartmentalModeling`$C[
+            Blank[]], 
+           Inset[
+            Framed[
+             Style[
+              First[RobertNachbar`CompartmentalModeling`Private`vertex$], 
+              Black, 
+              Apply[Sequence, {}]], FrameStyle -> Blue, Background -> 
+             LightBlue], 
+            RobertNachbar`CompartmentalModeling`Private`position$], 
+           RobertNachbar`CompartmentalModeling`$R[
+            Blank[], RobertNachbar`CompartmentalModeling`NullCompartment][
+            Blank[]], 
+           Inset[
+            Framed[
+             Style[
+              First[RobertNachbar`CompartmentalModeling`Private`vertex$], 
+              Black, 
+              Apply[Sequence, {}]], RoundingRadius -> 25, FrameStyle -> Red, 
+             Background -> LightRed], 
+            RobertNachbar`CompartmentalModeling`Private`position$], 
+           RobertNachbar`CompartmentalModeling`$R[
+            Blank[]][
+            Blank[]], 
+           Inset[
+            Framed[
+             Style[
+              First[RobertNachbar`CompartmentalModeling`Private`vertex$], 
+              Black, 
+              Apply[Sequence, {}]], FrameStyle -> Red, Background -> 
+             LightRed], 
+            RobertNachbar`CompartmentalModeling`Private`position$]]]}}]], 
+    Typeset`boxes, Typeset`boxes$s2d = GraphicsGroupBox[{{
+       Arrowheads[Medium], 
+       Directive[
+        Opacity[0.7], 
+        Hue[0.6, 0.7, 0.5]], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$1", Automatic, Center], 
+          DynamicLocation["VertexID$6", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$2", Automatic, Center], 
+          DynamicLocation["VertexID$9", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$3", Automatic, Center], 
+          DynamicLocation["VertexID$7", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[
+         BezierCurveBox[{
+           DynamicLocation[
+           "VertexID$3", Automatic, Center], {-5.782716046789233, 
+           0.0967902784040712}, {-5.7160493797057566`, 
+           0.1123458321733003}, {-5.644444441109966, 
+           0.12444459568675209`}, {-5.567901231001862, 
+           0.13308656894442664`}, {-5.486419749381444, 
+           0.13827175194632393`}, {-5.399999996248712, 
+           0.14000014469244393`}, {-5.311111107359822, 
+           0.14000014231067529`}, {-5.222222218470935, 
+           0.1400001399289067}, {-5.1333333295820465`, 
+           0.14000013754713808`}, {-5.044444440693157, 
+           0.14000013516536944`}, {-4.9555555518042675`, 
+           0.14000013278360082`}, {-4.86666666291538, 
+           0.14000013040183218`}, {-4.77777777402649, 
+           0.14000012802006356`}, {-4.688888885137602, 
+           0.14000012563829495`}, {-4.399999996248713, 
+           0.1400001178975469}, {-4.311111107359824, 
+           0.14000011551577826`}, {-4.222222218470935, 
+           0.14000011313400967`}, {-4.133333329582047, 
+           0.14000011075224103`}, {-4.044444440693157, 
+           0.1400001083704724}, {-3.955555551804269, 
+           0.14000010598870377`}, {-3.86666666291538, 
+           0.14000010360693516`}, {-3.777777774026491, 
+           0.14000010122516654`}, {-3.6888888851376027`, 
+           0.14000009884339792`}, {-3.399999996248713, 
+           0.14000009110264988`}, {-3.3111120436221806`, 
+           0.13990393190322667`}, {-3.2222259635203603`, 
+           0.13961545906849424`}, {-3.1333417559432517`, 
+           0.13913467259845264`}, {-3.0444594208908553`, 
+           0.1384615724931018}, {-2.955578958363171, 
+           0.13759615875244174`}, {-2.8667003683601995`, 
+           0.1365384313764725}, {-2.77782365088194, 
+           0.13528839036519405`}, {-2.6889488059283924`, 
+           0.13384603571860643`}, {-2.3558385831668573`, 
+           0.1274547310260237}, {-2.2632947054528367`, 
+           0.12097815663442116`}, {-2.176525713223918, 
+           0.10526557401032985`}, {-2.0955316064801015`, 
+           0.08031698315374973}, {-2.020312385221386, 
+           0.04613238406468081}, {-1.9508680494477724`, 
+           0.002711776743123062}, {-1.8871985991592606`, \
+-0.0499448388109234}, {-1.82930403435585, -0.11183746259745875`}, \
+{-1.7771843550375415`, -0.1829660946164828}, {-1.7308395612043346`, \
+-0.26333073486799574`}, {-1.594264093338647, -0.534205780423152}, \
+{-1.4715313950056443`, -0.7856028767655501}, {-1.3626414662053263`, \
+-1.0175220238951899`}, {-1.2675943069376925`, -1.229963221812071}, \
+{-1.1863899172027437`, -1.4229264705161944`}, 
+           DynamicLocation["VertexID$8", Automatic, Center]}]], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[
+         BezierCurveBox[{
+           DynamicLocation[
+           "VertexID$4", Automatic, 
+            Center], {-0.21728397741218086`, -0.9999999941778985}, \
+{-0.28395064407884757`, -0.9999999923915721}, {-0.3555555823504524, \
+-0.9999999904729252}, {-0.43209879222699565`, -0.9999999884219577}, \
+{-0.513580273708477, -0.9999999862386699}, {-0.6000000267948968, \
+-0.9999999839230614}, {-0.6888889156837856, -0.9999999815412927}, \
+{-0.7777778045726744, -0.9999999791595242}, {-0.8666666934615634, \
+-0.9999999767777557}, {-0.9555555823504523, -0.999999974395987}, \
+{-1.044444471239341, -0.9999999720142183}, {-1.13333336012823, \
+-0.9999999696324497}, {-1.2222222490171188`, -0.999999967250681}, \
+{-1.3111111379060079`, -0.9999999648689124}, {-1.6000000267948968`, \
+-0.9999999571281644}, {-1.6888889156837856`, -0.9999999547463958}, \
+{-1.7777778045726746`, -0.9999999523646271}, {-1.8666666934615632`, \
+-0.9999999499828587}, {-1.9555555823504522`, -0.9999999476010899}, \
+{-2.0444444712393413`, -0.9999999452193213}, {-2.13333336012823, \
+-0.9999999428375526}, {-2.222222249017119, -0.999999940455784}, \
+{-2.311111137906008, -0.9999999380740154}, {-2.4000000267948964`, \
+-0.9999999356922468}, {-2.486419779881316, -0.9999999333766384}, \
+{-2.5679012613627976`, -0.9999999311933504}, {-2.644444471239341, \
+-0.9999999291423832}, {-2.716049409510946, -0.9999999272237361}, \
+{-2.7827160761776124`, -0.9999999254374097}, 
+           DynamicLocation["VertexID$9", Automatic, Center]}]], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$5", Automatic, Center], 
+          DynamicLocation["VertexID$8", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$6", Automatic, Center], 
+          DynamicLocation["VertexID$3", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$7", Automatic, Center], 
+          DynamicLocation["VertexID$2", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[
+         BezierCurveBox[{
+           DynamicLocation[
+           "VertexID$8", Automatic, 
+            Center], {-1.335465717067232, -1.5332278470733587`}, \
+{-1.4366939561639365`, -1.3612501547652975`}, {-1.5448669245515796`, \
+-1.1671585981471868`}, {-1.6599846222301606`, -0.9509531772190261}, \
+{-1.7820470491996798`, -0.7126338919808153}, {-1.911054205460137, \
+-0.45220074243255437`}, {-1.9497440531911765`, -0.3823920869112491}, \
+{-1.9935699726387064`, -0.32101486915854704`}, {-2.0425319638027264`, \
+-0.268069089174448}, {-2.0966300266832367`, -0.22355474695895192`}, \
+{-2.155864161280237, -0.18747184251205898`}, {-2.2202343675937275`, \
+-0.15982037583376912`}, {-2.289740645623709, -0.1406003469240823}, \
+{-2.36438299537018, -0.12981175578299858`}, {-2.6294409458058556`, \
+-0.13163637481211493`}, {-2.7117885681997715`, -0.1333916865617776}, \
+{-2.794138520739107, -0.13494049078712386`}, {-2.8764908034238625`, \
+-0.13628278748815376`}, {-2.9588454162540367`, -0.13741857666486718`}, \
+{-3.0412023592296302`, -0.13834785831726426`}, {-3.1235616323506434`, \
+-0.1390706324453449}, {-3.2059232356170755`, -0.13958689904910915`}, \
+{-3.2882871690289277`, -0.13989665812855698`}, {-3.6000000037512847`, \
+-0.13999990353837066`}, {-3.6888888926401733`, -0.13999990115660202`}, \
+{-3.7777777815290623`, -0.1399998987748334}, {-3.8666666704179513`, \
+-0.1399998963930648}, {-3.9555555593068403`, -0.13999989401129614`}, \
+{-4.044444448195729, -0.13999989162952753`}, {-4.133333337084618, \
+-0.1399998892477589}, {-4.222222225973506, -0.1399998868659903}, \
+{-4.3111111148623955`, -0.13999988448422168`}, {-4.600000003751284, \
+-0.13999987674347364`}, {-4.688888892640172, -0.139999874361705}, \
+{-4.777777781529061, -0.1399998719799364}, {-4.866666670417952, \
+-0.1399998695981678}, {-4.955555559306839, -0.13999986721639915`}, \
+{-5.044444448195728, -0.13999986483463053`}, {-5.1333333370846175`, \
+-0.13999986245286192`}, {-5.222222225973506, -0.13999986007109327`}, \
+{-5.3111111148623955`, -0.13999985768932466`}, {-5.400000003751284, \
+-0.13999985530755604`}, {-5.486419756791391, -0.13827145793021925`}, \
+{-5.567901238133936, -0.13308627056174616`}, {-5.64444444777892, \
+-0.12444429320213678`}, {-5.716049385726338, -0.11234552585139106`}, \
+{-5.782716051976196, -0.09678996850950902}, 
+           DynamicLocation["VertexID$3", Automatic, Center]}]], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$8", Automatic, Center], 
+          DynamicLocation["VertexID$4", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[
+         BezierCurveBox[{
+           DynamicLocation[
+           "VertexID$9", Automatic, 
+            Center], {-3.260960913906354, -0.478078110430289}, \
+{-3.3521958603282056`, -0.2956082053634319}, {-3.4538286966076504`, \
+-0.0923425191883342}, {-3.5658594227446896`, 
+           0.13171894809500473`}, {-3.6882880387393238`, 
+           0.3765761964865843}, {-3.821114544591552, 
+           0.6422292259864049}, {-3.863596671584519, 
+           0.717316941924702}, {-3.9115384176240653`, 
+           0.7835708092092899}, {-3.9649397827101915`, 
+           0.8409908278401687}, {-4.023800766842895, 
+           0.889576997817338}, {-4.088121370022178, 
+           0.9293293191407983}, {-4.157901592248041, 
+           0.9602477918105492}, {-4.2331414335204816`, 
+           0.9823324158265909}, {-4.313840893839502, 
+           0.9955831911889234}, {-4.599999973205101, 
+           1.000000123256526}, {-4.688888862093989, 
+           1.0000001256382944`}, {-4.777777750982879, 
+           1.0000001280200632`}, {-4.866666639871768, 
+           1.000000130401832}, {-4.955555528760657, 
+           1.0000001327836008`}, {-5.0444444176495455`, 
+           1.0000001351653691`}, {-5.133333306538434, 
+           1.0000001375471377`}, {-5.222222195427324, 
+           1.0000001399289062`}, {-5.311111084316211, 
+           1.000000142310675}, {-5.599999973205102, 
+           1.000000150051423}, {-5.68888886209399, 
+           1.0000001524331914`}, {-5.77777775098288, 
+           1.0000001548149602`}, {-5.866666639871768, 
+           1.000000157196729}, {-5.955555528760657, 
+           1.0000001595784975`}, {-6.044444417649546, 
+           1.000000161960266}, {-6.133333306538434, 
+           1.0000001643420349`}, {-6.2222221954273245`, 
+           1.0000001667238034`}, {-6.311111084316213, 
+           1.0000001691055722`}, {-6.599999973205101, 
+           1.00000017684632}, {-6.687442475921808, 
+           0.99650829385014}, {-6.771992206294154, 
+           0.9860326400980628}, {-6.853649164322141, 
+           0.9685732155900886}, {-6.932413350005764, 
+           0.944130020326217}, {-7.008284763345026, 
+           0.9127030543064482}, {-7.081263404339927, 
+           0.8742923175307823}, {-7.151349272990466, 
+           0.8288978099992192}, {-7.218542369296644, 
+           0.776519531711759}, {-7.282842693258461, 
+           0.7171574826684014}, {-7.393851015837008, 
+           0.6061491660387656}, {-7.497028294069298, 
+           0.502971893335727}, {-7.592374527955325, 
+           0.40762566455928556`}, {-7.67988971749509, 
+           0.32011047970944106`}, {-7.759573862688594, 0.24042633878619377`}, 
+           DynamicLocation["VertexID$1", Automatic, Center]}]], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False], 
+       StyleBox[
+        ArrowBox[{
+          DynamicLocation["VertexID$9", Automatic, Center], 
+          DynamicLocation["VertexID$5", Automatic, Center]}], {{
+          RGBColor[
+          0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+          Thickness[Large]}}, StripOnInput -> False]}, {
+       Directive[
+        Hue[0.6, 0.2, 0.8], 
+        EdgeForm[
+         Directive[
+          GrayLevel[0], 
+          Opacity[0.7]]]], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox["\[ScriptCapitalX]", 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[0, 0, 1], Background -> RGBColor[0.87, 0.94, 1], 
+            StripOnInput -> False], TraditionalForm]], {-7.999999999999997, 
+         2.1435917623294274`*^-7}], "DynamicName", BoxID -> "VertexID$1"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox["\[ScriptCapitalX]\[ScriptP]", 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[0, 0, 1], Background -> RGBColor[0.87, 0.94, 1], 
+            StripOnInput -> False], 
+           TraditionalForm]], {-4.000000026794896, -0.9999998928204116}], 
+        "DynamicName", BoxID -> "VertexID$2"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox["\[ScriptCapitalX]\[ScriptT]", 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[0, 0, 1], Background -> RGBColor[0.87, 0.94, 1], 
+            StripOnInput -> False], TraditionalForm]], {-5.999999999999998, 
+         1.6076938217470707`*^-7}], "DynamicName", BoxID -> "VertexID$3"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox["\[ScriptCapitalY]", 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[0, 0, 1], Background -> RGBColor[0.87, 0.94, 1], 
+            StripOnInput -> False], 
+           TraditionalForm]], {-2.6794897029117842`*^-8, \
+-0.9999999999999997}], "DynamicName", BoxID -> "VertexID$4"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox["\[ScriptCapitalY]\[ScriptP]", 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[0, 0, 1], Background -> RGBColor[0.87, 0.94, 1], 
+            StripOnInput -> False], 
+           TraditionalForm]], {-2.0000000535897935`, -1.9999999464102052`}], 
+        "DynamicName", BoxID -> "VertexID$5"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox[
+             SubscriptBox["k", "1"], 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[1, 0, 0], Background -> RGBColor[1, 0.85, 0.85], 
+            StripOnInput -> False], TraditionalForm]], {-6.999999999999997, 
+         1.875642792038249*^-7}], "DynamicName", BoxID -> "VertexID$6"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox[
+             SubscriptBox["k", "2"], 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[1, 0, 0], Background -> RGBColor[1, 0.85, 0.85], 
+            StripOnInput -> False], 
+           TraditionalForm]], {-5.000000026794895, -0.9999998660255145}], 
+        "DynamicName", BoxID -> "VertexID$7"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox[
+             SubscriptBox["k", "4"], 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[1, 0, 0], Background -> RGBColor[1, 0.85, 0.85], 
+            StripOnInput -> False], 
+           TraditionalForm]], {-1.0000000535897937`, -1.9999999732051024`}], 
+        "DynamicName", BoxID -> "VertexID$8"], 
+       TagBox[
+        InsetBox[
+         BoxData[
+          FormBox[
+           FrameBox[
+            StyleBox[
+             SubscriptBox["k", "3"], 
+             GrayLevel[0], StripOnInput -> False], FrameStyle -> 
+            RGBColor[1, 0, 0], Background -> RGBColor[1, 0.85, 0.85], 
+            StripOnInput -> False], 
+           TraditionalForm]], {-3.000000026794896, -0.9999999196153085}], 
+        "DynamicName", BoxID -> "VertexID$9"]}}], $CellContext`flag}, 
+    TagBox[
+     DynamicBox[GraphComputation`NetworkGraphicsBox[
+      3, Typeset`graph, Typeset`boxes, $CellContext`flag], {
+      CachedValue :> Typeset`boxes, SingleEvaluation -> True, 
+       SynchronousUpdating -> False, TrackedSymbols :> {$CellContext`flag}},
+      ImageSizeCache->{{-3.239306690989906, 
+       363.2393066909899}, {-72.23930669098989, 74.23930669098992}}],
+     MouseAppearanceTag["NetworkGraphics"]],
+    AllowKernelInitialization->False,
+    UnsavedVariables:>{$CellContext`flag}]],
+  DefaultBaseStyle->{
+   "NetworkGraphics", FrontEnd`GraphicsHighlightColor -> Hue[0.8, 1., 0.6]},
+  FormatType->TraditionalForm,
+  FrameTicks->None]], "Output",
+ CellChangeTimes->{
+  3.941103416137261*^9, 3.941103485407873*^9, 3.9411036501615267`*^9, {
+   3.941103755719088*^9, 3.941103766363902*^9}, 3.941103805231224*^9, {
+   3.9411038549810143`*^9, 3.941103883947888*^9}, 3.941172799349388*^9},
+ CellLabel->"Out[8]=",ExpressionUUID->"a1b88fb4-eff5-4552-872e-d2b8eee00549"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Compute the stoichiometric matrix, differential equations, etc.\
+\>", "Item",
+ CellChangeTimes->{{3.941107846668481*^9, 
+  3.9411078902315817`*^9}},ExpressionUUID->"72ab9ace-3f0c-4fe5-95c2-\
+169ee9931444"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"modelData", "=", 
+   RowBox[{"KineticReactionNetworkModel", "[", 
+    RowBox[{"model", ",", "t"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Keys", "@", "%"}]}], "Input",
+ CellChangeTimes->{{3.94110395461649*^9, 3.941103989386703*^9}},
+ CellLabel->"In[9]:=",ExpressionUUID->"959fc89c-4089-460c-9e4a-9584cd0361c2"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Variables\"\>", ",", "\<\"ComponentReactions\"\>", 
+   ",", "\<\"StoichiometricMatrix\"\>", ",", "\<\"Rates\"\>", 
+   ",", "\<\"Equations\"\>", ",", "\<\"TimeSymbol\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.941103990101281*^9, 3.941172820708401*^9},
+ CellLabel->"Out[10]=",ExpressionUUID->"6e332765-1b47-4338-9886-71e956ee5ce0"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TableForm", "[", 
+  RowBox[{
+   RowBox[{"modelData", "[", "\"\<StoichiometricMatrix\>\"", "]"}], ",", 
+   RowBox[{"TableHeadings", "->", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"modelData", "[", "\"\<ComponentReactions\>\"", "]"}], ",", 
+      RowBox[{"modelData", "[", "\"\<Variables\>\"", "]"}]}], "}"}]}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.941104010938312*^9, 3.941104023325973*^9}, {
+  3.941104067125552*^9, 3.941104107852128*^9}},
+ CellLabel->"In[11]:=",ExpressionUUID->"d7349273-a35f-4eb8-8600-18698d474324"],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      StyleBox["\[Null]",
+       ShowStringCharacters->False], 
+      TagBox["\[ScriptCapitalX]",
+       HoldForm], 
+      TagBox["\[ScriptCapitalX]\[ScriptP]",
+       HoldForm], 
+      TagBox["\[ScriptCapitalX]\[ScriptT]",
+       HoldForm], 
+      TagBox["\[ScriptCapitalY]",
+       HoldForm], 
+      TagBox["\[ScriptCapitalY]\[ScriptP]",
+       HoldForm]},
+     {
+      TagBox[
+       RowBox[{"\[ScriptCapitalX]", 
+        OverscriptBox["\[RightArrow]", 
+         SubscriptBox["k", "1"]], "\[ScriptCapitalX]\[ScriptT]"}],
+       HoldForm], 
+      RowBox[{"-", "1"}], "0", "1", "0", "0"},
+     {
+      TagBox[
+       RowBox[{"\[ScriptCapitalX]\[ScriptT]", 
+        OverscriptBox["\[RightArrow]", 
+         SubscriptBox["k", "2"]], "\[ScriptCapitalX]\[ScriptP]"}],
+       HoldForm], "0", "1", 
+      RowBox[{"-", "1"}], "0", "0"},
+     {
+      TagBox[
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "+", "\[ScriptCapitalY]"}], 
+        OverscriptBox["\[RightArrow]", 
+         SubscriptBox["k", "3"]], 
+        RowBox[{"\[ScriptCapitalX]", "+", "\[ScriptCapitalY]\[ScriptP]"}]}],
+       HoldForm], "1", 
+      RowBox[{"-", "1"}], "0", 
+      RowBox[{"-", "1"}], "1"},
+     {
+      TagBox[
+       RowBox[{
+        RowBox[{
+        "\[ScriptCapitalX]\[ScriptT]", "+", "\[ScriptCapitalY]\[ScriptP]"}], 
+        OverscriptBox["\[RightArrow]", 
+         SubscriptBox["k", "4"]], 
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "+", "\[ScriptCapitalY]"}]}],
+       HoldForm], "0", "0", "0", "1", 
+      RowBox[{"-", "1"}]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}},
+    GridBoxDividers->{
+     "Columns" -> {False, True, {False}, False}, 
+      "Rows" -> {False, True, {False}, False}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}],
+   {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[BoxForm`e$, TableHeadings -> {{
+       RobertNachbar`CompartmentalModeling`Transition[$CellContext`\
+\[ScriptCapitalX], 
+        Subscript[$CellContext`k, 
+         1], $CellContext`\[ScriptCapitalX]\[ScriptT]], 
+       RobertNachbar`CompartmentalModeling`Transition[$CellContext`\
+\[ScriptCapitalX]\[ScriptT], 
+        Subscript[$CellContext`k, 
+         2], $CellContext`\[ScriptCapitalX]\[ScriptP]], 
+       RobertNachbar`CompartmentalModeling`Transition[$CellContext`\
+\[ScriptCapitalX]\[ScriptP] + $CellContext`\[ScriptCapitalY], 
+        Subscript[$CellContext`k, 
+         3], $CellContext`\[ScriptCapitalX] + $CellContext`\[ScriptCapitalY]\
+\[ScriptP]], 
+       RobertNachbar`CompartmentalModeling`Transition[$CellContext`\
+\[ScriptCapitalX]\[ScriptT] + $CellContext`\[ScriptCapitalY]\[ScriptP], 
+        Subscript[$CellContext`k, 
+         4], $CellContext`\[ScriptCapitalX]\[ScriptT] + $CellContext`\
+\[ScriptCapitalY]]}, {$CellContext`\[ScriptCapitalX], $CellContext`\
+\[ScriptCapitalX]\[ScriptP], $CellContext`\[ScriptCapitalX]\[ScriptT], \
+$CellContext`\[ScriptCapitalY], \
+$CellContext`\[ScriptCapitalY]\[ScriptP]}}]]]], "Output",
+ CellChangeTimes->{3.941104023944585*^9, 3.9411041086754923`*^9, 
+  3.941172823642025*^9},
+ CellLabel->
+  "Out[11]//TableForm=",ExpressionUUID->"bae3ea56-8878-4950-9a09-\
+1769bb453052"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"modelData", "[", "\"\<Equations\>\"", "]"}], "//", 
+  "Column"}]], "Input",
+ CellChangeTimes->{{3.941104177324292*^9, 3.9411041809882803`*^9}},
+ CellLabel->"In[23]:=",ExpressionUUID->"22f16dec-c58f-4c94-9a00-06b8ae05881f"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {
+     RowBox[{
+      RowBox[{
+       SuperscriptBox["\[ScriptCapitalX]", "\[Prime]",
+        MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["k", "1"]}], " ", 
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}]}], "+", 
+       RowBox[{
+        SubscriptBox["k", "3"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}]}]}]},
+    {
+     RowBox[{
+      RowBox[{
+       SuperscriptBox["\[ScriptCapitalX]\[ScriptP]", "\[Prime]",
+        MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+      RowBox[{
+       RowBox[{
+        SubscriptBox["k", "2"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}]}], "-", 
+       RowBox[{
+        SubscriptBox["k", "3"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}]}]}]},
+    {
+     RowBox[{
+      RowBox[{
+       SuperscriptBox["\[ScriptCapitalX]\[ScriptT]", "\[Prime]",
+        MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+      RowBox[{
+       RowBox[{
+        SubscriptBox["k", "1"], " ", 
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}]}], "-", 
+       RowBox[{
+        SubscriptBox["k", "2"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}]}]}]}]},
+    {
+     RowBox[{
+      RowBox[{
+       SuperscriptBox["\[ScriptCapitalY]", "\[Prime]",
+        MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["k", "3"]}], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}], "+", 
+       RowBox[{
+        SubscriptBox["k", "4"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}]}]}]}]},
+    {
+     RowBox[{
+      RowBox[{
+       SuperscriptBox["\[ScriptCapitalY]\[ScriptP]", "\[Prime]",
+        MultilineFunction->None], "[", "t", "]"}], "\[Equal]", 
+      RowBox[{
+       RowBox[{
+        SubscriptBox["k", "3"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}], "-", 
+       RowBox[{
+        SubscriptBox["k", "4"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}]}]}]}]}
+   },
+   DefaultBaseStyle->"Column",
+   GridBoxAlignment->{"Columns" -> {{Left}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+  "Column"]], "Output",
+ CellChangeTimes->{3.941104181432315*^9},
+ CellLabel->"Out[23]=",ExpressionUUID->"a14bb33b-adbc-4def-b738-9d1fa822a691"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Solve for the equilibria making use of the conservation equations\
+\>", "Item",
+ CellChangeTimes->{{3.9411079025178432`*^9, 
+  3.941107930075206*^9}},ExpressionUUID->"94dc3f2d-8a58-4d73-8740-\
+ca4bec87a049"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(", 
+   RowBox[{"equilibria", "=", 
+    RowBox[{
+     RowBox[{"Solve", "[", 
+      RowBox[{
+       RowBox[{"Join", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"modelData", "[", "\"\<Equations\>\"", "]"}], "/.", 
+          RowBox[{
+           RowBox[{
+            SuperscriptBox["_", "\[Prime]"], "[", "t", "]"}], "->", "0"}]}], 
+         ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            SubscriptBox["\[ScriptX]", "tot"], "==", 
+            RowBox[{
+             RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "+", 
+             RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "+", 
+             RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}]}]}], ",", 
+           RowBox[{
+            SubscriptBox["\[ScriptY]", "tot"], "==", 
+            RowBox[{
+             RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "+", 
+             RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}]}]}]}], 
+          "}"}]}], "]"}], ",", 
+       RowBox[{"Through", "[", 
+        RowBox[{
+         RowBox[{"modelData", "[", "\"\<Variables\>\"", "]"}], "[", "t", 
+         "]"}], "]"}]}], "]"}], "//", "Simplify"}]}], ")"}], "//", 
+  RowBox[{"Map", "[", "Column", "]"}]}]], "Input",
+ CellChangeTimes->{{3.941104321176139*^9, 3.94110449307725*^9}, {
+  3.941104601809643*^9, 3.941104640492889*^9}, {3.941105437659132*^9, 
+  3.9411054696225557`*^9}},
+ CellLabel->"In[12]:=",ExpressionUUID->"991d8b8a-621e-4276-b082-0123f4238edc"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[GridBox[{
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "\[Rule]", "0"}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        SubscriptBox["\[ScriptX]", "tot"]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "\[Rule]", 
+        "0"}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "\[Rule]", "0"}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        SubscriptBox["\[ScriptY]", "tot"]}]}
+     },
+     DefaultBaseStyle->"Column",
+     GridBoxAlignment->{"Columns" -> {{Left}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Column"], ",", 
+   TagBox[GridBox[{
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["k", "2"], " ", 
+          SubscriptBox["k", "3"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            SubscriptBox["k", "2"], "-", 
+            RowBox[{
+             SubscriptBox["k", "4"], " ", 
+             SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], 
+         RowBox[{
+          RowBox[{
+           SubscriptBox["k", "2"], " ", 
+           SubscriptBox["k", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubscriptBox["k", "2"], "-", 
+             RowBox[{
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["k", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["k", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                SubscriptBox["k", "3"], "-", 
+                SubscriptBox["k", "4"]}], ")"}]}], "-", 
+             RowBox[{
+              SubscriptBox["k", "3"], " ", 
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}]}]]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["k", "1"], " ", 
+          SubscriptBox["k", "2"], " ", 
+          SubscriptBox["k", "4"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"]}], 
+         RowBox[{
+          RowBox[{
+           SubscriptBox["k", "2"], " ", 
+           SubscriptBox["k", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"-", 
+              SubscriptBox["k", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["k", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["k", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"-", 
+                 SubscriptBox["k", "3"]}], "+", 
+                SubscriptBox["k", "4"]}], ")"}]}], "+", 
+             RowBox[{
+              SubscriptBox["k", "3"], " ", 
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}]}]]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["k", "1"], " ", 
+          SubscriptBox["k", "3"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            SubscriptBox["k", "2"], "-", 
+            RowBox[{
+             SubscriptBox["k", "4"], " ", 
+             SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], 
+         RowBox[{
+          RowBox[{
+           SubscriptBox["k", "2"], " ", 
+           SubscriptBox["k", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubscriptBox["k", "2"], "-", 
+             RowBox[{
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["k", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["k", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                SubscriptBox["k", "3"], "-", 
+                SubscriptBox["k", "4"]}], ")"}]}], "-", 
+             RowBox[{
+              SubscriptBox["k", "3"], " ", 
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}]}]]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "\[Rule]", 
+        RowBox[{
+         RowBox[{"-", 
+          FractionBox[
+           SubscriptBox["k", "2"], 
+           SubscriptBox["k", "4"]]}], "+", 
+         SubscriptBox["\[ScriptY]", "tot"]}]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         SubscriptBox["k", "2"], 
+         SubscriptBox["k", "4"]]}]}
+     },
+     DefaultBaseStyle->"Column",
+     GridBoxAlignment->{"Columns" -> {{Left}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Column"]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.941104577492626*^9, {3.941104622878213*^9, 3.941104641633209*^9}, {
+   3.941105444792817*^9, 3.941105470149472*^9}, 3.9411730545377293`*^9},
+ CellLabel->"Out[12]=",ExpressionUUID->"864496e5-40ae-4bef-8762-db1a7eedcd93"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Recast the model in the epidemiology framework to make use of the ",
+ StyleBox["NextGenerationMatrix", "Code"],
+ " function"
+}], "Item",
+ CellChangeTimes->{{3.9411068024418173`*^9, 3.941106821578108*^9}, {
+  3.941107211980853*^9, 3.941107212586141*^9}, {3.941107329980979*^9, 
+  3.941107346398423*^9}},ExpressionUUID->"0a74f02e-7332-41ec-a1a0-\
+caca0e97b2df"],
+
+Cell["\<\
+Only the species \[ScriptCapitalX]\[ScriptT] is manifestly catalytic and \
+therefore implicitly infectious. The rest of the steps are purely mechanical.\
+\
+\>", "ItemParagraph",
+ CellChangeTimes->{{3.941107206873198*^9, 3.9411072631737843`*^9}, {
+  3.94110737700767*^9, 
+  3.941107408808744*^9}},ExpressionUUID->"30fefabc-68fa-43be-9b1c-\
+1874acdfb4e0"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Load the ",
+ Cell[BoxData[
+  FormBox["\"\<RobertNachbar`EpidemiologyModeling`\>\"", TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "f7477bdd-5e27-4a51-9b8b-7bd2dbc1aea9"],
+ " context"
+}], "Item",
+ CellChangeTimes->{{3.941107739170785*^9, 
+  3.941107797927106*^9}},ExpressionUUID->"e1d6c9a5-06ac-48fe-a9cf-\
+d7ecc91df516"],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<RobertNachbar`EpidemiologyModeling`\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.9410993297859*^9, 3.941099348756165*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"7d655c91-31b6-4843-9adc-1e574cd32773"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"epiModel", "=", 
+   RowBox[{"{", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"\[ScriptCapitalX]", 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "1"]], "\[ScriptCapitalX]\[ScriptT]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"\[ScriptCapitalX]\[ScriptT]", 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "2"]], "\[ScriptCapitalX]\[ScriptP]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"\[ScriptCapitalY]\[ScriptP]", 
+      OverscriptBox["\[RightArrow]", 
+       RowBox[{
+        SubscriptBox["k", "4"], 
+        RowBox[{"\[Lambda]", "[", "t", "]"}]}]], "\[ScriptCapitalY]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"\[ScriptCapitalX]\[ScriptP]", "+", "\[ScriptCapitalY]"}], 
+      OverscriptBox["\[RightArrow]", 
+       SubscriptBox["k", "3"]], 
+      RowBox[{"\[ScriptCapitalX]", "+", "\[ScriptCapitalY]\[ScriptP]"}]}]}], 
+    "\[IndentingNewLine]", "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.941099374283115*^9, 3.9410993837613163`*^9}, {
+  3.9410999216854877`*^9, 3.941100047029871*^9}, {3.94110329255046*^9, 
+  3.941103334344062*^9}, {3.941103620295034*^9, 3.9411036216125383`*^9}, {
+  3.941105846993271*^9, 3.941105870140819*^9}},
+ CellLabel->"In[35]:=",ExpressionUUID->"caa6a080-e6cd-46ce-9251-08a3b33bd942"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"CompartmentalModelGraph", "[", 
+  RowBox[{"epiModel", ",", 
+   RowBox[{"ImageSize", "->", "Small"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.9411069309265833`*^9, 3.9411069324940987`*^9}, {
+  3.941106963863778*^9, 3.941106969481122*^9}},
+ CellLabel->"In[53]:=",ExpressionUUID->"2164f557-96fc-476f-bdd5-e8116d73fb45"],
+
+Cell[BoxData[
+ GraphicsBox[
+  NamespaceBox["NetworkGraphics",
+   DynamicModuleBox[{Typeset`graph = HoldComplete[
+     Graph[{$CellContext`\[ScriptCapitalX], $CellContext`\[ScriptCapitalX]\
+\[ScriptP], $CellContext`\[ScriptCapitalX]\[ScriptT], $CellContext`\
+\[ScriptCapitalY], $CellContext`\[ScriptCapitalY]\[ScriptP]}, {{{1, 3}, {3, 
+       2}, {5, 4}, {2, 1}, {4, 5}}, Null, {
+        Subscript[$CellContext`k, 1], 
+        Subscript[$CellContext`k, 2], 
+        Subscript[$CellContext`k, 4] $CellContext`\[Lambda][$CellContext`t], 
+        Subscript[$CellContext`k, 3], 
+        Subscript[$CellContext`k, 3]}}, {
+      EdgeLabels -> {
+        DirectedEdge[$CellContext`\[ScriptCapitalY], $CellContext`\
+\[ScriptCapitalY]\[ScriptP], 
+           Subscript[$CellContext`k, 3]] -> Framed[
+           Style[
+            Subscript[$CellContext`k, 3], 
+            GrayLevel[0]], FrameStyle -> GrayLevel[1], Background -> 
+           GrayLevel[1]], 
+         DirectedEdge[$CellContext`\[ScriptCapitalX], $CellContext`\
+\[ScriptCapitalX]\[ScriptT], 
+           Subscript[$CellContext`k, 1]] -> Framed[
+           Style[
+            Subscript[$CellContext`k, 1], 
+            GrayLevel[0]], FrameStyle -> GrayLevel[1], Background -> 
+           GrayLevel[1]], 
+         DirectedEdge[$CellContext`\[ScriptCapitalX]\[ScriptT], $CellContext`\
+\[ScriptCapitalX]\[ScriptP], 
+           Subscript[$CellContext`k, 2]] -> Framed[
+           Style[
+            Subscript[$CellContext`k, 2], 
+            GrayLevel[0]], FrameStyle -> GrayLevel[1], Background -> 
+           GrayLevel[1]], 
+         DirectedEdge[$CellContext`\[ScriptCapitalX]\[ScriptP], $CellContext`\
+\[ScriptCapitalX], 
+           Subscript[$CellContext`k, 3]] -> Framed[
+           Style[
+            Subscript[$CellContext`k, 3], 
+            GrayLevel[0]], FrameStyle -> GrayLevel[1], Background -> 
+           GrayLevel[1]], 
+         DirectedEdge[$CellContext`\[ScriptCapitalY]\[ScriptP], $CellContext`\
+\[ScriptCapitalY], 
+           Subscript[$CellContext`k, 
+             4] $CellContext`\[Lambda][$CellContext`t]] -> Framed[
+           Style[
+           Subscript[$CellContext`k, 
+              4] $CellContext`\[Lambda][$CellContext`t], 
+            GrayLevel[0]], FrameStyle -> GrayLevel[1], Background -> 
+           GrayLevel[1]]}, 
+       EdgeStyle -> {
+        DirectedEdge[$CellContext`\[ScriptCapitalX]\[ScriptP], $CellContext`\
+\[ScriptCapitalX], 
+           Subscript[$CellContext`k, 3]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, 
+         DirectedEdge[$CellContext`\[ScriptCapitalY]\[ScriptP], $CellContext`\
+\[ScriptCapitalY], 
+           Subscript[$CellContext`k, 
+             4] $CellContext`\[Lambda][$CellContext`t]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, 
+         DirectedEdge[$CellContext`\[ScriptCapitalX]\[ScriptT], $CellContext`\
+\[ScriptCapitalX]\[ScriptP], 
+           Subscript[$CellContext`k, 2]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, 
+         DirectedEdge[$CellContext`\[ScriptCapitalY], $CellContext`\
+\[ScriptCapitalY]\[ScriptP], 
+           Subscript[$CellContext`k, 3]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}, 
+         DirectedEdge[$CellContext`\[ScriptCapitalX], $CellContext`\
+\[ScriptCapitalX]\[ScriptT], 
+           Subscript[$CellContext`k, 1]] -> {
+           RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large]}}, ImageSize -> Small, PerformanceGoal -> 
+       "Quality", VertexShapeFunction -> {
+         Function[{
+          RobertNachbar`CompartmentalModeling`Private`position$, 
+           RobertNachbar`CompartmentalModeling`Private`vertex$, 
+           RobertNachbar`CompartmentalModeling`Private`box$}, 
+          If[
+           MatchQ[RobertNachbar`CompartmentalModeling`Private`vertex$, 
+            RobertNachbar`CompartmentalModeling`$C[
+             Blank[]][
+             Blank[]]], 
+           Inset[
+            First[RobertNachbar`CompartmentalModeling`Private`vertex$], 
+            RobertNachbar`CompartmentalModeling`Private`position$], 
+           Inset[
+            Framed[
+             Style[RobertNachbar`CompartmentalModeling`Private`vertex$, 
+              ReplaceAll[
+              RobertNachbar`CompartmentalModeling`Private`vertex$, 
+               RobertNachbar`CompartmentalModeling`Private`textColor$50502], 
+              Sequence[]], FrameStyle -> Darker[
+               ReplaceAll[
+               RobertNachbar`CompartmentalModeling`Private`vertex$, 
+                RobertNachbar`CompartmentalModeling`Private`compartmentColors$\
+50502]], Background -> 
+             ReplaceAll[
+              RobertNachbar`CompartmentalModeling`Private`vertex$, 
+               RobertNachbar`CompartmentalModeling`Private`compartmentColors$\
+50502]], RobertNachbar`CompartmentalModeling`Private`position$]]]}}]]}, 
+    TagBox[GraphicsGroupBox[{
+       {Hue[0.6, 0.7, 0.5], Opacity[0.7], Arrowheads[Medium], {
+         TagBox[
+          {RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large], 
+           ArrowBox[{
+            DynamicLocation["VertexID$1", Automatic, Center], DynamicLocation[
+             "VertexID$3", Automatic, Center]}]},
+          "DynamicName",
+          BoxID -> "EdgeLabelID$1"], InsetBox[
+          FrameBox[
+           StyleBox[
+            SubscriptBox["k", "1"],
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->GrayLevel[1],
+           FrameStyle->GrayLevel[1],
+           StripOnInput->False], DynamicLocation[
+          "EdgeLabelID$1", Automatic, Scaled[0.5]], ImageScaled[{0.5, 0.5}],
+          BaseStyle->"Graphics"]}, {
+         TagBox[
+          {RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large], 
+           ArrowBox[{
+            DynamicLocation["VertexID$2", Automatic, Center], DynamicLocation[
+             "VertexID$1", Automatic, Center]}]},
+          "DynamicName",
+          BoxID -> "EdgeLabelID$2"], InsetBox[
+          FrameBox[
+           StyleBox[
+            SubscriptBox["k", "3"],
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->GrayLevel[1],
+           FrameStyle->GrayLevel[1],
+           StripOnInput->False], DynamicLocation[
+          "EdgeLabelID$2", Automatic, Scaled[0.5]], ImageScaled[{0.5, 0.5}],
+          BaseStyle->"Graphics"]}, {
+         TagBox[
+          {RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large], 
+           ArrowBox[{
+            DynamicLocation["VertexID$3", Automatic, Center], DynamicLocation[
+             "VertexID$2", Automatic, Center]}]},
+          "DynamicName",
+          BoxID -> "EdgeLabelID$3"], InsetBox[
+          FrameBox[
+           StyleBox[
+            SubscriptBox["k", "2"],
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->GrayLevel[1],
+           FrameStyle->GrayLevel[1],
+           StripOnInput->False], DynamicLocation[
+          "EdgeLabelID$3", Automatic, Scaled[0.5]], ImageScaled[{0.5, 0.5}],
+          BaseStyle->"Graphics"]}, {
+         TagBox[
+          {RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large], 
+           ArrowBox[
+            BezierCurveBox[{
+             DynamicLocation["VertexID$4", Automatic, Center], {
+              0.6791365625000045, -1.2389939403168841`}, DynamicLocation[
+              "VertexID$5", Automatic, Center]}]]},
+          "DynamicName",
+          BoxID -> "EdgeLabelID$4"], InsetBox[
+          FrameBox[
+           StyleBox[
+            SubscriptBox["k", "3"],
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->GrayLevel[1],
+           FrameStyle->GrayLevel[1],
+           StripOnInput->False], DynamicLocation[
+          "EdgeLabelID$4", Automatic, Scaled[0.5]], ImageScaled[{0.5, 0.5}],
+          BaseStyle->"Graphics"]}, {
+         TagBox[
+          {RGBColor[
+           0.10196078431372549`, 0.2823529411764706, 0.4627450980392157], 
+           Thickness[Large], 
+           ArrowBox[
+            BezierCurveBox[{
+             DynamicLocation["VertexID$5", Automatic, Center], {
+              0.6791365624999965, -1.5678754346831134`}, DynamicLocation[
+              "VertexID$4", Automatic, Center]}]]},
+          "DynamicName",
+          BoxID -> "EdgeLabelID$5"], InsetBox[
+          FrameBox[
+           StyleBox[
+            RowBox[{
+             SubscriptBox["k", "4"], " ", 
+             RowBox[{"\[Lambda]", "(", "t", ")"}]}],
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->GrayLevel[1],
+           FrameStyle->GrayLevel[1],
+           StripOnInput->False], DynamicLocation[
+          "EdgeLabelID$5", Automatic, Scaled[0.5]], ImageScaled[{0.5, 0.5}],
+          BaseStyle->"Graphics"]}}, 
+       {Hue[0.6, 0.2, 0.8], EdgeForm[{GrayLevel[0], Opacity[0.7]}], 
+        TagBox[InsetBox[
+          FrameBox[
+           StyleBox["\[ScriptCapitalX]",
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->RGBColor[0.87, 0.94, 1],
+           FrameStyle->RGBColor[0.5800000000000001, 0.6266666666666667, 
+             Rational[2, 3]],
+           StripOnInput->False], {0.1791365625000001, -1.0451615625000001}],
+         "DynamicName",
+         BoxID -> "VertexID$1"], 
+        TagBox[InsetBox[
+          FrameBox[
+           StyleBox["\[ScriptCapitalX]\[ScriptP]",
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->RGBColor[0.87, 0.94, 1],
+           FrameStyle->RGBColor[0.5800000000000001, 0.6266666666666667, 
+             Rational[2, 3]],
+           StripOnInput->False], {1.1791365625, -1.0451615625000001}],
+         "DynamicName",
+         BoxID -> "VertexID$2"], 
+        TagBox[InsetBox[
+          FrameBox[
+           StyleBox["\[ScriptCapitalX]\[ScriptT]",
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->RGBColor[0.87, 0.94, 1],
+           FrameStyle->RGBColor[0.5800000000000001, 0.6266666666666667, 
+             Rational[2, 3]],
+           StripOnInput->False], {0.6791365625000001, -0.1791365625000001}],
+         "DynamicName",
+         BoxID -> "VertexID$3"], 
+        TagBox[InsetBox[
+          FrameBox[
+           StyleBox["\[ScriptCapitalY]",
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->RGBColor[0.87, 0.94, 1],
+           FrameStyle->RGBColor[0.5800000000000001, 0.6266666666666667, 
+             Rational[2, 3]],
+           StripOnInput->False], {0.1791365625000001, -1.4034346875000003}],
+         "DynamicName",
+         BoxID -> "VertexID$4"], 
+        TagBox[InsetBox[
+          FrameBox[
+           StyleBox["\[ScriptCapitalY]\[ScriptP]",
+            StripOnInput->False,
+            LineColor->GrayLevel[0],
+            FrontFaceColor->GrayLevel[0],
+            BackFaceColor->GrayLevel[0],
+            GraphicsColor->GrayLevel[0],
+            FontColor->GrayLevel[0]],
+           Background->RGBColor[0.87, 0.94, 1],
+           FrameStyle->RGBColor[0.5800000000000001, 0.6266666666666667, 
+             Rational[2, 3]],
+           StripOnInput->False], {1.1791365625, -1.4034346875000003}],
+         "DynamicName",
+         BoxID -> "VertexID$5"]}}],
+     MouseAppearanceTag["NetworkGraphics"]],
+    AllowKernelInitialization->False]],
+  DefaultBaseStyle->"NetworkGraphics",
+  FormatType->TraditionalForm,
+  FrameTicks->None,
+  ImageSize->Small]], "Output",
+ CellChangeTimes->{3.941106933949155*^9, 3.941106970245541*^9},
+ CellLabel->"Out[53]=",ExpressionUUID->"ecc9f018-6e82-46dd-8ffb-47afdde4de8d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"epiModelData", "=", 
+   RowBox[{"DynamicTransmissionModel", "[", 
+    RowBox[{"epiModel", ",", "t", ",", 
+     RowBox[{"\"\<ForceOfInfection\>\"", "->", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"\[Lambda]", "[", "t", "]"}], ",", 
+        "\[ScriptCapitalX]\[ScriptT]"}], "}"}]}]}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Keys", "@", "%"}]}], "Input",
+ CellChangeTimes->{{3.9411058786410627`*^9, 3.941105969368758*^9}, {
+  3.9411060150102377`*^9, 3.941106020810513*^9}},
+ CellLabel->"In[38]:=",ExpressionUUID->"c1cbb8ba-1fd9-4bdb-a04d-8287c202b382"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Variables\"\>", ",", "\<\"ComponentTransitions\"\>", 
+   ",", "\<\"StoichiometricMatrix\"\>", ",", "\<\"Rates\"\>", 
+   ",", "\<\"Equations\"\>", ",", "\<\"TimeSymbol\"\>", 
+   ",", "\<\"ForceOfInfection\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.941105970261774*^9, 3.941106024409472*^9},
+ CellLabel->"Out[39]=",ExpressionUUID->"b21a37e2-eb36-41e3-a1c0-49e87d688b5b"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"epiModelData", "[", "\"\<ForceOfInfection\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.941106030357155*^9, 3.9411060405568037`*^9}},
+ CellLabel->"In[40]:=",ExpressionUUID->"0072c177-e55e-4be0-97c7-04a501f6ed33"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\[Lambda]", "[", "t", "]"}], "\[Rule]", 
+   RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}]}], "}"}]], "Output",\
+
+ CellChangeTimes->{3.941106041288982*^9},
+ CellLabel->"Out[40]=",ExpressionUUID->"06e74a1f-bf0d-450e-bf03-55973bc02fbb"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(", 
+   RowBox[{"equilibria", "=", 
+    RowBox[{
+     RowBox[{"Solve", "[", 
+      RowBox[{
+       RowBox[{"Join", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"epiModelData", "[", "\"\<Equations\>\"", "]"}], "/.", 
+           RowBox[{
+            RowBox[{
+             SuperscriptBox["_", "\[Prime]"], "[", "t", "]"}], "->", "0"}]}], 
+          "/.", 
+          RowBox[{"epiModelData", "[", "\"\<ForceOfInfection\>\"", "]"}]}], 
+         ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            SubscriptBox["\[ScriptX]", "tot"], "==", 
+            RowBox[{
+             RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "+", 
+             RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "+", 
+             RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}]}]}], ",", 
+           
+           RowBox[{
+            SubscriptBox["\[ScriptY]", "tot"], "==", 
+            RowBox[{
+             RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "+", 
+             RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}]}]}]}], 
+          "}"}]}], "]"}], ",", 
+       RowBox[{"Through", "[", 
+        RowBox[{
+         RowBox[{"epiModelData", "[", "\"\<Variables\>\"", "]"}], "[", "t", 
+         "]"}], "]"}]}], "]"}], "//", "Simplify"}]}], ")"}], "//", 
+  RowBox[{"Map", "[", "Column", "]"}]}]], "Input",
+ CellChangeTimes->{{3.941106120128516*^9, 3.941106151546776*^9}},
+ CellLabel->"In[41]:=",ExpressionUUID->"2989ee67-1119-40b1-a781-56c33a5ae5e4"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[GridBox[{
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "\[Rule]", "0"}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        SubscriptBox["\[ScriptX]", "tot"]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "\[Rule]", 
+        "0"}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "\[Rule]", "0"}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        SubscriptBox["\[ScriptY]", "tot"]}]}
+     },
+     DefaultBaseStyle->"Column",
+     GridBoxAlignment->{"Columns" -> {{Left}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Column"], ",", 
+   TagBox[GridBox[{
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["k", "2"], " ", 
+          SubscriptBox["k", "3"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            SubscriptBox["k", "2"], "-", 
+            RowBox[{
+             SubscriptBox["k", "4"], " ", 
+             SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], 
+         RowBox[{
+          RowBox[{
+           SubscriptBox["k", "2"], " ", 
+           SubscriptBox["k", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubscriptBox["k", "2"], "-", 
+             RowBox[{
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["k", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["k", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                SubscriptBox["k", "3"], "-", 
+                SubscriptBox["k", "4"]}], ")"}]}], "-", 
+             RowBox[{
+              SubscriptBox["k", "3"], " ", 
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}]}]]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["k", "1"], " ", 
+          SubscriptBox["k", "2"], " ", 
+          SubscriptBox["k", "4"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"]}], 
+         RowBox[{
+          RowBox[{
+           SubscriptBox["k", "2"], " ", 
+           SubscriptBox["k", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"-", 
+              SubscriptBox["k", "2"]}], "+", 
+             RowBox[{
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["k", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["k", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"-", 
+                 SubscriptBox["k", "3"]}], "+", 
+                SubscriptBox["k", "4"]}], ")"}]}], "+", 
+             RowBox[{
+              SubscriptBox["k", "3"], " ", 
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}]}]]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         RowBox[{
+          SubscriptBox["k", "1"], " ", 
+          SubscriptBox["k", "3"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"], " ", 
+          RowBox[{"(", 
+           RowBox[{
+            SubscriptBox["k", "2"], "-", 
+            RowBox[{
+             SubscriptBox["k", "4"], " ", 
+             SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], 
+         RowBox[{
+          RowBox[{
+           SubscriptBox["k", "2"], " ", 
+           SubscriptBox["k", "3"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             SubscriptBox["k", "2"], "-", 
+             RowBox[{
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}], "+", 
+          RowBox[{
+           SubscriptBox["k", "1"], " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              SubscriptBox["k", "2"], " ", 
+              RowBox[{"(", 
+               RowBox[{
+                SubscriptBox["k", "3"], "-", 
+                SubscriptBox["k", "4"]}], ")"}]}], "-", 
+             RowBox[{
+              SubscriptBox["k", "3"], " ", 
+              SubscriptBox["k", "4"], " ", 
+              SubscriptBox["\[ScriptY]", "tot"]}]}], ")"}]}]}]]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "\[Rule]", 
+        RowBox[{
+         RowBox[{"-", 
+          FractionBox[
+           SubscriptBox["k", "2"], 
+           SubscriptBox["k", "4"]]}], "+", 
+         SubscriptBox["\[ScriptY]", "tot"]}]}]},
+      {
+       RowBox[{
+        RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+        FractionBox[
+         SubscriptBox["k", "2"], 
+         SubscriptBox["k", "4"]]}]}
+     },
+     DefaultBaseStyle->"Column",
+     GridBoxAlignment->{"Columns" -> {{Left}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Column"]}], "}"}]], "Output",
+ CellChangeTimes->{3.941105119358802*^9, 3.941106155958839*^9},
+ CellLabel->"Out[41]=",ExpressionUUID->"7fd41ef9-5ee2-431d-845b-b23bfc03056c"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The disease-free equilibrium is the first solution", "Item",
+ CellChangeTimes->{{3.941107948014617*^9, 
+  3.941107968659387*^9}},ExpressionUUID->"e4c677e9-4083-416c-8bdc-\
+53e53b6e91e5"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"dfe", "=", 
+  RowBox[{"First", "@", "equilibria"}]}]], "Input",
+ CellChangeTimes->{{3.9411061851804447`*^9, 3.9411061923920593`*^9}},
+ CellLabel->"In[42]:=",ExpressionUUID->"764a2f08-42c2-42f3-bdce-63d354d380e0"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "\[Rule]", "0"}], ",", 
+   RowBox[{
+    RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+    SubscriptBox["\[ScriptX]", "tot"]}], ",", 
+   RowBox[{
+    RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "\[Rule]", "0"}], 
+   ",", 
+   RowBox[{
+    RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "\[Rule]", "0"}], ",", 
+   RowBox[{
+    RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+    SubscriptBox["\[ScriptY]", "tot"]}]}], "}"}]], "Output",
+ CellChangeTimes->{3.941106193841378*^9},
+ CellLabel->"Out[42]=",ExpressionUUID->"b39fa705-4718-419f-9273-f0c0dee3092e"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Compute the next-generation matrix along with the intermediate matrices\
+\>", "Item",
+ CellChangeTimes->{{3.9411079798745737`*^9, 
+  3.9411080174911737`*^9}},ExpressionUUID->"cc73c31a-adf8-4714-a763-\
+3a37690c3dbc"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(", 
+   RowBox[{"ngmData", "=", 
+    RowBox[{"NextGenerationMatrix", "[", 
+     RowBox[{"epiModelData", ",", 
+      RowBox[{"{", 
+       RowBox[{
+       "\[ScriptCapitalX]", ",", "\[ScriptCapitalX]\[ScriptT]", ",", 
+        "\[ScriptCapitalY]"}], "}"}], ",", "All", ",", 
+      RowBox[{"\"\<DiseaseFreeEquilibrium\>\"", "->", "dfe"}]}], "]"}]}], 
+   ")"}], "/.", 
+  RowBox[{
+   RowBox[{"m_", "?", "MatrixQ"}], ":>", 
+   RowBox[{"MatrixForm", "[", "m", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.9411052094030046`*^9, 3.941105297494063*^9}, {
+   3.9411062115120983`*^9, 3.94110626794829*^9}, {3.941106308860355*^9, 
+   3.941106317300765*^9}, {3.941106363385477*^9, 3.9411063779792843`*^9}, 
+   3.941106568805956*^9},
+ CellLabel->"In[47]:=",ExpressionUUID->"e70b3778-f0bf-4ad2-900c-59622957d7c7"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"InfectedVariables\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], ",", 
+      RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], ",", 
+      RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}], "}"}]}], ",", 
+   RowBox[{"\<\"TransmissionTerms\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"0", ",", "0", ",", 
+      RowBox[{
+       SubscriptBox["k", "4"], " ", 
+       RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], " ", 
+       RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}]}]}], "}"}]}], 
+   ",", 
+   RowBox[{"\<\"TransferTerms\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        SubscriptBox["k", "1"], " ", 
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}]}], "-", 
+       RowBox[{
+        SubscriptBox["k", "3"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], " ", 
+        RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}]}], ",", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["k", "1"]}], " ", 
+        RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}]}], "+", 
+       RowBox[{
+        SubscriptBox["k", "2"], " ", 
+        RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}]}]}], ",", 
+      RowBox[{
+       SubscriptBox["k", "3"], " ", 
+       RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], " ", 
+       RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}]}]}], "}"}]}], ",", 
+   RowBox[{"\<\"DiseaseFreeEquilibrium\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"\[ScriptCapitalX]", "[", "t", "]"}], "\[Rule]", "0"}], ",", 
+      RowBox[{
+       RowBox[{"\[ScriptCapitalX]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+       SubscriptBox["\[ScriptX]", "tot"]}], ",", 
+      RowBox[{
+       RowBox[{"\[ScriptCapitalX]\[ScriptT]", "[", "t", "]"}], "\[Rule]", 
+       "0"}], ",", 
+      RowBox[{
+       RowBox[{"\[ScriptCapitalY]", "[", "t", "]"}], "\[Rule]", "0"}], ",", 
+      RowBox[{
+       RowBox[{"\[ScriptCapitalY]\[ScriptP]", "[", "t", "]"}], "\[Rule]", 
+       SubscriptBox["\[ScriptY]", "tot"]}]}], "}"}]}], ",", 
+   RowBox[{"\<\"TransmissionJacobianMatrix\"\>", "\[Rule]", 
+    TagBox[
+     RowBox[{"(", "\[NoBreak]", GridBox[{
+        {"0", "0", "0"},
+        {"0", "0", "0"},
+        {"0", 
+         RowBox[{
+          SubscriptBox["k", "4"], " ", 
+          SubscriptBox["\[ScriptY]", "tot"]}], "0"}
+       },
+       GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+       GridBoxSpacings->{"Columns" -> {
+           Offset[0.27999999999999997`], {
+            Offset[0.7]}, 
+           Offset[0.27999999999999997`]}, "Rows" -> {
+           Offset[0.2], {
+            Offset[0.4]}, 
+           Offset[0.2]}}], "\[NoBreak]", ")"}],
+     Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]}], ",", 
+   RowBox[{"\<\"TransferJacobianMatrix\"\>", "\[Rule]", 
+    TagBox[
+     RowBox[{"(", "\[NoBreak]", GridBox[{
+        {
+         SubscriptBox["k", "1"], "0", 
+         RowBox[{
+          RowBox[{"-", 
+           SubscriptBox["k", "3"]}], " ", 
+          SubscriptBox["\[ScriptX]", "tot"]}]},
+        {
+         RowBox[{"-", 
+          SubscriptBox["k", "1"]}], 
+         SubscriptBox["k", "2"], "0"},
+        {"0", "0", 
+         RowBox[{
+          SubscriptBox["k", "3"], " ", 
+          SubscriptBox["\[ScriptX]", "tot"]}]}
+       },
+       GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+       GridBoxSpacings->{"Columns" -> {
+           Offset[0.27999999999999997`], {
+            Offset[0.7]}, 
+           Offset[0.27999999999999997`]}, "Rows" -> {
+           Offset[0.2], {
+            Offset[0.4]}, 
+           Offset[0.2]}}], "\[NoBreak]", ")"}],
+     Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]}], ",", 
+   RowBox[{"\<\"NextGenerationMatrix\"\>", "\[Rule]", 
+    TagBox[
+     RowBox[{"(", "\[NoBreak]", GridBox[{
+        {"0", "0", "0"},
+        {"0", "0", "0"},
+        {
+         FractionBox[
+          RowBox[{
+           SubscriptBox["k", "4"], " ", 
+           SubscriptBox["\[ScriptY]", "tot"]}], 
+          SubscriptBox["k", "2"]], 
+         FractionBox[
+          RowBox[{
+           SubscriptBox["k", "4"], " ", 
+           SubscriptBox["\[ScriptY]", "tot"]}], 
+          SubscriptBox["k", "2"]], 
+         FractionBox[
+          RowBox[{
+           SubscriptBox["k", "4"], " ", 
+           SubscriptBox["\[ScriptY]", "tot"]}], 
+          SubscriptBox["k", "2"]]}
+       },
+       GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+       GridBoxSpacings->{"Columns" -> {
+           Offset[0.27999999999999997`], {
+            Offset[0.7]}, 
+           Offset[0.27999999999999997`]}, "Rows" -> {
+           Offset[0.2], {
+            Offset[0.4]}, 
+           Offset[0.2]}}], "\[NoBreak]", ")"}],
+     Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]}]}], "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.941105298781389*^9, 3.94110627183957*^9, 
+  3.941106318706584*^9, 3.9411063789622602`*^9, 3.941106569825086*^9},
+ CellLabel->"Out[47]=",ExpressionUUID->"c1966a3e-82b4-4049-a2e6-e60b54555b44"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Compute the basic reproduction rumber", "Item",
+ CellChangeTimes->{{3.94110802602325*^9, 
+  3.941108042457498*^9}},ExpressionUUID->"739c9a0c-80d5-42d2-9945-\
+11e4801e9ce1"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  SubscriptBox["\[GothicCapitalR]", "0"], "\[Equal]", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{"Max", "@", 
+     RowBox[{"Abs", "@", 
+      RowBox[{"Eigenvalues", "[", 
+       RowBox[{"ngmData", "[", "\"\<NextGenerationMatrix\>\"", "]"}], 
+       "]"}]}]}], "//", 
+    RowBox[{
+     RowBox[{"Simplify", "[", 
+      RowBox[{"#", ",", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+          SubscriptBox["k", "2"], ",", 
+          SubscriptBox["k", "4"], ",", 
+          SubscriptBox["\[ScriptY]", "tot"]}], "}"}], "\[Element]", 
+        "PositiveReals"}]}], "]"}], "&"}]}], ")"}]}]], "Input",
+ CellChangeTimes->{{3.941106535183847*^9, 3.94110655446948*^9}, {
+  3.9411065858908157`*^9, 3.941106620194415*^9}, {3.941106653212302*^9, 
+  3.941106720207719*^9}},
+ CellLabel->"In[51]:=",ExpressionUUID->"f20b36be-a8b5-4b29-8744-15e4206abb66"],
+
+Cell[BoxData[
+ RowBox[{
+  SubscriptBox["\[GothicCapitalR]", "0"], "\[Equal]", 
+  FractionBox[
+   RowBox[{
+    SubscriptBox["k", "4"], " ", 
+    SubscriptBox["\[ScriptY]", "tot"]}], 
+   SubscriptBox["k", "2"]]}]], "Output",
+ CellChangeTimes->{{3.941106556175427*^9, 3.9411065716161118`*^9}, 
+   3.9411066238938513`*^9, 3.941106654101079*^9, 3.94110672165548*^9},
+ CellLabel->"Out[51]=",ExpressionUUID->"45b9bd35-86fd-4fac-a6ea-24cb8117cff0"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{949, 497},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"12.3 for Microsoft Windows (64-bit) (May 11, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"9dba0e26-47ab-42e7-8015-37f33bb6eaf3"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 174, 3, 69, "Chapter",ExpressionUUID->"b1d65030-ff46-44b3-b5a1-47182dc41d1c"],
+Cell[CellGroupData[{
+Cell[775, 29, 187, 3, 32, "Item",ExpressionUUID->"e8f79ec1-03b2-46e5-8d51-5d15b31282c9"],
+Cell[CellGroupData[{
+Cell[987, 36, 778, 18, 105, "Input",ExpressionUUID->"1eca366d-b44e-4f73-9a72-f760fb6014d4"],
+Cell[1768, 56, 25325, 444, 65, "Output",ExpressionUUID->"7028b730-14f8-4e18-ac0f-f7d233a327f2"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27142, 506, 362, 10, 32, "Item",ExpressionUUID->"6103c6f6-8f07-4af3-847c-49908e0fb845"],
+Cell[27507, 518, 251, 4, 28, "Input",ExpressionUUID->"2294169d-e2f7-4361-a3c7-3e38350ebb8e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27795, 527, 167, 3, 32, "Item",ExpressionUUID->"e7ea9743-a8fa-47c4-8347-b98b476b56a7"],
+Cell[27965, 532, 1326, 29, 167, "Input",ExpressionUUID->"df130e1d-d57b-4c6a-a839-92ede2079dc2"],
+Cell[CellGroupData[{
+Cell[29316, 565, 749, 14, 48, "Input",ExpressionUUID->"36bbbeb0-6674-44d9-928b-31c8713ec85e"],
+Cell[30068, 581, 24819, 523, 164, "Output",ExpressionUUID->"a1b88fb4-eff5-4552-872e-d2b8eee00549"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[54936, 1110, 215, 5, 32, "Item",ExpressionUUID->"72ab9ace-3f0c-4fe5-95c2-169ee9931444"],
+Cell[CellGroupData[{
+Cell[55176, 1119, 357, 7, 48, "Input",ExpressionUUID->"959fc89c-4089-460c-9e4a-9584cd0361c2"],
+Cell[55536, 1128, 377, 6, 32, "Output",ExpressionUUID->"6e332765-1b47-4338-9886-71e956ee5ce0"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[55950, 1139, 555, 12, 48, "Input",ExpressionUUID->"d7349273-a35f-4eb8-8600-18698d474324"],
+Cell[56508, 1153, 3452, 90, 147, "Output",ExpressionUUID->"bae3ea56-8878-4950-9a09-1769bb453052"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[59997, 1248, 257, 5, 28, "Input",ExpressionUUID->"22f16dec-c58f-4c94-9a00-06b8ae05881f"],
+Cell[60257, 1255, 2874, 76, 103, "Output",ExpressionUUID->"a14bb33b-adbc-4def-b738-9d1fa822a691"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[63180, 1337, 217, 5, 32, "Item",ExpressionUUID->"94dc3f2d-8a58-4d73-8740-ca4bec87a049"],
+Cell[CellGroupData[{
+Cell[63422, 1346, 1503, 37, 48, "Input",ExpressionUUID->"991d8b8a-621e-4276-b082-0123f4238edc"],
+Cell[64928, 1385, 5652, 162, 159, "Output",ExpressionUUID->"864496e5-40ae-4bef-8762-db1a7eedcd93"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[70629, 1553, 377, 8, 32, "Item",ExpressionUUID->"0a74f02e-7332-41ec-a1a0-caca0e97b2df"],
+Cell[71009, 1563, 363, 8, 25, "ItemParagraph",ExpressionUUID->"30fefabc-68fa-43be-9b1c-1874acdfb4e0"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[71409, 1576, 360, 10, 32, "Item",ExpressionUUID->"e1d6c9a5-06ac-48fe-a9cf-d7ecc91df516"],
+Cell[71772, 1588, 245, 4, 28, "Input",ExpressionUUID->"7d655c91-31b6-4843-9adc-1e574cd32773"],
+Cell[72020, 1594, 1332, 29, 167, "Input",ExpressionUUID->"caa6a080-e6cd-46ce-9251-08a3b33bd942"],
+Cell[CellGroupData[{
+Cell[73377, 1627, 341, 6, 44, "Input",ExpressionUUID->"2164f557-96fc-476f-bdd5-e8116d73fb45"],
+Cell[73721, 1635, 13541, 317, 349, "Output",ExpressionUUID->"ecc9f018-6e82-46dd-8ffb-47afdde4de8d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[87299, 1957, 610, 14, 105, "Input",ExpressionUUID->"c1cbb8ba-1fd9-4bdb-a04d-8287c202b382"],
+Cell[87912, 1973, 416, 7, 80, "Output",ExpressionUUID->"b21a37e2-eb36-41e3-a1c0-49e87d688b5b"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[88365, 1985, 235, 3, 44, "Input",ExpressionUUID->"0072c177-e55e-4be0-97c7-04a501f6ed33"],
+Cell[88603, 1990, 294, 7, 50, "Output",ExpressionUUID->"06e74a1f-bf0d-450e-bf03-55973bc02fbb"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[88934, 2002, 1539, 39, 166, "Input",ExpressionUUID->"2989ee67-1119-40b1-a781-56c33a5ae5e4"],
+Cell[90476, 2043, 5551, 160, 221, "Output",ExpressionUUID->"7fd41ef9-5ee2-431d-845b-b23bfc03056c"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[96076, 2209, 192, 3, 46, "Item",ExpressionUUID->"e4c677e9-4083-416c-8bdc-53e53b6e91e5"],
+Cell[CellGroupData[{
+Cell[96293, 2216, 236, 4, 44, "Input",ExpressionUUID->"764a2f08-42c2-42f3-bdce-63d354d380e0"],
+Cell[96532, 2222, 708, 17, 50, "Output",ExpressionUUID->"b39fa705-4718-419f-9273-f0c0dee3092e"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[97289, 2245, 225, 5, 46, "Item",ExpressionUUID->"cc73c31a-adf8-4714-a763-3a37690c3dbc"],
+Cell[CellGroupData[{
+Cell[97539, 2254, 829, 19, 74, "Input",ExpressionUUID->"e70b3778-f0bf-4ad2-900c-59622957d7c7"],
+Cell[98371, 2275, 5181, 138, 457, "Output",ExpressionUUID->"c1966a3e-82b4-4049-a2e6-e60b54555b44"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[103601, 2419, 178, 3, 46, "Item",ExpressionUUID->"739c9a0c-80d5-42d2-9945-11e4801e9ce1"],
+Cell[CellGroupData[{
+Cell[103804, 2426, 870, 23, 74, "Input",ExpressionUUID->"f20b36be-a8b5-4b29-8744-15e4206abb66"],
+Cell[104677, 2451, 440, 10, 69, "Output",ExpressionUUID->"45b9bd35-86fd-4fac-a6ea-24cb8117cff0"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
