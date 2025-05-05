@@ -9,6 +9,7 @@ Bifp::usage = "Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]
 polynomial as required by Routh-Hurwicz theory, ie 
 normalized so the free coefficient is 1 
 (see for example R\[ODoubleDot]st, Tekeli, Thm 4A)";
+expM::usage = "expM[var,expo] gives the vector var at power in matrix expo";
 CofRH::usage = "co=CofRH[mat] yields coefficients of 
 CharacteristicPolynomial, as required by Routh-Hurwicz theory, ie 
 normalized so the free coefficient is 1 
@@ -18,6 +19,7 @@ CharacteristicPolynomial[A,x],x]],1]";
 cons::usage = "con=cons[mat,cp_:{}] parametrizes positively 
 the  left kernel of mat, using also conditions cp;cp is not necessary
 if mat is numeric*)";
+seZF::usage = "seZF[so]=Select[so,FreeQ[#, 0] &] selects parts free of 0";
 DFE::usage = "DFE[mod_,inf_] yields the DFE of the model";
 expon::usage= "Eponent[p,Variable[p]] computes the maximum power
  of an expanded form p";
@@ -38,6 +40,8 @@ matrix M, and could be used in Hur4M[mat]"; H6;
 Hur3M::usage = "{co,h3,ine}=Hur3M[A] yields ine=Append[inec,h3>0]";
 Hur4M::usage = "{co,h4,ine}=Hur4M[A]";
 Hur5M::usage="{co,h5,ine,H5}=Hur5M[jac]";
+posM::usage="keep all syntactically positive terms";
+FposEx::usage="extracts first syntactically positive term in a nonnegative matrix";
 perR::usage="perR[M_, i_, j_]=ReplacePart[M, {i -> M[[j]], j -> M[[i]]}]";
 perC::usage="perC[matrix_, cycle_List] performs a cyclic permutation
  on the rows (or columns) of the input matrix based on the indices
@@ -53,9 +57,10 @@ expM;
 makeLPM::usage = "makeLPM[mat_] := 
 Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}] yields
 the leading principal minors";countMS;
-onlyP::"onlyP[m_] checks whether all the coefficients
+onlyP::usage ="onlyP[m_] checks whether all the coefficients
  of the numerator of a rational expression m  are nonnegative";
-
+verHir::usage ="verHir[RHS,var,intRows] checks whether a network can be reduced
+using the species indexed by intRows";
 mat2Matl;
 
 JTD::usage = "JTD[mod,cn_:{}]";
@@ -64,19 +69,21 @@ NGM::usage = "NGM[mod_,inf_] yields {Jy,V1,F1,F,-V,K,chp(u)};they
  are the infectious Jacobian, two intermediate results, the new 
 infections, transitions, and next generation matrices, 
 and its char. pol."; 
+NGMs::usage = " simpler version of NGM[mod_,inf_], treats incorrectly denominators and exponents"; 
 JR0::usage = "JR0[pol],{R0,co}";
 extP::usage ="extP[mod_,inf_] yields the Bacaer equation
 for approximate extinction probability";
 Par::usage = "Par[dyn,var]";
 Res1F;Deg;
-RUR::usage = "RUR[mod,ind,cn_:{}] reduces the fixed point system to 
-one with variable specified by the set ind";
+RUR::usage = "RUR[mod,ind,cn_:{}] attempts to reduce the fixed point system to 
+one with variables specified by the list ind; only singleton ind is allowed currently;
+outputs are ratsub,pol,and ln=pol//Length";
 GBH::usage = "GBH[pol_,var_,sc_,cn_:{}]";
 matl2Mat;matlr2Mat;l2L;
 m2toM;Stodola;DerL;
 
 mSim::usage = "mSim[mod,cN, cInit,T,excluded]";Bifp;
-convNum;
+convNum;Hirono;
 Sta::usage = "numeric";
 Stab::usage = "Stab[mod_,cfp_,cn_:{}]";
 
@@ -114,6 +121,7 @@ NumeratorDenominator//(*get polys*)Map@CoefficientArrays//
 ReplaceAll[sa_SparseArray:>sa["NonzeroValues"]]//
 (*get nonzero coeffs*)Flatten//(*preconditioner for AllTrue*)
 Count[#, _?Negative] &;
+
 onlyP[m_]:=m//Together//(*put polynomials in standard form*)
 NumeratorDenominator//(*get polys*)Map@CoefficientArrays//
 (*get coefficients of polys*)
@@ -126,7 +134,7 @@ Drop[Reverse[CoefficientList[(-1)^(Length@A)
 CharacteristicPolynomial[A,x],x]],1]];
 
 CofP[co_?ListQ]:=Drop[Reverse[(-1)^(Length@co) *co],1];
-
+seZF[so_]:=Select[so,FreeQ[#, 0] &];
 makeLPM[mat_] := 
 Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}];
 
@@ -174,8 +182,6 @@ plf=Show[{pl},Epilog->epi,PlotRange->{{pl0,pL},{y0,yM}},AxesLabel->{bifv,"Fixed 
 
 Idx[set_,n_PositiveInteger]:=Module[{seq},
 seq=(Table[Count[set,i],{i,n}]/.List->Sequence);seq];
-
-
 FHJ[comp_List,edges_List,rates_List, ver_:{},groups_List:{}]:=
 Module[{colorList,shapeList,vertexColors,options,vertexShapes,defaultColor=Yellow},
 colorList={Green,Red,Yellow,Purple,Orange};
@@ -228,8 +234,6 @@ sym2Str=Replace[Thread[#1->#2],x_Symbol:>ToString[x],All]&;
 str2Sym= #//. s_String :>ToExpression[s]&; 
 varLS= (#//. s_String :>ToExpression[s])//Variables&;
 
-
-
 rul2Str=# /. r_Rule :> ToString /@ r &;
 
 (* Example usage 
@@ -241,8 +245,6 @@ edg = {"B" -> "A", "2 A + B" -> "A + 2 B"};
 wei = {k1, k2};
 
 FHJn[vert, edg, wei, {{"A", "B"}},  .20]*)
-
-
  Hur3M[A_]:=Module[{co,h3,inec,ineSys,\[Omega]},
 co=CoefficientList[(-1)^Length[A] CharacteristicPolynomial[A,\[Omega]],\[Omega]];
 h3=co[[ 2]]* co[[ 3]]-co[[ 1]] *co[[ 4]];inec={co[[ 1]]>0,co[[ 2]]>0};
@@ -344,7 +346,14 @@ phasePl2[mod_,cn_:{},plc_:{},in_:1]:=Module[{dyn,X,pl,fp,jac,jacE,Xp,Xs,sp,Gp,cP
    LabelStyle->Directive[Black,Medium]];
    {Xs, jacE,Show[sp,cP,Gp]}
    ]
-NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
+   
+   posM= Replace[#,{_?Negative->0,e_:>Replace[Expand[e],
+ {Times[_?Negative,_]->0,t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
+ 
+ FposEx=With[{pos=First@SparseArray[#]["NonzeroPositions"]},SparseArray[{pos->Extract[#,pos]},
+ Dimensions@#]]&;
+ 
+NGMs[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
    dyn=mod[[1]];X=mod[[2]];
    infc=Complement[Range[Length[X]],inf];
    Jy=Grad[dyn[[inf]],X[[inf]]];
@@ -356,15 +365,36 @@ NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
    F1=Jy+V1/.Thread[X[[inf]]->0];
    (*F1 is a first guess for F, containing all other 
    gradient terms*)
-   F=Replace[F1, _. _?Negative -> 0, {2}];
+   F=ReplaceAll[F1, _. _?Negative -> 0];
    (*all terms in F1 containing minuses are set to 0*);
    V=F-Jy;
-   Kl=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
-   K=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
- {Jy,V1,F1,F,-V,Kl,K,chp}]
+   K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
+   Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
+ {Jy,V1,F1,F,V,K,Kd,chp}]
  
+ NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
+   dyn=mod[[1]];X=mod[[2]];
+   infc=Complement[Range[Length[X]],inf];
+   Jy=Grad[dyn[[inf]],X[[inf]]];
+   chp=CharacteristicPolynomial[Jy,u];
+   (*The jacobian of the infectious equations*)
+   V1=-Jy/.Thread[X[[infc]]->0];
+   (*V1 is a first guess for V, retains all gradient terms which
+   disappear when the non infectious components are null*)
+   F1=Jy+V1/.Thread[X[[inf]]->0];
+   (*F1 is a first guess for F, containing all other 
+   gradient terms*)
+   F=posM[F1];
+   (*all terms in F1 containing minuses are set to 0*);
+   V=F-Jy;
+   K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
+   Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
+ {Jy,V1,F1,F,V,K,Kd,chp}]
+ 
+
  (*K=NGM[SEIR,Range[2]][[4]];eig=Eigenvalues[K]/.Thread[X[[inf]]->0];*) 
-  
+ 
+ 
 JR0[pol_,u_]:=Module[{co,co1,cop,con,R0J},
 co=CoefficientList[pol,u];
   Print["the  factor  has degree ",Length[co]-1];
@@ -377,24 +407,54 @@ co=CoefficientList[pol,u];
   R0J=con/cop//FullSimplify;
 {R0J,co}
 ]
- 
+
+ Hirono[S_, intRows_, intCols_] :=
+(*Hirono\[Dash]Okada Network Reduction Module*)
+ Module[
+  {S11, S12, S21, S22, S11plus, Sred},
+  
+  S11 = S[[intRows, intCols]];
+  S12 = S[[intRows, Complement[Range[Dimensions[S][[2]]], intCols]]];
+  S21 = S[[Complement[Range[Dimensions[S][[1]]], intRows], intCols]];
+  S22 = S[[Complement[Range[Dimensions[S][[1]]], intRows], Complement[Range[Dimensions[S][[2]]], intCols]]];
+  
+  S11plus = PseudoInverse[S11];
+  Sred = Simplify[S22 - S21 . S11plus . S12];
+  Sred
+]
+
+ (*Verify Hirono module*)
+verHir[RHS_,var_,intRows_]:=Module[
+{extRows,sub,rhsRed,fpRed},extRows=Complement[Range[Length[var]],intRows];
+sub=Solve[RHS[[intRows]]==0,var[[intRows]]][[1]];
+rhsRed=RHS[[extRows]]/. sub//Simplify;
+fpRed=Solve[rhsRed==0,var[[extRows]]][[1]];
+{sub,rhsRed,fpRed}]
+
+(*Test using Example 7
+RHS={k1-k2 a+k5 d,k2 a-k3 b,k3 b-k4 c-k6 c,k4 c-k5 d};
+var={a,b,c,d};
+intRows={1,2};
+verHir[RHS,var,intRows]*)
+
 extP[mod_,inf_]:=
 Module[{X,Xi,qv,ov,ngm,fv,eq},X=mod[[2]];Xi=X[[inf]];
  qv=Array[q,Length[Xi]];
  ov=Table[1,{j,Length[Xi]}];ngm=NGM[mod,inf];F=ngm[[4]];V=ngm[[5]];fv=ov . F;
  eq=(qv . F)*qv-qv*fv+(ov-qv) . V];
 
-RUR[mod_, ind_, cn_ : {}] (*ind is a list*):= 
-Module[{RHS, var, par, elim,ratsub,pol,polc,rat1},
+RUR[mod_, ind_:{1}, cn_ : {}] (*ind is a list*):= 
+Module[{RHS, var, par, elim,ratsub,pol,ln,rat1},
        RHS = mod[[1]]/.cn; var = mod[[2]]; par = mod[[3]]; 
        elim = Complement[Range[Length[var]], ind];
-       ratsub = Solve[Delete[Thread[RHS == 0], List /@ind], 
-       var[[elim]]];
-       pol = GroebnerBasis[Numerator[Together[RHS//.ratsub]], 
+       ratsub = seF[Solve[Delete[Thread[RHS == 0], ind], 
+       var[[elim]]]];
+      num=Numerator[Together[RHS//.ratsub]];
+       pol = Collect[GroebnerBasis[num, 
          Join[par, var[[ind]]], var[[elim]],
-         MonomialOrder->EliminationOrder]; 
+         MonomialOrder->EliminationOrder],var[[ind]]];ln=pol//Length; 
        rat1=Append[(ratsub/.var[[ind]]->1),var[[ind]]->1];
-    {ratsub, pol,rat1}
+    {ratsub, pol,ln,rat1}
       ]
       
 GBH[pol_,var_,sc_,cn_:{}]:=Module[{li,pa},
@@ -459,8 +519,6 @@ normForm={F1,G1}/. derivatives;
 (*Return L1 coefficient and normal form*)
 {L1,FG,normForm}
 ];
-
-
 DerEq[f_,var_,equilcon_]:=Module[
 {derivatives,order,deriv,i,j,k,A,B,CC,DD,EE,x,y,z,par,cp},
 n=Length[f];
@@ -481,8 +539,6 @@ EE[x_,y_,z_,s_,t_]:={0,0,0};
 (* the reason for the double symbols CC, DD, EE is that C, D, E are protected in Mathematica *)
 {A,B,CC(*,DD,EE*)}
 ];
-
-
 GetVec[A_,om_]:=Module[{n,mtx,pconj,q,qconj,normalize},
 n=Length[A];
 mtx=A-om I IdentityMatrix[n];
@@ -495,8 +551,6 @@ pconj=pconj/normalize;
 qconj=FullSimplify[ComplexExpand[q\[Conjugate]]];
 {pconj,q,qconj}
 ];
-
-
 L13[A_,B_,CC_,cp_]:=
 Module[{n,pconj,q,qconj,v1,v2,v3,c1,numer,denom,a,b,c,d,L1\[Kappa]\[Omega]},
 n=Length[A];
@@ -515,8 +569,6 @@ b=Simplify[ComplexExpand[Im[numer]],cp];
 c=Simplify[ComplexExpand[Re[denom]],cp];
 d=Simplify[ComplexExpand[Im[denom]],cp];
 L1\[Kappa]\[Omega]=Simplify[(a c+b d)/(c^2+d^2)]];
-
-
 L23[A_,B_,CC_:{0,0,0},DD_:{0,0,0},EE_:{0,0,0}]:=
 Module[{n,Id,omega,invA,inv2,inv3,pconj,q,qconj,h,prec,c,invbig},
 n=Length[A];
@@ -543,8 +595,6 @@ ComplexExpand[Re[Subscript[c, 2]]]
 (* Converts between products and sums *)
 toSum= (# /. Times -> Plus) &;
 toProd=(# /.  Plus->Times ) &;
-
-
 (*RescaleODE[f_,equilcon_]:=Module[{X,Y,Z,fscaled,f\[Kappa]1,fnew,
 \[Alpha]\[Beta]\[Gamma],A,i,factor,\[Kappa]2\[Alpha]\[Beta]\[Gamma]},
 X=x/.equilcon;
@@ -586,9 +636,5 @@ EE[x_,y_,z_,s_,t_]:={0,0,0};
 ];
 *)
 End[];
-
-
 EndPackage[];
-
-
 $ContextPath=DeleteDuplicates[Append[$ContextPath,"model`Private`"]];
