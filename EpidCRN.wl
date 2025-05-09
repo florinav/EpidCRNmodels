@@ -444,17 +444,17 @@ Module[{X,Xi,qv,ov,ngm,fv,eq},X=mod[[2]];Xi=X[[inf]];
  eq=(qv . F)*qv-qv*fv+(ov-qv) . V];
 
 RUR[mod_, ind_:{1}, cn_ : {}] (*ind is a list*):= 
-Module[{RHS, var, par, elim,ratsub,pol,ln,rat1},
+Module[{RHS, var, par, elim,ratsub,pol,rat1},
        RHS = mod[[1]]/.cn; var = mod[[2]]; par = mod[[3]]; 
        elim = Complement[Range[Length[var]], ind];
-       ratsub = seF[Solve[Delete[Thread[RHS == 0], ind], 
+       ratsub = seFZ[Solve[Delete[Thread[RHS == 0], ind], 
        var[[elim]]]];
-      num=Numerator[Together[RHS//.ratsub]];
-       pol = Collect[GroebnerBasis[num, 
+      pol =Numerator[Together[RHS//.ratsub]];
+        RHS[[ind]]/.ratsub;(*Collect[GroebnerBasis[num, 
          Join[par, var[[ind]]], var[[elim]],
-         MonomialOrder->EliminationOrder],var[[ind]]];ln=pol//Length; 
+         MonomialOrder->EliminationOrder],var[[ind]]]; *)
        rat1=Append[(ratsub/.var[[ind]]->1),var[[ind]]->1];
-    {ratsub, pol,ln,rat1}
+    {ratsub, pol,rat1}
       ]
       
 GBH[pol_,var_,sc_,cn_:{}]:=Module[{li,pa},
