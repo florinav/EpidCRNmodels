@@ -5,6 +5,8 @@ Global`ome;Global`u;(*Global`v;*)
 ACM::usage = "A2=ACM[A,k] yields additive compound matrix";
 Bifp::usage = "Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]
  gives the bifurcation plot of the dynamics wrt to one par ";
+ red::usage = "recl=red[re,cond] erases from the output of a Reduce all the 
+conditions in cond";
  CofP::usage = "co=CofP[list] yields coefficients of a
 polynomial as required by Routh-Hurwicz theory, ie 
 normalized so the free coefficient is 1 
@@ -19,7 +21,10 @@ CharacteristicPolynomial[A,x],x]],1]";
 cons::usage = "con=cons[mat,cp_:{}] parametrizes positively 
 the  left kernel of mat, using also conditions cp;cp is not necessary
 if mat is numeric*)";
-seZF::usage = "seZF[so]=Select[so,FreeQ[#, 0] &] selects parts free of 0";
+seZF::usage = "seZF[so_] removes in  a list of lists those 
+with a 0";
+onePR::usage = "onePR[cof_,cp_:{}] outputs conditions that the first and 
+last coefs of a list have different signs";
 DFE::usage = "DFE[mod_,inf_] yields the DFE of the model";
 expon::usage= "Eponent[p,Variable[p]] computes the maximum power
  of an expanded form p";
@@ -134,7 +139,11 @@ Drop[Reverse[CoefficientList[(-1)^(Length@A)
 CharacteristicPolynomial[A,x],x]],1]];
 
 CofP[co_?ListQ]:=Drop[Reverse[(-1)^(Length@co) *co],1];
-seZF[so_]:=Select[so,FreeQ[#, 0] &];
+red[re_,cond_]:=re/. (# -> True & /@ cond);
+
+seZF[expr_] := Select[expr, FreeQ[#, 0] &]
+onePR[cof_,cp_:{}]:=Append[cp,(cof[[#]]//First) 
+(cof[[#]]//Last)<0]&/@Range[cof//Length];
 makeLPM[mat_] := 
 Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}];
 
