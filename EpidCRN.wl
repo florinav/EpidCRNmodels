@@ -2,16 +2,22 @@
 
 BeginPackage["EpidCRN`"];
 Global`ome;Global`u;(*Global`v;*)
-ACM::usage = "A2=ACM[A,k] yields additive compound matrix";
+ACM::usage = "A2=ACM[A,k] yields additive compound matrix";asoRea::usage = "transforms classic RN into
+association";invFacet;isInvariantFacet;
 Bifp::usage = "Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]
  gives the bifurcation plot of the dynamics wrt to one par ";
  red::usage = "recl=red[re,cond] erases from the output of a Reduce all the 
 conditions in cond";
+reCL::usage = "recl=red[re,cond] erases from the output of a Reduce all the 
+conditions in cond";minSiph;CreateMassActionRate;reaToRHS;
+isSiph::usage = "isSiph[species,reactions,siphon]";
+reaProducts;
  CofP::usage = "co=CofP[list] yields coefficients of a
 polynomial as required by Routh-Hurwicz theory, ie 
 normalized so the free coefficient is 1 
 (see for example R\[ODoubleDot]st, Tekeli, Thm 4A)";
 expM::usage = "expM[var,expo] gives the vector var at power in matrix expo";
+extSpe;
 CofRH::usage = "co=CofRH[mat] yields coefficients of 
 CharacteristicPolynomial, as required by Routh-Hurwicz theory, ie 
 normalized so the free coefficient is 1 
@@ -42,6 +48,7 @@ H4::usage = "H4[co] gives the 4'th Hurwitz det,  needed in
 Routh-Hurwitz theory (see for example R\[ODoubleDot]st, Tekeli, Thm 4A).
 H4[CofRH[M]] gives the 4'th Hurwitz det of the 
 matrix M, and could be used in Hur4M[mat]"; H6;
+Hur2::usage = "ine=Hur2[co] yields stability cond";
 Hur3M::usage = "{co,h3,ine}=Hur3M[A] yields ine=Append[inec,h3>0]";
 Hur4M::usage = "{co,h4,ine}=Hur4M[A]";
 Hur5M::usage="{co,h5,ine,H5}=Hur5M[jac]";
@@ -116,6 +123,7 @@ tempMatrix];
 expon:=Exponent[#,Variables[#]]&;
 expM=Inner[OperatorApplied[Power],#2,#1,Times]&;
 Par[RHS_,X_]:=Complement[Variables[RHS],X];
+
 m2toM[a_List]:=
 ReplaceAll[str_String:>Total[StringSplit[str,"+"]]][Rule@@@StringSplit[First@(List@@@a),"-->"]]
 SpeComInc[comp_,spec_]:=Coefficient[#,spec]&/@comp;
@@ -139,13 +147,18 @@ Drop[Reverse[CoefficientList[(-1)^(Length@A)
 CharacteristicPolynomial[A,x],x]],1]];
 
 CofP[co_?ListQ]:=Drop[Reverse[(-1)^(Length@co) *co],1];
-red[re_,cond_]:=re/. (# -> True & /@ cond);
+red[re_,cond_:{}]:=re/. (# -> True & /@ cond);
+reCL[re_] :=DeleteCases[re, _Symbol > 0 | 
+Subscript[_, __] > 0, Infinity];
 
-seZF[expr_] := Select[expr, FreeQ[#, 0] &]
+seZF[expr_] := Select[expr, FreeQ[#, 0] &];
+
 onePR[cof_,cp_:{}]:=Append[cp,(cof[[#]]//First) 
 (cof[[#]]//Last)<0]&/@Range[cof//Length];
 makeLPM[mat_] := 
 Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}];
+Hur2[co_]:=Module[{co3, ine}, co3=co[[3]];
+ine= {co[[1]] co3>0,co[[2]] co3>0};ine];
 
 cons[mat_,cp_:{}] := Module[{X, sol, dim, cv}, 
 (*Parametrize the kernel to the left , using only pos
@@ -161,6 +174,7 @@ parameter to be one, and the rest to be 0*)
   Flatten /@ 
    Table[sol /. Thread[cv -> IdentityMatrix[dim][[i]]], {i, dim}]];
    
+     
 matl2Mat[matrix_String]:=Module[{formattedMatrix},
 (*Step 1:Split the input by newlines to separate rows*)
 formattedMatrix=StringSplit[matrix,"\n"];
@@ -179,6 +193,164 @@ matlr2Mat[str_String]:=Module[{formattedString,result},(*Step 1:Remove curly bra
 (*Step 3:Convert each element to an integer*)result=ToExpression[formattedString];
 (*Step 4:Remove any Null values*)DeleteCases[result,Null]];
 
+(*Helper function to switch reaction network representation from classic to list of associations*)asoRea[RN_]:=Module[{parseSide},parseSide[str_]:=If[str===0,{},StringSplit[ToString[str],"+"]//StringTrim];
+Map[Function[r,Association["Substrates"->parseSide[r[[1]]],"Products"->parseSide[r[[2]]]]],RN]]
+(*Function to parse reaction side and create stoichiometric coefficient*)
+reaProducts[side_]:=Module[{coeffs},coeffs=<||>;
+If[side===0,Return[coeffs]];
+If[Head[side]===Plus,(*Multiple species*)Do[If[Head[term]===Times&&Length[term]==2&&NumberQ[term[[1]]],(*Coefficient*Species*)coeffs[term[[2]]]=term[[1]],(*Single species (coefficient=1)*)coeffs[term]=1];,{term,List@@side}],(*Single species or coefficient*species*)If[Head[side]===Times&&Length[side]==2&&NumberQ[side[[1]]],coeffs[side[[2]]]=side[[1]],coeffs[side]=1]];
+coeffs];
+
+extSpe[reactions_] := Module[{allSpecies, lhs, rhs, terms}, 
+  allSpecies = {};
+  Do[lhs = reactions[[i, 1]];
+   rhs = reactions[[i, 2]];
+   
+   (* Process left side *)
+   If[lhs =!= 0, 
+    terms = If[Head[lhs] === Plus, List @@ lhs, {lhs}];
+    Do[
+     If[Head[term] === Times && Length[term] == 2 && NumberQ[term[[1]]], 
+      allSpecies = Append[allSpecies, term[[2]]], (* Extract species from coeff*species *)
+      allSpecies = Append[allSpecies, term]       (* Single species *)
+      ], {term, terms}]];
+   
+   (* Process right side *)
+   If[rhs =!= 0, 
+    terms = If[Head[rhs] === Plus, List @@ rhs, {rhs}];
+    Do[
+     If[Head[term] === Times && Length[term] == 2 && NumberQ[term[[1]]], 
+      allSpecies = Append[allSpecies, term[[2]]], (* Extract species from coeff*species *)
+      allSpecies = Append[allSpecies, term]       (* Single species *)
+      ], {term, terms}]];
+   , {i, Length[reactions]}];
+  DeleteDuplicates[allSpecies]
+  ];
+(*Function to create mass action rate expression*)
+
+CreateMassActionRate[reactants_, kParam_] := Module[{rateExpr}, 
+  rateExpr = kParam;
+  Do[rateExpr = rateExpr*sp^reactants[sp], {sp, Keys[reactants]}];
+  rateExpr];
+
+reaToRHS[reactions_] := Module[{species, odes, reactants, products, rate, netChange}, 
+  species = extSpe[reactions];
+  (*Initialize vector field components*)
+  odes = AssociationThread[species, Table[0, {Length[species]}]];
+  (*Process each reaction*)
+  Do[reactants = reaProducts[reactions[[i, 1]]];
+   products = reaProducts[reactions[[i, 2]]];
+   (*Create rate parameter*)
+   rate = CreateMassActionRate[reactants, Symbol["k" <> ToString[i]]];
+   (*Update vector field for each species*)
+   Do[netChange = 0;
+    (*Subtract reactant contribution*)
+    If[KeyExistsQ[reactants, sp], netChange -= reactants[sp]];
+    (*Add product contribution*)
+    If[KeyExistsQ[products, sp], netChange += products[sp]];
+    If[netChange != 0, odes[sp] += netChange*rate];, {sp, species}];, {i, Length[reactions]}];
+  (*Return species list and vector field RHS*)
+  {Table[odes[species[[i]]], {i, Length[species]}], species}];
+ 
+
+isSiph[species_List, reactions_List, siphon_List] := Module[
+  {ns, sm, siphonSet, isSiphonQ, subIdx, prodIdx, substrates, products},
+  
+  ns = Length[species];
+  sm = AssociationThread[species -> Range[ns]];
+  siphonSet = siphon;
+  isSiphonQ = True;
+  
+  Do[
+    substrates = reaction["Substrates"];
+    products = reaction["Products"];
+    subIdx = If[substrates === {} || substrates === {""}, {}, 
+      Select[Lookup[sm, substrates, Nothing], IntegerQ]];
+    prodIdx = If[products === {} || products === {""}, {}, 
+      Select[Lookup[sm, products, Nothing], IntegerQ]];
+    
+    Do[
+      If[MemberQ[siphonSet, p],
+        If[Length[subIdx] == 0,
+          (* No substrates but product in siphon - violates siphon property *)
+          isSiphonQ = False; Break[],
+          (* Has substrates - check if any are in siphon *)
+          If[!AnyTrue[subIdx, MemberQ[siphonSet, #] &],
+            isSiphonQ = False; Break[]
+          ]
+        ]
+      ], {p, prodIdx}];
+    
+    If[!isSiphonQ, Break[]];
+    , {reaction, reactions}];
+  
+  isSiphonQ
+]
+
+(*Corrected minimal siphon finder*)
+minSiph[species_List,reactions_List]:=Module[{ns,sm,specs,constraints,solutions,siphons,minimal},ns=Length[species];
+sm=AssociationThread[species->Range[ns]];
+specs=Array[Symbol["s"<>ToString[#]]&,ns];
+(*Build constraints*)constraints={Or@@specs};(*At least one species in siphon*)Do[Module[{subIdx,prodIdx,substrates,products},(*Get substrate and product indices*)substrates=reaction["Substrates"];
+products=reaction["Products"];
+(*Convert species names to indices*)subIdx=If[substrates==={}||substrates==={""},{},Select[Lookup[sm,substrates,Nothing],IntegerQ]];
+prodIdx=If[products==={}||products==={""},{},Select[Lookup[sm,products,Nothing],IntegerQ]];
+(*Add constraints for each product*)Do[If[Length[subIdx]==0,(*Empty product:product cannot be in siphon*)AppendTo[constraints,Not[specs[[p]]]],(*substrate->product:if product in siphon,some substrate must be too*)AppendTo[constraints,Implies[specs[[p]],If[Length[subIdx]==1,specs[[subIdx[[1]]]],Or@@specs[[subIdx]]]]]],{p,prodIdx}]],{reaction,reactions}];
+(*Print["Constraints generated: ",Length[constraints]];*)
+Print["Sample constraints: ",Take[constraints,Min[5,Length[constraints]]]];
+(*Find solutions with moderate limit to avoid crashes*)solutions=FindInstance[constraints,specs,Integers,25];
+If[solutions==={},Return[{}]];
+siphons=Map[Flatten@Position[specs/. #,True]&,solutions];
+siphons=DeleteDuplicates[siphons];
+Print["All  siphons: ",siphons];
+(*Proper minimality check:remove any siphon that contains another*)minimal={};
+Do[If[Not[AnyTrue[siphons,Function[other,other=!=siphon&&SubsetQ[siphon,other]]]],
+AppendTo[minimal,siphon]],{siphon,siphons}];
+minimal]
+(*Check if a facet is invariant using the RHS*)
+isInvariantFacet[facetSet_,reactions_]:=Module[{vf,vars,facetIndices,facetRules,isInvariant},{vf,vars}=reaToRHS[reactions];
+(*Find indices of facet species in variable list*)facetIndices=Flatten[Position[vars,#]&/@facetSet];
+(*Create facet:set all facet species to zero*)facetRules=Table[vars[[facetIndices[[j]]]]->0,{j,Length[facetIndices]}];
+(*Check invariance:derivatives of facet species should be<=0 on the facet*)isInvariant=True;
+Do[derivative=Simplify[vf[[facetIndices[[j]]]]/. facetRules];
+(*The derivative should be non-positive (can't leave the facet)*)If[!(PossibleZeroQ[derivative]||Simplify[derivative<=0]===True||MatchQ[derivative,_?NonPositive]),isInvariant=False;
+Break[]];,{j,Length[facetIndices]}];
+isInvariant];
+
+(*Main function to find invariant facets using RHS*)
+invFacet[reactions_,maxCodim_]:=Module[{species,n,invariantFacets,subsets},species=extSpe[reactions];
+n=Length[species];
+invariantFacets={};
+(*Check all subsets up to the specified codimension*)Do[subsets=Subsets[species,{k}];
+Do[candidateSet=subsets[[i]];
+(*Check if it's an invariant facet using RHS*)If[isInvariantFacet[candidateSet,reactions],
+AppendTo[invariantFacets,candidateSet]];,{i,Length[subsets]}];,{k,1,Min[maxCodim,n]}];
+invariantFacets];
+
+
+
+(*minSiph[species_List,reactions_List]:=Module[{ns,sm,specs,constraints,siphons,status,model,siphon},(*number of species*)ns=Length[species];
+(*map each species name to its index*)
+sm=AssociationThread[species->Range[ns]];
+(*Boolean variables s1\[Ellipsis]s_ns;s_i==True means species i is in the siphon*)
+specs=Array[Symbol["s"<>ToString[#]]&,ns];
+(*initial constraint:at least one species must be in the siphon*)constraints={Or@@specs};
+(*for each reaction,add the Julia\[Hyphen]style constraint*)Do[subIdx=Lookup[sm,reaction["Substrates"],{}];
+prodIdx=Lookup[sm,reaction["Products"],{}];
+Do[If[subIdx==={},(*if \[EmptySet]\[RightArrow]something,that product cannot be in the siphon*)AppendTo[constraints,Not[specs[[p]]]],(*otherwise s_p\[RightArrow]Or[s_subs]*)AppendTo[constraints,Implies[specs[[p]],Or@@specs[[subIdx]]]]],{p,prodIdx}],{reaction,reactions}];
+siphons={};
+(*find the first satisfying assignment*)status=FindInstance[constraints,specs,1,Method->"Boolean"];
+(*iterate until UNSAT,each time banishing any superset of the found siphon*)While[status=!={},model=status[[1]];
+siphon=Flatten@Position[specs/. model,True];
+AppendTo[siphons,siphon];
+(*Add constraint:at least one of those True variables must now be False to forbid supersets of this exact siphon*)
+AppendTo[constraints,Or@@(Not/@specs[[siphon]])];
+status=FindInstance[constraints,specs,1,Method->"Boolean"];];
+(*remove any siphon that strictly contains another*)DeleteCases[siphons,s_/;AnyTrue[siphons,sup|->(sup=!=s&&SubsetQ[sup,s])]]];
+(*test species={"A","B","C"};
+reactions={<|"Substrates"->{},"Products"->{"A"}|>,<|"Substrates"->{"A","B"},"Products"->{"C"}|>};
+ minSiph[species,reactions]*)
+*)
 Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]:=
 Module[{dyn, X,fp,pl,epi,plf},dyn=mod[[1]]/.cN;X=mod[[2]];
 fp=Quiet[Solve[Thread[(dyn)==0],X]//N];
@@ -362,7 +534,7 @@ phasePl2[mod_,cn_:{},plc_:{},in_:1]:=Module[{dyn,X,pl,fp,jac,jacE,Xp,Xs,sp,Gp,cP
  FposEx=With[{pos=First@SparseArray[#]["NonzeroPositions"]},SparseArray[{pos->Extract[#,pos]},
  Dimensions@#]]&;
  
-NGMs[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
+NGMs[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Kd},
    dyn=mod[[1]];X=mod[[2]];
    infc=Complement[Range[Length[X]],inf];
    Jy=Grad[dyn[[inf]],X[[inf]]];
@@ -381,24 +553,25 @@ NGMs[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
    Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
  {Jy,V1,F1,F,V,K,Kd,chp}]
  
- NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp},
+ NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Jx,Jxy,Jyx,Kd},
    dyn=mod[[1]];X=mod[[2]];
    infc=Complement[Range[Length[X]],inf];
-   Jy=Grad[dyn[[inf]],X[[inf]]];
-   chp=CharacteristicPolynomial[Jy,u];
+   Jx=Grad[dyn[[inf]],X[[inf]]];Jy=Grad[dyn[[infc]],X[[infc]]];
+   Jxy=Grad[dyn[[inf]],X[[infc]]];Jyx=Grad[dyn[[infc]],X[[inf]]];
+   chp=CharacteristicPolynomial[Jx,u];
    (*The jacobian of the infectious equations*)
-   V1=-Jy/.Thread[X[[infc]]->0];
+   V1=-Jx/.Thread[X[[infc]]->0];
    (*V1 is a first guess for V, retains all gradient terms which
    disappear when the non infectious components are null*)
-   F1=Jy+V1/.Thread[X[[inf]]->0];
+   F1=Jx+V1/.Thread[X[[inf]]->0];
    (*F1 is a first guess for F, containing all other 
    gradient terms*)
    F=posM[F1];
    (*all terms in F1 containing minuses are set to 0*);
-   V=F-Jy;
+   V=F-Jx;
    K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
    Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
- {Jy,V1,F1,F,V,K,Kd,chp}]
+ {Jx,V1,F1,F,V,K,Kd,chp,Jy,Jxy,Jyx}]
  
 
  (*K=NGM[SEIR,Range[2]][[4]];eig=Eigenvalues[K]/.Thread[X[[inf]]->0];*) 

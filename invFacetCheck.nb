@@ -1,0 +1,613 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     23477,        605]
+NotebookOptionsPosition[     22648,        583]
+NotebookOutlinePosition[     23073,        599]
+CellTagsIndexPosition[     23030,        596]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{"invFacetCheck", "-", 
+    RowBox[{"Siphon", " ", "Invariance", " ", "Theorem", " ", "Tester"}]}], 
+   "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "Function", " ", "to", " ", "extract", " ", "all", " ", "species", " ", 
+    "from", " ", "reaction", " ", "network"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"extSpe", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"allSpecies", ",", "lhs", ",", "rhs"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"allSpecies", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"lhs", "=", 
+            RowBox[{"reactions", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "1"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"rhs", "=", 
+            RowBox[{"reactions", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "2"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "species", " ", "from", " ", "left", " ", 
+             "side"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"lhs", "=!=", "0"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Head", "[", "lhs", "]"}], "===", "Plus"}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Join", "[", 
+                 RowBox[{"allSpecies", ",", 
+                  RowBox[{"List", "@@", "lhs"}]}], "]"}]}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Append", "[", 
+                 RowBox[{"allSpecies", ",", "lhs"}], "]"}]}]}], "]"}]}], 
+            "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "species", " ", "from", " ", "right", " ", 
+             "side"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"rhs", "=!=", "0"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Head", "[", "rhs", "]"}], "===", "Plus"}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Join", "[", 
+                 RowBox[{"allSpecies", ",", 
+                  RowBox[{"List", "@@", "rhs"}]}], "]"}]}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Append", "[", 
+                 RowBox[{"allSpecies", ",", "rhs"}], "]"}]}]}], "]"}]}], 
+            "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"DeleteDuplicates", "[", "allSpecies", "]"}]}]}], "]"}]}], 
+    ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "parse", " ", "reaction", " ", "side", " ", 
+     "and", " ", "create", " ", "stoichiometric", " ", "coefficient"}], 
+    "*)"}], "\n", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"reaProd", "[", "side_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "coeffs", "}"}], ",", 
+       RowBox[{
+        RowBox[{"coeffs", "=", 
+         RowBox[{"<|", "|>"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{"side", "===", "0"}], ",", 
+          RowBox[{"Return", "[", "coeffs", "]"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Head", "[", "side", "]"}], "===", "Plus"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{"Multiple", " ", "species"}], "*)"}], 
+          RowBox[{"Do", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Head", "[", "term", "]"}], "===", "Times"}], "&&", 
+                RowBox[{
+                 RowBox[{"Length", "[", "term", "]"}], "==", "2"}], "&&", 
+                RowBox[{"NumberQ", "[", 
+                 RowBox[{"term", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ",", 
+               RowBox[{"(*", 
+                RowBox[{"Coefficient", "*", "Species"}], "*)"}], 
+               RowBox[{
+                RowBox[{"coeffs", "[", 
+                 RowBox[{"term", "[", 
+                  RowBox[{"[", "2", "]"}], "]"}], "]"}], "=", 
+                RowBox[{"term", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}]}], ",", 
+               RowBox[{"(*", 
+                RowBox[{"Single", " ", "species", " ", 
+                 RowBox[{"(", 
+                  RowBox[{"coefficient", "=", "1"}], ")"}]}], "*)"}], 
+               RowBox[{
+                RowBox[{"coeffs", "[", "term", "]"}], "=", "1"}]}], "]"}], 
+             ";"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"term", ",", 
+              RowBox[{"List", "@@", "side"}]}], "}"}]}], "]"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{
+           "Single", " ", "species", " ", "or", " ", "coefficient", "*", 
+            "species"}], "*)"}], 
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{
+              RowBox[{"Head", "[", "side", "]"}], "===", "Times"}], "&&", 
+             RowBox[{
+              RowBox[{"Length", "[", "side", "]"}], "==", "2"}], "&&", 
+             RowBox[{"NumberQ", "[", 
+              RowBox[{"side", "[", 
+               RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ",", 
+            RowBox[{
+             RowBox[{"coeffs", "[", 
+              RowBox[{"side", "[", 
+               RowBox[{"[", "2", "]"}], "]"}], "]"}], "=", 
+             RowBox[{"side", "[", 
+              RowBox[{"[", "1", "]"}], "]"}]}], ",", 
+            RowBox[{
+             RowBox[{"coeffs", "[", "side", "]"}], "=", "1"}]}], "]"}]}], 
+         "]"}], ";", "\[IndentingNewLine]", "coeffs"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "create", " ", "mass", " ", "action", " ", 
+     "rate", " ", "expression"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"CreateMassActionRate", "[", 
+      RowBox[{"reactants_", ",", "kParam_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "rateExpr", "}"}], ",", 
+       RowBox[{
+        RowBox[{"rateExpr", "=", "kParam"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"rateExpr", "=", 
+            RowBox[{"rateExpr", "*", 
+             RowBox[{"species", "^", 
+              RowBox[{"reactants", "[", "species", "]"}]}]}]}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"species", ",", 
+            RowBox[{"Keys", "[", "reactants", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", "rateExpr"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Main", " ", "function", " ", "to", " ", "convert", " ", "reactions", " ",
+      "to", " ", "vector", " ", "field", " ", "RHS"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"reaToRHS", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+        "species", ",", "odes", ",", "reactants", ",", "products", ",", 
+         "rate", ",", "netChange"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"species", "=", 
+         RowBox[{"extSpe", "[", "reactions", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Initialize", " ", "vector", " ", "field", " ", "components"}], 
+         "*)"}], 
+        RowBox[{"odes", "=", 
+         RowBox[{"AssociationThread", "[", 
+          RowBox[{"species", ",", 
+           RowBox[{"Table", "[", 
+            RowBox[{"0", ",", 
+             RowBox[{"{", 
+              RowBox[{"Length", "[", "species", "]"}], "}"}]}], "]"}]}], 
+          "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Process", " ", "each", " ", "reaction"}], "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"reactants", "=", 
+            RowBox[{"reaProd", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "1"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"products", "=", 
+            RowBox[{"reaProd", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "2"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Create", " ", "rate", " ", "parameter"}], "*)"}], 
+           "\[IndentingNewLine]", 
+           RowBox[{"rate", "=", 
+            RowBox[{"CreateMassActionRate", "[", 
+             RowBox[{"reactants", ",", 
+              RowBox[{"Subscript", "[", 
+               RowBox[{"k", ",", "i"}], "]"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Update", " ", "vector", " ", "field", " ", "for", " ", "each", 
+             " ", "species"}], "*)"}], 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"netChange", "=", "0"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Subtract", " ", "reactant", " ", "contribution"}], 
+               "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"reactants", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "-=", 
+                 RowBox[{"reactants", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Add", " ", "product", " ", "contribution"}], "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"products", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "+=", 
+                 RowBox[{"products", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"netChange", "!=", "0"}], ",", 
+                RowBox[{
+                 RowBox[{"odes", "[", "sp", "]"}], "+=", 
+                 RowBox[{"netChange", "*", "rate"}]}]}], "]"}], ";"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"sp", ",", "species"}], "}"}]}], "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Return", " ", "species", " ", "list", " ", "and", " ", "vector", 
+          " ", "field", " ", "RHS"}], "*)"}], 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{"odes", "[", 
+             RowBox[{"species", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", 
+              RowBox[{"Length", "[", "species", "]"}]}], "}"}]}], "]"}], ",", 
+          "species"}], "}"}]}]}], "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"invFacetCheck", "-", 
+     RowBox[{"Test", " ", "siphon", " ", "invariance", " ", "theorem"}]}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"invFacetCheck", "[", 
+      RowBox[{"reactions_", ",", "siphons_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"vf", ",", "vars", ",", "results"}], "}"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{
+        "Convert", " ", "CRN", " ", "to", " ", "vector", " ", "field"}], 
+        "*)"}], 
+       RowBox[{
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"vf", ",", "vars"}], "}"}], "=", 
+         RowBox[{"reaToRHS", "[", "reactions", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"results", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Test", " ", "each", " ", "siphon"}], "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"siphon", "=", 
+            RowBox[{"siphons", "[", 
+             RowBox[{"[", "i", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"siphonResult", "=", "True"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Check", " ", "if", " ", "all", " ", "boundary", " ", "facets", 
+             " ", "of", " ", "the", " ", "siphon", " ", "are", " ", 
+             "invariant"}], "*)"}], 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"species", "=", 
+               RowBox[{"siphon", "[", 
+                RowBox[{"[", "j", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+              RowBox[{"speciesIndex", "=", 
+               RowBox[{
+                RowBox[{"Position", "[", 
+                 RowBox[{"vars", ",", "species"}], "]"}], "[", 
+                RowBox[{"[", 
+                 RowBox[{"1", ",", "1"}], "]"}], "]"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Check", " ", 
+                RowBox[{"invariance", ":", 
+                 RowBox[{
+                  RowBox[{"n", "\[CenterDot]", "f"}], "<=", 
+                  RowBox[{"0", " ", "on", " ", "facet", " ", 
+                   RowBox[{"(", 
+                    RowBox[{"species", "=", "0"}], ")"}]}]}]}]}], "*)"}], 
+              RowBox[{"dotProduct", "=", 
+               RowBox[{"Simplify", "[", 
+                RowBox[{
+                 RowBox[{"vf", "[", 
+                  RowBox[{"[", "speciesIndex", "]"}], "]"}], "/.", " ", 
+                 RowBox[{"(", 
+                  RowBox[{"species", "->", "0"}], ")"}]}], "]"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"isInvariant", "=", 
+               RowBox[{"(", 
+                RowBox[{"dotProduct", "<=", "0"}], ")"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"!", "isInvariant"}], ",", 
+                RowBox[{"siphonResult", "=", "False"}]}], "]"}], ";"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"j", ",", 
+               RowBox[{"Length", "[", "siphon", "]"}]}], "}"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"AppendTo", "[", 
+            RowBox[{"results", ",", "siphonResult"}], "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "siphons", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", "results"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Test", " ", "the", " ", "CRN", " ", "example"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RN", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "influx"}], "*)"}], 
+       RowBox[{
+        RowBox[{"\"\<S\>\"", "+", "\"\<e\>\""}], "->", "\"\<ES\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "binding"}], "*)"}], 
+       RowBox[{"\"\<ES\>\"", "->", 
+        RowBox[{"\"\<S\>\"", "+", "\"\<e\>\""}]}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "unbinding"}], "*)"}], 
+       RowBox[{"\"\<ES\>\"", "->", 
+        RowBox[{"\"\<e\>\"", "+", "\"\<P\>\""}]}], ",", 
+       RowBox[{"(*", "Catalysis", "*)"}], 
+       RowBox[{
+        RowBox[{"\"\<i\>\"", "+", "\"\<e\>\""}], "->", "\"\<EI\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "binding"}], "*)"}], 
+       RowBox[{"\"\<EI\>\"", "->", 
+        RowBox[{"\"\<i\>\"", "+", "\"\<e\>\""}]}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "unbinding"}], "*)"}], 
+       RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "efflux"}], "*)"}], 
+       RowBox[{"\"\<i\>\"", "->", "0"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "efflux"}], "*)"}], 
+       RowBox[{"\"\<P\>\"", "->", "0"}]}], "                    ", 
+      RowBox[{"(*", 
+       RowBox[{"Product", " ", "efflux"}], "*)"}], "}"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Known", " ", "minimal", " ", "siphons"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"siphons", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\"\<e\>\"", ",", "\"\<ES\>\"", ",", "\"\<EI\>\""}], "}"}], 
+       ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<i\>\"", ",", "\"\<EI\>\""}], "}"}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Run", " ", "the", " ", "test"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"results", "=", 
+     RowBox[{"invFacetCheck", "[", 
+      RowBox[{"RN", ",", "siphons"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RHS", "=", 
+     RowBox[{"reaToRHS", "[", "RN", "]"}]}], ";", 
+    RowBox[{"RHS", "//", "Length"}]}], "\[IndentingNewLine]", 
+   RowBox[{"RHS", "//", "MatrixForm"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Siphon {e,ES,EI} is invariant boundary facet: \>\"", ",", 
+      RowBox[{"results", "[", 
+       RowBox[{"[", "1", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Siphon {i,EI} is invariant boundary facet: \>\"", ",", 
+      RowBox[{"results", "[", 
+       RowBox[{"[", "2", "]"}], "]"}]}], "]"}], ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.9579187658588796`*^9, 3.9579187658588796`*^9}, {
+  3.9579358963060875`*^9, 3.9579359049404984`*^9}, {3.9579361582410336`*^9, 
+  3.957936166239085*^9}, {3.95793652850799*^9, 3.9579365285124454`*^9}, {
+  3.957936560590661*^9, 3.9579365765589943`*^9}, {3.957938064034834*^9, 
+  3.957938103241573*^9}},
+ CellLabel->
+  "In[204]:=",ExpressionUUID->"7ca51ec4-7a25-406e-9b47-12c12e77bd77"],
+
+Cell[BoxData["2"], "Output",
+ CellChangeTimes->{3.9579380678650365`*^9, 3.957938104925058*^9},
+ CellLabel->
+  "Out[212]=",ExpressionUUID->"f1fd711f-3008-4fa7-baf9-f64eaef3f588"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {
+      RowBox[{
+       SubscriptBox["k", "1"], "-", 
+       RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+        SubscriptBox["k", "2"]}], "+", 
+       RowBox[{"\<\"ES\"\>", " ", 
+        SubscriptBox["k", "3"]}], "-", 
+       RowBox[{"\<\"S\"\>", " ", 
+        SubscriptBox["k", "7"]}]}], 
+      RowBox[{
+       RowBox[{
+        RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"S\"\>", " ", 
+        SubscriptBox["k", "2"]}], "+", 
+       RowBox[{"\<\"ES\"\>", " ", 
+        SubscriptBox["k", "3"]}], "+", 
+       RowBox[{"\<\"ES\"\>", " ", 
+        SubscriptBox["k", "4"]}], "-", 
+       RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+        SubscriptBox["k", "5"]}], "+", 
+       RowBox[{"\<\"EI\"\>", " ", 
+        SubscriptBox["k", "6"]}]}], 
+      RowBox[{
+       RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+        SubscriptBox["k", "2"]}], "-", 
+       RowBox[{"\<\"ES\"\>", " ", 
+        SubscriptBox["k", "3"]}], "-", 
+       RowBox[{"\<\"ES\"\>", " ", 
+        SubscriptBox["k", "4"]}]}], 
+      RowBox[{
+       RowBox[{"\<\"ES\"\>", " ", 
+        SubscriptBox["k", "4"]}], "-", 
+       RowBox[{"\<\"P\"\>", " ", 
+        SubscriptBox["k", "9"]}]}], 
+      RowBox[{
+       RowBox[{
+        RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"i\"\>", " ", 
+        SubscriptBox["k", "5"]}], "+", 
+       RowBox[{"\<\"EI\"\>", " ", 
+        SubscriptBox["k", "6"]}], "-", 
+       RowBox[{"\<\"i\"\>", " ", 
+        SubscriptBox["k", "8"]}]}], 
+      RowBox[{
+       RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+        SubscriptBox["k", "5"]}], "-", 
+       RowBox[{"\<\"EI\"\>", " ", 
+        SubscriptBox["k", "6"]}]}]},
+     {"\<\"S\"\>", "\<\"e\"\>", "\<\"ES\"\>", "\<\"P\"\>", "\<\"i\"\>", \
+"\<\"EI\"\>"}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{3.9579380678650365`*^9, 3.9579381049913845`*^9},
+ CellLabel->
+  "Out[213]//MatrixForm=",ExpressionUUID->"4dc99ef2-47d9-4b11-95a6-\
+c31af72233ae"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Siphon {e,ES,EI} is invariant boundary facet: \"\>", 
+   "\[InvisibleSpace]", "True"}],
+  SequenceForm["Siphon {e,ES,EI} is invariant boundary facet: ", True],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579187892975965`*^9, 3.957936535543393*^9, 
+  3.9579365871466227`*^9, 3.957938067970784*^9, 3.95793810507633*^9},
+ CellLabel->
+  "During evaluation of \
+In[204]:=",ExpressionUUID->"d327afbb-0c69-4548-85fb-c7e6e3ea48e1"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Siphon {i,EI} is invariant boundary facet: \"\>", 
+   "\[InvisibleSpace]", "True"}],
+  SequenceForm["Siphon {i,EI} is invariant boundary facet: ", True],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579187892975965`*^9, 3.957936535543393*^9, 
+  3.9579365871466227`*^9, 3.957938067970784*^9, 3.9579381051473675`*^9},
+ CellLabel->
+  "During evaluation of \
+In[204]:=",ExpressionUUID->"fcfebb80-161a-4999-9653-b5930acf1b35"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{812.5714285714286, 384.85714285714283`},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e81e6420-2a92-4a90-818b-2036eabc445d"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 18557, 459, 1513, "Input",ExpressionUUID->"7ca51ec4-7a25-406e-9b47-12c12e77bd77"],
+Cell[19140, 483, 177, 3, 32, "Output",ExpressionUUID->"f1fd711f-3008-4fa7-baf9-f64eaef3f588"],
+Cell[19320, 488, 2315, 65, 61, "Output",ExpressionUUID->"4dc99ef2-47d9-4b11-95a6-c31af72233ae"],
+Cell[CellGroupData[{
+Cell[21660, 557, 480, 10, 22, "Print",ExpressionUUID->"d327afbb-0c69-4548-85fb-c7e6e3ea48e1"],
+Cell[22143, 569, 477, 10, 22, "Print",ExpressionUUID->"fcfebb80-161a-4999-9653-b5930acf1b35"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

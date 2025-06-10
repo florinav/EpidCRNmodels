@@ -1,0 +1,2462 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     97169,       2454]
+NotebookOptionsPosition[     86604,       2327]
+NotebookOutlinePosition[     87029,       2343]
+CellTagsIndexPosition[     86986,       2340]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "Reaction", " ", "Network", " ", "to", " ", "Mass", " ", "Action", " ", 
+    "Vector", " ", "Field", " ", "Converter"}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "Returns", " ", "only", " ", "the", " ", "RHS", " ", "of", " ", "ODE", " ",
+     "system"}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "Function", " ", "to", " ", "extract", " ", "all", " ", "species", " ", 
+    "from", " ", "reaction", " ", "network"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"extSpe", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"allSpecies", ",", "lhs", ",", "rhs"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"allSpecies", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"lhs", "=", 
+            RowBox[{"reactions", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "1"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"rhs", "=", 
+            RowBox[{"reactions", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "2"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "species", " ", "from", " ", "left", " ", 
+             "side"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"lhs", "=!=", "0"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Head", "[", "lhs", "]"}], "===", "Plus"}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Join", "[", 
+                 RowBox[{"allSpecies", ",", 
+                  RowBox[{"List", "@@", "lhs"}]}], "]"}]}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Append", "[", 
+                 RowBox[{"allSpecies", ",", "lhs"}], "]"}]}]}], "]"}]}], 
+            "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "species", " ", "from", " ", "right", " ", 
+             "side"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"rhs", "=!=", "0"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Head", "[", "rhs", "]"}], "===", "Plus"}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Join", "[", 
+                 RowBox[{"allSpecies", ",", 
+                  RowBox[{"List", "@@", "rhs"}]}], "]"}]}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Append", "[", 
+                 RowBox[{"allSpecies", ",", "rhs"}], "]"}]}]}], "]"}]}], 
+            "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"DeleteDuplicates", "[", "allSpecies", "]"}]}]}], "]"}]}], 
+    ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "parse", " ", "reaction", " ", "side", " ", 
+     "and", " ", "create", " ", "stoichiometric", " ", "coefficient"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ParseReactionSide", "[", "side_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "coeffs", "}"}], ",", 
+       RowBox[{
+        RowBox[{"coeffs", "=", 
+         RowBox[{"<|", "|>"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{"side", "===", "0"}], ",", 
+          RowBox[{"Return", "[", "coeffs", "]"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Head", "[", "side", "]"}], "===", "Plus"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{"Multiple", " ", "species"}], "*)"}], 
+          RowBox[{"Do", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Head", "[", "term", "]"}], "===", "Times"}], "&&", 
+                RowBox[{
+                 RowBox[{"Length", "[", "term", "]"}], "==", "2"}], "&&", 
+                RowBox[{"NumberQ", "[", 
+                 RowBox[{"term", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ",", 
+               RowBox[{"(*", 
+                RowBox[{"Coefficient", "*", "Species"}], "*)"}], 
+               RowBox[{
+                RowBox[{"coeffs", "[", 
+                 RowBox[{"term", "[", 
+                  RowBox[{"[", "2", "]"}], "]"}], "]"}], "=", 
+                RowBox[{"term", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}]}], ",", 
+               RowBox[{"(*", 
+                RowBox[{"Single", " ", "species", " ", 
+                 RowBox[{"(", 
+                  RowBox[{"coefficient", "=", "1"}], ")"}]}], "*)"}], 
+               RowBox[{
+                RowBox[{"coeffs", "[", "term", "]"}], "=", "1"}]}], "]"}], 
+             ";"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"term", ",", 
+              RowBox[{"List", "@@", "side"}]}], "}"}]}], "]"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{
+           "Single", " ", "species", " ", "or", " ", "coefficient", "*", 
+            "species"}], "*)"}], 
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{
+              RowBox[{"Head", "[", "side", "]"}], "===", "Times"}], "&&", 
+             RowBox[{
+              RowBox[{"Length", "[", "side", "]"}], "==", "2"}], "&&", 
+             RowBox[{"NumberQ", "[", 
+              RowBox[{"side", "[", 
+               RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ",", 
+            RowBox[{
+             RowBox[{"coeffs", "[", 
+              RowBox[{"side", "[", 
+               RowBox[{"[", "2", "]"}], "]"}], "]"}], "=", 
+             RowBox[{"side", "[", 
+              RowBox[{"[", "1", "]"}], "]"}]}], ",", 
+            RowBox[{
+             RowBox[{"coeffs", "[", "side", "]"}], "=", "1"}]}], "]"}]}], 
+         "]"}], ";", "\[IndentingNewLine]", "coeffs"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "create", " ", "mass", " ", "action", " ", 
+     "rate", " ", "expression"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"CreateMassActionRate", "[", 
+      RowBox[{"reactants_", ",", "kParam_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "rateExpr", "}"}], ",", 
+       RowBox[{
+        RowBox[{"rateExpr", "=", "kParam"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"rateExpr", "=", 
+            RowBox[{"rateExpr", "*", 
+             RowBox[{"species", "^", 
+              RowBox[{"reactants", "[", "species", "]"}]}]}]}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"species", ",", 
+            RowBox[{"Keys", "[", "reactants", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", "rateExpr"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Main", " ", "function", " ", "to", " ", "convert", " ", "reactions", " ",
+      "to", " ", "vector", " ", "field", " ", "RHS"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"reaToRHS", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+        "species", ",", "odes", ",", "reactants", ",", "products", ",", 
+         "rate", ",", "netChange"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"species", "=", 
+         RowBox[{"ExtractSpecies", "[", "reactions", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Initialize", " ", "vector", " ", "field", " ", "components"}], 
+         "*)"}], 
+        RowBox[{"odes", "=", 
+         RowBox[{"AssociationThread", "[", 
+          RowBox[{"species", ",", 
+           RowBox[{"Table", "[", 
+            RowBox[{"0", ",", 
+             RowBox[{"{", 
+              RowBox[{"Length", "[", "species", "]"}], "}"}]}], "]"}]}], 
+          "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Process", " ", "each", " ", "reaction"}], "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"reactants", "=", 
+            RowBox[{"ParseReactionSide", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "1"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"products", "=", 
+            RowBox[{"ParseReactionSide", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "2"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Create", " ", "rate", " ", "parameter"}], "*)"}], 
+           RowBox[{"rate", "=", 
+            RowBox[{"CreateMassActionRate", "[", 
+             RowBox[{"reactants", ",", 
+              RowBox[{"Subscript", "[", 
+               RowBox[{"k", ",", "i"}], "]"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Update", " ", "vector", " ", "field", " ", "for", " ", "each", 
+             " ", "species"}], "*)"}], 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"netChange", "=", "0"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Subtract", " ", "reactant", " ", "contribution"}], 
+               "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"reactants", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "-=", 
+                 RowBox[{"reactants", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Add", " ", "product", " ", "contribution"}], "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"products", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "+=", 
+                 RowBox[{"products", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"netChange", "!=", "0"}], ",", 
+                RowBox[{
+                 RowBox[{"odes", "[", "sp", "]"}], "+=", 
+                 RowBox[{"netChange", "*", "rate"}]}]}], "]"}], ";"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"sp", ",", "species"}], "}"}]}], "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Return", " ", "species", " ", "list", " ", "and", " ", "vector", 
+          " ", "field", " ", "RHS"}], "*)"}], 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{"odes", "[", 
+             RowBox[{"species", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", 
+              RowBox[{"Length", "[", "species", "]"}]}], "}"}]}], "]"}], ",", 
+          "species"}], "}"}]}]}], "]"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Example", " ", "usage"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"RN", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "influx"}], "*)"}], 
+       RowBox[{
+        RowBox[{"\"\<S\>\"", "+", "\"\<e\>\""}], "->", "\"\<ES\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "binding"}], "*)"}], 
+       RowBox[{"\"\<ES\>\"", "->", 
+        RowBox[{"\"\<S\>\"", "+", "\"\<e\>\""}]}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "unbinding"}], "*)"}], 
+       RowBox[{"\"\<ES\>\"", "->", 
+        RowBox[{"\"\<e\>\"", "+", "\"\<P\>\""}]}], ",", 
+       RowBox[{"(*", "Catalysis", "*)"}], 
+       RowBox[{
+        RowBox[{"\"\<i\>\"", "+", "\"\<e\>\""}], "->", "\"\<EI\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "binding"}], "*)"}], 
+       RowBox[{"\"\<EI\>\"", "->", 
+        RowBox[{"\"\<i\>\"", "+", "\"\<e\>\""}]}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "unbinding"}], "*)"}], 
+       RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "efflux"}], "*)"}], 
+       RowBox[{"\"\<i\>\"", "->", "0"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "efflux"}], "*)"}], 
+       RowBox[{"\"\<P\>\"", "->", "0"}]}], "                    ", 
+      RowBox[{"(*", 
+       RowBox[{"Product", " ", "efflux"}], "*)"}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Convert", " ", "to", " ", "vector", " ", "field"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"vectorField", ",", "speciesList"}], "}"}], "=", 
+     RowBox[{"reaToRHS", "[", "RN", "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<vars = \>\"", ",", "speciesList"}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<RHS = \>\"", ",", "vectorField"}], "]"}], 
+    ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.9579164231119804`*^9, 3.9579164231119804`*^9}, {
+   3.9579166035454636`*^9, 3.95791660580274*^9}, 3.9579166543997803`*^9, {
+   3.9579167060940876`*^9, 3.9579167361683207`*^9}, {3.9579168155303288`*^9, 
+   3.957916834098423*^9}, {3.9579173399743185`*^9, 3.957917349299615*^9}, {
+   3.957917397742882*^9, 3.957917459587551*^9}},
+ CellLabel->
+  "In[123]:=",ExpressionUUID->"67f119f3-c07c-40f3-808b-1973584bb6ce"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"vars = \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"S\"\>", ",", "\<\"e\"\>", ",", "\<\"ES\"\>", 
+     ",", "\<\"P\"\>", ",", "\<\"i\"\>", ",", "\<\"EI\"\>"}], "}"}]}],
+  SequenceForm["vars = ", {"S", "e", "ES", "P", "i", "EI"}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.957916607121047*^9, {3.9579167637305574`*^9, 3.9579167737396173`*^9}, {
+   3.9579168197931943`*^9, 3.957916838676716*^9}, 3.957917460782711*^9},
+ CellLabel->
+  "During evaluation of \
+In[123]:=",ExpressionUUID->"405b17c3-4ecd-43f2-97c8-ebe1b5fb373b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"RHS = \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      SubscriptBox["k", "1"], "-", 
+      RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+       SubscriptBox["k", "2"]}], "+", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "3"]}], "-", 
+      RowBox[{"\<\"S\"\>", " ", 
+       SubscriptBox["k", "7"]}]}], ",", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"S\"\>", " ", 
+       SubscriptBox["k", "2"]}], "+", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "3"]}], "+", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "4"]}], "-", 
+      RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+       SubscriptBox["k", "5"]}], "+", 
+      RowBox[{"\<\"EI\"\>", " ", 
+       SubscriptBox["k", "6"]}]}], ",", 
+     RowBox[{
+      RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+       SubscriptBox["k", "2"]}], "-", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "3"]}], "-", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "4"]}]}], ",", 
+     RowBox[{
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "4"]}], "-", 
+      RowBox[{"\<\"P\"\>", " ", 
+       SubscriptBox["k", "9"]}]}], ",", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"i\"\>", " ", 
+       SubscriptBox["k", "5"]}], "+", 
+      RowBox[{"\<\"EI\"\>", " ", 
+       SubscriptBox["k", "6"]}], "-", 
+      RowBox[{"\<\"i\"\>", " ", 
+       SubscriptBox["k", "8"]}]}], ",", 
+     RowBox[{
+      RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+       SubscriptBox["k", "5"]}], "-", 
+      RowBox[{"\<\"EI\"\>", " ", 
+       SubscriptBox["k", "6"]}]}]}], "}"}]}],
+  SequenceForm[
+  "RHS = ", {
+   Subscript[$CellContext`k, 1] - "e" "S" Subscript[$CellContext`k, 2] + 
+    "ES" Subscript[$CellContext`k, 3] - "S" 
+    Subscript[$CellContext`k, 7], -"e" "S" Subscript[$CellContext`k, 2] + 
+    "ES" Subscript[$CellContext`k, 3] + "ES" Subscript[$CellContext`k, 4] - 
+    "e" "i" Subscript[$CellContext`k, 5] + "EI" Subscript[$CellContext`k, 6], 
+    "e" "S" Subscript[$CellContext`k, 2] - "ES" Subscript[$CellContext`k, 3] - 
+    "ES" Subscript[$CellContext`k, 4], "ES" Subscript[$CellContext`k, 4] - 
+    "P" Subscript[$CellContext`k, 9], -"e" "i" Subscript[$CellContext`k, 5] + 
+    "EI" Subscript[$CellContext`k, 6] - "i" Subscript[$CellContext`k, 8], 
+    "e" "i" Subscript[$CellContext`k, 5] - "EI" Subscript[$CellContext`k, 6]}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.957916607121047*^9, {3.9579167637305574`*^9, 3.9579167737396173`*^9}, {
+   3.9579168197931943`*^9, 3.957916838676716*^9}, 3.9579174608985944`*^9},
+ CellLabel->
+  "During evaluation of \
+In[123]:=",ExpressionUUID->"b4110b16-e54a-4c4f-8d7c-7ccd2d8203ae"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "Reaction", " ", "Network", " ", "to", " ", "Mass", " ", "Action", " ", 
+    "ODE", " ", "System", " ", "Converter"}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "Function", " ", "to", " ", "extract", " ", "all", " ", "species", " ", 
+    "from", " ", "reaction", " ", "network"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"ExtractSpecies", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"allSpecies", ",", "lhs", ",", "rhs"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"allSpecies", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"lhs", "=", 
+            RowBox[{"reactions", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "1"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"rhs", "=", 
+            RowBox[{"reactions", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "2"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "species", " ", "from", " ", "left", " ", 
+             "side"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"lhs", "=!=", "0"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Head", "[", "lhs", "]"}], "===", "Plus"}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Join", "[", 
+                 RowBox[{"allSpecies", ",", 
+                  RowBox[{"List", "@@", "lhs"}]}], "]"}]}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Append", "[", 
+                 RowBox[{"allSpecies", ",", "lhs"}], "]"}]}]}], "]"}]}], 
+            "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "species", " ", "from", " ", "right", " ", 
+             "side"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"rhs", "=!=", "0"}], ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Head", "[", "rhs", "]"}], "===", "Plus"}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Join", "[", 
+                 RowBox[{"allSpecies", ",", 
+                  RowBox[{"List", "@@", "rhs"}]}], "]"}]}], ",", 
+               RowBox[{"allSpecies", "=", 
+                RowBox[{"Append", "[", 
+                 RowBox[{"allSpecies", ",", "rhs"}], "]"}]}]}], "]"}]}], 
+            "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"DeleteDuplicates", "[", "allSpecies", "]"}]}]}], "]"}]}], 
+    ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "parse", " ", "reaction", " ", "side", " ", 
+     "and", " ", "create", " ", "stoichiometric", " ", "coefficient"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ParseReactionSide", "[", "side_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "coeffs", "}"}], ",", 
+       RowBox[{
+        RowBox[{"coeffs", "=", 
+         RowBox[{"<|", "|>"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{"side", "===", "0"}], ",", 
+          RowBox[{"Return", "[", "coeffs", "]"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Head", "[", "side", "]"}], "===", "Plus"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{"Multiple", " ", "species"}], "*)"}], 
+          RowBox[{"Do", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Head", "[", "term", "]"}], "===", "Times"}], "&&", 
+                RowBox[{
+                 RowBox[{"Length", "[", "term", "]"}], "==", "2"}], "&&", 
+                RowBox[{"NumberQ", "[", 
+                 RowBox[{"term", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ",", 
+               RowBox[{"(*", 
+                RowBox[{"Coefficient", "*", "Species"}], "*)"}], 
+               RowBox[{
+                RowBox[{"coeffs", "[", 
+                 RowBox[{"term", "[", 
+                  RowBox[{"[", "2", "]"}], "]"}], "]"}], "=", 
+                RowBox[{"term", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}]}], ",", 
+               RowBox[{"(*", 
+                RowBox[{"Single", " ", "species", " ", 
+                 RowBox[{"(", 
+                  RowBox[{"coefficient", "=", "1"}], ")"}]}], "*)"}], 
+               RowBox[{
+                RowBox[{"coeffs", "[", "term", "]"}], "=", "1"}]}], "]"}], 
+             ";"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"term", ",", 
+              RowBox[{"List", "@@", "side"}]}], "}"}]}], "]"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{
+           "Single", " ", "species", " ", "or", " ", "coefficient", "*", 
+            "species"}], "*)"}], 
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{
+              RowBox[{"Head", "[", "side", "]"}], "===", "Times"}], "&&", 
+             RowBox[{
+              RowBox[{"Length", "[", "side", "]"}], "==", "2"}], "&&", 
+             RowBox[{"NumberQ", "[", 
+              RowBox[{"side", "[", 
+               RowBox[{"[", "1", "]"}], "]"}], "]"}]}], ",", 
+            RowBox[{
+             RowBox[{"coeffs", "[", 
+              RowBox[{"side", "[", 
+               RowBox[{"[", "2", "]"}], "]"}], "]"}], "=", 
+             RowBox[{"side", "[", 
+              RowBox[{"[", "1", "]"}], "]"}]}], ",", 
+            RowBox[{
+             RowBox[{"coeffs", "[", "side", "]"}], "=", "1"}]}], "]"}]}], 
+         "]"}], ";", "\[IndentingNewLine]", "coeffs"}]}], "]"}]}], ";"}], 
+   "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "create", " ", "mass", " ", "action", " ", 
+     "rate", " ", "expression"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"CreateMassActionRate", "[", 
+      RowBox[{"reactants_", ",", "kParam_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "rateExpr", "}"}], ",", 
+       RowBox[{
+        RowBox[{"rateExpr", "=", "kParam"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"rateExpr", "=", 
+            RowBox[{"rateExpr", "*", 
+             RowBox[{"species", "^", 
+              RowBox[{"reactants", "[", "species", "]"}]}]}]}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"species", ",", 
+            RowBox[{"Keys", "[", "reactants", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", "rateExpr"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Main", " ", "function", " ", "to", " ", "convert", " ", "reactions", " ",
+      "to", " ", "ODE", " ", "system"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ReactionsToODE", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+        "species", ",", "odes", ",", "reactants", ",", "products", ",", 
+         "rate", ",", "netChange"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"species", "=", 
+         RowBox[{"ExtractSpecies", "[", "reactions", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<Detected species: \>\"", ",", "species"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Initialize", " ", "ODE", " ", "system"}], "*)"}], 
+        RowBox[{"odes", "=", 
+         RowBox[{"AssociationThread", "[", 
+          RowBox[{"species", ",", 
+           RowBox[{"Table", "[", 
+            RowBox[{"0", ",", 
+             RowBox[{"{", 
+              RowBox[{"Length", "[", "species", "]"}], "}"}]}], "]"}]}], 
+          "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Process", " ", "each", " ", "reaction"}], "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Print", "[", 
+            RowBox[{
+            "\"\<Processing reaction \>\"", ",", "i", ",", "\"\<: \>\"", ",", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", "i", "]"}], "]"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"reactants", "=", 
+            RowBox[{"ParseReactionSide", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "1"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"products", "=", 
+            RowBox[{"ParseReactionSide", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "2"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<  Reactants: \>\"", ",", "reactants"}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<  Products: \>\"", ",", "products"}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Create", " ", "rate", " ", "parameter"}], "*)"}], 
+           RowBox[{"rate", "=", 
+            RowBox[{"CreateMassActionRate", "[", 
+             RowBox[{"reactants", ",", 
+              RowBox[{"Subscript", "[", 
+               RowBox[{"k", ",", "i"}], "]"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<  Rate expression: \>\"", ",", "rate"}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Update", " ", "ODE", " ", "for", " ", "each", " ", "species"}], 
+            "*)"}], 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"netChange", "=", "0"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Subtract", " ", "reactant", " ", "contribution"}], 
+               "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"reactants", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "-=", 
+                 RowBox[{"reactants", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Add", " ", "product", " ", "contribution"}], "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"products", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "+=", 
+                 RowBox[{"products", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"netChange", "!=", "0"}], ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"odes", "[", "sp", "]"}], "+=", 
+                  RowBox[{"netChange", "*", "rate"}]}], ";", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{"Print", "[", 
+                  RowBox[{
+                  "\"\<  Species \>\"", ",", "sp", ",", "\"\< change: \>\"", 
+                   ",", "netChange", ",", "\"\< * \>\"", ",", "rate"}], "]"}],
+                  ";"}]}], "]"}], ";"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"sp", ",", "species"}], "}"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Return", " ", "the", " ", "ODE", " ", "system"}], "*)"}], 
+        RowBox[{"Print", "[", "\"\<Final ODE System:\>\"", "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"D", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"species", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "[", "t", "]"}], ",", "t"}], 
+            "]"}], "==", 
+           RowBox[{"odes", "[", 
+            RowBox[{"species", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], "]"}]}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "species", "]"}]}], "}"}]}], "]"}]}]}], 
+      "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Function", " ", "to", " ", "create", " ", "vector", " ", "field", " ", 
+     RowBox[{"(", 
+      RowBox[{"RHS", " ", "only"}], ")"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ReactionsToVectorField", "[", "reactions_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+        "species", ",", "odes", ",", "reactants", ",", "products", ",", 
+         "rate", ",", "netChange"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"species", "=", 
+         RowBox[{"ExtractSpecies", "[", "reactions", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Initialize", " ", "ODE", " ", "system"}], "*)"}], 
+        RowBox[{"odes", "=", 
+         RowBox[{"AssociationThread", "[", 
+          RowBox[{"species", ",", 
+           RowBox[{"Table", "[", 
+            RowBox[{"0", ",", 
+             RowBox[{"{", 
+              RowBox[{"Length", "[", "species", "]"}], "}"}]}], "]"}]}], 
+          "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Process", " ", "each", " ", "reaction"}], "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"reactants", "=", 
+            RowBox[{"ParseReactionSide", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "1"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"products", "=", 
+            RowBox[{"ParseReactionSide", "[", 
+             RowBox[{"reactions", "[", 
+              RowBox[{"[", 
+               RowBox[{"i", ",", "2"}], "]"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Create", " ", "rate", " ", "parameter"}], "*)"}], 
+           RowBox[{"rate", "=", 
+            RowBox[{"CreateMassActionRate", "[", 
+             RowBox[{"reactants", ",", 
+              RowBox[{"Subscript", "[", 
+               RowBox[{"k", ",", "i"}], "]"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Update", " ", "ODE", " ", "for", " ", "each", " ", "species"}], 
+            "*)"}], 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"netChange", "=", "0"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Subtract", " ", "reactant", " ", "contribution"}], 
+               "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"reactants", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "-=", 
+                 RowBox[{"reactants", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Add", " ", "product", " ", "contribution"}], "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"KeyExistsQ", "[", 
+                 RowBox[{"products", ",", "sp"}], "]"}], ",", 
+                RowBox[{"netChange", "+=", 
+                 RowBox[{"products", "[", "sp", "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"netChange", "!=", "0"}], ",", 
+                RowBox[{
+                 RowBox[{"odes", "[", "sp", "]"}], "+=", 
+                 RowBox[{"netChange", "*", "rate"}]}]}], "]"}], ";"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"sp", ",", "species"}], "}"}]}], "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "reactions", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Return", " ", "species", " ", "list", " ", "and", " ", "vector", 
+          " ", "field"}], "*)"}], 
+        RowBox[{"{", 
+         RowBox[{"species", ",", 
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{"odes", "[", 
+             RowBox[{"species", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", 
+              RowBox[{"Length", "[", "species", "]"}]}], "}"}]}], "]"}]}], 
+         "}"}]}]}], "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Example", " ", "usage"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<=== EXAMPLE: Enzyme Kinetics with Competitive Inhibition ===\>\"", 
+     "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], "\[IndentingNewLine]", 
+   "\n", 
+   RowBox[{
+    RowBox[{"RN", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "influx"}], "*)"}], 
+       RowBox[{
+        RowBox[{"\"\<S\>\"", "+", "\"\<e\>\""}], "->", "\"\<ES\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "binding"}], "*)"}], 
+       RowBox[{"\"\<ES\>\"", "->", 
+        RowBox[{"\"\<S\>\"", "+", "\"\<e\>\""}]}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "unbinding"}], "*)"}], 
+       RowBox[{"\"\<ES\>\"", "->", 
+        RowBox[{"\"\<e\>\"", "+", "\"\<P\>\""}]}], ",", 
+       RowBox[{"(*", "Catalysis", "*)"}], 
+       RowBox[{
+        RowBox[{"\"\<i\>\"", "+", "\"\<e\>\""}], "->", "\"\<EI\>\""}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "binding"}], "*)"}], 
+       RowBox[{"\"\<EI\>\"", "->", 
+        RowBox[{"\"\<i\>\"", "+", "\"\<e\>\""}]}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "unbinding"}], "*)"}], 
+       RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Substrate", " ", "efflux"}], "*)"}], 
+       RowBox[{"\"\<i\>\"", "->", "0"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Inhibitor", " ", "efflux"}], "*)"}], 
+       RowBox[{"\"\<P\>\"", "->", "0"}]}], "                    ", 
+      RowBox[{"(*", 
+       RowBox[{"Product", " ", "efflux"}], "*)"}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Input reaction network:\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Do", "[", 
+     RowBox[{
+      RowBox[{"Print", "[", 
+       RowBox[{"\"\<  \>\"", ",", "i", ",", "\"\<: \>\"", ",", 
+        RowBox[{"RN", "[", 
+         RowBox[{"[", "i", "]"}], "]"}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"i", ",", 
+        RowBox[{"Length", "[", "RN", "]"}]}], "}"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Convert", " ", "to", " ", "ODE", " ", "system"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"odeSystem", "=", 
+     RowBox[{"ReactionsToODE", "[", "RN", "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Get", " ", "vector", " ", "field", " ", "representation"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"speciesList", ",", "vectorField"}], "}"}], "=", 
+     RowBox[{"ReactionsToVectorField", "[", "RN", "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Species variables: \>\"", ",", "speciesList"}], "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Vector field RHS: \>\"", ",", "vectorField"}], "]"}], ";"}],
+    "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Display", " ", "in", " ", "standard", " ", "form"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<=== STANDARD ODE FORM ===\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Do", "[", 
+     RowBox[{
+      RowBox[{"Print", "[", 
+       RowBox[{
+        RowBox[{"D", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"speciesList", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], "[", "t", "]"}], ",", "t"}], 
+         "]"}], ",", "\"\< = \>\"", ",", 
+        RowBox[{"vectorField", "[", 
+         RowBox[{"[", "i", "]"}], "]"}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"i", ",", 
+        RowBox[{"Length", "[", "speciesList", "]"}]}], "}"}]}], "]"}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<=== RATE PARAMETERS ===\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2081: Substrate influx rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2082: Substrate binding rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2083: Substrate unbinding rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2084: Catalysis rate\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2085: Inhibitor binding rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2086: Inhibitor unbinding rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2087: Substrate efflux rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2088: Inhibitor efflux rate\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<k\:2089: Product efflux rate\>\"", "]"}], 
+    ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.9579164231119804`*^9, 3.9579164231119804`*^9}, 
+   3.9579166035454636`*^9},ExpressionUUID->"53e26796-d243-4d2e-a386-\
+7eb996db48ad"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"=== EXAMPLE: Enzyme Kinetics with Competitive Inhibition \
+===\"\>"], "Print",
+ CellChangeTimes->{3.957916446201926*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ec1efc45-f7b2-4a95-b8d2-e022efec68da"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164462351103`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"844be403-1587-491b-9d98-1fcdcd090eed"],
+
+Cell[BoxData["\<\"Input reaction network:\"\>"], "Print",
+ CellChangeTimes->{3.957916446258703*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c87a7f80-4cbd-4ae3-b205-cc840cd45fe7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"0", "\[Rule]", "\<\"S\"\>"}]}],
+  SequenceForm["  ", 1, ": ", 0 -> "S"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916446301091*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5c7dd15f-8b2f-4965-bcf5-021652ae6bfd"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "2", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"e\"\>", "+", "\<\"S\"\>"}], "\[Rule]", "\<\"ES\"\>"}]}],
+  SequenceForm["  ", 2, ": ", "e" + "S" -> "ES"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916446357441*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"91ed0050-9ff8-4043-8e27-c12a903d2bc5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "3", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", "\[Rule]", 
+    RowBox[{"\<\"e\"\>", "+", "\<\"S\"\>"}]}]}],
+  SequenceForm["  ", 3, ": ", "ES" -> "e" + "S"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164464065137`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"1d56ccc9-a7bc-4ad8-a697-3dd286f63bc1"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "4", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", "\[Rule]", 
+    RowBox[{"\<\"e\"\>", "+", "\<\"P\"\>"}]}]}],
+  SequenceForm["  ", 4, ": ", "ES" -> "e" + "P"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164464569798`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"f74bf3f0-1281-4726-89aa-f377f38add65"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "5", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"e\"\>", "+", "\<\"i\"\>"}], "\[Rule]", "\<\"EI\"\>"}]}],
+  SequenceForm["  ", 5, ": ", "e" + "i" -> "EI"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916446502944*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b92f5042-7284-4cef-b987-00e42257a622"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "6", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"EI\"\>", "\[Rule]", 
+    RowBox[{"\<\"e\"\>", "+", "\<\"i\"\>"}]}]}],
+  SequenceForm["  ", 6, ": ", "EI" -> "e" + "i"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916446541947*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c8c7a993-6dc2-425e-be65-eecb526cb6e5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "7", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"S\"\>", "\[Rule]", "0"}]}],
+  SequenceForm["  ", 7, ": ", "S" -> 0],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164465763664`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"f0ac5057-9ecc-4015-89bc-ea7eba784fb4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "8", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"i\"\>", "\[Rule]", "0"}]}],
+  SequenceForm["  ", 8, ": ", "i" -> 0],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164466266766`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5d0d00b6-ff7e-45c5-9f09-cf9626b79c7e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  \"\>", "\[InvisibleSpace]", "9", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"P\"\>", "\[Rule]", "0"}]}],
+  SequenceForm["  ", 9, ": ", "P" -> 0],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164466653795`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"e05a0c1f-069b-45f7-ad15-d5b6a86e88b7"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916446705288*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c354b44c-4329-4de9-9f95-48ebbecabb1e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Detected species: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"S\"\>", ",", "\<\"e\"\>", ",", "\<\"ES\"\>", 
+     ",", "\<\"P\"\>", ",", "\<\"i\"\>", ",", "\<\"EI\"\>"}], "}"}]}],
+  SequenceForm["Detected species: ", {"S", "e", "ES", "P", "i", "EI"}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916446746356*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"383e24a5-e2e7-4c32-b80e-1e04c54dfa7b"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916446795523*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"dfacb4f0-dabd-4e52-b8b2-4cbd8a3934a4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"0", "\[Rule]", "\<\"S\"\>"}]}],
+  SequenceForm["Processing reaction ", 1, ": ", 0 -> "S"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164468365145`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"38c391b9-5e70-49ed-8f36-667e0ae5d4bb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <||>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164468783774`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"f7b7f51e-5f1e-4a0a-a63b-59af068e5fd7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"S\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <|"S" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164469258738`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"41371c0c-e7e4-4480-a94c-06fe429c8ef9"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   SubscriptBox["k", "1"]}],
+  SequenceForm["  Rate expression: ", 
+   Subscript[$CellContext`k, 1]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164469778037`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"24c4d31b-dc78-4d22-88a2-f2d9d162f8fe"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"S\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   SubscriptBox["k", "1"]}],
+  SequenceForm["  Species ", "S", " change: ", 1, " * ", 
+   Subscript[$CellContext`k, 1]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916447023679*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"16a66ec9-bad1-468a-b0ee-f38fccc5e937"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164470728083`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"17e3cf7a-94b7-4f5b-a981-777dc2f296ba"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "2", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"e\"\>", "+", "\<\"S\"\>"}], "\[Rule]", "\<\"ES\"\>"}]}],
+  SequenceForm["Processing reaction ", 2, ": ", "e" + "S" -> "ES"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916447118259*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c80ac3c9-42df-4602-9188-ad83eb50840c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{
+     RowBox[{"\<\"e\"\>", "\[Rule]", "1"}], ",", 
+     RowBox[{"\<\"S\"\>", "\[Rule]", "1"}]}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"e" -> 1, "S" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164471793847`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"fcbeb505-d7f6-4535-a573-a19e37275801"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"ES\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <|"ES" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916447245596*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"38b38c94-b68a-46b7-97f8-0332b86f3037"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+    SubscriptBox["k", "2"]}]}],
+  SequenceForm["  Rate expression: ", "e" "S" Subscript[$CellContext`k, 2]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916447309477*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ca731f40-9095-467a-9a8e-7e63eb6c114d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"S\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+    SubscriptBox["k", "2"]}]}],
+  SequenceForm[
+  "  Species ", "S", " change: ", -1, " * ", "e" "S" 
+   Subscript[$CellContext`k, 2]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.95791644736975*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b95f261e-2624-414a-8010-001fb2b41133"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"e\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+    SubscriptBox["k", "2"]}]}],
+  SequenceForm[
+  "  Species ", "e", " change: ", -1, " * ", "e" "S" 
+   Subscript[$CellContext`k, 2]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164474426746`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ee9c0078-3eac-454a-a678-e9b135f0cd01"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"ES\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+    SubscriptBox["k", "2"]}]}],
+  SequenceForm[
+  "  Species ", "ES", " change: ", 1, " * ", "e" "S" 
+   Subscript[$CellContext`k, 2]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.95791644749792*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"7a78b92a-44b5-42d1-8b09-35480719dadc"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164475527444`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"404012f4-d4a3-4570-8f73-ff44a8c45a6a"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "3", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", "\[Rule]", 
+    RowBox[{"\<\"e\"\>", "+", "\<\"S\"\>"}]}]}],
+  SequenceForm["Processing reaction ", 3, ": ", "ES" -> "e" + "S"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916447603983*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ae681d7b-c2a0-43a7-aa11-dec9c854851d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"ES\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"ES" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164476783695`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ad38a6a3-0095-476f-afd0-e0a416c94877"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{
+     RowBox[{"\<\"e\"\>", "\[Rule]", "1"}], ",", 
+     RowBox[{"\<\"S\"\>", "\[Rule]", "1"}]}], "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <|"e" -> 1, "S" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164477450643`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b580632b-0d9c-45bb-81b4-da7f3d94b00d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "3"]}]}],
+  SequenceForm["  Rate expression: ", "ES" Subscript[$CellContext`k, 3]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.95791644780545*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5337dc7b-d72f-426a-9b41-afbdcace48fd"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"S\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "3"]}]}],
+  SequenceForm[
+  "  Species ", "S", " change: ", 1, " * ", "ES" Subscript[$CellContext`k, 3]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164478685265`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"95d7140d-d7f2-4d99-9b56-8c72b384bf48"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"e\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "3"]}]}],
+  SequenceForm[
+  "  Species ", "e", " change: ", 1, " * ", "ES" Subscript[$CellContext`k, 3]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164479349613`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"f398d880-c9fb-4d1f-b4de-e51fd62f30b3"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"ES\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "3"]}]}],
+  SequenceForm[
+  "  Species ", "ES", " change: ", -1, " * ", "ES" 
+   Subscript[$CellContext`k, 3]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916447999285*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"855e0625-aa2b-4854-9f95-affd9f4b4530"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164480656233`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"1ccf37f7-1a38-4258-900e-250ffb1a5cb4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "4", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", "\[Rule]", 
+    RowBox[{"\<\"e\"\>", "+", "\<\"P\"\>"}]}]}],
+  SequenceForm["Processing reaction ", 4, ": ", "ES" -> "e" + "P"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164481235075`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ff1c0818-e344-4a77-97d9-7bb3ac9f7e37"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"ES\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"ES" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.95791644820502*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b763fdf1-bc0e-47f8-bbfb-c718d0a438e4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{
+     RowBox[{"\<\"e\"\>", "\[Rule]", "1"}], ",", 
+     RowBox[{"\<\"P\"\>", "\[Rule]", "1"}]}], "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <|"e" -> 1, "P" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164482686224`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"fd5e5340-4773-4fc5-a74c-a9b1f02c7244"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "4"]}]}],
+  SequenceForm["  Rate expression: ", "ES" Subscript[$CellContext`k, 4]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164483383484`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"f28133e3-9962-47e6-b067-8a68a2e6a808"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"e\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "4"]}]}],
+  SequenceForm[
+  "  Species ", "e", " change: ", 1, " * ", "ES" Subscript[$CellContext`k, 4]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916448423177*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ff8a00f1-75a0-475e-b72b-acd3aaaf85a6"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"ES\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "4"]}]}],
+  SequenceForm[
+  "  Species ", "ES", " change: ", -1, " * ", "ES" 
+   Subscript[$CellContext`k, 4]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164485390043`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"37c4f715-96bf-434d-a0fe-a52cbf33741d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"P\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"ES\"\>", " ", 
+    SubscriptBox["k", "4"]}]}],
+  SequenceForm[
+  "  Species ", "P", " change: ", 1, " * ", "ES" Subscript[$CellContext`k, 4]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916448608272*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"32f473ae-f884-4cc8-9c19-0df92d6b0cb0"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916448690589*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ec18c415-050f-4e25-ac7f-43fe6bdb8cd4"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "5", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"e\"\>", "+", "\<\"i\"\>"}], "\[Rule]", "\<\"EI\"\>"}]}],
+  SequenceForm["Processing reaction ", 5, ": ", "e" + "i" -> "EI"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916448765046*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"a8fc42bd-e4bf-4fd9-8996-bb40a137d765"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{
+     RowBox[{"\<\"e\"\>", "\[Rule]", "1"}], ",", 
+     RowBox[{"\<\"i\"\>", "\[Rule]", "1"}]}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"e" -> 1, "i" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164488425384`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5022db6b-3533-46d1-9370-ad29a9f43dc5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"EI\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <|"EI" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916448920705*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"a67ca96f-d926-4f86-877b-5df21fa24145"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+    SubscriptBox["k", "5"]}]}],
+  SequenceForm["  Rate expression: ", "e" "i" Subscript[$CellContext`k, 5]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164490030174`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"df530381-f07b-4627-99af-6bdcce705bdb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"e\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+    SubscriptBox["k", "5"]}]}],
+  SequenceForm[
+  "  Species ", "e", " change: ", -1, " * ", "e" "i" 
+   Subscript[$CellContext`k, 5]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164490899754`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"0df670b7-1fa9-46da-9392-967670a59bc7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"i\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+    SubscriptBox["k", "5"]}]}],
+  SequenceForm[
+  "  Species ", "i", " change: ", -1, " * ", "e" "i" 
+   Subscript[$CellContext`k, 5]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164491752214`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"a8d39b8f-66b7-4659-beb3-8a73cb7b2da1"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"EI\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+    SubscriptBox["k", "5"]}]}],
+  SequenceForm[
+  "  Species ", "EI", " change: ", 1, " * ", "e" "i" 
+   Subscript[$CellContext`k, 5]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164492521844`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"23ae6cd5-7176-44d5-90f6-9dbc007e24ce"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916449335884*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"60869a2a-63da-40ed-9046-70371bef9178"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "6", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"EI\"\>", "\[Rule]", 
+    RowBox[{"\<\"e\"\>", "+", "\<\"i\"\>"}]}]}],
+  SequenceForm["Processing reaction ", 6, ": ", "EI" -> "e" + "i"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916449421444*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"da90c85b-f805-4757-a2a9-c20f4217cfd6"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"EI\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"EI" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916449501838*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"1e5fc856-f46c-43c6-909e-ce0095269304"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{
+     RowBox[{"\<\"e\"\>", "\[Rule]", "1"}], ",", 
+     RowBox[{"\<\"i\"\>", "\[Rule]", "1"}]}], "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <|"e" -> 1, "i" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916449587248*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c81034ed-b00d-403a-a565-8caeb462c40a"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"EI\"\>", " ", 
+    SubscriptBox["k", "6"]}]}],
+  SequenceForm["  Rate expression: ", "EI" Subscript[$CellContext`k, 6]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164496764517`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"f8d7fe31-5e72-48fe-9e69-966cce32b369"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"e\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"EI\"\>", " ", 
+    SubscriptBox["k", "6"]}]}],
+  SequenceForm[
+  "  Species ", "e", " change: ", 1, " * ", "EI" Subscript[$CellContext`k, 6]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.95791644976855*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"9304e0cf-971e-4814-b372-ddb13f756db7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"i\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", "1", 
+   "\[InvisibleSpace]", "\<\" * \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"EI\"\>", " ", 
+    SubscriptBox["k", "6"]}]}],
+  SequenceForm[
+  "  Species ", "i", " change: ", 1, " * ", "EI" Subscript[$CellContext`k, 6]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164498658123`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"3f0a83fb-4655-4a68-8a98-414f534db6bb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"EI\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"EI\"\>", " ", 
+    SubscriptBox["k", "6"]}]}],
+  SequenceForm[
+  "  Species ", "EI", " change: ", -1, " * ", "EI" 
+   Subscript[$CellContext`k, 6]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164499563665`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"e76dcc6a-d3d3-4f55-a617-708e0a72afdc"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916450039096*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"79ec02f6-4ce0-4d55-b39b-9dede0f35d1b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "7", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"S\"\>", "\[Rule]", "0"}]}],
+  SequenceForm["Processing reaction ", 7, ": ", "S" -> 0],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164501224537`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"26830a84-257f-40b3-95ab-420637cb7c28"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"S\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"S" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164502179832`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"8208ce0f-8d52-4331-a8cd-45a27ef6686d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <||>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916450304058*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"552da215-a2fa-45d0-bff3-69e943c173d2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"S\"\>", " ", 
+    SubscriptBox["k", "7"]}]}],
+  SequenceForm["  Rate expression: ", "S" Subscript[$CellContext`k, 7]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916450403807*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"7c43f49c-c782-4817-add5-714acce98387"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"S\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"S\"\>", " ", 
+    SubscriptBox["k", "7"]}]}],
+  SequenceForm[
+  "  Species ", "S", " change: ", -1, " * ", "S" Subscript[$CellContext`k, 7]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916450509906*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"65b10f79-f2c0-4ad6-b817-4d57a8bf9c19"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164505957837`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"6a37f24f-9261-4afe-b52e-c962ac709984"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "8", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"i\"\>", "\[Rule]", "0"}]}],
+  SequenceForm["Processing reaction ", 8, ": ", "i" -> 0],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916450701293*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"bed3ab5f-13f1-455b-8efa-383c087bac45"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"i\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"i" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916450818581*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"859892aa-7774-4258-92d5-aebff38db1cb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <||>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164509233313`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"4d6c8d93-464d-4a32-b2b6-12f8e0f395a9"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"i\"\>", " ", 
+    SubscriptBox["k", "8"]}]}],
+  SequenceForm["  Rate expression: ", "i" Subscript[$CellContext`k, 8]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916451029906*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b14b5139-30d2-4aa0-bbaf-83bf8d9c5d4f"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"i\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"i\"\>", " ", 
+    SubscriptBox["k", "8"]}]}],
+  SequenceForm[
+  "  Species ", "i", " change: ", -1, " * ", "i" Subscript[$CellContext`k, 8]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916451143516*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"7bbc4174-4cc0-4944-a928-52f14ded3535"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916451258667*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"03fc5f72-9eb2-4820-9f29-41198f66e7e2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Processing reaction \"\>", "\[InvisibleSpace]", "9", 
+   "\[InvisibleSpace]", "\<\": \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"P\"\>", "\[Rule]", "0"}]}],
+  SequenceForm["Processing reaction ", 9, ": ", "P" -> 0],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916451365226*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"0824d14b-9731-4074-8f08-dc80615649d7"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Reactants: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", 
+    RowBox[{"\<\"P\"\>", "\[Rule]", "1"}], "\[RightAssociation]"}]}],
+  SequenceForm["  Reactants: ", <|"P" -> 1|>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916451481521*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5ea33882-37cf-4b4e-be63-75a771044ed2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Products: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\[LeftAssociation]", "\[RightAssociation]"}]}],
+  SequenceForm["  Products: ", <||>],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164515853043`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b2a72c97-f386-4e9e-b1f5-8154586e6785"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Rate expression: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"\<\"P\"\>", " ", 
+    SubscriptBox["k", "9"]}]}],
+  SequenceForm["  Rate expression: ", "P" Subscript[$CellContext`k, 9]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164516739674`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"bc01bee3-749d-41ec-ab0f-26f70b3b36e0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"  Species \"\>", "\[InvisibleSpace]", "\<\"P\"\>", 
+   "\[InvisibleSpace]", "\<\" change: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"-", "1"}], "\[InvisibleSpace]", "\<\" * \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"\<\"P\"\>", " ", 
+    SubscriptBox["k", "9"]}]}],
+  SequenceForm[
+  "  Species ", "P", " change: ", -1, " * ", "P" Subscript[$CellContext`k, 9]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916451778903*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c5689cc5-48f5-4530-8816-51d240885c39"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164518876953`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c2ff5658-b86d-4463-b583-69ef7b5bc706"],
+
+Cell[BoxData["\<\"Final ODE System:\"\>"], "Print",
+ CellChangeTimes->{3.957916451993843*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"8ee006d5-15fa-4870-a9e0-a4e2969d7460"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.9579164521024313`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"a2be0986-2863-4890-8320-adaf3860496d"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Species variables: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"S\"\>", ",", "\<\"e\"\>", ",", "\<\"ES\"\>", 
+     ",", "\<\"P\"\>", ",", "\<\"i\"\>", ",", "\<\"EI\"\>"}], "}"}]}],
+  SequenceForm["Species variables: ", {"S", "e", "ES", "P", "i", "EI"}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916452207522*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"84a8d051-9d90-4cc6-86a7-c105b9f47604"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Vector field RHS: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      SubscriptBox["k", "1"], "-", 
+      RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+       SubscriptBox["k", "2"]}], "+", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "3"]}], "-", 
+      RowBox[{"\<\"S\"\>", " ", 
+       SubscriptBox["k", "7"]}]}], ",", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"S\"\>", " ", 
+       SubscriptBox["k", "2"]}], "+", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "3"]}], "+", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "4"]}], "-", 
+      RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+       SubscriptBox["k", "5"]}], "+", 
+      RowBox[{"\<\"EI\"\>", " ", 
+       SubscriptBox["k", "6"]}]}], ",", 
+     RowBox[{
+      RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+       SubscriptBox["k", "2"]}], "-", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "3"]}], "-", 
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "4"]}]}], ",", 
+     RowBox[{
+      RowBox[{"\<\"ES\"\>", " ", 
+       SubscriptBox["k", "4"]}], "-", 
+      RowBox[{"\<\"P\"\>", " ", 
+       SubscriptBox["k", "9"]}]}], ",", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"i\"\>", " ", 
+       SubscriptBox["k", "5"]}], "+", 
+      RowBox[{"\<\"EI\"\>", " ", 
+       SubscriptBox["k", "6"]}], "-", 
+      RowBox[{"\<\"i\"\>", " ", 
+       SubscriptBox["k", "8"]}]}], ",", 
+     RowBox[{
+      RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+       SubscriptBox["k", "5"]}], "-", 
+      RowBox[{"\<\"EI\"\>", " ", 
+       SubscriptBox["k", "6"]}]}]}], "}"}]}],
+  SequenceForm[
+  "Vector field RHS: ", {
+   Subscript[$CellContext`k, 1] - "e" "S" Subscript[$CellContext`k, 2] + 
+    "ES" Subscript[$CellContext`k, 3] - "S" 
+    Subscript[$CellContext`k, 7], -"e" "S" Subscript[$CellContext`k, 2] + 
+    "ES" Subscript[$CellContext`k, 3] + "ES" Subscript[$CellContext`k, 4] - 
+    "e" "i" Subscript[$CellContext`k, 5] + "EI" Subscript[$CellContext`k, 6], 
+    "e" "S" Subscript[$CellContext`k, 2] - "ES" Subscript[$CellContext`k, 3] - 
+    "ES" Subscript[$CellContext`k, 4], "ES" Subscript[$CellContext`k, 4] - 
+    "P" Subscript[$CellContext`k, 9], -"e" "i" Subscript[$CellContext`k, 5] + 
+    "EI" Subscript[$CellContext`k, 6] - "i" Subscript[$CellContext`k, 8], 
+    "e" "i" Subscript[$CellContext`k, 5] - "EI" Subscript[$CellContext`k, 6]}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916452318804*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"6daf573d-2e85-4160-a420-26fb47e92485"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916452446844*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"ba572245-f956-4853-81bc-880c2607dd49"],
+
+Cell[BoxData["\<\"=== STANDARD ODE FORM ===\"\>"], "Print",
+ CellChangeTimes->{3.9579164525451965`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"2931f0f7-5620-4a0d-8133-23f4c22db7a6"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   RowBox[{
+    SuperscriptBox["\<\"S\"\>", "\[Prime]",
+     MultilineFunction->None], "[", "t", "]"}], 
+   "\[InvisibleSpace]", "\<\" = \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    SubscriptBox["k", "1"], "-", 
+    RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+     SubscriptBox["k", "2"]}], "+", 
+    RowBox[{"\<\"ES\"\>", " ", 
+     SubscriptBox["k", "3"]}], "-", 
+    RowBox[{"\<\"S\"\>", " ", 
+     SubscriptBox["k", "7"]}]}]}],
+  SequenceForm[
+   Derivative[1]["S"][$CellContext`t], " = ", Subscript[$CellContext`k, 1] - 
+   "e" "S" Subscript[$CellContext`k, 2] + "ES" Subscript[$CellContext`k, 3] - 
+   "S" Subscript[$CellContext`k, 7]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916452660097*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"4fbcddc5-3c4f-44c9-9e13-0aa97c241cbb"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   RowBox[{
+    SuperscriptBox["\<\"e\"\>", "\[Prime]",
+     MultilineFunction->None], "[", "t", "]"}], 
+   "\[InvisibleSpace]", "\<\" = \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"S\"\>", " ", 
+     SubscriptBox["k", "2"]}], "+", 
+    RowBox[{"\<\"ES\"\>", " ", 
+     SubscriptBox["k", "3"]}], "+", 
+    RowBox[{"\<\"ES\"\>", " ", 
+     SubscriptBox["k", "4"]}], "-", 
+    RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+     SubscriptBox["k", "5"]}], "+", 
+    RowBox[{"\<\"EI\"\>", " ", 
+     SubscriptBox["k", "6"]}]}]}],
+  SequenceForm[
+   Derivative[1]["e"][$CellContext`t], 
+   " = ", -"e" "S" Subscript[$CellContext`k, 2] + 
+   "ES" Subscript[$CellContext`k, 3] + "ES" Subscript[$CellContext`k, 4] - 
+   "e" "i" Subscript[$CellContext`k, 5] + "EI" Subscript[$CellContext`k, 6]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.95791645276912*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"6eec45cd-a7eb-446e-ad9f-bf7034729a46"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   RowBox[{
+    SuperscriptBox["\<\"ES\"\>", "\[Prime]",
+     MultilineFunction->None], "[", "t", "]"}], 
+   "\[InvisibleSpace]", "\<\" = \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"e\"\>", " ", "\<\"S\"\>", " ", 
+     SubscriptBox["k", "2"]}], "-", 
+    RowBox[{"\<\"ES\"\>", " ", 
+     SubscriptBox["k", "3"]}], "-", 
+    RowBox[{"\<\"ES\"\>", " ", 
+     SubscriptBox["k", "4"]}]}]}],
+  SequenceForm[
+   Derivative[1]["ES"][$CellContext`t], " = ", 
+   "e" "S" Subscript[$CellContext`k, 2] - "ES" Subscript[$CellContext`k, 3] - 
+   "ES" Subscript[$CellContext`k, 4]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164528857117`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"a10b0cf1-3b18-44c0-98b4-bee73113206e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   RowBox[{
+    SuperscriptBox["\<\"P\"\>", "\[Prime]",
+     MultilineFunction->None], "[", "t", "]"}], 
+   "\[InvisibleSpace]", "\<\" = \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"ES\"\>", " ", 
+     SubscriptBox["k", "4"]}], "-", 
+    RowBox[{"\<\"P\"\>", " ", 
+     SubscriptBox["k", "9"]}]}]}],
+  SequenceForm[
+   Derivative[1]["P"][$CellContext`t], " = ", 
+   "ES" Subscript[$CellContext`k, 4] - "P" Subscript[$CellContext`k, 9]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.957916453012827*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"0c37a8a3-1c46-42d2-a0c4-ea2b799bb966"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   RowBox[{
+    SuperscriptBox["\<\"i\"\>", "\[Prime]",
+     MultilineFunction->None], "[", "t", "]"}], 
+   "\[InvisibleSpace]", "\<\" = \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", "\<\"e\"\>"}], " ", "\<\"i\"\>", " ", 
+     SubscriptBox["k", "5"]}], "+", 
+    RowBox[{"\<\"EI\"\>", " ", 
+     SubscriptBox["k", "6"]}], "-", 
+    RowBox[{"\<\"i\"\>", " ", 
+     SubscriptBox["k", "8"]}]}]}],
+  SequenceForm[
+   Derivative[1]["i"][$CellContext`t], 
+   " = ", -"e" "i" Subscript[$CellContext`k, 5] + 
+   "EI" Subscript[$CellContext`k, 6] - "i" Subscript[$CellContext`k, 8]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164531402445`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"0c73ce65-3e81-4fb5-8762-17d5c91c6a79"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   RowBox[{
+    SuperscriptBox["\<\"EI\"\>", "\[Prime]",
+     MultilineFunction->None], "[", "t", "]"}], 
+   "\[InvisibleSpace]", "\<\" = \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+    RowBox[{"\<\"e\"\>", " ", "\<\"i\"\>", " ", 
+     SubscriptBox["k", "5"]}], "-", 
+    RowBox[{"\<\"EI\"\>", " ", 
+     SubscriptBox["k", "6"]}]}]}],
+  SequenceForm[
+   Derivative[1]["EI"][$CellContext`t], " = ", 
+   "e" "i" Subscript[$CellContext`k, 5] - "EI" Subscript[$CellContext`k, 6]],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9579164532849975`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"b639d09f-8c3f-4099-8b3e-0dcaf651fd8e"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.957916453419004*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5ffbb0a4-249d-47b4-9aca-da1a42e42419"],
+
+Cell[BoxData["\<\"=== RATE PARAMETERS ===\"\>"], "Print",
+ CellChangeTimes->{3.957916453535915*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"e7a53a8e-8f69-4cd8-a1ec-8dcef8c0e518"],
+
+Cell[BoxData["\<\"k\:2081: Substrate influx rate\"\>"], "Print",
+ CellChangeTimes->{3.957916453654708*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"81673651-449f-499f-a940-90f55ca1b0a0"],
+
+Cell[BoxData["\<\"k\:2082: Substrate binding rate\"\>"], "Print",
+ CellChangeTimes->{3.9579164537858186`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"4244c1e0-70a4-4f74-934f-124843fc747b"],
+
+Cell[BoxData["\<\"k\:2083: Substrate unbinding rate\"\>"], "Print",
+ CellChangeTimes->{3.95791645390617*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"cc49b300-e2f1-47bd-85a9-c7a19489d3cd"],
+
+Cell[BoxData["\<\"k\:2084: Catalysis rate\"\>"], "Print",
+ CellChangeTimes->{3.957916454036415*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"c0cad1d4-4839-4d58-aac7-4ba6bae370e4"],
+
+Cell[BoxData["\<\"k\:2085: Inhibitor binding rate\"\>"], "Print",
+ CellChangeTimes->{3.957916454168812*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"5767234e-5ea9-4f8d-b4cc-1d20a1c33ca3"],
+
+Cell[BoxData["\<\"k\:2086: Inhibitor unbinding rate\"\>"], "Print",
+ CellChangeTimes->{3.9579164543252087`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"3337c1a6-8a83-4ffd-baf3-18728480f3bc"],
+
+Cell[BoxData["\<\"k\:2087: Substrate efflux rate\"\>"], "Print",
+ CellChangeTimes->{3.9579164544687023`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"cd3422f1-f4b9-43c9-9e90-4433a3cc168d"],
+
+Cell[BoxData["\<\"k\:2088: Inhibitor efflux rate\"\>"], "Print",
+ CellChangeTimes->{3.9579164545788164`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"97d3392a-d079-4fad-81db-5a787aa8deb9"],
+
+Cell[BoxData["\<\"k\:2089: Product efflux rate\"\>"], "Print",
+ CellChangeTimes->{3.9579164547103915`*^9},
+ CellLabel->
+  "During evaluation of \
+In[49]:=",ExpressionUUID->"d7ec4f39-316c-4c56-aac6-bbe53f9831bd"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{812.5714285714286, 384.85714285714283`},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"8f8a179b-f624-46e6-8de6-bb79315ec6b3"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 14289, 356, 1075, "Input",ExpressionUUID->"67f119f3-c07c-40f3-808b-1973584bb6ce"],
+Cell[CellGroupData[{
+Cell[14894, 382, 601, 13, 22, "Print",ExpressionUUID->"405b17c3-4ecd-43f2-97c8-ebe1b5fb373b"],
+Cell[15498, 397, 2786, 68, 40, "Print",ExpressionUUID->"b4110b16-e54a-4c4f-8d7c-7ccd2d8203ae"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18333, 471, 22919, 576, 2027, "Input",ExpressionUUID->"53e26796-d243-4d2e-a386-7eb996db48ad"],
+Cell[CellGroupData[{
+Cell[41277, 1051, 243, 5, 22, "Print",ExpressionUUID->"ec1efc45-f7b2-4a95-b8d2-e022efec68da"],
+Cell[41523, 1058, 183, 4, 22, "Print",ExpressionUUID->"844be403-1587-491b-9d98-1fcdcd090eed"],
+Cell[41709, 1064, 204, 4, 22, "Print",ExpressionUUID->"c87a7f80-4cbd-4ae3-b205-cc840cd45fe7"],
+Cell[41916, 1070, 406, 10, 22, "Print",ExpressionUUID->"5c7dd15f-8b2f-4965-bcf5-021652ae6bfd"],
+Cell[42325, 1082, 457, 11, 22, "Print",ExpressionUUID->"91ed0050-9ff8-4043-8e27-c12a903d2bc5"],
+Cell[42785, 1095, 459, 11, 22, "Print",ExpressionUUID->"1d56ccc9-a7bc-4ad8-a697-3dd286f63bc1"],
+Cell[43247, 1108, 459, 11, 22, "Print",ExpressionUUID->"f74bf3f0-1281-4726-89aa-f377f38add65"],
+Cell[43709, 1121, 457, 11, 22, "Print",ExpressionUUID->"b92f5042-7284-4cef-b987-00e42257a622"],
+Cell[44169, 1134, 457, 11, 22, "Print",ExpressionUUID->"c8c7a993-6dc2-425e-be65-eecb526cb6e5"],
+Cell[44629, 1147, 408, 10, 22, "Print",ExpressionUUID->"f0ac5057-9ecc-4015-89bc-ea7eba784fb4"],
+Cell[45040, 1159, 408, 10, 22, "Print",ExpressionUUID->"5d0d00b6-ff7e-45c5-9f09-cf9626b79c7e"],
+Cell[45451, 1171, 408, 10, 22, "Print",ExpressionUUID->"e05a0c1f-069b-45f7-ad15-d5b6a86e88b7"],
+Cell[45862, 1183, 181, 4, 22, "Print",ExpressionUUID->"c354b44c-4329-4de9-9f95-48ebbecabb1e"],
+Cell[46046, 1189, 495, 11, 22, "Print",ExpressionUUID->"383e24a5-e2e7-4c32-b80e-1e04c54dfa7b"],
+Cell[46544, 1202, 181, 4, 22, "Print",ExpressionUUID->"dfacb4f0-dabd-4e52-b8b2-4cbd8a3934a4"],
+Cell[46728, 1208, 444, 10, 22, "Print",ExpressionUUID->"38c391b9-5e70-49ed-8f36-667e0ae5d4bb"],
+Cell[47175, 1220, 368, 9, 22, "Print",ExpressionUUID->"f7b7f51e-5f1e-4a0a-a63b-59af068e5fd7"],
+Cell[47546, 1231, 418, 10, 22, "Print",ExpressionUUID->"41371c0c-e7e4-4480-a94c-06fe429c8ef9"],
+Cell[47967, 1243, 377, 10, 22, "Print",ExpressionUUID->"24c4d31b-dc78-4d22-88a2-f2d9d162f8fe"],
+Cell[48347, 1255, 531, 12, 22, "Print",ExpressionUUID->"16a66ec9-bad1-468a-b0ee-f38fccc5e937"],
+Cell[48881, 1269, 183, 4, 22, "Print",ExpressionUUID->"17e3cf7a-94b7-4f5b-a981-777dc2f296ba"],
+Cell[49067, 1275, 493, 11, 22, "Print",ExpressionUUID->"c80ac3c9-42df-4602-9188-ad83eb50840c"],
+Cell[49563, 1288, 496, 12, 22, "Print",ExpressionUUID->"fcbeb505-d7f6-4535-a573-a19e37275801"],
+Cell[50062, 1302, 418, 10, 22, "Print",ExpressionUUID->"38b38c94-b68a-46b7-97f8-0332b86f3037"],
+Cell[50483, 1314, 430, 10, 22, "Print",ExpressionUUID->"ca731f40-9095-467a-9a8e-7e63eb6c114d"],
+Cell[50916, 1326, 612, 15, 22, "Print",ExpressionUUID->"b95f261e-2624-414a-8010-001fb2b41133"],
+Cell[51531, 1343, 615, 15, 22, "Print",ExpressionUUID->"ee9c0078-3eac-454a-a678-e9b135f0cd01"],
+Cell[52149, 1360, 594, 14, 22, "Print",ExpressionUUID->"7a78b92a-44b5-42d1-8b09-35480719dadc"],
+Cell[52746, 1376, 183, 4, 22, "Print",ExpressionUUID->"404012f4-d4a3-4570-8f73-ff44a8c45a6a"],
+Cell[52932, 1382, 493, 11, 22, "Print",ExpressionUUID->"ae681d7b-c2a0-43a7-aa11-dec9c854851d"],
+Cell[53428, 1395, 422, 10, 22, "Print",ExpressionUUID->"ad38a6a3-0095-476f-afd0-e0a416c94877"],
+Cell[53853, 1407, 494, 12, 22, "Print",ExpressionUUID->"b580632b-0d9c-45bb-81b4-da7f3d94b00d"],
+Cell[54350, 1421, 409, 10, 22, "Print",ExpressionUUID->"5337dc7b-d72f-426a-9b41-afbdcace48fd"],
+Cell[54762, 1433, 571, 13, 22, "Print",ExpressionUUID->"95d7140d-d7f2-4d99-9b56-8c72b384bf48"],
+Cell[55336, 1448, 571, 13, 22, "Print",ExpressionUUID->"f398d880-c9fb-4d1f-b4de-e51fd62f30b3"],
+Cell[55910, 1463, 595, 15, 22, "Print",ExpressionUUID->"855e0625-aa2b-4854-9f95-affd9f4b4530"],
+Cell[56508, 1480, 183, 4, 22, "Print",ExpressionUUID->"1ccf37f7-1a38-4258-900e-250ffb1a5cb4"],
+Cell[56694, 1486, 495, 11, 22, "Print",ExpressionUUID->"ff1c0818-e344-4a77-97d9-7bb3ac9f7e37"],
+Cell[57192, 1499, 419, 10, 22, "Print",ExpressionUUID->"b763fdf1-bc0e-47f8-bbfb-c718d0a438e4"],
+Cell[57614, 1511, 494, 12, 22, "Print",ExpressionUUID->"fd5e5340-4773-4fc5-a74c-a9b1f02c7244"],
+Cell[58111, 1525, 412, 10, 22, "Print",ExpressionUUID->"f28133e3-9962-47e6-b067-8a68a2e6a808"],
+Cell[58526, 1537, 569, 13, 22, "Print",ExpressionUUID->"ff8a00f1-75a0-475e-b72b-acd3aaaf85a6"],
+Cell[59098, 1552, 597, 15, 22, "Print",ExpressionUUID->"37c4f715-96bf-434d-a0fe-a52cbf33741d"],
+Cell[59698, 1569, 569, 13, 22, "Print",ExpressionUUID->"32f473ae-f884-4cc8-9c19-0df92d6b0cb0"],
+Cell[60270, 1584, 181, 4, 22, "Print",ExpressionUUID->"ec18c415-050f-4e25-ac7f-43fe6bdb8cd4"],
+Cell[60454, 1590, 493, 11, 22, "Print",ExpressionUUID->"a8fc42bd-e4bf-4fd9-8996-bb40a137d765"],
+Cell[60950, 1603, 496, 12, 22, "Print",ExpressionUUID->"5022db6b-3533-46d1-9370-ad29a9f43dc5"],
+Cell[61449, 1617, 418, 10, 22, "Print",ExpressionUUID->"a67ca96f-d926-4f86-877b-5df21fa24145"],
+Cell[61870, 1629, 432, 10, 22, "Print",ExpressionUUID->"df530381-f07b-4627-99af-6bdcce705bdb"],
+Cell[62305, 1641, 615, 15, 22, "Print",ExpressionUUID->"0df670b7-1fa9-46da-9392-967670a59bc7"],
+Cell[62923, 1658, 615, 15, 22, "Print",ExpressionUUID->"a8d39b8f-66b7-4659-beb3-8a73cb7b2da1"],
+Cell[63541, 1675, 597, 14, 22, "Print",ExpressionUUID->"23ae6cd5-7176-44d5-90f6-9dbc007e24ce"],
+Cell[64141, 1691, 181, 4, 22, "Print",ExpressionUUID->"60869a2a-63da-40ed-9046-70371bef9178"],
+Cell[64325, 1697, 493, 11, 22, "Print",ExpressionUUID->"da90c85b-f805-4757-a2a9-c20f4217cfd6"],
+Cell[64821, 1710, 420, 10, 22, "Print",ExpressionUUID->"1e5fc856-f46c-43c6-909e-ce0095269304"],
+Cell[65244, 1722, 492, 12, 22, "Print",ExpressionUUID->"c81034ed-b00d-403a-a565-8caeb462c40a"],
+Cell[65739, 1736, 412, 10, 22, "Print",ExpressionUUID->"f8d7fe31-5e72-48fe-9e69-966cce32b369"],
+Cell[66154, 1748, 568, 13, 22, "Print",ExpressionUUID->"9304e0cf-971e-4814-b372-ddb13f756db7"],
+Cell[66725, 1763, 571, 13, 22, "Print",ExpressionUUID->"3f0a83fb-4655-4a68-8a98-414f534db6bb"],
+Cell[67299, 1778, 597, 15, 22, "Print",ExpressionUUID->"e76dcc6a-d3d3-4f55-a617-708e0a72afdc"],
+Cell[67899, 1795, 181, 4, 22, "Print",ExpressionUUID->"79ec02f6-4ce0-4d55-b39b-9dede0f35d1b"],
+Cell[68083, 1801, 444, 10, 22, "Print",ExpressionUUID->"26830a84-257f-40b3-95ab-420637cb7c28"],
+Cell[68530, 1813, 420, 10, 22, "Print",ExpressionUUID->"8208ce0f-8d52-4331-a8cd-45a27ef6686d"],
+Cell[68953, 1825, 364, 9, 22, "Print",ExpressionUUID->"552da215-a2fa-45d0-bff3-69e943c173d2"],
+Cell[69320, 1836, 408, 10, 22, "Print",ExpressionUUID->"7c43f49c-c782-4817-add5-714acce98387"],
+Cell[69731, 1848, 587, 14, 22, "Print",ExpressionUUID->"65b10f79-f2c0-4ad6-b817-4d57a8bf9c19"],
+Cell[70321, 1864, 183, 4, 22, "Print",ExpressionUUID->"6a37f24f-9261-4afe-b52e-c962ac709984"],
+Cell[70507, 1870, 442, 10, 22, "Print",ExpressionUUID->"bed3ab5f-13f1-455b-8efa-383c087bac45"],
+Cell[70952, 1882, 418, 10, 22, "Print",ExpressionUUID->"859892aa-7774-4258-92d5-aebff38db1cb"],
+Cell[71373, 1894, 366, 9, 22, "Print",ExpressionUUID->"4d6c8d93-464d-4a32-b2b6-12f8e0f395a9"],
+Cell[71742, 1905, 408, 10, 22, "Print",ExpressionUUID->"b14b5139-30d2-4aa0-bbaf-83bf8d9c5d4f"],
+Cell[72153, 1917, 587, 14, 22, "Print",ExpressionUUID->"7bbc4174-4cc0-4944-a928-52f14ded3535"],
+Cell[72743, 1933, 181, 4, 22, "Print",ExpressionUUID->"03fc5f72-9eb2-4820-9f29-41198f66e7e2"],
+Cell[72927, 1939, 442, 10, 22, "Print",ExpressionUUID->"0824d14b-9731-4074-8f08-dc80615649d7"],
+Cell[73372, 1951, 418, 10, 22, "Print",ExpressionUUID->"5ea33882-37cf-4b4e-be63-75a771044ed2"],
+Cell[73793, 1963, 366, 9, 22, "Print",ExpressionUUID->"b2a72c97-f386-4e9e-b1f5-8154586e6785"],
+Cell[74162, 1974, 410, 10, 22, "Print",ExpressionUUID->"bc01bee3-749d-41ec-ab0f-26f70b3b36e0"],
+Cell[74575, 1986, 587, 14, 22, "Print",ExpressionUUID->"c5689cc5-48f5-4530-8816-51d240885c39"],
+Cell[75165, 2002, 183, 4, 22, "Print",ExpressionUUID->"c2ff5658-b86d-4463-b583-69ef7b5bc706"],
+Cell[75351, 2008, 198, 4, 22, "Print",ExpressionUUID->"8ee006d5-15fa-4870-a9e0-a4e2969d7460"],
+Cell[75552, 2014, 183, 4, 22, "Print",ExpressionUUID->"a2be0986-2863-4890-8320-adaf3860496d"],
+Cell[75738, 2020, 497, 11, 22, "Print",ExpressionUUID->"84a8d051-9d90-4cc6-86a7-c105b9f47604"],
+Cell[76238, 2033, 2680, 66, 40, "Print",ExpressionUUID->"6daf573d-2e85-4160-a420-26fb47e92485"],
+Cell[78921, 2101, 181, 4, 22, "Print",ExpressionUUID->"ba572245-f956-4853-81bc-880c2607dd49"],
+Cell[79105, 2107, 208, 4, 22, "Print",ExpressionUUID->"2931f0f7-5620-4a0d-8133-23f4c22db7a6"],
+Cell[79316, 2113, 865, 23, 22, "Print",ExpressionUUID->"4fbcddc5-3c4f-44c9-9e13-0aa97c241cbb"],
+Cell[80184, 2138, 1057, 28, 22, "Print",ExpressionUUID->"6eec45cd-a7eb-446e-ad9f-bf7034729a46"],
+Cell[81244, 2168, 806, 22, 22, "Print",ExpressionUUID->"a10b0cf1-3b18-44c0-98b4-bee73113206e"],
+Cell[82053, 2192, 671, 19, 22, "Print",ExpressionUUID->"0c37a8a3-1c46-42d2-a0c4-ea2b799bb966"],
+Cell[82727, 2213, 824, 23, 22, "Print",ExpressionUUID->"0c73ce65-3e81-4fb5-8762-17d5c91c6a79"],
+Cell[83554, 2238, 697, 19, 22, "Print",ExpressionUUID->"b639d09f-8c3f-4099-8b3e-0dcaf651fd8e"],
+Cell[84254, 2259, 181, 4, 22, "Print",ExpressionUUID->"5ffbb0a4-249d-47b4-9aca-da1a42e42419"],
+Cell[84438, 2265, 204, 4, 22, "Print",ExpressionUUID->"e7a53a8e-8f69-4cd8-a1ec-8dcef8c0e518"],
+Cell[84645, 2271, 211, 4, 22, "Print",ExpressionUUID->"81673651-449f-499f-a940-90f55ca1b0a0"],
+Cell[84859, 2277, 214, 4, 22, "Print",ExpressionUUID->"4244c1e0-70a4-4f74-934f-124843fc747b"],
+Cell[85076, 2283, 213, 4, 22, "Print",ExpressionUUID->"cc49b300-e2f1-47bd-85a9-c7a19489d3cd"],
+Cell[85292, 2289, 204, 4, 22, "Print",ExpressionUUID->"c0cad1d4-4839-4d58-aac7-4ba6bae370e4"],
+Cell[85499, 2295, 212, 4, 22, "Print",ExpressionUUID->"5767234e-5ea9-4f8d-b4cc-1d20a1c33ca3"],
+Cell[85714, 2301, 216, 4, 22, "Print",ExpressionUUID->"3337c1a6-8a83-4ffd-baf3-18728480f3bc"],
+Cell[85933, 2307, 213, 4, 22, "Print",ExpressionUUID->"cd3422f1-f4b9-43c9-9e90-4433a3cc168d"],
+Cell[86149, 2313, 213, 4, 22, "Print",ExpressionUUID->"97d3392a-d079-4fad-81db-5a787aa8deb9"],
+Cell[86365, 2319, 211, 4, 22, "Print",ExpressionUUID->"d7ec4f39-316c-4c56-aac6-bbe53f9831bd"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
