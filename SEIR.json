@@ -1,0 +1,69 @@
+{
+  "model": {
+    "name": "SEIR_Model",
+    "description": "A simple SEIR epidemiological model",
+    "reactions": [
+      {
+        "name": "Infection",
+        "reactants": [
+          {"species": "S", "stoichiometry": 1},
+          {"species": "I", "stoichiometry": 1}
+        ],
+        "products": [
+          {"species": "E", "stoichiometry": 1},
+          {"species": "I", "stoichiometry": 1}
+        ],
+        "rate_constant": "beta"
+      },
+      {
+        "name": "Progression",
+        "reactants": [
+          {"species": "E", "stoichiometry": 1}
+        ],
+        "products": [
+          {"species": "I", "stoichiometry": 1}
+        ],
+        "rate_constant": "sigma"
+      },
+      {
+        "name": "Recovery",
+        "reactants": [
+          {"species": "I", "stoichiometry": 1}
+        ],
+        "products": [
+          {"species": "R", "stoichiometry": 1}
+        ],
+        "rate_constant": "gamma"
+      }
+    ],
+    "species": [
+      {"name": "S", "initial_amount": 999},
+      {"name": "E", "initial_amount": 1},
+      {"name": "I", "initial_amount": 0},
+      {"name": "R", "initial_amount": 0}
+    ],
+    "parameters": [
+      {
+        "name": "beta",
+        "expression": "0.5",
+        "min": "0.1",
+        "max": "1.0",
+        "description": "Infection rate (S + I -> E + I)"
+      },
+      {
+        "name": "sigma",
+        "expression": "0.2",
+        "min": "0.05",
+        "max": "0.5",
+        "description": "Progression rate (E -> I)"
+      },
+      {
+        "name": "gamma",
+        "expression": "0.1",
+        "min": "0.05",
+        "max": "0.5",
+        "description": "Recovery rate (I -> R)"
+      }
+    ]
+  }
+}

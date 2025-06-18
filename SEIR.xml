@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
+  <model id="SEIR_Model" name="SEIR Model">
+
+    <!-- List of Compartments -->
+    <listOfCompartments>
+      <compartment id="cell" size="1" constant="true"/>
+    </listOfCompartments>
+
+    <!-- List of Species -->
+    <listOfSpecies>
+      <species id="S" compartment="cell" initialAmount="999"
+      hasOnlySubstanceUnits="false" boundaryCondition="false"
+      constant="false"/>
+      <species id="E" compartment="cell" initialAmount="1"
+      hasOnlySubstanceUnits="false" boundaryCondition="false"
+      constant="false"/>
+      <species id="I" compartment="cell" initialAmount="0"
+      hasOnlySubstanceUnits="false" boundaryCondition="false"
+      constant="false"/>
+      <species id="R" compartment="cell" initialAmount="0"
+      hasOnlySubstanceUnits="false" boundaryCondition="false"
+      constant="false"/>
+    </listOfSpecies>
+
+    <!-- List of Parameters -->
+    <listOfParameters>
+      <parameter id="beta" value="0.5" constant="true"/>
+      <parameter id="sigma" value="0.2" constant="true"/>
+      <parameter id="gamma" value="0.1" constant="true"/>
+    </listOfParameters>
+
+    <!-- List of Reactions -->
+    <listOfReactions>
+      <!-- S + I -> E + I -->
+      <reaction id="Infection" reversible="false">
+        <listOfReactants>
+          <speciesReference species="S" stoichiometry="1"/>
+          <speciesReference species="I" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E" stoichiometry="1"/>
+          <speciesReference species="I" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> beta </ci>
+              <ci> S </ci>
+              <ci> I </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+
+      <!-- E -> I -->
+      <reaction id="Progression" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="I" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> sigma </ci>
+              <ci> E </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+
+      <!-- I -> R -->
+      <reaction id="Recovery" reversible="false">
+        <listOfReactants>
+          <speciesReference species="I" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R" stoichiometry="1"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <times/>
+              <ci> gamma </ci>
+              <ci> I </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+
+    </listOfReactions>
+
+  </model>
+</sbml>
