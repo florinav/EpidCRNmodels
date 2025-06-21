@@ -2,107 +2,93 @@
 
 BeginPackage["EpidCRN`"];
 Global`ome;Global`u;(*Global`v;*)
-ACM::usage = "A2=ACM[A,k] yields additive compound matrix";asoRea::usage = "transforms classic RN into
-association";invFacet;isInvariantFacet;
-Bifp::usage = "Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]
- gives the bifurcation plot of the dynamics wrt to one par ";
- red::usage = "recl=red[re,cond] erases from the output of a Reduce all the 
-conditions in cond";
-reCL::usage = "recl=red[re,cond] erases from the output of a Reduce all the 
-conditions in cond";minSiph;CreateMassActionRate;reaToRHS;
-isSiph::usage = "isSiph[species,reactions,siphon]";
-reaProducts;
- CofP::usage = "co=CofP[list] yields coefficients of a
-polynomial as required by Routh-Hurwicz theory, ie 
-normalized so the free coefficient is 1 
-(see for example R\[ODoubleDot]st, Tekeli, Thm 4A)";
-expM::usage = "expM[var,expo] gives the vector var at power in matrix expo";
-extSpe;
-CofRH::usage = "co=CofRH[mat] yields coefficients of 
-CharacteristicPolynomial, as required by Routh-Hurwicz theory, ie 
-normalized so the free coefficient is 1 
-(see for example R\[ODoubleDot]st, Tekeli, Thm 4A):
-Drop[Reverse[CoefficientList[(-1)^(Length@A)
-CharacteristicPolynomial[A,x],x]],1]";
-cons::usage = "con=cons[mat,cp_:{}] parametrizes positively 
-the  left kernel of mat, using also conditions cp;cp is not necessary
-if mat is numeric*)";
-seZF::usage = "seZF[so_] removes in  a list of lists those 
-with a 0";
-onePR::usage = "onePR[cof_,cp_:{}] outputs conditions that the first and 
-last coefs of a list have different signs";
-DFE::usage = "DFE[mod_,inf_] yields the DFE of the model";
-expon::usage= "Eponent[p,Variable[p]] computes the maximum power
- of an expanded form p";
-FHJ::usage="FHJ[comp_List,edges_List,rates_List, ver_:{},groups_List:{}]
-generates the Feinberg-Horn-Jackson graph. The first argument, comp_List,
- represents the set of complexes,  edges_List defines the reaction edges, rates_List
- specifies the reaction rates. The optional 
-argument ver_ determines the node sizes, and groups_List, used for distinguishing linkage classes, 
- colors the first specified class in green, the second in red, ...,following a given list of 
-colors. The complement of the groups specified is collored in yellow.";
-fix::usage = "fix[mod_,cn_:{}]";
-phasePl2::usage = "phasePl2[mod_,plc_:{},cn_:{}] plots a 2dim phase-plot 
-of  mod, for the components not excluded in plc";
-H4::usage = "H4[co] gives the 4'th Hurwitz det,  needed in 
-Routh-Hurwitz theory (see for example R\[ODoubleDot]st, Tekeli, Thm 4A).
-H4[CofRH[M]] gives the 4'th Hurwitz det of the 
-matrix M, and could be used in Hur4M[mat]"; H6;
-Hur2::usage = "ine=Hur2[co] yields stability cond";
-Hur3M::usage = "{co,h3,ine}=Hur3M[A] yields ine=Append[inec,h3>0]";
-Hur4M::usage = "{co,h4,ine}=Hur4M[A]";
-Hur5M::usage="{co,h5,ine,H5}=Hur5M[jac]";
-posM::usage="keep all syntactically positive terms";
-FposEx::usage="extracts first syntactically positive term in a nonnegative matrix";
-perR::usage="perR[M_, i_, j_]=ReplacePart[M, {i -> M[[j]], j -> M[[i]]}]";
-perC::usage="perC[matrix_, cycle_List] performs a cyclic permutation
- on the rows (or columns) of the input matrix based on the indices
- in the list cycle_List. The rows (or columns) specified by cycle are rearranged 
-according to the right rotation of cycle, and the modified matrix is returned";
-Idx;IaFHJ::usage = "{oU,taF}=IaFHJ[vert,edg]";
-IkFHJ::usage = "Ik=IkHKF[vert,edg,tk]";
-sym2Str;str2Sym;rul2Str;
-toSum;toProd;
-strEdg;
-SpeComInc::usage = "SpeComInc[comp,spec]";
-expM;
-makeLPM::usage = "makeLPM[mat_] := 
-Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}] yields
-the leading principal minors";countMS;
-onlyP::usage ="onlyP[m_] checks whether all the coefficients
- of the numerator of a rational expression m  are nonnegative";
-verHir::usage ="verHir[RHS,var,intRows] checks whether a network can be reduced
-using the species indexed by intRows";
-mat2Matl;
+(* Usage statements for new functions *)
+reaProd::usage = "reaProd[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: reaProd[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 
-JTD::usage = "JTD[mod,cn_:{}]";
-JTDP::usage = "JTDP[mod,\[Zeta]_:\[Zeta],cn_:{}]";
-NGM::usage = "NGM[mod_,inf_] yields {Jy,V1,F1,F,-V,K,chp(u)};they
- are the infectious Jacobian, two intermediate results, the new 
-infections, transitions, and next generation matrices, 
-and its char. pol."; 
-NGMs::usage = " simpler version of NGM[mod_,inf_], treats incorrectly denominators and exponents"; 
-JR0::usage = "JR0[pol],{R0,co}";
-extP::usage ="extP[mod_,inf_] yields the Bacaer equation
-for approximate extinction probability";
-Par::usage = "Par[dyn,var]";
-Res1F;Deg;
-RUR::usage = "RUR[mod,ind,cn_:{}] attempts to reduce the fixed point system to 
-one with variables specified by the list ind; only singleton ind is allowed currently;
-outputs are ratsub,pol,and ln=pol//Length";
-GBH::usage = "GBH[pol_,var_,sc_,cn_:{}]";
-matl2Mat;matlr2Mat;l2L;
-m2toM;Stodola;DerL;
+extSpe::usage = "extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings. Example: species = extSpe[reactions]";
 
-mSim::usage = "mSim[mod,cN, cInit,T,excluded]";Bifp;
-convNum;Hirono;
-Sta::usage = "numeric";
-Stab::usage = "Stab[mod_,cfp_,cn_:{}]";
+asoRea::usage = "asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys. Example: associations = asoRea[reactions]";
 
-L1Planar::usage = "L1Planar[fg,eq:{}]";
-DerEq::usage = "DerEq[fg,eq:{}]; eq is condition";
-GetVec::usage = "GetVec[A,om],used in L13,L23";
-L13;L23;(*DerSc::usage ="DerSc[f]";
+stoichiometricMatrices::usage = "{alpha, beta, gamma, species} = stoichiometricMatrices[reactions] creates stoichiometric matrices for a reaction network. Returns {alpha, beta, gamma, species} where alpha is reactant matrix, beta is product matrix, gamma=beta-alpha is net matrix, and species is the species list";
+
+reaToRHS::usage = "{RHS, species, gamma, Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics. Returns {RHS, species, gamma, Rv} where RHS is the vector field, species is the species list, gamma is the net stoichiometric matrix, and Rv is the reaction rate vector";
+
+expM::usage = "expM[var,expo] gives the vector var at power in matrix expo using Inner[OperatorApplied[Power],#2,#1,Times]&";
+
+(* Existing usage statements *)
+ACM::usage = "A2 = ACM[A,k] yields additive compound matrix";
+Bifp::usage = "{bifurcationPlot} = Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0] gives the bifurcation plot of the dynamics wrt to one parameter";
+red::usage = "recl = red[re,cond] erases from the output of a Reduce all the conditions in cond";
+reCL::usage = "recl = reCL[re,cond] erases from the output of a Reduce all the conditions in cond";
+CofP::usage = "co = CofP[list] yields coefficients of a polynomial as required by Routh-Hurwitz theory, ie normalized so the free coefficient is 1 (see for example R\[ODoubleDot]st, Tekeli, Thm 4A)";
+CofRH::usage = "co = CofRH[mat] yields coefficients of CharacteristicPolynomial, as required by Routh-Hurwitz theory, ie normalized so the free coefficient is 1 (see for example R\[ODoubleDot]st, Tekeli, Thm 4A): Drop[Reverse[CoefficientList[(-1)^(Length@A) CharacteristicPolynomial[A,x],x]],1]";
+cons::usage = "{conservationVectors} = cons[mat,cp_:{}] parametrizes positively the left kernel of mat, using also conditions cp; cp is not necessary if mat is numeric";
+seZF::usage = "seZF[so_] removes in a list of lists those with a 0";
+onePR::usage = "onePR[cof_,cp_:{}] outputs conditions that the first and last coefs of a list have different signs";
+DFE::usage = "{diseaseFreeeEquilibrium} = DFE[mod_,inf_] yields the DFE of the model";
+expon::usage= "Exponent[p,Variable[p]] computes the maximum power of an expanded form p";
+FHJ::usage="FHJ[comp_List,edges_List,rates_List, ver_:{},groups_List:{}] generates the Feinberg-Horn-Jackson graph. The first argument, comp_List, represents the set of complexes, edges_List defines the reaction edges, rates_List specifies the reaction rates. The optional argument ver_ determines the node sizes, and groups_List, used for distinguishing linkage classes, colors the first specified class in green, the second in red, ...,following a given list of colors. The complement of the groups specified is colored in yellow.";
+fix::usage = "{fixedPoints} = fix[mod_,cn_:{}] finds fixed points of the model with conditions cn";
+phasePl2::usage = "{phasePlot} = phasePl2[mod_,plc_:{},cn_:{}] plots a 2dim phase-plot of mod, for the components not excluded in plc";
+H4::usage = "H4[co] gives the 4th Hurwitz det, needed in Routh-Hurwitz theory (see for example R\[ODoubleDot]st, Tekeli, Thm 4A). H4[CofRH[M]] gives the 4th Hurwitz det of the matrix M, and could be used in Hur4M[mat]";
+Hur2::usage = "ine = Hur2[co] yields stability conditions";
+Hur3M::usage = "{co,h3,ine} = Hur3M[A] yields Hurwitz analysis where ine=Append[inec,h3>0]";
+Hur4M::usage = "{co,h4,ine} = Hur4M[A] yields fourth-order Hurwitz analysis";
+Hur5M::usage = "{co,h5,ine,H5} = Hur5M[jac] yields fifth-order Hurwitz analysis";
+posM::usage="posM[matrix] keeps all syntactically positive terms";
+FposEx::usage="FposEx[matrix] extracts first syntactically positive term in a nonnegative matrix";
+perR::usage="perR[M_, i_, j_] = ReplacePart[M, {i -> M[[j]], j -> M[[i]]}] swaps rows i and j";
+perC::usage="perC[matrix_, cycle_List] performs a cyclic permutation on the rows (or columns) of the input matrix based on the indices in the list cycle_List. The rows (or columns) specified by cycle are rearranged according to the right rotation of cycle, and the modified matrix is returned";
+IaFHJ::usage = "{oU,taF} = IaFHJ[vert,edg] analyzes Feinberg-Horn-Jackson graph structure";
+IkFHJ::usage = "Ik = IkFHJ[vert,edg,tk] computes Ik matrix for FHJ analysis";
+SpeComInc::usage = "SpeComInc[comp,spec] creates species-complex incidence matrix";
+makeLPM::usage = "makeLPM[mat_] := Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}] yields the leading principal minors";
+onlyP::usage ="onlyP[m_] checks whether all the coefficients of the numerator of a rational expression m are nonnegative";
+verHir::usage ="{reductionResult} = verHir[RHS,var,intRows] checks whether a network can be reduced using the species indexed by intRows";
+JTD::usage = "{jtdResult} = JTD[mod,cn_:{}] performs JTD analysis";
+JTDP::usage = "{jtdpResult} = JTDP[mod,\[Zeta]_:\[Zeta],cn_:{}] performs JTDP analysis with parameter \[Zeta]";
+NGM::usage = "{Jy,V1,F1,F,negV,K,chp} = NGM[mod_,inf_] yields {Jy,V1,F1,F,-V,K,chp(u)}; they are the infectious Jacobian, two intermediate results, the new infections, transitions, and next generation matrices, and its char. pol."; 
+NGMs::usage = "NGMs[mod_,inf_] simpler version of NGM[mod_,inf_], treats incorrectly denominators and exponents"; 
+JR0::usage = "{R0,co} = JR0[pol] computes basic reproduction number and coefficients";
+extP::usage ="{extinctionProb} = extP[mod_,inf_] yields the Bacaer equation for approximate extinction probability";
+Par::usage = "Par[dyn,var] extracts parameters from dynamics";
+RUR::usage = "{ratsub,pol,ln} = RUR[mod,ind,cn_:{}] attempts to reduce the fixed point system to one with variables specified by the list ind; only singleton ind is allowed currently; outputs are ratsub,pol,and ln=pol//Length";
+GBH::usage = "{gbhResult} = GBH[pol_,var_,sc_,cn_:{}] performs Gr\[ODoubleDot]bner basis analysis";
+mSim::usage = "{simulationResult} = mSim[mod,cN, cInit,T,excluded] performs model simulation";
+Sta::usage = "Sta[] numeric stability analysis";
+Stab::usage = "{stabilityResult} = Stab[mod_,cfp_,cn_:{}] analyzes stability at fixed point";
+L1Planar::usage = "{l1Result} = L1Planar[fg,eq:{}] performs L1 planar analysis; eq is condition";
+DerEq::usage = "{derivativeEq} = DerEq[fg,eq:{}] computes derivative equations; eq is condition";
+GetVec::usage = "{vectorResult} = GetVec[A,om] extracts vectors, used in L13,L23";
+
+(* Functions that currently don't have usage but need one *)
+invFacet::usage = "invF = invFacet[reactions,maxCodim] finds invariant facets of the positive orthant for reaction networks up to specified codimension";
+isInvariantFacet::usage = "isInvariantFacet[facetSet,reactions] checks if a given set of species forms an invariant facet";
+minSiph::usage = "{minimalSiphons} = minSiph[species,reactions] finds minimal siphons in a reaction network";
+CreateMassActionRate::usage = "CreateMassActionRate[reactants,kParam] creates mass action rate expression from reactant association and rate parameter";
+isSiph::usage = "isSiph[species,reactions,siphon] checks if a given set forms a siphon in the reaction network";
+H6::usage = "H6[co] computes the 6th Hurwitz determinant for stability analysis";
+Idx::usage = "Idx[args] indexing function for complex manipulations";
+sym2Str::usage = "sym2Str[expr] converts symbolic expressions to string format";
+str2Sym::usage = "str2Sym[expr] converts string expressions to symbolic format";
+rul2Str::usage = "rul2Str[rules] converts replacement rules to string format";
+toSum::usage = "toSum[expr] converts expression to sum format";
+toProd::usage = "toProd[expr] converts expression to product format";
+strEdg::usage = "strEdg[edges] processes edge structures for graph operations";
+countMS::usage = "countMS[matrix] counts negative coefficients in a matrix";
+mat2Matl::usage = "mat2Matl[matrix] converts Mathematica matrix to MATLAB format string";
+matl2Mat::usage = "{matrix} = matl2Mat[string] converts MATLAB format string to Mathematica matrix";
+matlr2Mat::usage = "{list} = matlr2Mat[string] converts MATLAB row vector string to Mathematica list";
+l2L::usage = "l2L[list] converts lowercase list format to uppercase format";
+m2toM::usage = "m2toM[expr] converts m2 expressions to M format";
+Stodola::usage = "{stodolaResult} = Stodola[args] implements Stodola method for eigenvalue problems";
+DerL::usage = "DerL[expr] computes derivatives in L format";
+convNum::usage = "convNum[expr] converts numerical expressions";
+Hirono::usage = "{hironoResult} = Hirono[args] implements Hirono method";
+L13::usage = "{l13Coeff} = L13[args] computes L13 coefficient";
+L23::usage = "{l23Coeff} = L23[args] computes L23 coefficient";
+Res1F::usage = "{residueForm} = Res1F[args] computes first residue form";
+Deg::usage = "Deg[poly] computes degree of polynomial";(*DerSc::usage ="DerSc[f]";
 RescaleODE::usage ="RescaleODE[f,equilcon];necessary
 before calling DerSc ";*)
 
@@ -120,8 +106,7 @@ perR[M_, i_, j_] := ReplacePart[M, {i -> M[[j]], j -> M[[i]]}];
 perC[matrix_,cycle_List]:=
 Module[{tempMatrix=matrix},tempMatrix[[cycle]]=tempMatrix[[RotateRight[cycle]]];
 tempMatrix];
-expon:=Exponent[#,Variables[#]]&;
-expM=Inner[OperatorApplied[Power],#2,#1,Times]&;
+
 Par[RHS_,X_]:=Complement[Variables[RHS],X];
 
 m2toM[a_List]:=
@@ -193,67 +178,119 @@ matlr2Mat[str_String]:=Module[{formattedString,result},(*Step 1:Remove curly bra
 (*Step 3:Convert each element to an integer*)result=ToExpression[formattedString];
 (*Step 4:Remove any Null values*)DeleteCases[result,Null]];
 
-(*Helper function to switch reaction network representation from classic to list of associations*)asoRea[RN_]:=Module[{parseSide},parseSide[str_]:=If[str===0,{},StringSplit[ToString[str],"+"]//StringTrim];
-Map[Function[r,Association["Substrates"->parseSide[r[[1]]],"Products"->parseSide[r[[2]]]]],RN]]
-(*Function to parse reaction side and create stoichiometric coefficient*)
-reaProducts[side_]:=Module[{coeffs},coeffs=<||>;
-If[side===0,Return[coeffs]];
-If[Head[side]===Plus,(*Multiple species*)Do[If[Head[term]===Times&&Length[term]==2&&NumberQ[term[[1]]],(*Coefficient*Species*)coeffs[term[[2]]]=term[[1]],(*Single species (coefficient=1)*)coeffs[term]=1];,{term,List@@side}],(*Single species or coefficient*species*)If[Head[side]===Times&&Length[side]==2&&NumberQ[side[[1]]],coeffs[side[[2]]]=side[[1]],coeffs[side]=1]];
-coeffs];
+expon:=Exponent[#,Variables[#]]&;
+expM=Inner[OperatorApplied[Power],#2,#1,Times]&;
 
-extSpe[reactions_] := Module[{allSpecies, lhs, rhs, terms}, 
+(* Direct reaProd function - manually extracts strings and coefficients *)
+reaProd[side_] := Module[{coeffs}, 
+  coeffs = <||>;
+  If[side === 0, Return[coeffs]];
+  
+  If[Head[side] === Plus, 
+   (* Multiple species - handle each term *)
+   Do[
+    If[Head[term] === Times, 
+     (* Manually separate strings from non-strings *)
+     Module[{parts, strings, nonStrings},
+      parts = List @@ term;
+      strings = Select[parts, MatchQ[#, _String] &];
+      nonStrings = Select[parts, !MatchQ[#, _String] &];
+      
+      If[Length[strings] >= 1,
+       (* For each string, assign coefficient as product of non-strings *)
+       Do[
+        coeffs[str] = If[Length[nonStrings] == 0, 1, 
+                        If[Length[nonStrings] == 1, nonStrings[[1]], Times @@ nonStrings]];
+        , {str, strings}];,
+       (* No strings - treat whole term as species *)
+       coeffs[term] = 1
+       ]
+      ], 
+     (* Not Times - single species *)
+     coeffs[term] = 1];, {term, List @@ side}], 
+   (* Single term *)
+   If[Head[side] === Times, 
+    (* Manually separate strings from non-strings *)
+    Module[{parts, strings, nonStrings},
+     parts = List @@ side;
+     strings = Select[parts, MatchQ[#, _String] &];
+     nonStrings = Select[parts, !MatchQ[#, _String] &];
+     
+     If[Length[strings] >= 1,
+      (* For each string, assign coefficient as product of non-strings *)
+      Do[
+       coeffs[str] = If[Length[nonStrings] == 0, 1, 
+                       If[Length[nonStrings] == 1, nonStrings[[1]], Times @@ nonStrings]];
+       , {str, strings}];,
+      (* No strings - treat whole side as species *)
+      coeffs[side] = 1
+      ]
+     ], 
+    (* Single species *)
+    coeffs[side] = 1]];
+  coeffs];
+
+(* Extract all species from reactions *)
+extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
   allSpecies = {};
-  Do[lhs = reactions[[i, 1]];
-   rhs = reactions[[i, 2]];
-   
-   (* Process left side *)
-   If[lhs =!= 0, 
-    terms = If[Head[lhs] === Plus, List @@ lhs, {lhs}];
-    Do[
-     If[Head[term] === Times && Length[term] == 2 && NumberQ[term[[1]]], 
-      allSpecies = Append[allSpecies, term[[2]]], (* Extract species from coeff*species *)
-      allSpecies = Append[allSpecies, term]       (* Single species *)
-      ], {term, terms}]];
-   
-   (* Process right side *)
-   If[rhs =!= 0, 
-    terms = If[Head[rhs] === Plus, List @@ rhs, {rhs}];
-    Do[
-     If[Head[term] === Times && Length[term] == 2 && NumberQ[term[[1]]], 
-      allSpecies = Append[allSpecies, term[[2]]], (* Extract species from coeff*species *)
-      allSpecies = Append[allSpecies, term]       (* Single species *)
-      ], {term, terms}]];
+  Do[
+   reactants = reaProd[reactions[[i, 1]]];
+   products = reaProd[reactions[[i, 2]]];
+   allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
    , {i, Length[reactions]}];
-  DeleteDuplicates[allSpecies]
-  ];
-(*Function to create mass action rate expression*)
+  DeleteDuplicates[allSpecies]];
 
-CreateMassActionRate[reactants_, kParam_] := Module[{rateExpr}, 
-  rateExpr = kParam;
-  Do[rateExpr = rateExpr*sp^reactants[sp], {sp, Keys[reactants]}];
-  rateExpr];
+(* Fixed asoRea function *)
+asoRea[RN_] := Module[{parseSide}, 
+  parseSide[expr_] := If[expr === 0, {}, 
+    If[Head[expr] === Plus, 
+     List @@ expr, (* If it's a sum, get the terms *)
+     {expr}]]; (* If it's a single term, wrap in list *)
+  Map[Function[r, 
+    Association["Substrates" -> parseSide[r[[1]]], 
+     "Products" -> parseSide[r[[2]]]]], RN]]
 
-reaToRHS[reactions_] := Module[{species, odes, reactants, products, rate, netChange}, 
+(* Create stoichiometric matrices alpha (reactants), beta (products), and gamma (net) *)
+stoichiometricMatrices[reactions_] := Module[{species, numReactions, numSpecies, alpha, beta, gamma, reactants, products},
   species = extSpe[reactions];
-  (*Initialize vector field components*)
-  odes = AssociationThread[species, Table[0, {Length[species]}]];
-  (*Process each reaction*)
-  Do[reactants = reaProducts[reactions[[i, 1]]];
-   products = reaProducts[reactions[[i, 2]]];
-   (*Create rate parameter*)
-   rate = CreateMassActionRate[reactants, Symbol["k" <> ToString[i]]];
-   (*Update vector field for each species*)
-   Do[netChange = 0;
-    (*Subtract reactant contribution*)
-    If[KeyExistsQ[reactants, sp], netChange -= reactants[sp]];
-    (*Add product contribution*)
-    If[KeyExistsQ[products, sp], netChange += products[sp]];
-    If[netChange != 0, odes[sp] += netChange*rate];, {sp, species}];, {i, Length[reactions]}];
-  (*Return species list and vector field RHS*)
-  {Table[odes[species[[i]]], {i, Length[species]}], species}];
- 
+  numReactions = Length[reactions];
+  numSpecies = Length[species];
+  
+  (* Initialize matrices *)
+  alpha = Table[0, {numSpecies}, {numReactions}];
+  beta = Table[0, {numSpecies}, {numReactions}];
+  
+  (* Fill matrices *)
+  Do[
+   reactants = reaProd[reactions[[j, 1]]];
+   products = reaProd[reactions[[j, 2]]];
+   
+   Do[
+    If[KeyExistsQ[reactants, species[[i]]], 
+     alpha[[i, j]] = reactants[species[[i]]]];
+    If[KeyExistsQ[products, species[[i]]], 
+     beta[[i, j]] = products[species[[i]]]];
+    , {i, numSpecies}];
+   , {j, numReactions}];
+  
+  (* Calculate net stoichiometric matrix *)
+  gamma = beta - alpha;
+  
+  (* Return matrices and species list *)
+  {alpha, beta, gamma, species}];
 
-isSiph[species_List, reactions_List, siphon_List] := Module[
+(* Main function: RHS using your exact specification *)
+reaToRHS[reactions_] := Module[{alpha, beta, gamma, species, var, rv, tk, Rv, RHS},
+  {alpha, beta, gamma, species} = stoichiometricMatrices[reactions];
+  (* Convert species strings to variables *)
+  var = ToExpression[species];
+  rv = expM[var, alpha // Transpose];
+  tk = Array[Symbol["k" <> ToString[#]] &, alpha // Transpose // Length];
+  Rv = tk*rv;
+  RHS = gamma . Rv;
+  {RHS, species,gamma,Rv}];
+  
+  isSiph[species_List, reactions_List, siphon_List] := Module[
   {ns, sm, siphonSet, isSiphonQ, subIdx, prodIdx, substrates, products},
   
   ns = Length[species];
@@ -298,7 +335,8 @@ prodIdx=If[products==={}||products==={""},{},Select[Lookup[sm,products,Nothing],
 (*Add constraints for each product*)Do[If[Length[subIdx]==0,(*Empty product:product cannot be in siphon*)AppendTo[constraints,Not[specs[[p]]]],(*substrate->product:if product in siphon,some substrate must be too*)AppendTo[constraints,Implies[specs[[p]],If[Length[subIdx]==1,specs[[subIdx[[1]]]],Or@@specs[[subIdx]]]]]],{p,prodIdx}]],{reaction,reactions}];
 (*Print["Constraints generated: ",Length[constraints]];*)
 Print["Sample constraints: ",Take[constraints,Min[5,Length[constraints]]]];
-(*Find solutions with moderate limit to avoid crashes*)solutions=FindInstance[constraints,specs,Integers,25];
+(*Find solutions with moderate limit to avoid crashes*)
+solutions=FindInstance[constraints,specs,Integers,25];
 If[solutions==={},Return[{}]];
 siphons=Map[Flatten@Position[specs/. #,True]&,solutions];
 siphons=DeleteDuplicates[siphons];
@@ -306,51 +344,10 @@ Print["All  siphons: ",siphons];
 (*Proper minimality check:remove any siphon that contains another*)minimal={};
 Do[If[Not[AnyTrue[siphons,Function[other,other=!=siphon&&SubsetQ[siphon,other]]]],
 AppendTo[minimal,siphon]],{siphon,siphons}];
-minimal]
-(*Check if a facet is invariant using the RHS*)
-isInvariantFacet[facetSet_,reactions_]:=Module[{vf,vars,facetIndices,facetRules,isInvariant},{vf,vars}=reaToRHS[reactions];
-(*Find indices of facet species in variable list*)facetIndices=Flatten[Position[vars,#]&/@facetSet];
-(*Create facet:set all facet species to zero*)facetRules=Table[vars[[facetIndices[[j]]]]->0,{j,Length[facetIndices]}];
-(*Check invariance:derivatives of facet species should be<=0 on the facet*)isInvariant=True;
-Do[derivative=Simplify[vf[[facetIndices[[j]]]]/. facetRules];
-(*The derivative should be non-positive (can't leave the facet)*)If[!(PossibleZeroQ[derivative]||Simplify[derivative<=0]===True||MatchQ[derivative,_?NonPositive]),isInvariant=False;
-Break[]];,{j,Length[facetIndices]}];
-isInvariant];
-
-(*Main function to find invariant facets using RHS*)
-invFacet[reactions_,maxCodim_]:=Module[{species,n,invariantFacets,subsets},species=extSpe[reactions];
-n=Length[species];
-invariantFacets={};
-(*Check all subsets up to the specified codimension*)Do[subsets=Subsets[species,{k}];
-Do[candidateSet=subsets[[i]];
-(*Check if it's an invariant facet using RHS*)If[isInvariantFacet[candidateSet,reactions],
-AppendTo[invariantFacets,candidateSet]];,{i,Length[subsets]}];,{k,1,Min[maxCodim,n]}];
-invariantFacets];
+Print["minimal  siphons: ",minimal];minimal
+]
 
 
-
-(*minSiph[species_List,reactions_List]:=Module[{ns,sm,specs,constraints,siphons,status,model,siphon},(*number of species*)ns=Length[species];
-(*map each species name to its index*)
-sm=AssociationThread[species->Range[ns]];
-(*Boolean variables s1\[Ellipsis]s_ns;s_i==True means species i is in the siphon*)
-specs=Array[Symbol["s"<>ToString[#]]&,ns];
-(*initial constraint:at least one species must be in the siphon*)constraints={Or@@specs};
-(*for each reaction,add the Julia\[Hyphen]style constraint*)Do[subIdx=Lookup[sm,reaction["Substrates"],{}];
-prodIdx=Lookup[sm,reaction["Products"],{}];
-Do[If[subIdx==={},(*if \[EmptySet]\[RightArrow]something,that product cannot be in the siphon*)AppendTo[constraints,Not[specs[[p]]]],(*otherwise s_p\[RightArrow]Or[s_subs]*)AppendTo[constraints,Implies[specs[[p]],Or@@specs[[subIdx]]]]],{p,prodIdx}],{reaction,reactions}];
-siphons={};
-(*find the first satisfying assignment*)status=FindInstance[constraints,specs,1,Method->"Boolean"];
-(*iterate until UNSAT,each time banishing any superset of the found siphon*)While[status=!={},model=status[[1]];
-siphon=Flatten@Position[specs/. model,True];
-AppendTo[siphons,siphon];
-(*Add constraint:at least one of those True variables must now be False to forbid supersets of this exact siphon*)
-AppendTo[constraints,Or@@(Not/@specs[[siphon]])];
-status=FindInstance[constraints,specs,1,Method->"Boolean"];];
-(*remove any siphon that strictly contains another*)DeleteCases[siphons,s_/;AnyTrue[siphons,sup|->(sup=!=s&&SubsetQ[sup,s])]]];
-(*test species={"A","B","C"};
-reactions={<|"Substrates"->{},"Products"->{"A"}|>,<|"Substrates"->{"A","B"},"Products"->{"C"}|>};
- minSiph[species,reactions]*)
-*)
 Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]:=
 Module[{dyn, X,fp,pl,epi,plf},dyn=mod[[1]]/.cN;X=mod[[2]];
 fp=Quiet[Solve[Thread[(dyn)==0],X]//N];
@@ -363,6 +360,7 @@ plf=Show[{pl},Epilog->epi,PlotRange->{{pl0,pL},{y0,yM}},AxesLabel->{bifv,"Fixed 
 
 Idx[set_,n_PositiveInteger]:=Module[{seq},
 seq=(Table[Count[set,i],{i,n}]/.List->Sequence);seq];
+
 FHJ[comp_List,edges_List,rates_List, ver_:{},groups_List:{}]:=
 Module[{colorList,shapeList,vertexColors,options,vertexShapes,defaultColor=Yellow},
 colorList={Green,Red,Yellow,Purple,Orange};
@@ -381,64 +379,40 @@ Which[a===b[[1]],-1,a===b[[2]],1,True,0];
 oU=Outer[gg,vert,edg];
 taF=TableForm[oU,TableHeadings->{vert,edg},
 TableAlignments->{Right,Top}];
-{oU,taF}
-];
+{oU,taF}];
+
 IkFHJ[vert_,edg_,tk_]:=Module[{tri,gg,oU},
 tri=MapThread[Append,{edg,tk}];gg[a_,b_]:=
 Which[a===b[[1]],b[[3]],a===b[[2]],0,True,0];
-oU=Outer[gg,vert,tri]//Transpose
-];
+oU=Outer[gg,vert,tri]//Transpose];
 
-convNum[vertices_List] := Module[
-  {basis, processTerm, parseVertex},
-
-  (* Define basis vectors for A and B *)
+convNum[vertices_List] := Module[{basis, processTerm, parseVertex},
   basis = Association[{"A" -> {1, 0}, "B" -> {0, 1}}];
-
-  (* Function to process each term and convert to vector *)
   processTerm[term_] := Module[{coef, letter},
-    (* Extract coefficient and letter, default coefficient is 1 if missing *)
     {coef, letter} = 
      StringCases[term, {a : DigitCharacter .. ~~ " " ~~ l : ("A" | "B") :> {ToExpression[a], l}, 
                         l : ("A" | "B") :> {1, l}}][[1]];
-    coef * basis[letter]
-  ];
-
-  (* Parse each vertex string into terms and sum the resulting vectors *)
+    coef * basis[letter]];
   parseVertex[vertex_String] := 
    Total[processTerm /@ StringSplit[vertex, " + "]];
+  parseVertex /@ vertices];
 
-  (* Apply the conversion to the entire list of vertices *)
-  parseVertex /@ vertices
-]
 sym2Str=Replace[Thread[#1->#2],x_Symbol:>ToString[x],All]&;
 str2Sym= #//. s_String :>ToExpression[s]&; 
 varLS= (#//. s_String :>ToExpression[s])//Variables&;
-
 rul2Str=# /. r_Rule :> ToString /@ r &;
 
-(* Example usage 
-expr={{2 "x"+"y"->4 "x"+5 "y"},{5 "x"->7 "y"}};
-convEdg[expr]
-vert = {"B", "A", "2 A + B", "A + 2 B"};
-vertn = convNum[vert]
-edg = {"B" -> "A", "2 A + B" -> "A + 2 B"};
-wei = {k1, k2};
-
-FHJn[vert, edg, wei, {{"A", "B"}},  .20]*)
- Hur3M[A_]:=Module[{co,h3,inec,ineSys,\[Omega]},
+Hur3M[A_]:=Module[{co,h3,inec,ineSys,\[Omega]},
 co=CoefficientList[(-1)^Length[A] CharacteristicPolynomial[A,\[Omega]],\[Omega]];
 h3=co[[ 2]]* co[[ 3]]-co[[ 1]] *co[[ 4]];inec={co[[ 1]]>0,co[[ 2]]>0};
 ineSys=Append[inec,h3>0];
 {co,h3,ineSys}];
-(*A={{-j[1]-j[3]+j[4],j[4],j[3]},{-2 j[4],-j[2]-j[4],0},{j[3],0,-j[3]}};
-Hur3M[A]*)
 
 Hur4M[mat_]:=Module[{lm,ch,cot,co,H4,h4,ine},
 lm=mat//Length;
 ch=((-1)^lm * CharacteristicPolynomial[mat,\[Lambda]]//Factor);
 cot=CoefficientList[ch,\[Lambda]];
-co=Reverse[Drop[cot,-1]];(*co[[0]]=1 is lead coef*)
+co=Reverse[Drop[cot,-1]];
 H4={{co[[1]],1,0,0},
 {co[[3]],co[[2]],co[[1]],1},
 {0,co[[4]],co[[3]],co[[2]]},
@@ -460,12 +434,6 @@ H5={{co[[1]],1,0,0,0},{co[[3]],co[[2]],co[[1]],1,0},
 {0,0,co[[5]],co[[4]],co[[3]]},
 {0,0,0,0,co[[5]]}};h5=Det[H5];
 ine=Append[Thread[co>0],co[[1]] co[[2]]>co[[3]]];{co,h5,ine,H5}];
-(*
-H5[co_]:=Module[{hm},hm={{co[[1]],1,0,0,0},
-{co[[3]],co[[2]],co[[1]],1,0},
-{co[[5]],co[[4]],co[[3]],co[[2]],co[[1]]},
-{0,0,co[[5]],co[[4]],co[[3]]},
-{0,0,0,0,co[[5]]}}];*)
 
 H6[co_]:=Module[{hm},hm={{co[[1]],1,0,0,0,0},
 {co[[3]],co[[2]],co[[1]],1,0,0},
@@ -480,6 +448,7 @@ jac=Grad[dyn,X]/.cn;
 tr=Tr[jac];
 det=Det[jac];
 {jac,tr,det}];
+
 JTDP[mod_,\[Zeta]_:\[Zeta],cn_:{}]:=
 Module[{dyn,X,jac,tr,det,chp,cof},dyn=mod[[1]];X=mod[[2]];
 jac=Grad[dyn,X]/.cn;
@@ -487,20 +456,18 @@ tr=Tr[jac];
 det=Det[jac];
 chp=CharacteristicPolynomial[jac,\[Zeta]];cof=CoefficientList[chp,\[Zeta]];
 {jac,tr,det,cof,chp}];
-(*Collect[JTDP[SIRG,x][[4]],x]
-JTDP[SIRG][[1]]//MatrixForm*)
+
 Res1F[mod_,csr_,pol_,in_,cn_:{}]:=
 Module[{jac,det,res,chp,cof},
 jac=JTDP[mod][[1]]/.csr/.cn;
 det=Numerator[Together[Det[jac]]];
-res=Resultant[det,pol,in]//Factor
-];
+res=Resultant[det,pol,in]//Factor];
 
 DFE[mod_,inf_:{},cn_:{}]:=Module[{dyn,X},
     dyn=mod[[1]]/.cn;X=mod[[2]];
     Quiet[Solve[Thread[dyn==0]/.Thread[X[[inf]]->0],X]]];
 
-fix[mod_,cn_:{}]:=Module[{dyn,X,fp,Xp},(*mostly numerical*)
+fix[mod_,cn_:{}]:=Module[{dyn,X,fp,Xp},
    dyn=mod[[1]]//.cn;X=mod[[2]];
    fp=X/.Quiet[Solve[Thread[(dyn)==0],X]];
    If[cn!={},Xp=Cases[_?(AllTrue[NonNegative]@#&)]@fp;
@@ -509,11 +476,11 @@ fix[mod_,cn_:{}]:=Module[{dyn,X,fp,Xp},(*mostly numerical*)
 phasePl2[mod_,cn_:{},plc_:{},in_:1]:=Module[{dyn,X,pl,fp,jac,jacE,Xp,Xs,sp,Gp,cP,xM,yM,
    r1,r2},
    dyn=mod[[1]]//.cn;X=mod[[2]];pl=Complement[Range[Length[X]],plc];
-   fp=X/.Quiet[NSolve[Thread[(dyn)==0],X]](*works if fp takes a short time*);
+   fp=X/.Quiet[NSolve[Thread[(dyn)==0],X]];
    jac=Grad[dyn,X]; jacE=jac/.{Thread[X->fp[[1]]]};
-   Xp=Cases[_?(AllTrue[NonNegative]@#&)]@fp(*selects positive fp*);
-   xM=Max/@Transpose[Xp](*determines the maximum values of x and y for plotting*);
-   Xs=SortBy[Xp,{ #[[1]]&,#[[2]]&}](*sorts fixed points in ascending order of x and y*);
+   Xp=Cases[_?(AllTrue[NonNegative]@#&)]@fp;
+   xM=Max/@Transpose[Xp];
+   Xs=SortBy[Xp,{ #[[1]]&,#[[2]]&}];
    r1={X[[pl[[1]]]],-xM[[pl[[1]]]]-.5,xM[[pl[[1]]]]+.5};
    r2={X[[pl[[2]]]],-xM[[pl[[2]]]]-.5,xM[[pl[[2]]]]+.5};
    sp=StreamPlot[{dyn[[pl[[1]]]],dyn[[pl[[2]]]]},r1,r2,StreamStyle->Arrowheads[Medium],
@@ -525,13 +492,12 @@ phasePl2[mod_,cn_:{},plc_:{},in_:1]:=Module[{dyn,X,pl,fp,jac,jacE,Xp,Xs,sp,Gp,cP
    cP=ContourPlot[{dyn[[1]],dyn[[2]]},r1,r2,
    FrameLabel->{"x[t]","y[t]"},ContourStyle->{Blue,Red},
    LabelStyle->Directive[Black,Medium]];
-   {Xs, jacE,Show[sp,cP,Gp]}
-   ]
+   {Xs, jacE,Show[sp,cP,Gp]}];
    
-   posM= Replace[#,{_?Negative->0,e_:>Replace[Expand[e],
+posM= Replace[#,{_?Negative->0,e_:>Replace[Expand[e],
  {Times[_?Negative,_]->0,t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
  
- FposEx=With[{pos=First@SparseArray[#]["NonzeroPositions"]},SparseArray[{pos->Extract[#,pos]},
+FposEx=With[{pos=First@SparseArray[#]["NonzeroPositions"]},SparseArray[{pos->Extract[#,pos]},
  Dimensions@#]]&;
  
 NGMs[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Kd},
@@ -539,85 +505,56 @@ NGMs[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Kd},
    infc=Complement[Range[Length[X]],inf];
    Jy=Grad[dyn[[inf]],X[[inf]]];
    chp=CharacteristicPolynomial[Jy,u];
-   (*The jacobian of the infectious equations*)
    V1=-Jy/.Thread[X[[infc]]->0];
-   (*V1 is a first guess for V, retains all gradient terms which
-   disappear when the non infectious components are null*)
    F1=Jy+V1/.Thread[X[[inf]]->0];
-   (*F1 is a first guess for F, containing all other 
-   gradient terms*)
    F=ReplaceAll[F1, _. _?Negative -> 0];
-   (*all terms in F1 containing minuses are set to 0*);
    V=F-Jy;
    K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
    Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
- {Jy,V1,F1,F,V,K,Kd,chp}]
+ {Jy,V1,F1,F,V,K,Kd,chp}];
  
- NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Jx,Jxy,Jyx,Kd},
+NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Jx,Jxy,Jyx,Kd},
    dyn=mod[[1]];X=mod[[2]];
    infc=Complement[Range[Length[X]],inf];
    Jx=Grad[dyn[[inf]],X[[inf]]];Jy=Grad[dyn[[infc]],X[[infc]]];
    Jxy=Grad[dyn[[inf]],X[[infc]]];Jyx=Grad[dyn[[infc]],X[[inf]]];
    chp=CharacteristicPolynomial[Jx,u];
-   (*The jacobian of the infectious equations*)
    V1=-Jx/.Thread[X[[infc]]->0];
-   (*V1 is a first guess for V, retains all gradient terms which
-   disappear when the non infectious components are null*)
    F1=Jx+V1/.Thread[X[[inf]]->0];
-   (*F1 is a first guess for F, containing all other 
-   gradient terms*)
    F=posM[F1];
-   (*all terms in F1 containing minuses are set to 0*);
    V=F-Jx;
    K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
    Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
- {Jx,V1,F1,F,V,K,Kd,chp,Jy,Jxy,Jyx}]
- 
+ {Jx,V1,F1,F,V,K,Kd,chp,Jy,Jxy,Jyx}];
 
- (*K=NGM[SEIR,Range[2]][[4]];eig=Eigenvalues[K]/.Thread[X[[inf]]->0];*) 
- 
- 
 JR0[pol_,u_]:=Module[{co,co1,cop,con,R0J},
 co=CoefficientList[pol,u];
   Print["the  factor  has degree ",Length[co]-1];
   Print["its leading  coefficient  is ",co[[Length[co]]]];
   co1=Expand[co[[1]] ];
   Print["its  constant coefficient  is ",co1];
-  cop=Replace[co1, _. _?Negative -> 0, {1}](*level 1 here ?*);
+  cop=Replace[co1, _. _?Negative -> 0, {1}];
   con=cop-co1;
   Print["R0J is"];
   R0J=con/cop//FullSimplify;
-{R0J,co}
-]
+{R0J,co}];
 
- Hirono[S_, intRows_, intCols_] :=
-(*Hirono\[Dash]Okada Network Reduction Module*)
- Module[
-  {S11, S12, S21, S22, S11plus, Sred},
-  
+Hirono[S_, intRows_, intCols_] :=
+Module[{S11, S12, S21, S22, S11plus, Sred},
   S11 = S[[intRows, intCols]];
   S12 = S[[intRows, Complement[Range[Dimensions[S][[2]]], intCols]]];
   S21 = S[[Complement[Range[Dimensions[S][[1]]], intRows], intCols]];
   S22 = S[[Complement[Range[Dimensions[S][[1]]], intRows], Complement[Range[Dimensions[S][[2]]], intCols]]];
-  
   S11plus = PseudoInverse[S11];
   Sred = Simplify[S22 - S21 . S11plus . S12];
-  Sred
-]
+  Sred];
 
- (*Verify Hirono module*)
-verHir[RHS_,var_,intRows_]:=Module[
-{extRows,sub,rhsRed,fpRed},extRows=Complement[Range[Length[var]],intRows];
+verHir[RHS_,var_,intRows_]:=Module[{extRows,sub,rhsRed,fpRed},
+extRows=Complement[Range[Length[var]],intRows];
 sub=Solve[RHS[[intRows]]==0,var[[intRows]]][[1]];
 rhsRed=RHS[[extRows]]/. sub//Simplify;
 fpRed=Solve[rhsRed==0,var[[extRows]]][[1]];
-{sub,rhsRed,fpRed}]
-
-(*Test using Example 7
-RHS={k1-k2 a+k5 d,k2 a-k3 b,k3 b-k4 c-k6 c,k4 c-k5 d};
-var={a,b,c,d};
-intRows={1,2};
-verHir[RHS,var,intRows]*)
+{sub,rhsRed,fpRed}];
 
 extP[mod_,inf_]:=
 Module[{X,Xi,qv,ov,ngm,fv,eq},X=mod[[2]];Xi=X[[inf]];
@@ -625,27 +562,24 @@ Module[{X,Xi,qv,ov,ngm,fv,eq},X=mod[[2]];Xi=X[[inf]];
  ov=Table[1,{j,Length[Xi]}];ngm=NGM[mod,inf];F=ngm[[4]];V=ngm[[5]];fv=ov . F;
  eq=(qv . F)*qv-qv*fv+(ov-qv) . V];
 
-RUR[mod_, ind_:{1}, cn_ : {}] (*ind is a list*):= 
+RUR[mod_, ind_:{1}, cn_ : {}] := 
 Module[{RHS, var, par, elim,ratsub,pol,rat1},
        RHS = mod[[1]]/.cn; var = mod[[2]]; par = mod[[3]]; 
        elim = Complement[Range[Length[var]], ind];
        ratsub = seFZ[Solve[Delete[Thread[RHS == 0], ind], 
        var[[elim]]]];
       pol =Numerator[Together[RHS//.ratsub]];
-        RHS[[ind]]/.ratsub;(*Collect[GroebnerBasis[num, 
-         Join[par, var[[ind]]], var[[elim]],
-         MonomialOrder->EliminationOrder],var[[ind]]]; *)
+        RHS[[ind]]/.ratsub;
        rat1=Append[(ratsub/.var[[ind]]->1),var[[ind]]->1];
-    {ratsub, pol,rat1}
-      ]
+    {ratsub, pol,rat1}];
       
 GBH[pol_,var_,sc_,cn_:{}]:=Module[{li,pa},
 li={pol,sc};pa=Complement[Variables[li],{var}];
 GroebnerBasis[{Numerator[Together[pol]],
 Numerator[Together[sc]]}/.cn,pa,{var},
 MonomialOrder->EliminationOrder]];
-Stodola[pol_,var_] :=Equal@@Sign[CoefficientList[pol,var]]
 
+Stodola[pol_,var_] :=Equal@@Sign[CoefficientList[pol,var]];
 
 
 mSim[mod_,cN_, cInit_,T_:100,exc_:{}]:=
