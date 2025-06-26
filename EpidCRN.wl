@@ -240,15 +240,14 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
    , {i, Length[reactions]}];
   DeleteDuplicates[allSpecies]];
 
-(* Fixed asoRea function *)
-asoRea[RN_] := Module[{parseSide}, 
-  parseSide[expr_] := If[expr === 0, {}, 
-    If[Head[expr] === Plus, 
-     List @@ expr, (* If it's a sum, get the terms *)
-     {expr}]]; (* If it's a single term, wrap in list *)
-  Map[Function[r, 
-    Association["Substrates" -> parseSide[r[[1]]], 
-     "Products" -> parseSide[r[[2]]]]], RN]]
+asoRea[RN_]:=Module[{parseSide,extractSpecies},(*Extract species names from terms like "2 A",2*"A","A"*)extractSpecies[expr_]:=Module[{terms,species},If[expr===0,Return[{}]];
+terms=If[Head[expr]===Plus,List@@expr,{expr}];
+species={};
+Do[Which[(*Handle strings like "2 A","3 B"*)StringQ[term]&&StringContainsQ[term," "],AppendTo[species,StringTrim[StringDrop[term,1]]],(*Handle expressions like 2*"A",3*"B"*)Head[term]===Times,AppendTo[species,Cases[term,_String][[1]]],(*Handle simple strings like "A","B"*)StringQ[term],AppendTo[species,term]];,{term,terms}];
+DeleteDuplicates[species]];
+parseSide[expr_]:=extractSpecies[expr];
+Map[Function[r,Association["Substrates"->parseSide[r[[1]]],"Products"->parseSide[r[[2]]]]],RN]];
+
 
 (* Create stoichiometric matrices alpha (reactants), beta (products), and gamma (net) *)
 stoichiometricMatrices[reactions_] := Module[{species, numReactions, numSpecies, alpha, beta, gamma, reactants, products},
@@ -324,28 +323,28 @@ reaToRHS[reactions_] := Module[{alpha, beta, gamma, species, var, rv, tk, Rv, RH
   isSiphonQ
 ]
 
-(*Corrected minimal siphon finder*)
+(*Corrected minSiph function*)
 minSiph[species_List,reactions_List]:=Module[{ns,sm,specs,constraints,solutions,siphons,minimal},ns=Length[species];
 sm=AssociationThread[species->Range[ns]];
 specs=Array[Symbol["s"<>ToString[#]]&,ns];
-(*Build constraints*)constraints={Or@@specs};(*At least one species in siphon*)Do[Module[{subIdx,prodIdx,substrates,products},(*Get substrate and product indices*)substrates=reaction["Substrates"];
-products=reaction["Products"];
-(*Convert species names to indices*)subIdx=If[substrates==={}||substrates==={""},{},Select[Lookup[sm,substrates,Nothing],IntegerQ]];
-prodIdx=If[products==={}||products==={""},{},Select[Lookup[sm,products,Nothing],IntegerQ]];
-(*Add constraints for each product*)Do[If[Length[subIdx]==0,(*Empty product:product cannot be in siphon*)AppendTo[constraints,Not[specs[[p]]]],(*substrate->product:if product in siphon,some substrate must be too*)AppendTo[constraints,Implies[specs[[p]],If[Length[subIdx]==1,specs[[subIdx[[1]]]],Or@@specs[[subIdx]]]]]],{p,prodIdx}]],{reaction,reactions}];
-(*Print["Constraints generated: ",Length[constraints]];*)
-Print["Sample constraints: ",Take[constraints,Min[5,Length[constraints]]]];
-(*Find solutions with moderate limit to avoid crashes*)
-solutions=FindInstance[constraints,specs,Integers,25];
-If[solutions==={},Return[{}]];
+constraints={Or@@specs};
+Do[Module[{subIdx,prodIdx,substrates,products},substrates=reactions[[i]]["Substrates"];
+products=reactions[[i]]["Products"];
+subIdx={};
+If[substrates=!={}&&substrates=!={""},Do[If[KeyExistsQ[sm,sub],AppendTo[subIdx,sm[sub]];];,{sub,substrates}];];
+prodIdx={};
+If[products=!={}&&products=!={""},Do[If[KeyExistsQ[sm,prod],AppendTo[prodIdx,sm[prod]];];,{prod,products}];];
+Do[Module[{constraint},If[Length[subIdx]==0,constraint=Not[specs[[p]]];,constraint=Implies[specs[[p]],If[Length[subIdx]==1,specs[[subIdx[[1]]]],Or@@specs[[subIdx]]]];];
+AppendTo[constraints,constraint];];,{p,prodIdx}];];,{i,Length[reactions]}];
+solutions=FindInstance[constraints,specs,Integers,50];
+If[solutions==={},Return[{}];];
 siphons=Map[Flatten@Position[specs/. #,True]&,solutions];
 siphons=DeleteDuplicates[siphons];
-Print["All  siphons: ",siphons];
-(*Proper minimality check:remove any siphon that contains another*)minimal={};
-Do[If[Not[AnyTrue[siphons,Function[other,other=!=siphon&&SubsetQ[siphon,other]]]],
-AppendTo[minimal,siphon]],{siphon,siphons}];
-Print["minimal  siphons: ",minimal];minimal
-]
+siphons=Select[siphons,Length[#]>0&];
+minimal={};
+Do[If[Not[AnyTrue[siphons,Function[other,other=!=siphon&&SubsetQ[siphon,other]]]],AppendTo[minimal,siphon]];,{siphon,siphons}];
+Map[species[[#]]&/@#&,minimal]];
+
 (*Check if a facet is invariant using the RHS*)
 isInvariantFacet[facetSet_,reactions_]:=
 Module[{vf,vars,facetIndices,facetRules,isInvariant,derivative,varSymbols},
