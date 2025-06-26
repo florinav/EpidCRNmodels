@@ -346,6 +346,50 @@ Do[If[Not[AnyTrue[siphons,Function[other,other=!=siphon&&SubsetQ[siphon,other]]]
 AppendTo[minimal,siphon]],{siphon,siphons}];
 Print["minimal  siphons: ",minimal];minimal
 ]
+(*Check if a facet is invariant using the RHS*)
+isInvariantFacet[facetSet_,reactions_]:=
+Module[{vf,vars,facetIndices,facetRules,isInvariant,derivative,varSymbols},
+{vf,vars}=Take[reaToRHS[reactions],2];
+(*Convert species strings to symbols to match what's in vf*)
+varSymbols=ToExpression[vars];
+(*Find indices of facet species in variable list*)
+facetIndices=Flatten[Position[vars,#]&/@facetSet];
+(*Create facet:set all facet species to zero using symbols*)
+facetRules=Table[varSymbols[[facetIndices[[j]]]]->0,{j,Length[facetIndices]}];
+(*Check invariance:derivatives of facet species should be<=0 on the facet*)
+isInvariant=True;
+Do[
+  derivative=Simplify[vf[[facetIndices[[j]]]]/. facetRules];
+  
+  (* Handle 0^k terms: assume k > 0, so 0^k = 0 *)
+  derivative=derivative/.Power[0,_]:>0;
+  derivative=Simplify[derivative];
+  
+  (*The derivative should be non-positive (can't leave the facet)*)
+  If[!(PossibleZeroQ[derivative]||
+    TrueQ[Simplify[derivative<=0]]||
+    TrueQ[Simplify[derivative<=0,Assumptions->And@@(#>=0&/@varSymbols)]]||
+    MatchQ[derivative,_?NonPositive]||
+    MatchQ[derivative,_?Negative]||
+    derivative===0),
+    isInvariant=False;
+    Break[]];
+,{j,Length[facetIndices]}];
+isInvariant];
+
+(*Main function to find invariant facets using RHS*)
+invFacet[reactions_,maxCodim_]:=Module[{species,n,invariantFacets,subsets},
+species=extSpe[reactions];
+n=Length[species];
+invariantFacets={};
+(*Check all subsets up to the specified codimension*)
+Do[subsets=Subsets[species,{k}];
+Do[candidateSet=subsets[[i]];
+(*Check if it's an invariant facet using RHS*)
+If[isInvariantFacet[candidateSet,reactions],
+AppendTo[invariantFacets,candidateSet]];,{i,Length[subsets]}];,{k,1,Min[maxCodim,n]}];
+invariantFacets];
+
 
 
 Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]:=
