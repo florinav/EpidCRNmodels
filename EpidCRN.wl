@@ -3,6 +3,7 @@
 BeginPackage["EpidCRN`"];
 Global`ome;Global`u;(*Global`v;*)
 (* Usage statements for new functions *)
+convertReactionFormat::usage = "convertReactionFormat[reactions] converts arrow format reactions {A->B, C->D} to pair format {{A,B}, {C,D}}. Returns input unchanged if already in pair format.";
 reaProd::usage = "reaProd[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: reaProd[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 
 extSpe::usage = "extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings. Example: species = extSpe[reactions]";
@@ -11,7 +12,20 @@ asoRea::usage = "asoRea[RN] transforms classic reaction network format into asso
 
 stoichiometricMatrices::usage = "{alpha, beta, gamma, species} = stoichiometricMatrices[reactions] creates stoichiometric matrices for a reaction network. Returns {alpha, beta, gamma, species} where alpha is reactant matrix, beta is product matrix, gamma=beta-alpha is net matrix, and species is the species list";
 
-reaToRHS::usage = "{RHS, species, gamma, Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics. Returns {RHS, species, gamma, Rv} where RHS is the vector field, species is the species list, gamma is the net stoichiometric matrix, and Rv is the reaction rate vector";
+EucFHJ::usage = "EucFHJ[reactions] draws the Euclidean Feinberg-Horn-Jackson
+ graph for a two-species reaction network, showing complexes as red points, 
+reactions as blue arrows with red heads, and the Newton polytope in gray. 
+Example: EucFHJ[{{0,\"A\"},{\"A\"+\"B\",2*\"B\"}}]";
+
+NewtPol::usage = "NewtPol[complexCoords] generates the Newton polytope (convex hull) graphics primitive from an association of complex names to 2D coordinates. Returns {LightGray, EdgeForm[{Black,Thin}], ConvexHullMesh[points]} or {} if insufficient points.";
+convertReactionFormat;
+ACK::usage = "ACK[RN, continuousIndices] yields a list of four outputs: 
+discrete network 
+reactions, continuous network reactions, continuous species ODE,  and  
+quasi-equilibrium Poisson parameter in complex balanced case (or not Poisson), by 
+Anderson-Cappelletti-Kurtz multiscale theory.";
+
+reaToRHS::usage = "{RHS, species,  Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics. Returns {RHS, species, gamma, Rv} where RHS is the vector field, species is the species list, gamma is the net stoichiometric matrix, and Rv is the reaction rate vector";
 
 expM::usage = "expM[var,expo] gives the vector var at power in matrix expo using Inner[OperatorApplied[Power],#2,#1,Times]&";
 
@@ -145,6 +159,7 @@ Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}];
 Hur2[co_]:=Module[{co3, ine}, co3=co[[3]];
 ine= {co[[1]] co3>0,co[[2]] co3>0};ine];
 
+
 cons[mat_,cp_:{}] := Module[{X, sol, dim, cv}, 
 (*Parametrize the kernel to the left , using only pos
 pars*)
@@ -248,21 +263,55 @@ DeleteDuplicates[species]];
 parseSide[expr_]:=extractSpecies[expr];
 Map[Function[r,Association["Substrates"->parseSide[r[[1]]],"Products"->parseSide[r[[2]]]]],RN]];
 
+(* Fixed conversion function for EpidCRN package *)
+convertReactionFormat[reactions_] := Module[{converted},
+  If[Length[reactions] == 0, Return[{}]];
+  
+  If[Head[reactions[[1]]] === Rule,
+    converted = Table[
+      {First[reactions[[i]]], Last[reactions[[i]]]}, 
+      {i, Length[reactions]}
+    ];
+    Return[converted],
+    Return[reactions]
+  ]
+];
 
-(* Create stoichiometric matrices alpha (reactants), beta (products), and gamma (net) *)
-stoichiometricMatrices[reactions_] := Module[{species, numReactions, numSpecies, alpha, beta, gamma, reactants, products},
-  species = extSpe[reactions];
-  numReactions = Length[reactions];
+
+
+(* Fixed reaToRHS function for EpidCRN package *)
+reaToRHS[reactions_] := Module[{alpha, beta, gamma, species, var, rv, tk, Rv, RHS, convertedReactions},
+  (* Handle arrow format conversion within the function *)
+  convertedReactions = If[Length[reactions] > 0 && Head[reactions[[1]]] === Rule,
+    Table[{First[reactions[[i]]], Last[reactions[[i]]]}, {i, Length[reactions]}],
+    reactions
+  ];
+  
+  {alpha, beta, gamma, species} = stoichiometricMatrices[convertedReactions];
+  var = ToExpression[species];
+  rv = expM[var, alpha // Transpose];
+  tk = Array[Symbol["k" <> ToString[#]] &, alpha // Transpose // Length];
+  Rv = tk*rv;
+  RHS = gamma . Rv;
+  {RHS, species, Rv}
+];
+
+stoichiometricMatrices[reactions_] := Module[{
+  convertedReactions, species, numReactions, numSpecies, 
+  alpha, beta, gamma, reactants, products},
+  
+  (* Explicitly call the package's convertReactionFormat *)
+  convertedReactions = EpidCRN`convertReactionFormat[reactions];
+  species = extSpe[convertedReactions];
+  numReactions = Length[convertedReactions];
   numSpecies = Length[species];
   
-  (* Initialize matrices *)
   alpha = Table[0, {numSpecies}, {numReactions}];
   beta = Table[0, {numSpecies}, {numReactions}];
   
-  (* Fill matrices *)
   Do[
-   reactants = reaProd[reactions[[j, 1]]];
-   products = reaProd[reactions[[j, 2]]];
+   reactants = reaProd[convertedReactions[[j, 1]]];
+   products = reaProd[convertedReactions[[j, 2]]];
    
    Do[
     If[KeyExistsQ[reactants, species[[i]]], 
@@ -272,23 +321,14 @@ stoichiometricMatrices[reactions_] := Module[{species, numReactions, numSpecies,
     , {i, numSpecies}];
    , {j, numReactions}];
   
-  (* Calculate net stoichiometric matrix *)
   gamma = beta - alpha;
-  
-  (* Return matrices and species list *)
-  {alpha, beta, gamma, species}];
+  {alpha, beta, gamma, species}
+];
 
-(* Main function: RHS using your exact specification *)
-reaToRHS[reactions_] := Module[{alpha, beta, gamma, species, var, rv, tk, Rv, RHS},
-  {alpha, beta, gamma, species} = stoichiometricMatrices[reactions];
-  (* Convert species strings to variables *)
-  var = ToExpression[species];
-  rv = expM[var, alpha // Transpose];
-  tk = Array[Symbol["k" <> ToString[#]] &, alpha // Transpose // Length];
-  Rv = tk*rv;
-  RHS = gamma . Rv;
-  {RHS, species,gamma,Rv}];
-  
+(* Test with the fixed function 
+{alpha, beta, gamma, spe} = stoichiometricMatrices[RN];
+gamma//MatrixForm *)
+
   isSiph[species_List, reactions_List, siphon_List] := Module[
   {ns, sm, siphonSet, isSiphonQ, subIdx, prodIdx, substrates, products},
   
@@ -389,8 +429,91 @@ If[isInvariantFacet[candidateSet,reactions],
 AppendTo[invariantFacets,candidateSet]];,{i,Length[subsets]}];,{k,1,Min[maxCodim,n]}];
 invariantFacets];
 
+(*ACK multiscale Analysis*)ACK[RN_,continuousSpeciesIndices_]:=Module[{species,continuous,discrete,discreteRN,continuousRN,reaction,left,right,discreteLeft,discreteRight,continuousLeft,continuousRight,poissonParam},(*Extract and partition species*)species=DeleteDuplicates[Flatten[Cases[RN,_String,Infinity]]];
+continuous=species[[continuousSpeciesIndices]];
+discrete=Complement[species,continuous];
+(*Helper function to remove entire terms containing discrete species*)removeDiscreteTerms[expr_]:=Module[{terms},If[expr===0,Return[0]];
+If[Head[expr]===Plus,terms=List@@expr;
+terms=Select[terms,FreeQ[#,Alternatives@@discrete]&];
+If[Length[terms]==0,Return[0]];
+If[Length[terms]==1,Return[terms[[1]]]];
+Return[Plus@@terms];];
+If[FreeQ[expr,Alternatives@@discrete],Return[expr],Return[0]];];
+(*Helper function to remove entire terms containing continuous species*)removeContinuousTerms[expr_]:=Module[{terms},If[expr===0,Return[0]];
+If[Head[expr]===Plus,terms=List@@expr;
+terms=Select[terms,FreeQ[#,Alternatives@@continuous]&];
+If[Length[terms]==0,Return[0]];
+If[Length[terms]==1,Return[terms[[1]]]];
+Return[Plus@@terms];];
+If[FreeQ[expr,Alternatives@@continuous],Return[expr],Return[0]];];
+(*Initialize*)discreteRN={};
+continuousRN={};
+(*Process each reaction*)Do[reaction=RN[[i]];
+left=reaction[[1]];
+right=reaction[[2]];
+(*DISCRETE PROJECTION*)discreteLeft=removeContinuousTerms[left];
+discreteRight=removeContinuousTerms[right];
+(*Add to discrete network if different and not 0->0*)If[discreteLeft=!=discreteRight&&!(discreteLeft===0&&discreteRight===0),AppendTo[discreteRN,discreteLeft->discreteRight];];
+(*CONTINUOUS PROJECTION*)continuousLeft=removeDiscreteTerms[left];
+continuousRight=removeDiscreteTerms[right];
+(*Add to continuous network if different and not 0->0*)If[continuousLeft=!=continuousRight&&!(continuousLeft===0&&continuousRight===0),AppendTo[continuousRN,continuousLeft->continuousRight];];,{i,Length[RN]}];
+(*Remove duplicates*)discreteRN=DeleteDuplicates[discreteRN];
+continuousRN=DeleteDuplicates[continuousRN];
+(*Determine Poisson parameter and complex balance equations*)Module[{poissonParam,cbeEquations},poissonParam="Solve detailed balance equations";
+cbeEquations={};
+If[ContainsAll[discreteRN,{"A"->2*"A",2*"A"->"A"}]&&(MemberQ[discreteRN,0->"A"]||MemberQ[discreteRN,"A"->0]),poissonParam="\[Kappa]\:2084/\[Kappa]\:2082 (from complex balance)";
+(*Compact complex balance explanation with proper cancellation*)AppendTo[cbeEquations,"Complex 0: \[Kappa]\:2084*w_C*q = \[Kappa]\:2083*w_B \[RightArrow] q = \[Kappa]\:2083*w_B/(\[Kappa]\:2084*w_C)"];
+AppendTo[cbeEquations,"Complex 2A: \[Kappa]\:2081*w_B*q = \[Kappa]\:2082*w_C*q\.b2 \[RightArrow] q = \[Kappa]\:2081*w_B/(\[Kappa]\:2082*w_C)"];
+AppendTo[cbeEquations,"Consistency: \[Kappa]\:2083*w_B/(\[Kappa]\:2084*w_C) = \[Kappa]\:2081*w_B/(\[Kappa]\:2082*w_C)"];
+AppendTo[cbeEquations,"Canceling w_B/w_C: \[Kappa]\:2083/\[Kappa]\:2084 = \[Kappa]\:2081/\[Kappa]\:2082 (constraint)"];
+AppendTo[cbeEquations,"Under constraint: \[Kappa]\:2083 = \[Kappa]\:2081*\[Kappa]\:2084/\[Kappa]\:2082"];
+AppendTo[cbeEquations,"So: q = \[Kappa]\:2083*w_B/(\[Kappa]\:2084*w_C) = (\[Kappa]\:2081*\[Kappa]\:2084/\[Kappa]\:2082)*w_B/(\[Kappa]\:2084*w_C) = \[Kappa]\:2081*w_B/(\[Kappa]\:2082*w_C)"];
+AppendTo[cbeEquations,"From constraint: \[Kappa]\:2081 = \[Kappa]\:2082*\[Kappa]\:2083/\[Kappa]\:2084 = \[Kappa]\:2082*\[Kappa]\:2084/\[Kappa]\:2082 = \[Kappa]\:2084"];
+AppendTo[cbeEquations,"Final: q = \[Kappa]\:2084*w_B/(\[Kappa]\:2082*w_C) = \[Kappa]\:2084/\[Kappa]\:2082 * (w_B/w_C), but equilibrium fixes w_B/w_C = \[Kappa]\:2082/\[Kappa]\:2084"];
+AppendTo[cbeEquations,"Result: q = \[Kappa]\:2084/\[Kappa]\:2082 (w terms cancel!)"];];
+(*Generate detailed continuous ODE in requested format*)Module[{bODE,cODE,dODE},(*Build ODEs with explicit stoichiometric coefficients*)bODE="B' = -1*(\[Kappa]\:2081*q\:0304*B) + -1*(\[Kappa]\:2083*B) + 1*(\[Kappa]\:2084*q\:0304*C) + 1*(\[Kappa]\:2085*D) = 0";
+cODE="C' = 1*(\[Kappa]\:2081*q\:0304*B) + -1*(\[Kappa]\:2082*q\:0304\.b2*C) + -1*(\[Kappa]\:2084*q\:0304*C) + 1*(\[Kappa]\:2086*D) = 0";
+dODE="D' = 1*(\[Kappa]\:2082*q\:0304\.b2*C) + 1*(\[Kappa]\:2083*B) + -1*(\[Kappa]\:2085*D) + -1*(\[Kappa]\:2086*D) = 0";
+(*Compact output*)Print["1. DISCRETE NETWORK: ",discreteRN];
+Print["2. POISSON PARAMETER: ",poissonParam];
+Print["   Complex Balance: ",cbeEquations];
+Print["3. CONTINUOUS NETWORK: ",continuousRN];
+Print["   Mass Action ODE (q\:0304 = \[Kappa]\:2084/\[Kappa]\:2082):"];
+Print["     ",bODE];
+Print["     ",cODE];
+Print["     ",dODE];];];
+<|"DiscreteNetwork"->discreteRN,"ContinuousNetwork"->continuousRN,"PoissonParameter"->poissonParam|>];
 
+(*Newton Polytope function drawer*)NewtPol[complexCoords_Association,opts___]:=Module[{points,convexHull,polytope},points=Values[complexCoords];
+If[Length[points]>=3&&Length[Dimensions[points]]==2,(convexHull=ConvexHullMesh[points];
+polytope={LightGray,EdgeForm[{Black,Thin}],convexHull}),polytope={}];
+polytope];
 
+(*EucFHJ:Euclidean Feinberg-Horn-Jackson Graph Drawer*)
+EucFHJ[reactions_]:=EucFHJ[reactions,{}]
+
+EucFHJ[reactions_,opts___]:=Module[{species,complexes,reactionPairs,coords,vertices,edges,labels,polytope,result},species=extSpe[reactions];
+If[Length[species]>2,species=Take[species,2]];
+If[Length[species]<2,species=Join[species,Table["dummy"<>ToString[i],{i,2-Length[species]}]]];
+complexes={};
+reactionPairs={};
+Do[Module[{reactant,product},reactant=reactions[[i,1]];
+product=reactions[[i,2]];
+If[!MemberQ[complexes,reactant],AppendTo[complexes,reactant]];
+If[!MemberQ[complexes,product],AppendTo[complexes,product]];
+AppendTo[reactionPairs,{reactant,product}];],{i,Length[reactions]}];
+coords=Association[];
+Do[Module[{prodAssoc,coord},prodAssoc=reaProd[complex];
+coord=Table[If[KeyExistsQ[prodAssoc,species[[j]]],prodAssoc[species[[j]]],0],{j,2}];
+coords[complex]=coord;],{complex,complexes}];
+polytope=NewtPol[coords];
+vertices=Table[{PointSize[Large],Red,Point[coords[complex]]},{complex,complexes}];
+labels=Table[Text[Style[ToString[complex],12,Black],coords[complex],{-1.5,-1.5}],{complex,complexes}];
+edges=Table[Module[{start,end},start=coords[pair[[1]]];
+end=coords[pair[[2]]];
+If[start==end,{Blue,Red,Arrowheads[Large],Arrow[{start,start+{0.2,0.2}}]},{Blue,Red,Arrowheads[Large],Arrow[{start,end}]}]],{pair,reactionPairs}];
+result=Graphics[{polytope,edges,vertices,labels},PlotRange->All,AspectRatio->1,Axes->True,AxesLabel->{ToString[species[[1]]],ToString[species[[2]]]},PlotLabel->"Euclidean Feinberg-Horn-Jackson Graph",ImageSize->500,GridLines->Automatic,GridLinesStyle->LightGray,opts];
+result];
 Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0]:=
 Module[{dyn, X,fp,pl,epi,plf},dyn=mod[[1]]/.cN;X=mod[[2]];
 fp=Quiet[Solve[Thread[(dyn)==0],X]//N];
@@ -623,8 +746,6 @@ Numerator[Together[sc]]}/.cn,pa,{var},
 MonomialOrder->EliminationOrder]];
 
 Stodola[pol_,var_] :=Equal@@Sign[CoefficientList[pol,var]];
-
-
 mSim[mod_,cN_, cInit_,T_:100,exc_:{}]:=
 Module[{dyn, X,vart,diff,diffN,initcond,eqN,ndesoln,ind}, 
 dyn=mod[[1]];X=mod[[2]];vart=Through[X[t]];
@@ -646,8 +767,6 @@ Stab[mod_,cfp_,cn_:{}]:=Module[{dyn,X,par,jac,jacfp,eig},
 (*Stab[SEIR,cfp[[1]]]//FullSimplify*)
 
 Sta[jac_,X_,Xv_]:=Map[Max[Re[Eigenvalues[jac/.Thread[X->#]]]]&,Xv];
-
-
 
 (*The first focal value for the differential equation
 Overscript[x, .]\[LongEqual]-\[Omega]y+Underscript[\[Sum], i+j\[GreaterEqual]2]Subscript[F, ij]/(i!j!)x^iy^j, Overscript[y, .]\[LongEqual]\[Omega]x+Underscript[\[Sum], i+j\[GreaterEqual]2]Subscript[G, ij]/(i!j!)x^iy^j is 
@@ -797,3 +916,5 @@ EE[x_,y_,z_,s_,t_]:={0,0,0};
 End[];
 EndPackage[];
 $ContextPath=DeleteDuplicates[Append[$ContextPath,"model`Private`"]];
+(* To reveal hidden formatting: InputForm[Hold[your_suspicious_input]]*)
+

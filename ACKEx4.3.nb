@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     47630,       1185]
-NotebookOptionsPosition[     39284,       1081]
-NotebookOutlinePosition[     39747,       1098]
-CellTagsIndexPosition[     39704,       1095]
+NotebookDataLength[     47485,       1117]
+NotebookOptionsPosition[     45405,       1082]
+NotebookOutlinePosition[     45849,       1098]
+CellTagsIndexPosition[     45806,       1095]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -23,355 +23,639 @@ Cell[CellGroupData[{
 Cell[BoxData[
  RowBox[{
   RowBox[{"(*", 
-   RowBox[{
-    RowBox[{
-    "Test", " ", "ACK", " ", "Theory", " ", "on", " ", "Example", " ", "from",
-      " ", "Paper"}], "-", "Non", "-", 
-    RowBox[{"Poisson", " ", "ACR", " ", "System"}]}], "*)"}], 
+   RowBox[{"ACK", " ", "multiscale", " ", "Analysis"}], "*)"}], 
+  "\[IndentingNewLine]", 
   RowBox[{
    RowBox[{
     RowBox[{
-    "Print", "[", 
-     "\"\<=== ACK PAPER EXAMPLE: NON-POISSON ACR SYSTEM ===\\n\>\"", "]"}], 
-    ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{
-    "Define", " ", "the", " ", "reaction", " ", "network", " ", "from", " ", 
-     "the", " ", "paper"}], "*)"}], "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"RN", "=", 
-     RowBox[{"{", 
+     RowBox[{"ACK", "[", 
+      RowBox[{"RN_", ",", "continuousSpeciesIndices_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
       RowBox[{
-       RowBox[{
+       RowBox[{"{", 
         RowBox[{
-         RowBox[{"2", "*", "\"\<A\>\""}], "+", "\"\<B\>\""}], "->", 
-        RowBox[{"3", "*", "\"\<B\>\""}]}], ",", 
-       RowBox[{"\"\<B\>\"", "->", "\"\<A\>\""}]}], "}"}]}], ";"}], 
-   "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<Reaction Network:\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<  2A + B \[RightArrow] 3B\>\"", "]"}], ";"}], 
-   "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<  B \[RightArrow] A\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<(A exhibits ACR but discrete system is NOT complex \
-balanced)\\n\>\"", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{
-    "Extract", " ", "species", " ", "and", " ", "analyze", " ", "structure"}],
-     "*)"}], "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"species", "=", 
-     RowBox[{"extSpe", "[", "RN", "]"}]}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"reactions", "=", 
-     RowBox[{"asoRea", "[", "RN", "]"}]}], ";"}], "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Species: \>\"", ",", "species"}], "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Parsed reactions: \>\"", ",", "reactions"}], "]"}], ";"}], 
-   "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"SIPHON", " ", "ANALYSIS"}], "==="}], "*)"}], 
+        "species", ",", "continuous", ",", "discrete", ",", "discreteRN", ",",
+          "continuousRN", ",", "reaction", ",", "left", ",", "right", ",", 
+         "discreteLeft", ",", "discreteRight", ",", "continuousLeft", ",", 
+         "continuousRight", ",", "poissonParam", ",", "continuousODE"}], 
+        "}"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Extract", " ", "and", " ", "partition", " ", "species"}], 
+        "*)"}], 
+       RowBox[{
+        RowBox[{"species", "=", 
+         RowBox[{"DeleteDuplicates", "[", 
+          RowBox[{"Flatten", "[", 
+           RowBox[{"Cases", "[", 
+            RowBox[{"RN", ",", "_String", ",", "Infinity"}], "]"}], "]"}], 
+          "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"continuous", "=", 
+         RowBox[{"species", "[", 
+          RowBox[{"[", "continuousSpeciesIndices", "]"}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"discrete", "=", 
+         RowBox[{"Complement", "[", 
+          RowBox[{"species", ",", "continuous"}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Helper", " ", "function", " ", "to", " ", "remove", " ", "entire", 
+          " ", "terms", " ", "containing", " ", "discrete", " ", "species"}], 
+         "*)"}], 
+        RowBox[{
+         RowBox[{"removeDiscreteTerms", "[", "expr_", "]"}], ":=", 
+         RowBox[{"Module", "[", 
+          RowBox[{
+           RowBox[{"{", "terms", "}"}], ",", 
+           RowBox[{
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"expr", "===", "0"}], ",", 
+              RowBox[{"Return", "[", "0", "]"}]}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Head", "[", "expr", "]"}], "===", "Plus"}], ",", 
+              RowBox[{
+               RowBox[{"terms", "=", 
+                RowBox[{"List", "@@", "expr"}]}], ";", "\[IndentingNewLine]", 
+               RowBox[{"terms", "=", 
+                RowBox[{"Select", "[", 
+                 RowBox[{"terms", ",", 
+                  RowBox[{
+                   RowBox[{"FreeQ", "[", 
+                    RowBox[{"#", ",", 
+                    RowBox[{"Alternatives", "@@", "discrete"}]}], "]"}], 
+                   "&"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Length", "[", "terms", "]"}], "==", "0"}], ",", 
+                 RowBox[{"Return", "[", "0", "]"}]}], "]"}], ";", 
+               "\[IndentingNewLine]", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Length", "[", "terms", "]"}], "==", "1"}], ",", 
+                 RowBox[{"Return", "[", 
+                  RowBox[{"terms", "[", 
+                   RowBox[{"[", "1", "]"}], "]"}], "]"}]}], "]"}], ";", 
+               "\[IndentingNewLine]", 
+               RowBox[{"Return", "[", 
+                RowBox[{"Plus", "@@", "terms"}], "]"}], ";"}]}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"FreeQ", "[", 
+               RowBox[{"expr", ",", 
+                RowBox[{"Alternatives", "@@", "discrete"}]}], "]"}], ",", 
+              RowBox[{"Return", "[", "expr", "]"}], ",", 
+              RowBox[{"Return", "[", "0", "]"}]}], "]"}], ";"}]}], "]"}]}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Helper", " ", "function", " ", "to", " ", "remove", " ", "entire", 
+          " ", "terms", " ", "containing", " ", "continuous", " ", 
+          "species"}], "*)"}], 
+        RowBox[{
+         RowBox[{"removeContinuousTerms", "[", "expr_", "]"}], ":=", 
+         RowBox[{"Module", "[", 
+          RowBox[{
+           RowBox[{"{", "terms", "}"}], ",", 
+           RowBox[{
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"expr", "===", "0"}], ",", 
+              RowBox[{"Return", "[", "0", "]"}]}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Head", "[", "expr", "]"}], "===", "Plus"}], ",", 
+              RowBox[{
+               RowBox[{"terms", "=", 
+                RowBox[{"List", "@@", "expr"}]}], ";", "\[IndentingNewLine]", 
+               RowBox[{"terms", "=", 
+                RowBox[{"Select", "[", 
+                 RowBox[{"terms", ",", 
+                  RowBox[{
+                   RowBox[{"FreeQ", "[", 
+                    RowBox[{"#", ",", 
+                    RowBox[{"Alternatives", "@@", "continuous"}]}], "]"}], 
+                   "&"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Length", "[", "terms", "]"}], "==", "0"}], ",", 
+                 RowBox[{"Return", "[", "0", "]"}]}], "]"}], ";", 
+               "\[IndentingNewLine]", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Length", "[", "terms", "]"}], "==", "1"}], ",", 
+                 RowBox[{"Return", "[", 
+                  RowBox[{"terms", "[", 
+                   RowBox[{"[", "1", "]"}], "]"}], "]"}]}], "]"}], ";", 
+               "\[IndentingNewLine]", 
+               RowBox[{"Return", "[", 
+                RowBox[{"Plus", "@@", "terms"}], "]"}], ";"}]}], "]"}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"FreeQ", "[", 
+               RowBox[{"expr", ",", 
+                RowBox[{"Alternatives", "@@", "continuous"}]}], "]"}], ",", 
+              RowBox[{"Return", "[", "expr", "]"}], ",", 
+              RowBox[{"Return", "[", "0", "]"}]}], "]"}], ";"}]}], "]"}]}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", "Initialize", "*)"}], 
+        RowBox[{"discreteRN", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"continuousRN", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Process", " ", "each", " ", "reaction"}], "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"reaction", "=", 
+            RowBox[{"RN", "[", 
+             RowBox[{"[", "i", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"left", "=", 
+            RowBox[{"reaction", "[", 
+             RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"right", "=", 
+            RowBox[{"reaction", "[", 
+             RowBox[{"[", "2", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"DISCRETE", " ", "PROJECTION"}], "*)"}], 
+           RowBox[{"discreteLeft", "=", 
+            RowBox[{"removeContinuousTerms", "[", "left", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"discreteRight", "=", 
+            RowBox[{"removeContinuousTerms", "[", "right", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+             RowBox[{
+             "Add", " ", "to", " ", "discrete", " ", "network", " ", "if", 
+              " ", "different", " ", "and", " ", "not", " ", "0"}], "->", 
+             "0"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"discreteLeft", "=!=", "discreteRight"}], "&&", 
+              RowBox[{"!", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"discreteLeft", "===", "0"}], "&&", 
+                 RowBox[{"discreteRight", "===", "0"}]}], ")"}]}]}], ",", 
+             RowBox[{
+              RowBox[{"AppendTo", "[", 
+               RowBox[{"discreteRN", ",", 
+                RowBox[{"discreteLeft", "->", "discreteRight"}]}], "]"}], 
+              ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"CONTINUOUS", " ", "PROJECTION"}], "*)"}], 
+           RowBox[{"continuousLeft", "=", 
+            RowBox[{"removeDiscreteTerms", "[", "left", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"continuousRight", "=", 
+            RowBox[{"removeDiscreteTerms", "[", "right", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+             RowBox[{
+             "Add", " ", "to", " ", "continuous", " ", "network", " ", "if", 
+              " ", "different", " ", "and", " ", "not", " ", "0"}], "->", 
+             "0"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"continuousLeft", "=!=", "continuousRight"}], "&&", 
+              RowBox[{"!", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"continuousLeft", "===", "0"}], "&&", 
+                 RowBox[{"continuousRight", "===", "0"}]}], ")"}]}]}], ",", 
+             RowBox[{
+              RowBox[{"AppendTo", "[", 
+               RowBox[{"continuousRN", ",", 
+                RowBox[{"continuousLeft", "->", "continuousRight"}]}], "]"}], 
+              ";"}]}], "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "RN", "]"}]}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Remove", " ", "duplicates"}], "*)"}], 
+        RowBox[{"discreteRN", "=", 
+         RowBox[{"DeleteDuplicates", "[", "discreteRN", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"continuousRN", "=", 
+         RowBox[{"DeleteDuplicates", "[", "continuousRN", "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Determine", " ", "Poisson", " ", "parameter"}], "*)"}], 
+        RowBox[{
+        "poissonParam", "=", "\"\<Solve detailed balance equations\>\""}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"ContainsAll", "[", 
+            RowBox[{"discreteRN", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"\"\<A\>\"", "->", 
+                RowBox[{"2", "*", "\"\<A\>\""}]}], ",", 
+               RowBox[{
+                RowBox[{"2", "*", "\"\<A\>\""}], "->", "\"\<A\>\""}]}], 
+              "}"}]}], "]"}], "&&", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"MemberQ", "[", 
+              RowBox[{"discreteRN", ",", 
+               RowBox[{"0", "->", "\"\<A\>\""}]}], "]"}], "||", 
+             RowBox[{"MemberQ", "[", 
+              RowBox[{"discreteRN", ",", 
+               RowBox[{"\"\<A\>\"", "->", "0"}]}], "]"}]}], ")"}]}], ",", 
+          RowBox[{
+           RowBox[{
+           "poissonParam", "=", 
+            "\"\<\[Kappa]\:2084/\[Kappa]\:2082 (from complex balance, w terms \
+cancel)\>\""}], ";"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{
+            RowBox[{"Check", " ", "for", " ", "birth"}], "-", 
+            RowBox[{"death", " ", "pattern", " ", "like", " ", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"2", "A"}], "->", "0"}], ",", 
+               RowBox[{"0", "->", "A"}]}], "}"}], " ", "or", " ", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"A", "->", "0"}], ",", 
+               RowBox[{"0", "->", "A"}]}], "}"}]}]}], "*)"}], 
+          RowBox[{
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "discrete", "]"}], "==", "1"}], "&&", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"MemberQ", "[", 
+                 RowBox[{"discreteRN", ",", 
+                  RowBox[{
+                   RowBox[{"2", "*", 
+                    RowBox[{"discrete", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}]}], "->", "0"}]}], "]"}], "||", 
+                RowBox[{"MemberQ", "[", 
+                 RowBox[{"discreteRN", ",", 
+                  RowBox[{
+                   RowBox[{"discrete", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], "->", "0"}]}], "]"}]}], 
+               ")"}], "&&", 
+              RowBox[{"MemberQ", "[", 
+               RowBox[{"discreteRN", ",", 
+                RowBox[{"0", "->", 
+                 RowBox[{"discrete", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}]}]}], "]"}]}], ",", 
+             RowBox[{
+              RowBox[{
+              "poissonParam", "=", 
+               "\"\<Birth-death equilibrium (NOT Poisson for 2A->0 pattern)\>\
+\""}], ";"}], ",", 
+             RowBox[{
+              RowBox[{
+              "poissonParam", "=", "\"\<Complex network equilibrium\>\""}], 
+              ";"}]}], "]"}], ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Generate", " ", "continuous", " ", "ODE", " ", "based", " ", "on", 
+          " ", "actual", " ", "continuous", " ", "species", " ", "and", " ", 
+          "network"}], "*)"}], 
+        RowBox[{"continuousODE", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{
+            RowBox[{"Length", "[", "continuous", "]"}], ">", "0"}], "&&", 
+           RowBox[{
+            RowBox[{"Length", "[", "continuousRN", "]"}], ">", "0"}]}], ",", 
+          RowBox[{
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Module", "[", 
+               RowBox[{
+                RowBox[{"{", 
+                 RowBox[{"terms", "=", 
+                  RowBox[{"{", "}"}]}], "}"}], ",", 
+                RowBox[{
+                 RowBox[{"Do", "[", 
+                  RowBox[{"(*", 
+                   RowBox[{
+                   "Calculate", " ", "net", " ", "stoichiometric", " ", 
+                    "coefficient", " ", "for", " ", "this", " ", "species", 
+                    " ", "in", " ", "this", " ", "reaction"}], "*)"}], 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"Module", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{
+                    "leftSide", ",", "rightSide", ",", "leftCoeff", ",", 
+                    "rightCoeff", ",", "netChange", ",", "rateExpr"}], "}"}], 
+                    ",", 
+                    RowBox[{
+                    RowBox[{"leftSide", "=", 
+                    RowBox[{"continuousRN", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", ",", "1"}], "]"}], "]"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"rightSide", "=", 
+                    RowBox[{"continuousRN", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", ",", "2"}], "]"}], "]"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"(*", 
+                    RowBox[{
+                    "Count", " ", "occurrences", " ", "of", " ", "this", " ", 
+                    "species", " ", "on", " ", "each", " ", "side"}], "*)"}], 
+                    RowBox[{"leftCoeff", "=", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"leftSide", "===", "0"}], ",", "0", ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "leftSide", "]"}], "===", "Plus"}], 
+                    ",", 
+                    RowBox[{"Total", "[", 
+                    RowBox[{"Cases", "[", 
+                    RowBox[{
+                    RowBox[{"List", "@@", "leftSide"}], ",", 
+                    RowBox[{
+                    RowBox[{"x_", "/;", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"x", "===", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], "||", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "x", "]"}], "===", "Times"}], "&&", 
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"x", ",", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], "]"}]}], ")"}]}], 
+                    ")"}]}], ":>", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "x", "]"}], "===", "Times"}], ",", 
+                    RowBox[{
+                    RowBox[{"Cases", "[", 
+                    RowBox[{"x", ",", 
+                    RowBox[{"_", "?", "NumericQ"}]}], "]"}], "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], ",", "1"}], "]"}]}]}], 
+                    "]"}], "]"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"leftSide", "===", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], ",", "1", ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "leftSide", "]"}], "===", "Times"}], 
+                    "&&", 
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"leftSide", ",", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], "]"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"Cases", "[", 
+                    RowBox[{"leftSide", ",", 
+                    RowBox[{"_", "?", "NumericQ"}]}], "]"}], "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], ",", "0"}], "]"}]}], 
+                    "]"}]}], "]"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"rightCoeff", "=", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"rightSide", "===", "0"}], ",", "0", ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "rightSide", "]"}], "===", "Plus"}], 
+                    ",", 
+                    RowBox[{"Total", "[", 
+                    RowBox[{"Cases", "[", 
+                    RowBox[{
+                    RowBox[{"List", "@@", "rightSide"}], ",", 
+                    RowBox[{
+                    RowBox[{"x_", "/;", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"x", "===", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], "||", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "x", "]"}], "===", "Times"}], "&&", 
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"x", ",", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], "]"}]}], ")"}]}], 
+                    ")"}]}], ":>", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "x", "]"}], "===", "Times"}], ",", 
+                    RowBox[{
+                    RowBox[{"Cases", "[", 
+                    RowBox[{"x", ",", 
+                    RowBox[{"_", "?", "NumericQ"}]}], "]"}], "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], ",", "1"}], "]"}]}]}], 
+                    "]"}], "]"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"rightSide", "===", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], ",", "1", ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "rightSide", "]"}], "===", "Times"}],
+                     "&&", 
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"rightSide", ",", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}], "]"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"Cases", "[", 
+                    RowBox[{"rightSide", ",", 
+                    RowBox[{"_", "?", "NumericQ"}]}], "]"}], "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], ",", "0"}], "]"}]}], 
+                    "]"}]}], "]"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"netChange", "=", 
+                    RowBox[{"rightCoeff", "-", "leftCoeff"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"netChange", "!=", "0"}], ",", 
+                    RowBox[{"(*", 
+                    RowBox[{
+                    RowBox[{"Build", " ", "rate", " ", "expression"}], "-", 
+                    RowBox[{"simplified", " ", "for", " ", "now"}]}], "*)"}], 
+                    RowBox[{
+                    RowBox[{"rateExpr", "=", 
+                    RowBox[{"\"\<\[Kappa]\>\"", "<>", 
+                    RowBox[{"ToString", "[", "j", "]"}]}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Length", "[", "discrete", "]"}], ">", "0"}], ",", 
+                    RowBox[{"rateExpr", "=", 
+                    RowBox[{"rateExpr", "<>", "\"\<*q\:0304\>\""}]}]}], "]"}],
+                     ";", "\[IndentingNewLine]", 
+                    RowBox[{"(*", 
+                    RowBox[{"Add", " ", "substrate", " ", "dependencies"}], 
+                    "*)"}], 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"leftSide", "=!=", "0"}], ",", 
+                    RowBox[{
+                    RowBox[{"Module", "[", 
+                    RowBox[{
+                    RowBox[{"{", "substrates", "}"}], ",", 
+                    RowBox[{
+                    RowBox[{"substrates", "=", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "leftSide", "]"}], "===", "Plus"}], 
+                    ",", 
+                    RowBox[{"List", "@@", "leftSide"}], ",", 
+                    RowBox[{"{", "leftSide", "}"}]}], "]"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"Do", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"continuous", ",", "substrate"}], "]"}], "||", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Head", "[", "substrate", "]"}], "===", "Times"}],
+                     "&&", 
+                    RowBox[{"AnyTrue", "[", 
+                    RowBox[{"substrate", ",", 
+                    RowBox[{
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"continuous", ",", "#"}], "]"}], "&"}]}], "]"}]}],
+                     ")"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"rateExpr", "=", 
+                    RowBox[{"rateExpr", "<>", "\"\<*\>\"", "<>", 
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}]}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"Break", "[", "]"}], ";"}]}], "]"}], ";"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"substrate", ",", "substrates"}], "}"}]}], "]"}], 
+                    ";"}]}], "]"}], ";"}]}], "]"}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"AppendTo", "[", 
+                    RowBox[{"terms", ",", 
+                    RowBox[{
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"netChange", ">", "0"}], ",", "\"\<+\>\"", ",", 
+                    "\"\<\>\""}], "]"}], "<>", 
+                    RowBox[{"ToString", "[", "netChange", "]"}], "<>", 
+                    "\"\<*(\>\"", "<>", "rateExpr", "<>", "\"\<)\>\""}]}], 
+                    "]"}], ";"}]}], "]"}], ";"}]}], "]"}], ";"}], ",", 
+                   RowBox[{"{", 
+                    RowBox[{"j", ",", 
+                    RowBox[{"Length", "[", "continuousRN", "]"}]}], "}"}]}], 
+                  "]"}], ";", "\[IndentingNewLine]", 
+                 RowBox[{"Module", "[", 
+                  RowBox[{
+                   RowBox[{"{", 
+                    RowBox[{"odeExpr", ",", "simplified"}], "}"}], ",", 
+                   RowBox[{
+                    RowBox[{"odeExpr", "=", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Length", "[", "terms", "]"}], ">", "0"}], ",", 
+                    RowBox[{"StringReplace", "[", 
+                    RowBox[{
+                    RowBox[{"StringRiffle", "[", 
+                    RowBox[{"terms", ",", "\"\< \>\""}], "]"}], ",", 
+                    RowBox[{"\"\<+-\>\"", "->", "\"\<-\>\""}]}], "]"}], ",", 
+                    "\"\<0\>\""}], "]"}]}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"simplified", "=", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"StringContainsQ", "[", 
+                    RowBox[{"poissonParam", ",", "\"\<complex balance\>\""}], 
+                    "]"}], "||", 
+                    RowBox[{"StringContainsQ", "[", 
+                    RowBox[{
+                    "poissonParam", ",", 
+                    "\"\<\[Kappa]\:2084/\[Kappa]\:2082\>\""}], "]"}]}], ",", 
+                    "\"\< = 0 (after CBE)\>\"", ",", "\"\<\>\""}], "]"}]}], 
+                    ";", "\[IndentingNewLine]", 
+                    RowBox[{"AppendTo", "[", 
+                    RowBox[{"continuousODE", ",", 
+                    RowBox[{
+                    RowBox[{"continuous", "[", 
+                    RowBox[{"[", "i", "]"}], "]"}], "<>", "\"\<' = \>\"", "<>",
+                     "odeExpr", "<>", "simplified"}]}], "]"}], ";"}]}], "]"}],
+                  ";"}]}], "]"}], ";"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"i", ",", 
+               RowBox[{"Length", "[", "continuous", "]"}]}], "}"}]}], "]"}], 
+           ";"}], ",", 
+          RowBox[{
+           RowBox[{"continuousODE", "=", 
+            RowBox[{
+            "{", "\"\<No continuous species or reactions\>\"", "}"}]}], 
+           ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Return", " ", "four", " ", "outputs", " ", "as", " ", "list"}], 
+         "*)"}], 
+        RowBox[{"{", 
+         RowBox[{
+         "discreteRN", ",", "continuousRN", ",", "continuousODE", ",", 
+          "poissonParam"}], "}"}]}]}], "]"}]}], ";"}], "\n", 
    "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<=== SIPHON ANALYSIS ===\>\"", "]"}], ";"}], 
-   "\n", 
-   RowBox[{
-    RowBox[{"minimalSiphons", "=", 
-     RowBox[{"minSiph", "[", 
-      RowBox[{"species", ",", "reactions"}], "]"}]}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Minimal siphons: \>\"", ",", "minimalSiphons"}], "]"}], 
-    ";"}], "\n", "\[IndentingNewLine]", 
    RowBox[{"(*", 
-    RowBox[{"Verify", " ", "siphon", " ", "properties", " ", "manually"}], 
-    "*)"}], "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<\\nManual siphon verification:\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<R1: 2A+B \[RightArrow] 3B\>\"", "]"}], ";"}], 
-   "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<  Produces B, consumes A,B \[Element] {A,B} \[Checkmark]\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<R2: B \[RightArrow] A\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<  Produces A, consumes B \[Element] {A,B} \[Checkmark]\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<Expected: {A,B} should be a siphon\>\"", "]"}],
-     ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"INVARIANT", " ", "FACET", " ", "ANALYSIS"}], "==="}], "*)"}], 
+    RowBox[{"Test", " ", "examples"}], "*)"}], "\[IndentingNewLine]", 
    "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<=== INVARIANT FACET ANALYSIS ===\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"invFacets", "=", 
-     RowBox[{"invFacet", "[", 
-      RowBox[{"RN", ",", "3"}], "]"}]}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Invariant facets: \>\"", ",", "invFacets"}], "]"}], ";"}], 
-   "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"ACK", " ", "ANALYSIS"}], "==="}], "*)"}], "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<=== ACK ANALYSIS ===\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<Partition: A (discrete), B (continuous)\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{"ACKResults", "=", 
-     RowBox[{"ACKAnalysis", "[", 
-      RowBox[{"RN", ",", 
-       RowBox[{"{", "2", "}"}]}], "]"}]}], ";"}], " ", 
-   RowBox[{"(*", 
-    RowBox[{"B", " ", "is", " ", "continuous", " ", "species"}], "*)"}], 
-   "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"DETAILED", " ", "ACK", " ", "INTERPRETATION"}], "==="}], "*)"}],
-    "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<=== ACK THEORY INTERPRETATION ===\>\"", "]"}], 
-    ";"}], "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<1. DISCRETE NETWORK (A dynamics with B = w):\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Original: 2A + B \[RightArrow] 3B gives 2A + w \[RightArrow] 3w \
-\[DoubleLongRightArrow] 2A \[RightArrow] 0\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Original: B \[RightArrow] A gives w \[RightArrow] A \
-\[DoubleLongRightArrow] 0 \[RightArrow] A\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Result: {2A \[RightArrow] 0, 0 \[RightArrow] A}\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   This is a birth-death process but NOT weakly reversible\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   \[Therefore] NOT complex balanced \[Therefore] NO Poisson \
-stationary distribution\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<2. CONTINUOUS NETWORK (B dynamics with A = q\:0304):\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Original: 2A + B \[RightArrow] 3B gives 2q\:0304 + B \
-\[RightArrow] 3B \[DoubleLongRightArrow] B \[RightArrow] 2B (net)\>\"", "]"}],
-     ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Original: B \[RightArrow] A gives B \[RightArrow] q\:0304 \
-\[DoubleLongRightArrow] B \[RightArrow] 0 (net)\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Result: B' = 2\[Kappa]\:2081q\:0304B - \[Kappa]\:2082B = (2\
-\[Kappa]\:2081q\:0304 - \[Kappa]\:2082)B\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<3. QUASI-EQUILIBRIUM:\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   The discrete birth-death process 2A \[RightArrow] 0, 0 \
-\[RightArrow] A has\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   stationary distribution \[Mu]\:02b7 (not Poisson!)\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<   A still exhibits ACR: E[A] independent of w\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<4. ACR PROPERTY:\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<   Even without complex balance, A exhibits ACR\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   Stationary mean E[A] = f(\[Kappa]\:2081,\[Kappa]\:2082) \
-independent of B concentration\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<   But distribution is NOT Poisson (as paper notes)\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"COMPARISON", " ", "OF", " ", "METHODS"}], "==="}], "*)"}], 
-   "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<=== COMPARISON: SIPHONS vs FACETS vs ACK ===\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Minimal siphons:     \>\"", ",", "minimalSiphons"}], "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Invariant facets:    \>\"", ",", "invFacets"}], "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<ACK discrete network: 2A \[RightArrow] 0, 0 \[RightArrow] A \
-(birth-death)\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<ACK continuous ODE:   B' = (2\[Kappa]\:2081q\:0304 - \
-\[Kappa]\:2082)B\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"THEORETICAL", " ", "INSIGHT"}], "==="}], "*)"}], 
-   "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<=== THEORETICAL INSIGHT ===\>\"", "]"}], ";"}],
-    "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "\"\<This example demonstrates that:\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] Siphons and invariant facets still work normally\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] ACR can exist without complex balance in discrete network\
-\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] The limiting distribution is NOT Poisson but still \
-exhibits ACR\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] A exhibits 'non-Poisson ACR' - robust mean, non-Poisson \
-distribution\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", "]"}], ";"}], "\n", "\[IndentingNewLine]", 
-   RowBox[{"(*", 
-    RowBox[{"===", 
-     RowBox[{"BIRTH", "-", 
-      RowBox[{"DEATH", " ", "ANALYSIS"}]}], "==="}], "*)"}], 
-   "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<=== BIRTH-DEATH PROCESS ANALYSIS ===\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<The discrete network 2A \[RightArrow] 0, 0 \[RightArrow] A is a \
-birth-death process:\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] Birth rate (0\[RightArrow]1): \[Lambda]\:2080 = \[Kappa]\
-\:2082w\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] Death rate (2\[RightArrow]0): \[Mu]\:2082 = \
-\[Kappa]\:2081w\[CenterDot]2\[CenterDot]1 = 2\[Kappa]\:2081w\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] Death rate (1\[RightArrow]0): \[Mu]\:2081 = 0 (no 1\
-\[RightArrow]0 transition!)\>\"", "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<This creates a non-standard birth-death process\>\"", 
-     "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Therefore] Stationary distribution exists but is NOT Poisson\>\"",
-      "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<However, the mean is still robust to w (ACR property)\>\"", "]"}], 
-    ";"}], "\n", "\[IndentingNewLine]", 
    RowBox[{"(*", 
     RowBox[{
-    "Test", " ", "with", " ", "simple", " ", "SI", " ", "model", " ", "for", 
-     " ", "comparison"}], "*)"}], "\[IndentingNewLine]", 
+     RowBox[{"Example", " ", "1"}], ":", 
+     RowBox[{"SI", " ", "Model"}]}], "*)"}], "\[IndentingNewLine]", 
    RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<\\n\>\"", "<>", 
-      RowBox[{"StringRepeat", "[", 
-       RowBox[{"\"\<=\>\"", ",", "60"}], "]"}]}], "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{
-    "Print", "[", "\"\<=== COMPARISON: SI MODEL (Poisson ACR) ===\>\"", "]"}],
-     ";"}], "\[IndentingNewLine]", "\n", 
+    RowBox[{"Print", "[", "\"\<=== SI MODEL TEST ===\>\"", "]"}], ";"}], "\n", 
    RowBox[{
     RowBox[{"RN", "=", 
      RowBox[{"{", 
@@ -381,707 +665,423 @@ birth-death process:\>\"", "]"}], ";"}], "\n",
         RowBox[{"2", "*", "\"\<I\>\""}]}], ",", 
        RowBox[{"\"\<I\>\"", "->", "\"\<S\>\""}]}], "}"}]}], ";"}], "\n", 
    RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<SI Model: S + I \[RightArrow] 2I, I \[RightArrow] S\>\"", "]"}], 
-    ";"}], "\n", 
-   RowBox[{
-    RowBox[{"species", "=", 
-     RowBox[{"extSpe", "[", "RN", "]"}]}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"reactions", "=", 
-     RowBox[{"asoRea", "[", "RN", "]"}]}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Minimal siphons: \>\"", ",", 
-      RowBox[{"minSiph", "[", 
-       RowBox[{"species", ",", "reactions"}], "]"}]}], "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"Print", "[", 
-     RowBox[{"\"\<Invariant facets: \>\"", ",", 
-      RowBox[{"invFacet", "[", 
-       RowBox[{"RN", ",", "2"}], "]"}]}], "]"}], ";"}], "\n", 
-   RowBox[{
-    RowBox[{"ACKResultsSI", "=", 
-     RowBox[{"ACKAnalysis", "[", 
+    RowBox[{"result", "=", 
+     RowBox[{"ACK", "[", 
       RowBox[{"RN", ",", 
        RowBox[{"{", "2", "}"}]}], "]"}]}], ";"}], " ", 
    RowBox[{"(*", 
     RowBox[{"I", " ", "is", " ", "continuous"}], "*)"}], "\n", 
    RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<SI gives M/M/\[Infinity] queue \[DoubleLongRightArrow] Poisson \
-distribution (standard ACR)\>\"", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Discrete network: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "1", "]"}], "]"}]}], "]"}], ";"}], "\n", 
    RowBox[{
-    RowBox[{"Print", "[", "\"\<\\n=== SUMMARY ===\>\"", "]"}], ";"}], "\n", 
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Continuous network: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "2", "]"}], "]"}]}], "]"}], ";"}], "\n", 
    RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<Both examples exhibit ACR but with different limiting \
-distributions:\>\"", "]"}], ";"}], "\n", 
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Continuous ODE: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "3", "]"}], "]"}]}], "]"}], ";"}], "\n", 
    RowBox[{
-    RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] SI model: Poisson ACR (complex balanced discrete network)\
-\>\"", "]"}], ";"}], "\n", 
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Poisson parameter: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "4", "]"}], "]"}]}], "]"}], ";"}], "\n", 
    RowBox[{
+    RowBox[{"Print", "[", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
     RowBox[{
-    "Print", "[", 
-     "\"\<\[Bullet] Non-Poisson example: Non-Poisson ACR (birth-death \
-discrete network)\>\"", "]"}], ";"}], "\n", 
+     RowBox[{"Example", " ", "2"}], ":", 
+     RowBox[{"Non", "-", 
+      RowBox[{"Poisson", " ", "ACR"}]}]}], "*)"}], "\[IndentingNewLine]", 
    RowBox[{
+    RowBox[{"Print", "[", "\"\<=== NON-POISSON ACR TEST ===\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"RN", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{
+         RowBox[{"2", "*", "\"\<A\>\""}], "+", "\"\<B\>\""}], "->", 
+        RowBox[{"3", "*", "\"\<B\>\""}]}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<A\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"result", "=", 
+     RowBox[{"ACK", "[", 
+      RowBox[{"RN", ",", 
+       RowBox[{"{", "2", "}"}]}], "]"}]}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"B", " ", "is", " ", "continuous"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Discrete network: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "1", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Continuous network: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "2", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Continuous ODE: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "3", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Poisson parameter: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "4", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
     RowBox[{
-    "Print", "[", 
-     "\"\<Siphon/facet analysis works identically for both cases!\>\"", "]"}],
-     ";"}]}]}]], "Input",
+     RowBox[{"Example", " ", "3"}], ":", 
+     RowBox[{"Complex", " ", "ACR"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<=== COMPLEX ACR TEST ===\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"RN", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"\"\<A\>\"", "+", "\"\<B\>\""}], "->", 
+        RowBox[{
+         RowBox[{"2", "*", "\"\<A\>\""}], "+", "\"\<C\>\""}]}], ",", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"2", "*", "\"\<A\>\""}], "+", "\"\<C\>\""}], "->", 
+        RowBox[{"\"\<A\>\"", "+", "\"\<D\>\""}]}], ",", 
+       RowBox[{"\"\<B\>\"", "->", 
+        RowBox[{"\"\<A\>\"", "+", "\"\<D\>\""}]}], ",", 
+       RowBox[{
+        RowBox[{"\"\<A\>\"", "+", "\"\<C\>\""}], "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<D\>\"", "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<D\>\"", "->", "\"\<C\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"result", "=", 
+     RowBox[{"ACK", "[", 
+      RowBox[{"RN", ",", 
+       RowBox[{"{", 
+        RowBox[{"2", ",", "3", ",", "4"}], "}"}]}], "]"}]}], ";"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"B", ",", "C", ",", 
+     RowBox[{"D", " ", "are", " ", "continuous"}]}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Discrete network: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "1", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Continuous network: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "2", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Continuous ODE: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "3", "]"}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Poisson parameter: \>\"", ",", 
+      RowBox[{"result", "[", 
+       RowBox[{"[", "4", "]"}], "]"}]}], "]"}], ";"}]}]}]], "Input",
  CellChangeTimes->{{3.9599278202156477`*^9, 3.959927856919216*^9}, 
    3.9599285183732204`*^9, {3.9599287097441893`*^9, 3.9599287459029803`*^9}, {
    3.959928776229429*^9, 3.959928776261368*^9}, 3.9599289558010483`*^9, 
    3.959929058266965*^9, 3.9599291791185265`*^9, {3.9599296741143417`*^9, 
-   3.9599297050411243`*^9}, 3.959929880775151*^9},
+   3.9599297050411243`*^9}, 3.959929880775151*^9, {3.959930171338827*^9, 
+   3.959930180853883*^9}, 3.959940048958061*^9, 3.959940086023844*^9, {
+   3.9599402282927265`*^9, 3.9599402360476236`*^9}, {3.9599413718880777`*^9, 
+   3.959941406681872*^9}, {3.959941811283576*^9, 3.959941847845496*^9}},
  CellLabel->
-  "In[259]:=",ExpressionUUID->"27c6ce13-724c-4d12-bcac-1caba2095556"],
+  "In[290]:=",ExpressionUUID->"27c6ce13-724c-4d12-bcac-1caba2095556"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData["\<\"=== ACK PAPER EXAMPLE: NON-POISSON ACR SYSTEM ===\\n\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882935876*^9},
+Cell[BoxData["\<\"=== SI MODEL TEST ===\"\>"], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859429424*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"4b7b25c0-2670-4671-bb37-8527ac315a03"],
-
-Cell[BoxData["\<\"Reaction Network:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882938654*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"fbe10f13-8599-42b0-81fe-569d144a8eaf"],
-
-Cell[BoxData["\<\"  2A + B \[RightArrow] 3B\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882942814*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"160069cd-e636-442e-baf0-d4d1c852683d"],
-
-Cell[BoxData["\<\"  B \[RightArrow] A\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882943819*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"a8d4220e-0e8d-413c-a77e-7a3f25cb6fc9"],
-
-Cell[BoxData["\<\"(A exhibits ACR but discrete system is NOT complex \
-balanced)\\n\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829458723`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"ebe0eac1-ab65-4afc-865b-0a7206d59024"],
+In[290]:=",ExpressionUUID->"c16573cf-4404-411f-877e-cb84fc7baac8"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Species: \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>"}], "}"}]}],
-  SequenceForm["Species: ", {"A", "B"}],
-  Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829469166`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"11faecaf-b89e-46c1-8b95-195d882d1c87"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"Parsed reactions: \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"Discrete network: \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-     RowBox[{"\[LeftAssociation]", 
-      RowBox[{
-       RowBox[{"\<\"Substrates\"\>", "\[Rule]", 
-        RowBox[{"{", 
-         RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>"}], "}"}]}], ",", 
-       RowBox[{"\<\"Products\"\>", "\[Rule]", 
-        RowBox[{"{", "\<\"B\"\>", "}"}]}]}], "\[RightAssociation]"}], ",", 
-     RowBox[{"\[LeftAssociation]", 
-      RowBox[{
-       RowBox[{"\<\"Substrates\"\>", "\[Rule]", 
-        RowBox[{"{", "\<\"B\"\>", "}"}]}], ",", 
-       RowBox[{"\<\"Products\"\>", "\[Rule]", 
-        RowBox[{"{", "\<\"A\"\>", "}"}]}]}], "\[RightAssociation]"}]}], 
+     RowBox[{"\<\"I\"\>", "\[Rule]", 
+      RowBox[{"2", " ", "\<\"I\"\>"}]}], ",", 
+     RowBox[{"\<\"I\"\>", "\[Rule]", "0"}]}], "}"}]}],
+  SequenceForm["Discrete network: ", {"I" -> 2 "I", "I" -> 0}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859457092*^9}},
+ CellLabel->
+  "During evaluation of \
+In[290]:=",ExpressionUUID->"0a8fab3e-3066-4742-ac2a-e38362185343"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Continuous network: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"\<\"S\"\>", "\[Rule]", "0"}], ",", 
+     RowBox[{"0", "\[Rule]", "\<\"S\"\>"}]}], "}"}]}],
+  SequenceForm["Continuous network: ", {"S" -> 0, 0 -> "S"}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859490139*^9}},
+ CellLabel->
+  "During evaluation of \
+In[290]:=",ExpressionUUID->"715b65a1-a4a4-494b-8d7c-ab354dea6aff"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Continuous ODE: \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+   "{", "\<\"S' = -1*(\[Kappa]1*q\:0304*S) +1*(\[Kappa]2*q\:0304)\"\>", 
     "}"}]}],
   SequenceForm[
-  "Parsed reactions: ", {<|
-    "Substrates" -> {"A", "B"}, "Products" -> {"B"}|>, <|
-    "Substrates" -> {"B"}, "Products" -> {"A"}|>}],
+  "Continuous ODE: ", {
+   "S' = -1*(\[Kappa]1*q\:0304*S) +1*(\[Kappa]2*q\:0304)"}],
   Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829488697`*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859542224*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"1908fc17-f9b3-4192-8f39-bcef3dd9e576"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829499097`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"75131a8c-b09c-443c-94c8-8729a9c92a01"],
-
-Cell[BoxData["\<\"=== SIPHON ANALYSIS ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829518604`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"6c999d96-9b8e-4b7e-874e-8bc98c9537ba"],
+In[290]:=",ExpressionUUID->"52d10561-3f60-4423-aedd-2113f02d3620"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Minimal siphons: \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{"{", "\<\"B\"\>", "}"}], "}"}]}],
-  SequenceForm["Minimal siphons: ", {{"B"}}],
+  RowBox[{"\<\"Poisson parameter: \"\>", 
+   "\[InvisibleSpace]", "\<\"Complex network equilibrium\"\>"}],
+  SequenceForm["Poisson parameter: ", "Complex network equilibrium"],
   Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882952828*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859597047*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"47690707-a175-4aa3-b40f-06918d760f00"],
-
-Cell[BoxData["\<\"\\nManual siphon verification:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829551516`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"ae94bacd-a04a-430d-8b6d-8524d546f74e"],
-
-Cell[BoxData["\<\"R1: 2A+B \[RightArrow] 3B\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882957447*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"d3a45a5c-ca0d-4548-8f06-9a60488d9254"],
-
-Cell[BoxData["\<\"  Produces B, consumes A,B \[Element] {A,B} \
-\[Checkmark]\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882959439*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"7ba1ac9f-55e0-47cb-9bf9-b4fac496a158"],
-
-Cell[BoxData["\<\"R2: B \[RightArrow] A\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882960461*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"b3d8278d-56b5-4406-a58e-82995db3b3ee"],
-
-Cell[BoxData["\<\"  Produces A, consumes B \[Element] {A,B} \
-\[Checkmark]\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829614396`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"b4435bb1-6245-4876-9282-5c489026f33d"],
-
-Cell[BoxData["\<\"Expected: {A,B} should be a siphon\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882962431*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"393e211d-a370-4658-a85f-f39a13863d88"],
+In[290]:=",ExpressionUUID->"82510cf4-fbde-4488-a594-1bcc6a0a4d83"],
 
 Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882964356*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859648677*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"73fa9d15-37fa-4d0b-be36-ad9ca4d38ee5"],
+In[290]:=",ExpressionUUID->"112bf1e2-5d4b-4a68-bbba-20092d2a5828"],
 
-Cell[BoxData["\<\"=== INVARIANT FACET ANALYSIS ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829654655`*^9},
+Cell[BoxData["\<\"=== NON-POISSON ACR TEST ===\"\>"], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.9599418597070785`*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"04c7b04c-0a85-443f-8de1-a2e09609be7b"],
+In[290]:=",ExpressionUUID->"75ee001e-db21-498a-97b8-472e8bf66984"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Invariant facets: \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"Discrete network: \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-     RowBox[{"{", "\<\"B\"\>", "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>"}], "}"}]}], "}"}]}],
-  SequenceForm["Invariant facets: ", {{"B"}, {"A", "B"}}],
+     RowBox[{
+      RowBox[{"2", " ", "\<\"A\"\>"}], "\[Rule]", "0"}], ",", 
+     RowBox[{"0", "\[Rule]", "\<\"A\"\>"}]}], "}"}]}],
+  SequenceForm["Discrete network: ", {2 "A" -> 0, 0 -> "A"}],
   Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882966441*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859766193*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"5f55ad11-66bd-4865-aa45-fa86f8afce65"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882968435*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"072b2158-7e15-406e-89ae-b044c3b65174"],
-
-Cell[BoxData["\<\"=== ACK ANALYSIS ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882969433*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"7149d8d7-f430-4a12-b011-eff8a36165a1"],
-
-Cell[BoxData["\<\"Partition: A (discrete), B (continuous)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829713955`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"8b9dfb4b-c86b-43da-8665-982075be577e"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829718857`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"fbdd15d3-58f8-4ea6-9357-d924a61eed7f"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882974166*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"c5941c44-b15d-4653-b52f-de3cd20944d1"],
-
-Cell[BoxData["\<\"=== ACK THEORY INTERPRETATION ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882975196*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"b47c2a5a-dd5d-4f0b-8088-db9e84e360ca"],
-
-Cell[BoxData["\<\"1. DISCRETE NETWORK (A dynamics with B = w):\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882976215*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"1561b623-cb85-488a-a898-a7f0817d47d2"],
-
-Cell[BoxData["\<\"   Original: 2A + B \[RightArrow] 3B gives 2A + w \
-\[RightArrow] 3w \[DoubleLongRightArrow] 2A \[RightArrow] 0\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882978121*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"19bed55e-c78d-40da-8d6f-5a2fee5e5111"],
-
-Cell[BoxData["\<\"   Original: B \[RightArrow] A gives w \[RightArrow] A \
-\[DoubleLongRightArrow] 0 \[RightArrow] A\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829792194`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"33b35dc7-4218-439e-9ae3-140aca3c011f"],
-
-Cell[BoxData["\<\"   Result: {2A \[RightArrow] 0, 0 \[RightArrow] A}\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829802103`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"3affa5ca-a2c0-40d2-8098-dba2f921242b"],
-
-Cell[BoxData["\<\"   This is a birth-death process but NOT weakly \
-reversible\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882982133*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"6f3aa317-260c-4d4b-bdd9-3260b91e2eaf"],
-
-Cell[BoxData["\<\"   \[Therefore] NOT complex balanced \[Therefore] NO \
-Poisson stationary distribution\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829832153`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"dd0d874b-1174-4f9b-86c6-3c95df21aa8c"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882984163*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"c66a45fc-43e7-4a1d-adaa-ad5be2494325"],
-
-Cell[BoxData["\<\"2. CONTINUOUS NETWORK (B dynamics with A = q\:0304):\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882986125*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"0b192d19-3126-4b1e-a289-35cd0ada5edc"],
-
-Cell[BoxData["\<\"   Original: 2A + B \[RightArrow] 3B gives 2q\:0304 + B \
-\[RightArrow] 3B \[DoubleLongRightArrow] B \[RightArrow] 2B (net)\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882988152*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"954376b4-2094-4aba-b649-d3c35778f3aa"],
-
-Cell[BoxData["\<\"   Original: B \[RightArrow] A gives B \[RightArrow] \
-q\:0304 \[DoubleLongRightArrow] B \[RightArrow] 0 (net)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829937477`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"22498563-2d2a-43b0-997d-6226aa04edc0"],
-
-Cell[BoxData["\<\"   Result: B' = 2\[Kappa]\:2081q\:0304B - \[Kappa]\:2082B = \
-(2\[Kappa]\:2081q\:0304 - \[Kappa]\:2082)B\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298829957466`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"7f1bc7a8-669d-4460-8c93-61bbaa9344ba"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882996745*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"e41bd823-869e-468a-b18c-13553abe2337"],
-
-Cell[BoxData["\<\"3. QUASI-EQUILIBRIUM:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929882998747*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"518c9109-b7d4-4572-affd-ac74915e2727"],
-
-Cell[BoxData["\<\"   The discrete birth-death process 2A \[RightArrow] 0, 0 \
-\[RightArrow] A has\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830007467`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"523efded-20ed-4e57-a4be-0d2b5f154e23"],
-
-Cell[BoxData["\<\"   stationary distribution \[Mu]\:02b7 (not \
-Poisson!)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883001746*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"0e2ed8aa-9aae-43ef-8b24-abdfb8b5b6cc"],
-
-Cell[BoxData["\<\"   A still exhibits ACR: E[A] independent of w\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883003747*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"0594755b-6081-4269-ac64-5e3c23c631ab"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883005125*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"a6f0cec0-e5bd-4b05-8f41-72f04dfd5f25"],
-
-Cell[BoxData["\<\"4. ACR PROPERTY:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830073357`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"308fd231-f52a-4088-98b4-7e253fb5ea61"],
-
-Cell[BoxData["\<\"   Even without complex balance, A exhibits ACR\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883009331*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"7336d8ea-a9bb-41a2-a5ab-d7a1b9eb11a8"],
-
-Cell[BoxData["\<\"   Stationary mean E[A] = f(\[Kappa]\:2081,\[Kappa]\:2082) \
-independent of B concentration\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883010332*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"755ed3f4-8a75-4b44-82a8-a6829489e60b"],
-
-Cell[BoxData["\<\"   But distribution is NOT Poisson (as paper notes)\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883012334*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"befd013e-35a7-4967-bd8a-4ab3629c95f1"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830133867`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"63a99d38-0fb4-4674-b455-d22a5f853fc1"],
-
-Cell[BoxData["\<\"=== COMPARISON: SIPHONS vs FACETS vs ACK ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883015332*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"a607a4c4-5668-4221-b1fe-071bc63003a5"],
+In[290]:=",ExpressionUUID->"df3d343f-68d3-4290-8a7e-90fac9b5f830"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Minimal siphons:     \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", 
-    RowBox[{"{", "\<\"B\"\>", "}"}], "}"}]}],
-  SequenceForm["Minimal siphons:     ", {{"B"}}],
-  Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830164185`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"c48a154a-94a7-4909-ad4d-93dd169e8d05"],
-
-Cell[BoxData[
- InterpretationBox[
-  RowBox[{"\<\"Invariant facets:    \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"Continuous network: \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{
-     RowBox[{"{", "\<\"B\"\>", "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>"}], "}"}]}], "}"}]}],
-  SequenceForm["Invariant facets:    ", {{"B"}, {"A", "B"}}],
+     RowBox[{"\<\"B\"\>", "\[Rule]", 
+      RowBox[{"3", " ", "\<\"B\"\>"}]}], ",", 
+     RowBox[{"\<\"B\"\>", "\[Rule]", "0"}]}], "}"}]}],
+  SequenceForm["Continuous network: ", {"B" -> 3 "B", "B" -> 0}],
   Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883018359*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859832367*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"dad79b24-9395-45ca-9cc4-e8c762815e30"],
-
-Cell[BoxData["\<\"ACK discrete network: 2A \[RightArrow] 0, 0 \[RightArrow] A \
-(birth-death)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883020334*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"5d547712-4de4-41e3-9441-e1b549e98855"],
-
-Cell[BoxData["\<\"ACK continuous ODE:   B' = (2\[Kappa]\:2081q\:0304 - \
-\[Kappa]\:2082)B\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830242376`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"32d4099e-49f0-4fec-9a14-ba08865ae0bb"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830263386`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"71652452-20e5-4c77-a30f-992a2deef535"],
-
-Cell[BoxData["\<\"=== THEORETICAL INSIGHT ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883027439*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"91852a3c-a01b-40a3-be73-89bebe73cb94"],
-
-Cell[BoxData["\<\"This example demonstrates that:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830284433`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"42c3efb3-3b7c-4efb-800b-634eafefdfee"],
-
-Cell[BoxData["\<\"\[Bullet] Siphons and invariant facets still work \
-normally\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830321712`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"271d7444-0c85-46b6-9a1c-6a59b909044a"],
-
-Cell[BoxData["\<\"\[Bullet] ACR can exist without complex balance in discrete \
-network\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883034171*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"a0e4d8ff-693d-4c84-92af-0c1337b05810"],
-
-Cell[BoxData["\<\"\[Bullet] The limiting distribution is NOT Poisson but \
-still exhibits ACR\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830351715`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"b542257c-75f6-45ac-95e4-0509b9fc7ce3"],
-
-Cell[BoxData["\<\"\[Bullet] A exhibits 'non-Poisson ACR' - robust mean, \
-non-Poisson distribution\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830400195`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"6a5054d6-9476-47aa-94e7-8ea79b55f3ee"],
-
-Cell[BoxData["\<\"\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.95992988304102*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"9133bbf2-b9ba-41bf-b94d-d6fa828b803d"],
-
-Cell[BoxData["\<\"=== BIRTH-DEATH PROCESS ANALYSIS ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830431333`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"7859bea9-8b5a-4ed3-ba1b-bdb77e27371f"],
-
-Cell[BoxData["\<\"The discrete network 2A \[RightArrow] 0, 0 \[RightArrow] A \
-is a birth-death process:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830451336`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"69ce2f1f-a5dc-47ad-97f9-dea9c0e56287"],
-
-Cell[BoxData["\<\"\[Bullet] Birth rate (0\[RightArrow]1): \[Lambda]\:2080 = \
-\[Kappa]\:2082w\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830468655`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"5c6f224b-b5ac-4b29-9c48-6509056f450e"],
-
-Cell[BoxData["\<\"\[Bullet] Death rate (2\[RightArrow]0): \[Mu]\:2082 = \
-\[Kappa]\:2081w\[CenterDot]2\[CenterDot]1 = 2\[Kappa]\:2081w\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830478716`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"d5b87f68-8893-4c16-8b5c-cde45ae3ba09"],
-
-Cell[BoxData["\<\"\[Bullet] Death rate (1\[RightArrow]0): \[Mu]\:2081 = 0 (no \
-1\[RightArrow]0 transition!)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830498705`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"fe79a4ae-a34c-40b6-8992-ad90732dc401"],
-
-Cell[BoxData["\<\"This creates a non-standard birth-death process\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883050871*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"6d9f1655-c725-4202-8954-f15921fb1136"],
-
-Cell[BoxData["\<\"\[Therefore] Stationary distribution exists but is NOT \
-Poisson\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830518703`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"c2b6a9dc-b18b-476f-a939-8651c119a2fc"],
-
-Cell[BoxData["\<\"However, the mean is still robust to w (ACR \
-property)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883053871*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"e802e77e-7fc2-474c-ae41-8215e00a30ad"],
-
-Cell[BoxData["\<\"\\n=========================================================\
-===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830551667`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"a4cd6e21-eabe-4f0e-b5cd-51311597ac73"],
-
-Cell[BoxData["\<\"=== COMPARISON: SI MODEL (Poisson ACR) ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298830574813`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"ef5a2fd0-3585-43b4-97d7-f3162740f58a"],
-
-Cell[BoxData["\<\"SI Model: S + I \[RightArrow] 2I, I \[RightArrow] S\"\>"], \
-"Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883059478*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"305ccf52-6ab4-4bca-9a96-8c5caa61f210"],
+In[290]:=",ExpressionUUID->"58afa3dd-dfbb-4043-8a49-add9f67ea7ca"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Minimal siphons: \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"Continuous ODE: \"\>", "\[InvisibleSpace]", 
+   RowBox[{
+   "{", "\<\"B' = +2*(\[Kappa]1*q\:0304*B) -1*(\[Kappa]2*q\:0304*B)\"\>", 
+    "}"}]}],
+  SequenceForm[
+  "Continuous ODE: ", {
+   "B' = +2*(\[Kappa]1*q\:0304*B) -1*(\[Kappa]2*q\:0304*B)"}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.9599418599003305`*^9}},
+ CellLabel->
+  "During evaluation of \
+In[290]:=",ExpressionUUID->"a7b40267-ecd7-4849-9d0a-76fcf1b6bc2c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Poisson parameter: \"\>", 
+   "\[InvisibleSpace]", "\<\"Birth-death equilibrium (NOT Poisson for 2A->0 \
+pattern)\"\>"}],
+  SequenceForm[
+  "Poisson parameter: ", 
+   "Birth-death equilibrium (NOT Poisson for 2A->0 pattern)"],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941859954398*^9}},
+ CellLabel->
+  "During evaluation of \
+In[290]:=",ExpressionUUID->"6311eeee-ad52-452c-8da1-ee7e36208a8e"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941860026828*^9}},
+ CellLabel->
+  "During evaluation of \
+In[290]:=",ExpressionUUID->"7529f4f2-ce48-44e0-a45b-1781edea1827"],
+
+Cell[BoxData["\<\"=== COMPLEX ACR TEST ===\"\>"], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.9599418600754347`*^9}},
+ CellLabel->
+  "During evaluation of \
+In[290]:=",ExpressionUUID->"30d2bdfe-d4a9-4945-93f0-60b42d395986"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Discrete network: \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
-    RowBox[{"{", "\<\"I\"\>", "}"}], "}"}]}],
-  SequenceForm["Minimal siphons: ", {{"I"}}],
+    RowBox[{
+     RowBox[{"\<\"A\"\>", "\[Rule]", 
+      RowBox[{"2", " ", "\<\"A\"\>"}]}], ",", 
+     RowBox[{
+      RowBox[{"2", " ", "\<\"A\"\>"}], "\[Rule]", "\<\"A\"\>"}], ",", 
+     RowBox[{"0", "\[Rule]", "\<\"A\"\>"}], ",", 
+     RowBox[{"\<\"A\"\>", "\[Rule]", "0"}]}], "}"}]}],
+  SequenceForm[
+  "Discrete network: ", {"A" -> 2 "A", 2 "A" -> "A", 0 -> "A", "A" -> 0}],
   Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883060477*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941860144431*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"55ee92ea-892c-4cf6-8aed-7089d8879e69"]
-}, Open  ]],
-
-Cell[BoxData[
- TemplateBox[{
-  "GreaterEqual", "nord", 
-   "\"Invalid comparison with \\!\\(\\*RowBox[{\\\"\[ImaginaryI]\\\"}]\\) \
-attempted.\"", 2, 340, 34, 24798134851760783450, "Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.959929711757908*^9, 3.959929883062476*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"0766134c-06c8-4f4f-bdc9-51a75fcc15d7"],
-
-Cell[BoxData[
- TemplateBox[{
-  "GreaterEqual", "nord", 
-   "\"Invalid comparison with \\!\\(\\*RowBox[{\\\"\[ImaginaryI]\\\"}]\\) \
-attempted.\"", 2, 340, 35, 24798134851760783450, "Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.959929711757908*^9, 3.959929883084181*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"1337627d-b0b3-478e-8c95-eedc5126215e"],
-
-Cell[BoxData[
- TemplateBox[{
-  "GreaterEqual", "nord", 
-   "\"Invalid comparison with \\!\\(\\*RowBox[{\\\"\[ImaginaryI]\\\"}]\\) \
-attempted.\"", 2, 340, 36, 24798134851760783450, "Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.959929711757908*^9, 3.9599298830920925`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"2242e8f1-ca09-41e3-8080-e2914688bab3"],
-
-Cell[BoxData[
- TemplateBox[{
-  "General", "stop", 
-   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"GreaterEqual\\\", \
-\\\"::\\\", \\\"nord\\\"}], \\\"MessageName\\\"]\\) will be suppressed during \
-this calculation.\"", 2, 340, 37, 24798134851760783450, "Local"},
-  "MessageTemplate"]], "Message", "MSG",
- CellChangeTimes->{3.959929711757908*^9, 3.9599298830970917`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"eb158ca9-c310-423e-803c-2f4c46efb5f9"],
-
-Cell[CellGroupData[{
+In[290]:=",ExpressionUUID->"026739a0-a489-4efa-9aa3-c2549d3ae37e"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Invariant facets: \"\>", "\[InvisibleSpace]", 
-   RowBox[{"{", "}"}]}],
-  SequenceForm["Invariant facets: ", {}],
+  RowBox[{"\<\"Continuous network: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"\<\"B\"\>", "\[Rule]", "\<\"C\"\>"}], ",", 
+     RowBox[{"\<\"C\"\>", "\[Rule]", "\<\"D\"\>"}], ",", 
+     RowBox[{"\<\"B\"\>", "\[Rule]", "\<\"D\"\>"}], ",", 
+     RowBox[{"\<\"C\"\>", "\[Rule]", "\<\"B\"\>"}], ",", 
+     RowBox[{"\<\"D\"\>", "\[Rule]", "\<\"B\"\>"}], ",", 
+     RowBox[{"\<\"D\"\>", "\[Rule]", "\<\"C\"\>"}]}], "}"}]}],
+  SequenceForm[
+  "Continuous network: ", {
+   "B" -> "C", "C" -> "D", "B" -> "D", "C" -> "B", "D" -> "B", "D" -> "C"}],
   Editable->False]], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298831030912`*^9},
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941860220153*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"12a32870-ebb2-43b0-b21e-711b77dd4658"],
+In[290]:=",ExpressionUUID->"4e1ba119-fef7-401b-8665-47b1cd0bddbb"],
 
-Cell[BoxData["\<\"SI gives M/M/\[Infinity] queue \[DoubleLongRightArrow] \
-Poisson distribution (standard ACR)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298831048717`*^9},
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Continuous ODE: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"B' = -1*(\[Kappa]1*q\:0304*B) -1*(\[Kappa]3*q\:0304*B) +1*(\
+\[Kappa]4*q\:0304*B) +1*(\[Kappa]5*q\:0304*B) = 0 (after CBE)\"\>", 
+     ",", "\<\"C' = +1*(\[Kappa]1*q\:0304*C) -1*(\[Kappa]2*q\:0304*C) -1*(\
+\[Kappa]4*q\:0304*C) +1*(\[Kappa]6*q\:0304*C) = 0 (after CBE)\"\>", 
+     ",", "\<\"D' = +1*(\[Kappa]2*q\:0304*D) +1*(\[Kappa]3*q\:0304*D) -1*(\
+\[Kappa]5*q\:0304*D) -1*(\[Kappa]6*q\:0304*D) = 0 (after CBE)\"\>"}], "}"}]}],
+  SequenceForm[
+  "Continuous ODE: ", {
+   "B' = -1*(\[Kappa]1*q\:0304*B) -1*(\[Kappa]3*q\:0304*B) \
++1*(\[Kappa]4*q\:0304*B) +1*(\[Kappa]5*q\:0304*B) = 0 (after CBE)", 
+    "C' = +1*(\[Kappa]1*q\:0304*C) -1*(\[Kappa]2*q\:0304*C) \
+-1*(\[Kappa]4*q\:0304*C) +1*(\[Kappa]6*q\:0304*C) = 0 (after CBE)", 
+    "D' = +1*(\[Kappa]2*q\:0304*D) +1*(\[Kappa]3*q\:0304*D) \
+-1*(\[Kappa]5*q\:0304*D) -1*(\[Kappa]6*q\:0304*D) = 0 (after CBE)"}],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941860289914*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"888d8bed-5fa5-45de-b60e-4091638f4dd8"],
+In[290]:=",ExpressionUUID->"b045f6ae-a499-4891-a22c-1e23179b6337"],
 
-Cell[BoxData["\<\"\\n=== SUMMARY ===\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883108539*^9},
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Poisson parameter: \"\>", 
+   "\[InvisibleSpace]", "\<\"\[Kappa]\:2084/\[Kappa]\:2082 (from complex \
+balance, w terms cancel)\"\>"}],
+  SequenceForm[
+  "Poisson parameter: ", 
+   "\[Kappa]\:2084/\[Kappa]\:2082 (from complex balance, w terms cancel)"],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.959929711712248*^9, 3.959929882935876*^9, 3.9599301816943336`*^9, 
+   3.9599400518864875`*^9, 3.959940091390383*^9, 3.959940238070239*^9, 
+   3.959941407893716*^9, {3.9599418311996365`*^9, 3.959941860355613*^9}},
  CellLabel->
   "During evaluation of \
-In[259]:=",ExpressionUUID->"4f50e510-4dd7-4cbe-a727-17dbcf7677e9"],
-
-Cell[BoxData["\<\"Both examples exhibit ACR but with different limiting \
-distributions:\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298831094236`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"aada147d-ca6e-4a74-9918-93fa33402db3"],
-
-Cell[BoxData["\<\"\[Bullet] SI model: Poisson ACR (complex balanced discrete \
-network)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298831114283`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"4a1c303b-c647-4eb1-90a2-b5129f41665a"],
-
-Cell[BoxData["\<\"\[Bullet] Non-Poisson example: Non-Poisson ACR (birth-death \
-discrete network)\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.959929883114149*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"6ac4315c-2e13-4391-a802-2b95eebaef03"],
-
-Cell[BoxData["\<\"Siphon/facet analysis works identically for both \
-cases!\"\>"], "Print",
- CellChangeTimes->{3.959929711712248*^9, 3.9599298831161532`*^9},
- CellLabel->
-  "During evaluation of \
-In[259]:=",ExpressionUUID->"45a85e10-e611-4079-95c2-1470bdce8fa3"]
+In[290]:=",ExpressionUUID->"0fa69947-77d7-4326-a660-6e944e7a304d"]
 }, Open  ]]
 }, Open  ]]
 },
 WindowSize->{708.8571428571428, 371.1428571428571},
-WindowMargins->{{
-  Automatic, 48.428571428571445`}, {-22.285714285714278`, Automatic}},
+WindowMargins->{{Automatic, -10.285714285714334`}, {-15, Automatic}},
 FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"0a2573fe-70cd-44a5-a9c4-686f619f38f3"
@@ -1098,98 +1098,28 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 14591, 421, 2331, "Input",ExpressionUUID->"27c6ce13-724c-4d12-bcac-1caba2095556"],
+Cell[580, 22, 33553, 782, 2616, "Input",ExpressionUUID->"27c6ce13-724c-4d12-bcac-1caba2095556"],
 Cell[CellGroupData[{
-Cell[15196, 447, 258, 5, 40, "Print",ExpressionUUID->"4b7b25c0-2670-4671-bb37-8527ac315a03"],
-Cell[15457, 454, 221, 4, 22, "Print",ExpressionUUID->"fbe10f13-8599-42b0-81fe-569d144a8eaf"],
-Cell[15681, 460, 229, 4, 22, "Print",ExpressionUUID->"160069cd-e636-442e-baf0-d4d1c852683d"],
-Cell[15913, 466, 223, 4, 22, "Print",ExpressionUUID->"a8d4220e-0e8d-413c-a77e-7a3f25cb6fc9"],
-Cell[16139, 472, 271, 5, 40, "Print",ExpressionUUID->"ebe0eac1-ab65-4afc-865b-0a7206d59024"],
-Cell[16413, 479, 400, 10, 22, "Print",ExpressionUUID->"11faecaf-b89e-46c1-8b95-195d882d1c87"],
-Cell[16816, 491, 1073, 27, 40, "Print",ExpressionUUID->"1908fc17-f9b3-4192-8f39-bcef3dd9e576"],
-Cell[17892, 520, 206, 4, 22, "Print",ExpressionUUID->"75131a8c-b09c-443c-94c8-8729a9c92a01"],
-Cell[18101, 526, 229, 4, 22, "Print",ExpressionUUID->"6c999d96-9b8e-4b7e-874e-8bc98c9537ba"],
-Cell[18333, 532, 403, 10, 22, "Print",ExpressionUUID->"47690707-a175-4aa3-b40f-06918d760f00"],
-Cell[18739, 544, 236, 4, 40, "Print",ExpressionUUID->"ae94bacd-a04a-430d-8b6d-8524d546f74e"],
-Cell[18978, 550, 229, 4, 22, "Print",ExpressionUUID->"d3a45a5c-ca0d-4548-8f06-9a60488d9254"],
-Cell[19210, 556, 262, 5, 22, "Print",ExpressionUUID->"7ba1ac9f-55e0-47cb-9bf9-b4fac496a158"],
-Cell[19475, 563, 225, 4, 22, "Print",ExpressionUUID->"b3d8278d-56b5-4406-a58e-82995db3b3ee"],
-Cell[19703, 569, 262, 5, 22, "Print",ExpressionUUID->"b4435bb1-6245-4876-9282-5c489026f33d"],
-Cell[19968, 576, 238, 4, 22, "Print",ExpressionUUID->"393e211d-a370-4658-a85f-f39a13863d88"],
-Cell[20209, 582, 204, 4, 22, "Print",ExpressionUUID->"73fa9d15-37fa-4d0b-be36-ad9ca4d38ee5"],
-Cell[20416, 588, 238, 4, 22, "Print",ExpressionUUID->"04c7b04c-0a85-443f-8de1-a2e09609be7b"],
-Cell[20657, 594, 512, 13, 22, "Print",ExpressionUUID->"5f55ad11-66bd-4865-aa45-fa86f8afce65"],
-Cell[21172, 609, 204, 4, 22, "Print",ExpressionUUID->"072b2158-7e15-406e-89ae-b044c3b65174"],
-Cell[21379, 615, 224, 4, 22, "Print",ExpressionUUID->"7149d8d7-f430-4a12-b011-eff8a36165a1"],
-Cell[21606, 621, 245, 4, 22, "Print",ExpressionUUID->"8b9dfb4b-c86b-43da-8665-982075be577e"],
-Cell[21854, 627, 206, 4, 22, "Print",ExpressionUUID->"fbdd15d3-58f8-4ea6-9357-d924a61eed7f"],
-Cell[22063, 633, 204, 4, 22, "Print",ExpressionUUID->"c5941c44-b15d-4653-b52f-de3cd20944d1"],
-Cell[22270, 639, 237, 4, 22, "Print",ExpressionUUID->"b47c2a5a-dd5d-4f0b-8088-db9e84e360ca"],
-Cell[22510, 645, 248, 4, 22, "Print",ExpressionUUID->"1561b623-cb85-488a-a898-a7f0817d47d2"],
-Cell[22761, 651, 315, 5, 22, "Print",ExpressionUUID->"19bed55e-c78d-40da-8d6f-5a2fee5e5111"],
-Cell[23079, 658, 304, 5, 22, "Print",ExpressionUUID->"33b35dc7-4218-439e-9ae3-140aca3c011f"],
-Cell[23386, 665, 258, 5, 22, "Print",ExpressionUUID->"3affa5ca-a2c0-40d2-8098-dba2f921242b"],
-Cell[23647, 672, 264, 5, 22, "Print",ExpressionUUID->"6f3aa317-260c-4d4b-bdd9-3260b91e2eaf"],
-Cell[23914, 679, 292, 5, 22, "Print",ExpressionUUID->"dd0d874b-1174-4f9b-86c6-3c95df21aa8c"],
-Cell[24209, 686, 204, 4, 22, "Print",ExpressionUUID->"c66a45fc-43e7-4a1d-adaa-ad5be2494325"],
-Cell[24416, 692, 258, 5, 22, "Print",ExpressionUUID->"0b192d19-3126-4b1e-a289-35cd0ada5edc"],
-Cell[24677, 699, 329, 6, 22, "Print",ExpressionUUID->"954376b4-2094-4aba-b649-d3c35778f3aa"],
-Cell[25009, 707, 316, 5, 22, "Print",ExpressionUUID->"22498563-2d2a-43b0-997d-6226aa04edc0"],
-Cell[25328, 714, 310, 5, 22, "Print",ExpressionUUID->"7f1bc7a8-669d-4460-8c93-61bbaa9344ba"],
-Cell[25641, 721, 204, 4, 22, "Print",ExpressionUUID->"e41bd823-869e-468a-b18c-13553abe2337"],
-Cell[25848, 727, 225, 4, 22, "Print",ExpressionUUID->"518c9109-b7d4-4572-affd-ac74915e2727"],
-Cell[26076, 733, 285, 5, 22, "Print",ExpressionUUID->"523efded-20ed-4e57-a4be-0d2b5f154e23"],
-Cell[26364, 740, 259, 5, 22, "Print",ExpressionUUID->"0e2ed8aa-9aae-43ef-8b24-abdfb8b5b6cc"],
-Cell[26626, 747, 252, 5, 22, "Print",ExpressionUUID->"0594755b-6081-4269-ac64-5e3c23c631ab"],
-Cell[26881, 754, 204, 4, 22, "Print",ExpressionUUID->"a6f0cec0-e5bd-4b05-8f41-72f04dfd5f25"],
-Cell[27088, 760, 222, 4, 22, "Print",ExpressionUUID->"308fd231-f52a-4088-98b4-7e253fb5ea61"],
-Cell[27313, 766, 253, 5, 22, "Print",ExpressionUUID->"7336d8ea-a9bb-41a2-a5ab-d7a1b9eb11a8"],
-Cell[27569, 773, 295, 5, 22, "Print",ExpressionUUID->"755ed3f4-8a75-4b44-82a8-a6829489e60b"],
-Cell[27867, 780, 257, 5, 22, "Print",ExpressionUUID->"befd013e-35a7-4967-bd8a-4ab3629c95f1"],
-Cell[28127, 787, 206, 4, 22, "Print",ExpressionUUID->"63a99d38-0fb4-4674-b455-d22a5f853fc1"],
-Cell[28336, 793, 248, 4, 22, "Print",ExpressionUUID->"a607a4c4-5668-4221-b1fe-071bc63003a5"],
-Cell[28587, 799, 413, 10, 22, "Print",ExpressionUUID->"c48a154a-94a7-4909-ad4d-93dd169e8d05"],
-Cell[29003, 811, 518, 13, 22, "Print",ExpressionUUID->"dad79b24-9395-45ca-9cc4-e8c762815e30"],
-Cell[29524, 826, 279, 5, 22, "Print",ExpressionUUID->"5d547712-4de4-41e3-9441-e1b549e98855"],
-Cell[29806, 833, 277, 5, 22, "Print",ExpressionUUID->"32d4099e-49f0-4fec-9a14-ba08865ae0bb"],
-Cell[30086, 840, 206, 4, 22, "Print",ExpressionUUID->"71652452-20e5-4c77-a30f-992a2deef535"],
-Cell[30295, 846, 231, 4, 22, "Print",ExpressionUUID->"91852a3c-a01b-40a3-be73-89bebe73cb94"],
-Cell[30529, 852, 237, 4, 22, "Print",ExpressionUUID->"42c3efb3-3b7c-4efb-800b-634eafefdfee"],
-Cell[30769, 858, 266, 5, 22, "Print",ExpressionUUID->"271d7444-0c85-46b6-9a1c-6a59b909044a"],
-Cell[31038, 865, 273, 5, 22, "Print",ExpressionUUID->"a0e4d8ff-693d-4c84-92af-0c1337b05810"],
-Cell[31314, 872, 281, 5, 22, "Print",ExpressionUUID->"b542257c-75f6-45ac-95e4-0509b9fc7ce3"],
-Cell[31598, 879, 286, 5, 22, "Print",ExpressionUUID->"6a5054d6-9476-47aa-94e7-8ea79b55f3ee"],
-Cell[31887, 886, 203, 4, 22, "Print",ExpressionUUID->"9133bbf2-b9ba-41bf-b94d-d6fa828b803d"],
-Cell[32093, 892, 242, 4, 22, "Print",ExpressionUUID->"7859bea9-8b5a-4ed3-ba1b-bdb77e27371f"],
-Cell[32338, 898, 292, 5, 22, "Print",ExpressionUUID->"69ce2f1f-a5dc-47ad-97f9-dea9c0e56287"],
-Cell[32633, 905, 281, 5, 22, "Print",ExpressionUUID->"5c6f224b-b5ac-4b29-9c48-6509056f450e"],
-Cell[32917, 912, 322, 5, 22, "Print",ExpressionUUID->"d5b87f68-8893-4c16-8b5c-cde45ae3ba09"],
-Cell[33242, 919, 296, 5, 22, "Print",ExpressionUUID->"fe79a4ae-a34c-40b6-8992-ad90732dc401"],
-Cell[33541, 926, 253, 5, 22, "Print",ExpressionUUID->"6d9f1655-c725-4202-8954-f15921fb1136"],
-Cell[33797, 933, 270, 5, 22, "Print",ExpressionUUID->"c2b6a9dc-b18b-476f-a939-8651c119a2fc"],
-Cell[34070, 940, 259, 5, 22, "Print",ExpressionUUID->"e802e77e-7fc2-474c-ae41-8215e00a30ad"],
-Cell[34332, 947, 271, 5, 40, "Print",ExpressionUUID->"a4cd6e21-eabe-4f0e-b5cd-51311597ac73"],
-Cell[34606, 954, 248, 4, 22, "Print",ExpressionUUID->"ef5a2fd0-3585-43b4-97d7-f3162740f58a"],
-Cell[34857, 960, 257, 5, 22, "Print",ExpressionUUID->"305ccf52-6ab4-4bca-9a96-8c5caa61f210"],
-Cell[35117, 967, 403, 10, 22, "Print",ExpressionUUID->"55ee92ea-892c-4cf6-8aed-7089d8879e69"]
-}, Open  ]],
-Cell[35535, 980, 401, 9, 28, "Message",ExpressionUUID->"0766134c-06c8-4f4f-bdc9-51a75fcc15d7"],
-Cell[35939, 991, 401, 9, 28, "Message",ExpressionUUID->"1337627d-b0b3-478e-8c95-eedc5126215e"],
-Cell[36343, 1002, 403, 9, 28, "Message",ExpressionUUID->"2242e8f1-ca09-41e3-8080-e2914688bab3"],
-Cell[36749, 1013, 483, 10, 28, "Message",ExpressionUUID->"eb158ca9-c310-423e-803c-2f4c46efb5f9"],
-Cell[CellGroupData[{
-Cell[37257, 1027, 364, 9, 22, "Print",ExpressionUUID->"12a32870-ebb2-43b0-b21e-711b77dd4658"],
-Cell[37624, 1038, 298, 5, 22, "Print",ExpressionUUID->"888d8bed-5fa5-45de-b60e-4091638f4dd8"],
-Cell[37925, 1045, 222, 4, 40, "Print",ExpressionUUID->"4f50e510-4dd7-4cbe-a727-17dbcf7677e9"],
-Cell[38150, 1051, 276, 5, 22, "Print",ExpressionUUID->"aada147d-ca6e-4a74-9918-93fa33402db3"],
-Cell[38429, 1058, 275, 5, 22, "Print",ExpressionUUID->"4a1c303b-c647-4eb1-90a2-b5129f41665a"],
-Cell[38707, 1065, 283, 5, 22, "Print",ExpressionUUID->"6ac4315c-2e13-4391-a802-2b95eebaef03"],
-Cell[38993, 1072, 263, 5, 22, "Print",ExpressionUUID->"45a85e10-e611-4079-95c2-1470bdce8fa3"]
+Cell[34158, 808, 398, 7, 22, "Print",ExpressionUUID->"c16573cf-4404-411f-877e-cb84fc7baac8"],
+Cell[34559, 817, 702, 16, 22, "Print",ExpressionUUID->"0a8fab3e-3066-4742-ac2a-e38362185343"],
+Cell[35264, 835, 667, 15, 22, "Print",ExpressionUUID->"715b65a1-a4a4-494b-8d7c-ab354dea6aff"],
+Cell[35934, 852, 665, 16, 22, "Print",ExpressionUUID->"52d10561-3f60-4423-aedd-2113f02d3620"],
+Cell[36602, 870, 583, 12, 22, "Print",ExpressionUUID->"82510cf4-fbde-4488-a594-1bcc6a0a4d83"],
+Cell[37188, 884, 377, 7, 22, "Print",ExpressionUUID->"112bf1e2-5d4b-4a68-bbba-20092d2a5828"],
+Cell[37568, 893, 407, 7, 22, "Print",ExpressionUUID->"75ee001e-db21-498a-97b8-472e8bf66984"],
+Cell[37978, 902, 692, 16, 22, "Print",ExpressionUUID->"df3d343f-68d3-4290-8a7e-90fac9b5f830"],
+Cell[38673, 920, 706, 16, 22, "Print",ExpressionUUID->"58afa3dd-dfbb-4043-8a49-add9f67ea7ca"],
+Cell[39382, 938, 671, 16, 22, "Print",ExpressionUUID->"a7b40267-ecd7-4849-9d0a-76fcf1b6bc2c"],
+Cell[40056, 956, 648, 15, 22, "Print",ExpressionUUID->"6311eeee-ad52-452c-8da1-ee7e36208a8e"],
+Cell[40707, 973, 377, 7, 22, "Print",ExpressionUUID->"7529f4f2-ce48-44e0-a45b-1781edea1827"],
+Cell[41087, 982, 403, 7, 22, "Print",ExpressionUUID->"30d2bdfe-d4a9-4945-93f0-60b42d395986"],
+Cell[41493, 991, 864, 20, 22, "Print",ExpressionUUID->"026739a0-a489-4efa-9aa3-c2549d3ae37e"],
+Cell[42360, 1013, 974, 21, 22, "Print",ExpressionUUID->"4e1ba119-fef7-401b-8665-47b1cd0bddbb"],
+Cell[43337, 1036, 1363, 25, 58, "Print",ExpressionUUID->"b045f6ae-a499-4891-a22c-1e23179b6337"],
+Cell[44703, 1063, 674, 15, 22, "Print",ExpressionUUID->"0fa69947-77d7-4326-a660-6e944e7a304d"]
 }, Open  ]]
 }, Open  ]]
 }
 ]
 *)
-
-(* End of internal cache information *)
 
