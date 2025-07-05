@@ -1,0 +1,671 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     24711,        663]
+NotebookOptionsPosition[     22785,        623]
+NotebookOutlinePosition[     23211,        639]
+CellTagsIndexPosition[     23168,        636]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{"ClearAll", "[", "\"\<Global\[OpenCurlyQuote]*\>\"", 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"SetDirectory", "[", 
+   RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";", 
+  RowBox[{"SetOptions", "[", 
+   RowBox[{"$FrontEndSession", ",", " ", 
+    RowBox[{"NotebookAutoSave", " ", "->", " ", "True"}]}], "]"}], 
+  ";"}], "\n", 
+ RowBox[{
+  RowBox[{"NotebookSave", "[", "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"AppendTo", "[", 
+   RowBox[{"$Path", ",", " ", 
+    RowBox[{"FileNameJoin", "[", 
+     RowBox[{"{", 
+      RowBox[{
+      "$HomeDirectory", ",", " ", "\"\<Dropbox\>\"", ",", " ", 
+       "\"\<EpidCRNmodels\>\""}], "}"}], "]"}]}], "]"}], ";", 
+  RowBox[{"<<", "EpidCRN`"}], ";", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Example", " ", "8.1"}], ":", 
+    RowBox[{"Network", " ", "from", " ", "Example", " ", "4.2"}]}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{"Expected", ":", 
+    RowBox[{"strongly", " ", "endotactic"}]}], "*)"}], 
+  RowBox[{"exa1", "=", 
+   RowBox[{"strToSymb", "[", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\"\<0\>\"", "->", "\"\<3A+B\>\""}], ",", 
+      RowBox[{"\"\<2A\>\"", "->", "\"\<B\>\""}], ",", 
+      RowBox[{"\"\<2B\>\"", "->", "\"\<A+B\>\""}]}], "}"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"endo", "[", "exa1", "]"}], "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+   3.960540134620284*^9, 3.9605401572040367`*^9}, {3.9605408062255926`*^9, 
+   3.9605408171831083`*^9}, 3.960550860676119*^9, {3.9605647777103004`*^9, 
+   3.9605647893699913`*^9}},
+ CellLabel->
+  "In[2077]:=",ExpressionUUID->"e1323b65-724c-42c9-bc29-ea8736e2e30c"],
+
+Cell[BoxData[
+ GraphicsBox[{{}, 
+   {RGBColor[1, 0, 0], Arrowheads[Large], ArrowBox[{{0, 0}, {0.2, 0.2}}]}, {
+    {RGBColor[1, 0, 0], EdgeForm[{RGBColor[1, 0, 0], Thickness[Large]}], 
+     DiskBox[{0, 0}, 0.03]}, 
+    {RGBColor[1, 0, 0], PointSize[0.015], PointBox[{0, 0}]}}, {InsetBox[
+     StyleBox["\<\"{0, 3 A + B}\"\>",
+      StripOnInput->False,
+      LineColor->GrayLevel[0],
+      FrontFaceColor->GrayLevel[0],
+      BackFaceColor->GrayLevel[0],
+      GraphicsColor->GrayLevel[0],
+      FontSize->12,
+      FontColor->GrayLevel[0]], {0, 0}, ImageScaled[{-0.25, -0.25}]], InsetBox[
+     StyleBox["\<\"{2 B, A + B}\"\>",
+      StripOnInput->False,
+      LineColor->GrayLevel[0],
+      FrontFaceColor->GrayLevel[0],
+      BackFaceColor->GrayLevel[0],
+      GraphicsColor->GrayLevel[0],
+      FontSize->12,
+      FontColor->GrayLevel[0]], {0, 0}, ImageScaled[{-0.25, -0.25}]]}},
+  AspectRatio->1,
+  Axes->True,
+  AxesLabel->{
+    FormBox["\"0 -> 3 A + B\"", TraditionalForm], 
+    FormBox["\"2 A -> B\"", TraditionalForm]},
+  GridLines->Automatic,
+  GridLinesStyle->GrayLevel[0.85],
+  ImageSize->300,
+  PlotLabel->FormBox[
+   "\"Euclidean Feinberg-Horn-Jackson Graph with Reaction Polygon\"", 
+    TraditionalForm],
+  PlotRange->All]], "Print",
+ CellChangeTimes->{3.960564791917141*^9, 3.960565241186895*^9, 
+  3.9605654664582014`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2077]:=",ExpressionUUID->"cff110d6-1a79-4109-bad3-0bdcb1edf5c7"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Species\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\<\"0\"\>", "\[Rule]", "\<\"3A+B\"\>"}], ",", 
+      RowBox[{"\<\"2A\"\>", "\[Rule]", "\<\"B\"\>"}]}], "}"}]}], ",", 
+   RowBox[{"\<\"Reactions\"\>", "\[Rule]", 
+    RowBox[{"strToSymb", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\<\"0\"\>", "\[Rule]", "\<\"3A+B\"\>"}], ",", 
+       RowBox[{"\<\"2A\"\>", "\[Rule]", "\<\"B\"\>"}], ",", 
+       RowBox[{"\<\"2B\"\>", "\[Rule]", "\<\"A+B\"\>"}]}], "}"}], "]"}]}], 
+   ",", 
+   RowBox[{"\<\"Endotactic\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"StronglyEndotactic\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"StoichiometricSubspace\"\>", "\[Rule]", 
+    RowBox[{"{", "}"}]}]}], "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.9605508360093727`*^9, 3.9605508661583233`*^9, 
+  3.960550907994299*^9, 3.960552448495782*^9, 3.960552911355504*^9, 
+  3.9605531156612864`*^9, 3.960553261066804*^9, 3.9605533662147865`*^9, 
+  3.9605538160463414`*^9, 3.960554069913912*^9, 3.96056383750463*^9, 
+  3.9605647919520006`*^9, 3.9605652412184014`*^9, 3.960565466490328*^9},
+ CellLabel->
+  "Out[2081]=",ExpressionUUID->"f267f773-bca9-479f-98d4-a136d0161d7e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Example", " ", "8.2"}], ":", 
+    RowBox[{"Cycle", " ", "network"}]}], "*)"}], "\n", 
+  RowBox[{"(*", 
+   RowBox[{"Expected", ":", 
+    RowBox[{"strongly", " ", "endotactic"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"exa2", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<0\>\"", "->", "\"\<A\>\""}], ",", 
+       RowBox[{"\"\<A\>\"", "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<C\>\""}], ",", 
+       RowBox[{"\"\<C\>\"", "->", "\"\<0\>\""}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"endo", "[", "exa2", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+  3.960553336527554*^9, 3.9605533441211147`*^9}},
+ CellLabel->
+  "In[1225]:=",ExpressionUUID->"7f8329cb-af9c-4996-88ad-787819b63a7f"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Species\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>", ",", "\<\"C\"\>"}], "}"}]}], ",", 
+   RowBox[{"\<\"Reactions\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"0", "\[Rule]", "\<\"A\"\>"}], ",", 
+      RowBox[{"\<\"A\"\>", "\[Rule]", "\<\"B\"\>"}], ",", 
+      RowBox[{"\<\"B\"\>", "\[Rule]", "\<\"C\"\>"}], ",", 
+      RowBox[{"\<\"C\"\>", "\[Rule]", "0"}]}], "}"}]}], ",", 
+   RowBox[{"\<\"Endotactic\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"StronglyEndotactic\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"StoichiometricSubspace\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "1", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", 
+        RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0", ",", 
+        RowBox[{"-", "1"}]}], "}"}]}], "}"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.960553354680358*^9, 3.960553827813535*^9, 
+  3.960554081301056*^9},
+ CellLabel->
+  "Out[1226]=",ExpressionUUID->"567e175e-8a15-4905-989c-055cb143ed17"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Example", " ", "8.3"}], ":", 
+    RowBox[{
+    "Triangular", " ", "network", " ", "with", " ", "reversible", " ", 
+     "reactions"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Expected", ":", 
+    RowBox[{"strongly", " ", "endotactic"}]}], "*)"}], "\n", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"exa3", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<2A\>\"", "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<2A\>\""}], ",", 
+       RowBox[{"\"\<2B\>\"", "->", "\"\<C\>\""}], ",", 
+       RowBox[{"\"\<C\>\"", "->", "\"\<2B\>\""}], ",", 
+       RowBox[{"\"\<2C\>\"", "->", "\"\<A\>\""}], ",", 
+       RowBox[{"\"\<A\>\"", "->", "\"\<2C\>\""}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"endo", "[", "exa3", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+  3.960553336527554*^9, 3.960553340759801*^9}, {3.9605541051854653`*^9, 
+  3.9605541212313843`*^9}},
+ CellLabel->
+  "In[1235]:=",ExpressionUUID->"28ea4e57-ee5b-4aee-9452-cbf2a3f0bb5e"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Species\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>", ",", "\<\"C\"\>"}], "}"}]}], ",", 
+   RowBox[{"\<\"Reactions\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"2", " ", "\<\"A\"\>"}], "\[Rule]", "\<\"B\"\>"}], ",", 
+      RowBox[{"\<\"B\"\>", "\[Rule]", 
+       RowBox[{"2", " ", "\<\"A\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"2", " ", "\<\"B\"\>"}], "\[Rule]", "\<\"C\"\>"}], ",", 
+      RowBox[{"\<\"C\"\>", "\[Rule]", 
+       RowBox[{"2", " ", "\<\"B\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"2", " ", "\<\"C\"\>"}], "\[Rule]", "\<\"A\"\>"}], ",", 
+      RowBox[{"\<\"A\"\>", "\[Rule]", 
+       RowBox[{"2", " ", "\<\"C\"\>"}]}]}], "}"}]}], ",", 
+   RowBox[{"\<\"Endotactic\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"StronglyEndotactic\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"StoichiometricSubspace\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "2"}], ",", "1", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", 
+        RowBox[{"-", "1"}], ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", 
+        RowBox[{"-", "2"}], ",", "1"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0", ",", 
+        RowBox[{"-", "1"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0", ",", 
+        RowBox[{"-", "2"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "0", ",", "0"}], "}"}]}], "}"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.960554122802842*^9},
+ CellLabel->
+  "Out[1236]=",ExpressionUUID->"75a512e9-8ba6-4539-b15d-15280c45032a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Example", " ", "8.4"}], ":", 
+    RowBox[{"Complex", " ", "3", "D", " ", "network"}]}], "*)"}], "\n", 
+  RowBox[{"(*", 
+   RowBox[{"Expected", ":", 
+    RowBox[{"strongly", " ", "endotactic"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"exa4", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<4A\>\"", "->", "\"\<A+B+C\>\""}], ",", 
+       RowBox[{"\"\<A+B+C\>\"", "->", "\"\<4B\>\""}], ",", 
+       RowBox[{"\"\<4B\>\"", "->", "\"\<4C\>\""}], ",", 
+       RowBox[{"\"\<4C\>\"", "->", "\"\<2A+2C\>\""}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"endo", "[", "exa4", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+  3.960553336527554*^9, 3.960553340759801*^9}, {3.9605541051854653`*^9, 
+  3.960554141303033*^9}},
+ CellLabel->
+  "In[1237]:=",ExpressionUUID->"83f7b955-f0c5-4812-806e-ce87e8c7e539"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Species\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>", ",", "\<\"C\"\>"}], "}"}]}], ",", 
+   RowBox[{"\<\"Reactions\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"4", " ", "\<\"A\"\>"}], "\[Rule]", 
+       RowBox[{"\<\"A\"\>", "+", "\<\"B\"\>", "+", "\<\"C\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"\<\"A\"\>", "+", "\<\"B\"\>", "+", "\<\"C\"\>"}], "\[Rule]", 
+       RowBox[{"4", " ", "\<\"B\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"4", " ", "\<\"B\"\>"}], "\[Rule]", 
+       RowBox[{"4", " ", "\<\"C\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"4", " ", "\<\"C\"\>"}], "\[Rule]", 
+       RowBox[{
+        RowBox[{"2", " ", "\<\"A\"\>"}], "+", 
+        RowBox[{"2", " ", "\<\"C\"\>"}]}]}]}], "}"}]}], ",", 
+   RowBox[{"\<\"Endotactic\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"StronglyEndotactic\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"StoichiometricSubspace\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "3"}], ",", "1", ",", "1"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "3", ",", 
+        RowBox[{"-", "1"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", 
+        RowBox[{"-", "4"}], ",", "4"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"2", ",", "0", ",", 
+        RowBox[{"-", "2"}]}], "}"}]}], "}"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.960554143474636*^9},
+ CellLabel->
+  "Out[1238]=",ExpressionUUID->"6c768db2-87b5-4d2a-b5cf-d486975f8dd4"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Example", " ", "8.5"}], ":", 
+    RowBox[{"Network", " ", "showing", " ", "limitations"}]}], "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Expected", ":", 
+    RowBox[{
+    "endotactic", " ", "but", " ", "NOT", " ", "strongly", " ", 
+     "endotactic"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"exa5", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<0\>\"", "->", "\"\<A\>\""}], ",", 
+       RowBox[{"\"\<A\>\"", "->", "\"\<0\>\""}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<2B\>\""}], ",", 
+       RowBox[{"\"\<2B\>\"", "->", "\"\<B\>\""}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"endo", "[", "exa5", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+  3.960553336527554*^9, 3.960553340759801*^9}, {3.9605541051854653`*^9, 
+  3.9605541608801947`*^9}},
+ CellLabel->
+  "In[1239]:=",ExpressionUUID->"6e9e39a6-bb52-4c5d-a066-6cccacfebef3"],
+
+Cell[BoxData[
+ GraphicsBox[{
+   {RGBColor[0.8, 0.8, 1.], EdgeForm[{RGBColor[0, 0, 1], Thickness[Large]}], 
+    TagBox[
+     DynamicModuleBox[{Typeset`mesh = HoldComplete[
+       BoundaryMeshRegion[{{0., 0.}, {1., 0.}, {0., 2.}}, {
+         Line[{{1, 2}, {2, 3}, {3, 1}}]}, 
+        Method -> {
+         "EliminateUnusedCoordinates" -> True, "DeleteDuplicateCoordinates" -> 
+          Automatic, "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> 
+          Identity, "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+          Automatic, "CheckIntersections" -> Automatic, 
+          "BoundaryNesting" -> {{0, 0}}, "SeparateBoundaries" -> False, 
+          "TJunction" -> Automatic, "PropagateMarkers" -> True, "ZeroTest" -> 
+          Automatic, "Hash" -> 962950820732139059}, {PlotTheme -> None}]]}, 
+      TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}, {0., 2.}}, {{}, 
+         TagBox[PolygonBox[{{1, 2, 3}}],
+          Annotation[#, "Geometry"]& ]}],
+       MouseAppearanceTag["LinkHand"]],
+      AllowKernelInitialization->False],
+     "BoundaryMeshRegion"]}, {
+    {RGBColor[1, 0, 0], Arrowheads[Large], ArrowBox[{{0, 0}, {1, 0}}]}, 
+    {RGBColor[1, 0, 0], Arrowheads[Large], ArrowBox[{{1, 0}, {0, 0}}]}, 
+    {RGBColor[1, 0, 0], Arrowheads[Large], ArrowBox[{{0, 1}, {0, 2}}]}, 
+    {RGBColor[1, 0, 0], Arrowheads[Large], ArrowBox[{{0, 2}, {0, 1}}]}}, {
+    {RGBColor[1, 0, 0], EdgeForm[{RGBColor[1, 0, 0], Thickness[Large]}], 
+     DiskBox[{0, 0}, 0.03]}, 
+    {RGBColor[1, 0, 0], EdgeForm[{RGBColor[1, 0, 0], Thickness[Large]}], 
+     DiskBox[{1, 0}, 0.03]}, 
+    {RGBColor[1, 0, 0], EdgeForm[{RGBColor[1, 0, 0], Thickness[Large]}], 
+     DiskBox[{0, 1}, 0.03]}, 
+    {RGBColor[1, 0, 0], EdgeForm[{RGBColor[1, 0, 0], Thickness[Large]}], 
+     DiskBox[{0, 2}, 0.03]}}, {InsetBox[
+     StyleBox["\<\"0\"\>",
+      StripOnInput->False,
+      LineColor->GrayLevel[0],
+      FrontFaceColor->GrayLevel[0],
+      BackFaceColor->GrayLevel[0],
+      GraphicsColor->GrayLevel[0],
+      FontSize->12,
+      FontColor->GrayLevel[0]], {0, 0}, ImageScaled[{-0.25, -0.25}]], InsetBox[
+     StyleBox["\<\"A\"\>",
+      StripOnInput->False,
+      LineColor->GrayLevel[0],
+      FrontFaceColor->GrayLevel[0],
+      BackFaceColor->GrayLevel[0],
+      GraphicsColor->GrayLevel[0],
+      FontSize->12,
+      FontColor->GrayLevel[0]], {1, 0}, ImageScaled[{-0.25, -0.25}]], InsetBox[
+     StyleBox["\<\"B\"\>",
+      StripOnInput->False,
+      LineColor->GrayLevel[0],
+      FrontFaceColor->GrayLevel[0],
+      BackFaceColor->GrayLevel[0],
+      GraphicsColor->GrayLevel[0],
+      FontSize->12,
+      FontColor->GrayLevel[0]], {0, 1}, ImageScaled[{-0.25, -0.25}]], InsetBox[
+     StyleBox["\<\"2 B\"\>",
+      StripOnInput->False,
+      LineColor->GrayLevel[0],
+      FrontFaceColor->GrayLevel[0],
+      BackFaceColor->GrayLevel[0],
+      GraphicsColor->GrayLevel[0],
+      FontSize->12,
+      FontColor->GrayLevel[0]], {0, 2}, ImageScaled[{-0.25, -0.25}]]}},
+  AspectRatio->1,
+  Axes->True,
+  AxesLabel->{
+    FormBox["\"A\"", TraditionalForm], 
+    FormBox["\"B\"", TraditionalForm]},
+  GridLines->Automatic,
+  GridLinesStyle->GrayLevel[0.85],
+  ImageSize->300,
+  PlotLabel->FormBox[
+   "\"Euclidean Feinberg-Horn-Jackson Graph with Reaction Polygon\"", 
+    TraditionalForm],
+  PlotRange->All]], "Print",
+ CellChangeTimes->{3.9605541629901543`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1239]:=",ExpressionUUID->"f78a4fe9-f5bf-472b-8cc0-87ef8da58e68"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Species\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>"}], "}"}]}], ",", 
+   RowBox[{"\<\"Reactions\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"0", "\[Rule]", "\<\"A\"\>"}], ",", 
+      RowBox[{"\<\"A\"\>", "\[Rule]", "0"}], ",", 
+      RowBox[{"\<\"B\"\>", "\[Rule]", 
+       RowBox[{"2", " ", "\<\"B\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"2", " ", "\<\"B\"\>"}], "\[Rule]", "\<\"B\"\>"}]}], "}"}]}], 
+   ",", 
+   RowBox[{"\<\"Endotactic\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"StronglyEndotactic\"\>", "\[Rule]", "False"}], ",", 
+   RowBox[{"\<\"StoichiometricSubspace\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", 
+        RowBox[{"-", "1"}]}], "}"}]}], "}"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.9605541630387955`*^9},
+ CellLabel->
+  "Out[1240]=",ExpressionUUID->"80710e98-284d-48fd-b4f6-bbaa244e90f7"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Example", " ", "8.6"}], ":", 
+    RowBox[{"Weakly", " ", "reversible", " ", "network"}]}], "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"Expected", ":", 
+    RowBox[{
+    "endotactic", " ", "but", " ", "NOT", " ", "strongly", " ", 
+     "endotactic"}]}], "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"exa6", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<A\>\"", "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<C\>\""}], ",", 
+       RowBox[{"\"\<C\>\"", "->", "\"\<A\>\""}], ",", 
+       RowBox[{"\"\<2A\>\"", "->", "\"\<3B\>\""}], ",", 
+       RowBox[{"\"\<3B\>\"", "->", "\"\<2A\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{"endo", "[", "exa6", "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+  3.960553336527554*^9, 3.960553340759801*^9}, {3.9605541051854653`*^9, 
+  3.9605541925190573`*^9}},
+ CellLabel->
+  "In[1241]:=",ExpressionUUID->"2a662d57-4054-4cda-8486-f35701251abb"],
+
+Cell[BoxData[
+ RowBox[{"\[LeftAssociation]", 
+  RowBox[{
+   RowBox[{"\<\"Species\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\<\"A\"\>", ",", "\<\"B\"\>", ",", "\<\"C\"\>"}], "}"}]}], ",", 
+   RowBox[{"\<\"Reactions\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"\<\"A\"\>", "\[Rule]", "\<\"B\"\>"}], ",", 
+      RowBox[{"\<\"B\"\>", "\[Rule]", "\<\"C\"\>"}], ",", 
+      RowBox[{"\<\"C\"\>", "\[Rule]", "\<\"A\"\>"}], ",", 
+      RowBox[{
+       RowBox[{"2", " ", "\<\"A\"\>"}], "\[Rule]", 
+       RowBox[{"3", " ", "\<\"B\"\>"}]}], ",", 
+      RowBox[{
+       RowBox[{"3", " ", "\<\"B\"\>"}], "\[Rule]", 
+       RowBox[{"2", " ", "\<\"A\"\>"}]}]}], "}"}]}], ",", 
+   RowBox[{"\<\"Endotactic\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"StronglyEndotactic\"\>", "\[Rule]", "True"}], ",", 
+   RowBox[{"\<\"StoichiometricSubspace\"\>", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "1"}], ",", "1", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", 
+        RowBox[{"-", "1"}], ",", "1"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0", ",", 
+        RowBox[{"-", "1"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"-", "2"}], ",", "3", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"2", ",", 
+        RowBox[{"-", "3"}], ",", "0"}], "}"}]}], "}"}]}]}], 
+  "\[RightAssociation]"}]], "Output",
+ CellChangeTimes->{3.9605541960052223`*^9},
+ CellLabel->
+  "Out[1242]=",ExpressionUUID->"91391cfc-fb1b-4ab9-90cb-632379823392"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+   "Additional", " ", "simple", " ", "examples", " ", "for", " ", "testing"}],
+    "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"simple1", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<A\>\"", "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<A\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"simple2", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<A\>\"", "->", "\"\<B\>\""}], ",", 
+       RowBox[{"\"\<B\>\"", "->", "\"\<C\>\""}], ",", 
+       RowBox[{"\"\<C\>\"", "->", "\"\<A\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"simple3", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<0\>\"", "->", "\"\<A\>\""}], ",", 
+       RowBox[{"\"\<0\>\"", "->", "\"\<B\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"simple4", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<A\>\"", "->", "\"\<2A\>\""}], ",", 
+       RowBox[{"\"\<2A\>\"", "->", "\"\<A\>\""}]}], "}"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"simple5", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\"\<A\>\"", "->", "\"\<2B\>\""}], ",", 
+       RowBox[{"\"\<2B\>\"", "->", "\"\<C\>\""}], ",", 
+       RowBox[{"\"\<C\>\"", "->", "\"\<A\>\""}]}], "}"}]}], 
+    ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.960540071392747*^9, 3.9605400831398525`*^9}, {
+  3.960553336527554*^9, 3.960553340759801*^9}, {3.9605541051854653`*^9, 
+  3.9605541925190573`*^9}},ExpressionUUID->"fcbf8b33-b554-4fce-881a-\
+792e562c8e35"]
+},
+WindowSize->{582.8571428571428, 306},
+WindowMargins->{{36, Automatic}, {34.71428571428572, Automatic}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"7498e264-51ae-478a-b717-1981eab572bc"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 1684, 42, 238, "Input",ExpressionUUID->"e1323b65-724c-42c9-bc29-ea8736e2e30c"],
+Cell[2267, 66, 1446, 38, 228, "Print",ExpressionUUID->"cff110d6-1a79-4109-bad3-0bdcb1edf5c7"],
+Cell[3716, 106, 1267, 26, 90, "Output",ExpressionUUID->"f267f773-bca9-479f-98d4-a136d0161d7e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5020, 137, 875, 23, 86, "Input",ExpressionUUID->"7f8329cb-af9c-4996-88ad-787819b63a7f"],
+Cell[5898, 162, 1312, 33, 104, "Output",ExpressionUUID->"567e175e-8a15-4905-989c-055cb143ed17"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7247, 200, 1108, 28, 105, "Input",ExpressionUUID->"28ea4e57-ee5b-4aee-9452-cbf2a3f0bb5e"],
+Cell[8358, 230, 1789, 47, 123, "Output",ExpressionUUID->"75a512e9-8ba6-4539-b15d-15280c45032a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10184, 282, 958, 24, 86, "Input",ExpressionUUID->"83f7b955-f0c5-4812-806e-ce87e8c7e539"],
+Cell[11145, 308, 1669, 44, 123, "Output",ExpressionUUID->"6c768db2-87b5-4d2a-b5cf-d486975f8dd4"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[12851, 357, 1024, 27, 86, "Input",ExpressionUUID->"6e9e39a6-bb52-4c5d-a066-6cccacfebef3"],
+Cell[13878, 386, 3458, 80, 318, "Print",ExpressionUUID->"f78a4fe9-f5bf-472b-8cc0-87ef8da58e68"],
+Cell[17339, 468, 1180, 32, 85, "Output",ExpressionUUID->"80710e98-284d-48fd-b4f6-bbaa244e90f7"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18556, 505, 1058, 27, 86, "Input",ExpressionUUID->"2a662d57-4054-4cda-8486-f35701251abb"],
+Cell[19617, 534, 1575, 41, 146, "Output",ExpressionUUID->"91391cfc-fb1b-4ab9-90cb-632379823392"]
+}, Open  ]],
+Cell[21207, 578, 1574, 43, 143, "Input",ExpressionUUID->"fcbf8b33-b554-4fce-881a-792e562c8e35"]
+}
+]
+*)
+
