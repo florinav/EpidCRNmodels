@@ -3,13 +3,18 @@
 BeginPackage["EpidCRN`"];
 
 (* Global variables used throughout the package *)
-Global`ome; Global`u;
+Global`ome;
 
 (* ========================================================================= *)
 (* CORE UTILITIES - Reaction parsing and species extraction *)
 (* ========================================================================= *)
 
 extMat::usage = "{spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] extracts comprehensive stoichiometric and network information. Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}. Combines functionality of extSpe, stoichiometricMatrices, reaToRHS, and diagnostics.";
+checkPersistence::usage = "checkPersistence[RN] determines persistence status of reaction network RN. Returns {status, analysis} where status is 'Persistent', 'Unknown', or 'Non-persistent'.";
+persistenceReport::usage = "persistenceReport[RN] provides comprehensive persistence analysis of reaction network RN with detailed output.";
+isCatalytic::usage = "isCatalytic[RN] checks if the reaction network contains catalytic sets.";
+
+findCatalyticSets::usage = "findCatalyticSets[RN] identifies all catalytic sets in the reaction network.";
 convertReactionFormat::usage = "convertReactionFormat[reactions] converts arrow format reactions {A->B, C->D} to pair format {{A,B}, {C,D}}. Returns input unchanged if already in pair format.";
 compToAsso::usage = "compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings. Example: species = extSpe[reactions]";
@@ -72,7 +77,10 @@ ACK::usage = "ACK[RN, continuousIndices] yields a list of four outputs: discrete
 (* ========================================================================= *)
 
 (* Next Generation Matrix analysis *)
-NGM::usage = "{Jy,V1,F1,F,negV,K,chp} = NGM[mod_,inf_] yields {Jy,V1,F1,F,-V,K,chp(u)}; they are the infectious Jacobian, two intermediate results, the new infections, transitions, and next generation matrices, and its char. pol."; 
+NGM::usage = "{Jx,F,V,K,Jy,Jxy,Jyx,chp,Kd} = 
+NGM[mod_,inf_] yields {Jx,F,V,K,Jy,Jxy,Jyx,chp(u),Kd}; 
+they are the infectious Jacobian, the new infections, transitions, 
+and next generation matrices, char. pol,  other blocks of Jacobian, and the alt K"; 
 NGMs::usage = "NGMs[mod_,inf_] simpler version of NGM[mod_,inf_], treats incorrectly denominators and exponents"; 
 JR0::usage = "{R0,co} = JR0[pol] computes basic reproduction number and coefficients";
 DFE::usage = "{diseaseFreeeEquilibrium} = DFE[mod_,inf_] yields the DFE of the model";
@@ -308,7 +316,7 @@ compToAsso[side_] := Module[{coeffs},
     If[StringQ[side], coeffs[side] = 1]]];
   coeffs];
 
-(* Updated extMat function - no conversions needed *)
+(* {spe, al, be, gamma, Rv, RHS, def} =extMat[RN] *)
 extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
   numReactions, numSpecies, reactants, products, 
@@ -534,87 +542,200 @@ expM=Inner[OperatorApplied[Power],#2,#1,Times]&;
 (* CORE DRAINABILITY AND SELF-REPLICABILITY FUNCTIONS *)
 (* ========================================================================= *)
 
-isDrainable[reactions_, speciesSet_List] := Module[{
-  matResults, species, gamma, speciesIndices, coeffs, constraints, solution},
+isDrainable[RN_, speciesSet_List] := Module[{
+  RND, spe, gamma, speciesIndices, coeffs, constraints, solution},
   
-  If[Length[speciesSet] == 0, Return[False]];
+  RND = extMat[RN];
+  spe = RND[[1]];
+  gamma = RND[[4]];
   
-  matResults = extMat[reactions];
-  species = matResults[[1]];
-  gamma = matResults[[4]];
+  speciesIndices = Flatten[Position[spe, #] & /@ speciesSet];
   
-  If[Length[gamma] == 0, Return[False]];
+  If[Length[speciesIndices] != Length[speciesSet],
+    Print["Warning: Some species not found in network"];
+    Return[False]
+  ];
   
-  speciesIndices = Flatten[Position[species, #] & /@ speciesSet];
-  If[Length[speciesIndices] != Length[speciesSet], Return[False]];
-  
-  coeffs = Array[c, Length[gamma]];
+  coeffs = Array[c, Dimensions[gamma][[2]]];
+  linearComb = coeffs . Transpose[gamma];
   constraints = Join[
     Thread[coeffs >= 0],
-    Thread[(coeffs . gamma)[[speciesIndices]] < 0],
+    Thread[linearComb[[speciesIndices]] < 0],
     {Total[coeffs] > 0}
   ];
   
-  solution = FindInstance[constraints, coeffs, Reals, 1];
+  solution = FindInstance[constraints, coeffs, Reals];
   Length[solution] > 0
 ];
 
-isSelfReplicable[reactions_, speciesSet_List] := Module[{
-  matResults, species, gamma, speciesIndices, coeffs, constraints, solution},
+(* Function to test if a species set is self-replicable *)
+isSelfReplicable[RN_, speciesSet_List] := Module[{
+  RND, spe, gamma, speciesIndices, coeffs, constraints, solution},
   
-  If[Length[speciesSet] == 0, Return[False]];
+  RND = extMat[RN];
+  spe = RND[[1]];
+  gamma = RND[[4]];
   
-  matResults = extMat[reactions];
-  species = matResults[[1]];
-  gamma = matResults[[4]];
+  speciesIndices = Flatten[Position[spe, #] & /@ speciesSet];
   
-  If[Length[gamma] == 0, Return[False]];
+  If[Length[speciesIndices] != Length[speciesSet],
+    Print["Warning: Some species not found in network"];
+    Return[False]
+  ];
   
-  speciesIndices = Flatten[Position[species, #] & /@ speciesSet];
-  If[Length[speciesIndices] != Length[speciesSet], Return[False]];
-  
-  coeffs = Array[c, Length[gamma]];
+  coeffs = Array[c, Dimensions[gamma][[2]]];
+  linearComb = coeffs . Transpose[gamma];
   constraints = Join[
     Thread[coeffs >= 0],
-    Thread[(coeffs . gamma)[[speciesIndices]] > 0],
+    Thread[linearComb[[speciesIndices]] > 0],
     {Total[coeffs] > 0}
   ];
   
-  solution = FindInstance[constraints, coeffs, Reals, 1];
+  solution = FindInstance[constraints, coeffs, Reals];
   Length[solution] > 0
 ];
 
-isCritical[reactions_, speciesSet_List] := Module[{
-  matResults, species, conservationLaws, speciesIndices, result},
+(* Function to check if a set is critical *)
+isCritical[RN_, speciesSet_List] := Module[{
+  RND, spe, conservationLaws, speciesIndices},
   
-  If[Length[speciesSet] == 0, Return[False]];
+  RND = extMat[RN];
+  spe = RND[[1]];
+  speciesIndices = Flatten[Position[spe, #] & /@ speciesSet];
+  conservationLaws = cons[RND[[4]], {}];
   
-  matResults = extMat[reactions];
-  species = matResults[[1]];
-  
-  speciesIndices = Flatten[Position[species, #] & /@ speciesSet];
-  If[Length[speciesIndices] != Length[speciesSet], Return[False]];
-  
-  (* Get conservation laws *)
-  conservationLaws = cons[matResults[[4]], {}];
-  
-  (* If no conservation laws, the set is critical *)
-  If[Length[conservationLaws] == 0, Return[True]];
-  
-  (* Check if any conservation law has support contained in speciesSet *)
-  result = True;
-  Do[
-    Module[{supportIndices},
-      supportIndices = Flatten[Position[conservationLaws[[i]], _?Positive]];
-      If[SubsetQ[speciesIndices, supportIndices] && Length[supportIndices] > 0,
-        result = False; Break[]
+  If[Length[conservationLaws] == 0,
+    True,
+    !AnyTrue[conservationLaws,
+      Function[law, 
+        AllTrue[speciesIndices, law[[#]] >= 0 &] && 
+        AnyTrue[speciesIndices, law[[#]] > 0 &] &&
+        AllTrue[Complement[Range[Length[spe]], speciesIndices], law[[#]] == 0 &]
       ]
-    ], {i, Length[conservationLaws]}
+    ]
+  ]
+];
+
+(* Function to find all minimal critical siphons *)
+findMinimalCriticalSiphons[RN_] := Module[{
+  RND, spe, allSiphons, criticalSiphons},
+  
+  RND = extMat[RN];
+  spe = RND[[1]];
+  allSiphons = minSiph[spe, asoRea[RN]];
+  criticalSiphons = Select[allSiphons, isCritical[RN, #] &];
+  criticalSiphons
+];
+
+(* Function to classify all siphons *)
+classifySiphons[RN_] := Module[{
+  RND, spe, allSiphons, classification},
+  
+  RND = extMat[RN];
+  spe = RND[[1]];
+  allSiphons = minSiph[spe, asoRea[RN]];
+  
+  classification = Association[];
+  
+  Do[
+    Module[{isDrain, isSelfRep, isCrit},
+      isDrain = isDrainable[RN, siphon];
+      isSelfRep = isSelfReplicable[RN, siphon];
+      isCrit = isCritical[RN, siphon];
+      
+      classification[siphon] = <|
+        "Drainable" -> isDrain,
+        "SelfReplicable" -> isSelfRep,
+        "Critical" -> isCrit,
+        "Type" -> Which[
+          isDrain && isSelfRep, "Both drainable and self-replicable",
+          isDrain && !isSelfRep, "Drainable only",
+          !isDrain && isSelfRep, "Self-replicable only",
+          True, "Neither drainable nor self-replicable"
+        ]
+      |>;
+    ], {siphon, allSiphons}
+  ];
+  
+  classification
+];
+
+(* Function to check persistence - returns status string instead of boolean *)
+checkPersistence[RN_] := Module[{
+  RND, spe, allSiphons, drainableSiphons, analysis, 
+  persistenceStatus, competing},
+  
+  RND = extMat[RN];
+  spe = RND[[1]];
+  allSiphons = minSiph[spe, asoRea[RN]];
+  drainableSiphons = Select[allSiphons, isDrainable[RN, #] &];
+  competing = Select[drainableSiphons, isSelfReplicable[RN, #] &];
+  
+  persistenceStatus = Which[
+    Length[drainableSiphons] == 0, 
+    "Persistent",
+    Length[competing] == Length[drainableSiphons], 
+    "Unknown",
+    True, 
+    "Non-persistent"
+  ];
+  
+  analysis = <|
+    "AllSiphons" -> allSiphons,
+    "DrainableSiphons" -> drainableSiphons,
+    "CompetingSiphons" -> competing,
+    "PersistenceStatus" -> persistenceStatus
+  |>;
+  
+  {persistenceStatus, analysis}
+];
+
+(* Function to generate persistence report - verbose by default, minimal output *)
+persistenceReport[RN_] := Module[{
+  RND, spe, persistenceCheck, siphonClassification,
+  minimalCriticalSiphons, result},
+  
+  RND = extMat[RN];
+  spe = RND[[1]];
+  
+  persistenceCheck = checkPersistence[RN];
+  siphonClassification = classifySiphons[RN];
+  minimalCriticalSiphons = findMinimalCriticalSiphons[RN];
+  
+  result = <|
+    "Species" -> spe,
+    "NumberOfSpecies" -> Length[spe],
+    "NumberOfReactions" -> Length[RN],
+    "Deficiency" -> RND[[7]],
+    "PersistenceStatus" -> persistenceCheck[[1]],
+    "PersistenceAnalysis" -> persistenceCheck[[2]],
+    "SiphonClassification" -> siphonClassification,
+    "MinimalCriticalSiphons" -> minimalCriticalSiphons
+  |>;
+  
+  Print["=== PERSISTENCE ANALYSIS ==="];
+  Print["Persistence: ", persistenceCheck[[1]]];
+  
+  If[persistenceCheck[[1]] == "Unknown",
+    Print["WARNING: Competing forces - drainable siphons are also self-replicable"];
+    Print["This represents the central challenge of the persistence conjecture"];
+  ];
+  
+  Print[""];
+  Print["Siphon Analysis:"];
+  Print["  Drainable siphons: ", persistenceCheck[[2]]["DrainableSiphons"]];
+  Print["  Competing siphons: ", persistenceCheck[[2]]["CompetingSiphons"]];
+  
+  Print[""];
+  Print["Siphon Classification:"];
+  Do[
+    Print["  ", siphon, " -> ", siphonClassification[siphon]["Type"]],
+    {siphon, Keys[siphonClassification]}
   ];
   
   result
 ];
-
+    
 (* ========================================================================= *)
 (* COMPREHENSIVE SIPHON ANALYSIS *)
 (* ========================================================================= *)
@@ -854,6 +975,47 @@ autocatalysisReport[reactions_, OptionsPattern[{"Verbose" -> True}]] := Module[{
   
   summary
 ];
+
+
+isCatalytic[RN_] := Module[{catalyticSets},
+  catalyticSets = findCatalyticSets[RN];
+  Length[catalyticSets] > 0
+];
+
+
+findCatalyticSets[RN_] := Module[{
+  RND, spe, allSiphons, selfReplicableCriticalSiphons, 
+  reactionCatalysts, allCatalyticSets},
+  
+  RND = extMat[RN];
+  spe = RND[[1]];
+  allSiphons = Quiet[minSiph[spe, asoRea[RN]]];
+  
+  If[allSiphons === $Failed || !ListQ[allSiphons],
+    allSiphons = {}
+  ];
+  
+  (* Find self-replicable critical siphons *)
+  selfReplicableCriticalSiphons = Select[allSiphons,
+    isSelfReplicable[RN, #] && isCritical[RN, #] &
+  ];
+  
+  (* Find traditional catalysts (species unchanged in reactions) *)
+  reactionCatalysts = {};
+  Do[
+    Module[{reactants, products, catalysts},
+      reactants = compToAsso[RN[[i, 1]]];
+      products = compToAsso[RN[[i, 2]]];
+      catalysts = Select[Keys[reactants], 
+        KeyExistsQ[products, #] && reactants[#] == products[#] &];
+      If[Length[catalysts] > 0,
+        reactionCatalysts = Union[reactionCatalysts, {catalysts}]
+      ];
+    ], {i, Length[RN]}
+  ];
+  
+  Union[selfReplicableCriticalSiphons, reactionCatalysts]
+];
 (* ========================================================================= *)
 (* ENHANCED ENDOTACTIC ANALYSIS IMPLEMENTATION *)
 (* ========================================================================= *)
@@ -905,8 +1067,6 @@ getMaximalElements[vectors_, w_] := Module[{dotProducts, maxValue, validVectors,
   
   result
 ];
-
-
 
 (* Other endotactic helper functions *)
 getReactantVectors[reactions_, speciesList_] := Module[{reactants},
@@ -1146,8 +1306,6 @@ endo[reactions_, OptionsPattern[]] := Module[{
 (* ========================================================================= *)
 (* ENHANCED VISUALIZATION *)
 (* ========================================================================= *)
-
-
 (* EucFHJ - FIXED to properly handle Rule format *)
 EucFHJ[reactions_] := EucFHJ[reactions, {}]
 
@@ -1293,12 +1451,34 @@ seZF[expr_] := Select[expr, FreeQ[#, 0] &];
 onePR[cof_,cp_:{}]:=Append[cp,(cof[[#]]//First) (cof[[#]]//Last)<0]&/@Range[cof//Length];
 makeLPM[mat_] := Table[Det@mat[[1 ;; i, 1 ;; i]], {i, 1, Length@mat}];
 Hur2[co_]:=Module[{co3, ine}, co3=co[[3]];ine= {co[[1]] co3>0,co[[2]] co3>0};ine];
-cons[mat_,cp_:{}] := Module[{X, sol, dim, cv}, 
-X = Array[x, Length[mat]];
-  sol = SolveValues[Join[Thread[X . mat == 0],cp], X, NonNegativeIntegers];
-  dim = NullSpace[mat // Transpose] // Length;
-  cv = Table[C[i], {i, dim}];
-  Flatten /@ Table[sol /. Thread[cv -> IdentityMatrix[dim][[i]]], {i, dim}]];
+
+cons[gamma_, {}] := Module[{
+  leftKernel, positiveConservationLaws, nullSpace, dims},
+  
+  dims = Dimensions[gamma];
+  
+  (* Find the left nullspace of gamma (vectors w such that w.gamma = 0) *)
+  nullSpace = Quiet[NullSpace[Transpose[gamma]]];
+  
+  If[nullSpace === {} || nullSpace === $Failed,
+    (* No conservation laws *)
+    {},
+    (* Filter for positive conservation laws *)
+    positiveConservationLaws = Select[nullSpace,
+      AllTrue[#, # >= 0 &] && AnyTrue[#, # > 0 &] &
+    ];
+    
+    (* If no positive ones found, try to make them positive *)
+    If[Length[positiveConservationLaws] == 0,
+      positiveConservationLaws = Select[nullSpace,
+        AllTrue[-#, # >= 0 &] && AnyTrue[-#, # > 0 &] &
+      ];
+      positiveConservationLaws = -# & /@ positiveConservationLaws;
+    ];
+    
+    positiveConservationLaws
+  ]
+];
    
 matl2Mat[matrix_String]:=Module[{formattedMatrix},
 formattedMatrix=StringSplit[matrix,"\n"];
@@ -1442,8 +1622,10 @@ F=ReplaceAll[F1, _. _?Negative -> 0];V=F-Jy;K=(F . Inverse[V])/.Thread[X[[inf]]-
  
 NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Jx,Jxy,Jyx,Kd},dyn=mod[[1]];X=mod[[2]];infc=Complement[Range[Length[X]],inf];
 Jx=Grad[dyn[[inf]],X[[inf]]];Jy=Grad[dyn[[infc]],X[[infc]]];Jxy=Grad[dyn[[inf]],X[[infc]]];Jyx=Grad[dyn[[infc]],X[[inf]]];
-chp=CharacteristicPolynomial[Jx,u];V1=-Jx/.Thread[X[[infc]]->0];F1=Jx+V1/.Thread[X[[inf]]->0];F=posM[F1];V=F-Jx;
-K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;{Jx,chp,Kd,F,V,K,Jy,Jxy,Jyx}];
+chp=CharacteristicPolynomial[Jx,#]&;V1=-Jx/.Thread[X[[infc]]->0];F1=Jx+V1/.Thread[X[[inf]]->0];F=posM[F1];V=F-Jx;
+K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
+Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
+{Jx,F,V,K,Jy,Jxy,Jyx,chp,Kd}];
 
 JR0[pol_,u_]:=Module[{co,co1,cop,con,R0J},co=CoefficientList[pol,u];Print["the  factor  has degree ",Length[co]-1];
 Print["its leading  coefficient  is ",co[[Length[co]]]];co1=Expand[co[[1]] ];Print["its  constant coefficient  is ",co1];
