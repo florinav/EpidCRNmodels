@@ -8,7 +8,7 @@ Global`ome;
 (* ========================================================================= *)
 (* CORE UTILITIES - Reaction parsing and species extraction *)
 (* ========================================================================= *)
-
+(*Do not use * or spaces in names of species*)
 extMat::usage = "{spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] extracts comprehensive stoichiometric and network information. Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}. Combines functionality of extSpe, stoichiometricMatrices, reaToRHS, and diagnostics.";
 checkPersistence::usage = "checkPersistence[RN] determines persistence status of reaction network RN. Returns {status, analysis} where status is 'Persistent', 'Unknown', or 'Non-persistent'.";
 persistenceReport::usage = "persistenceReport[RN] provides comprehensive persistence analysis of reaction network RN with detailed output.";
@@ -321,18 +321,26 @@ extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
   numReactions, numSpecies, reactants, products, 
   var, rv, tk, complexes, linkageClasses, deficiency,
-  defFormula, defTerms, defResult, Nc, l, s},
+  defFormula, defTerms, defResult, Nc, l, s, leftSide, rightSide},
   
-  (* 1. Extract species directly from Rule format *)
+  (* 1. Extract species - fix species extraction for Rule format *)
   spe = Module[{allSpecies, reactants, products}, 
     allSpecies = {};
     
     Do[
-     (* Extract left and right sides of the rule directly *)
-     reactants = compToAsso[reactions[[i, 1]]];
-     products = compToAsso[reactions[[i, 2]]];
-     allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
-     , {i, Length[reactions]}];
+      (* Properly extract left and right sides from Rule format *)
+      If[Head[reactions[[i]]] === Rule,
+        leftSide = First[reactions[[i]]];
+        rightSide = Last[reactions[[i]]],
+        (* If already in pair format *)
+        leftSide = reactions[[i, 1]];
+        rightSide = reactions[[i, 2]]
+      ];
+      
+      reactants = compToAsso[leftSide];
+      products = compToAsso[rightSide];
+      allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
+    , {i, Length[reactions]}];
     DeleteDuplicates[allSpecies]
   ];
   
@@ -344,9 +352,17 @@ extMat[reactions_] := Module[{
   be = Table[0, {numSpecies}, {numReactions}];  (* beta - products *)
   
   Do[
-    (* Extract left and right sides directly *)
-    reactants = compToAsso[reactions[[j, 1]]];
-    products = compToAsso[reactions[[j, 2]]];
+    (* Properly extract left and right sides from Rule format *)
+    If[Head[reactions[[j]]] === Rule,
+      leftSide = First[reactions[[j]]];
+      rightSide = Last[reactions[[j]]],
+      (* If already in pair format *)
+      leftSide = reactions[[j, 1]];
+      rightSide = reactions[[j, 2]]
+    ];
+    
+    reactants = compToAsso[leftSide];
+    products = compToAsso[rightSide];
     
     Do[
       If[KeyExistsQ[reactants, spe[[i]]], 
@@ -372,14 +388,18 @@ extMat[reactions_] := Module[{
   complexes = Module[{complexList},
     complexList = {};
     Do[
-      Module[{reactant, product},
-        (* Extract left and right sides directly *)
-        reactant = reactions[[i, 1]];
-        product = reactions[[i, 2]];
-        If[!MemberQ[complexList, reactant], AppendTo[complexList, reactant]];
-        If[!MemberQ[complexList, product], AppendTo[complexList, product]];
-      ], {i, Length[reactions]}
-    ];
+      (* Properly extract left and right sides from Rule format *)
+      If[Head[reactions[[i]]] === Rule,
+        leftSide = First[reactions[[i]]];
+        rightSide = Last[reactions[[i]]],
+        (* If already in pair format *)
+        leftSide = reactions[[i, 1]];
+        rightSide = reactions[[i, 2]]
+      ];
+      
+      If[!MemberQ[complexList, leftSide], AppendTo[complexList, leftSide]];
+      If[!MemberQ[complexList, rightSide], AppendTo[complexList, rightSide]];
+    , {i, Length[reactions]}];
     complexList
   ];
   
@@ -392,11 +412,18 @@ extMat[reactions_] := Module[{
     (* Build adjacency matrix *)
     adjMatrix = ConstantArray[0, {Length[complexes], Length[complexes]}];
     Do[
-      Module[{reactant, product, reactantPos, productPos},
-        reactant = reactions[[i, 1]];
-        product = reactions[[i, 2]];
-        reactantPos = FirstPosition[complexes, reactant][[1]];
-        productPos = FirstPosition[complexes, product][[1]];
+      (* Properly extract left and right sides from Rule format *)
+      If[Head[reactions[[i]]] === Rule,
+        leftSide = First[reactions[[i]]];
+        rightSide = Last[reactions[[i]]],
+        (* If already in pair format *)
+        leftSide = reactions[[i, 1]];
+        rightSide = reactions[[i, 2]]
+      ];
+      
+      Module[{reactantPos, productPos},
+        reactantPos = FirstPosition[complexes, leftSide][[1]];
+        productPos = FirstPosition[complexes, rightSide][[1]];
         adjMatrix[[reactantPos, productPos]] = 1;
         adjMatrix[[productPos, reactantPos]] = 1; (* Make undirected *)
       ], {i, Length[reactions]}
@@ -425,6 +452,7 @@ extMat[reactions_] := Module[{
   (* Return all results *)
   {spe, al, be, gamma, Rv, RHS, {defFormula, defTerms, defResult}}
 ];
+
 (* Enhanced extSpe function *)
 extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
   allSpecies = {};
@@ -466,28 +494,37 @@ asoRea[RN_]:=Module[{parseSide,extractSpecies},
 
 (* Stoichiometric matrices *)
 stoichiometricMatrices[reactions_] := Module[{
-  convertedReactions, species, numReactions, numSpecies, 
-  alpha, beta, gamma, reactants, products},
+  species, numReactions, numSpecies, 
+  alpha, beta, gamma, reactants, products, leftSide, rightSide},
   
-  convertedReactions = EpidCRN`convertReactionFormat[reactions];
-  species = extSpe[convertedReactions];
-  numReactions = Length[convertedReactions];
+  (* Extract species using extSpe which should handle Rule format properly *)
+  species = extSpe[reactions];
+  numReactions = Length[reactions];
   numSpecies = Length[species];
   
   alpha = Table[0, {numSpecies}, {numReactions}];
   beta = Table[0, {numSpecies}, {numReactions}];
   
   Do[
-   reactants = compToAsso[convertedReactions[[j, 1]]];
-   products = compToAsso[convertedReactions[[j, 2]]];
-   
-   Do[
-    If[KeyExistsQ[reactants, species[[i]]], 
-     alpha[[i, j]] = reactants[species[[i]]]];
-    If[KeyExistsQ[products, species[[i]]], 
-     beta[[i, j]] = products[species[[i]]]];
+    (* Properly extract left and right sides from Rule format *)
+    If[Head[reactions[[j]]] === Rule,
+      leftSide = First[reactions[[j]]];
+      rightSide = Last[reactions[[j]]],
+      (* If already in pair format *)
+      leftSide = reactions[[j, 1]];
+      rightSide = reactions[[j, 2]]
+    ];
+    
+    reactants = compToAsso[leftSide];
+    products = compToAsso[rightSide];
+    
+    Do[
+      If[KeyExistsQ[reactants, species[[i]]], 
+        alpha[[i, j]] = reactants[species[[i]]]];
+      If[KeyExistsQ[products, species[[i]]], 
+        beta[[i, j]] = products[species[[i]]]];
     , {i, numSpecies}];
-   , {j, numReactions}];
+  , {j, numReactions}];
   
   gamma = beta - alpha;
   {alpha, beta, gamma, species}
@@ -975,14 +1012,10 @@ autocatalysisReport[reactions_, OptionsPattern[{"Verbose" -> True}]] := Module[{
   
   summary
 ];
-
-
 isCatalytic[RN_] := Module[{catalyticSets},
   catalyticSets = findCatalyticSets[RN];
   Length[catalyticSets] > 0
 ];
-
-
 findCatalyticSets[RN_] := Module[{
   RND, spe, allSiphons, selfReplicableCriticalSiphons, 
   reactionCatalysts, allCatalyticSets},
@@ -1527,8 +1560,6 @@ If[!(PossibleZeroQ[derivative]||TrueQ[Simplify[derivative<=0]]||TrueQ[Simplify[d
 invFacet[reactions_,maxCodim_]:=Module[{species,n,invariantFacets,subsets},species=extSpe[reactions];n=Length[species];invariantFacets={};
 Do[subsets=Subsets[species,{k}];Do[candidateSet=subsets[[i]];If[isInvariantFacet[candidateSet,reactions],AppendTo[invariantFacets,candidateSet]];,{i,Length[subsets]}];,{k,1,Min[maxCodim,n]}];
 invariantFacets];
-
-
 
 ACK[RN_,continuousSpeciesIndices_]:=Module[{species,continuous,discrete,discreteRN,continuousRN,reaction,left,right,discreteLeft,discreteRight,continuousLeft,continuousRight,poissonParam},
 species=DeleteDuplicates[Flatten[Cases[RN,_String,Infinity]]];continuous=species[[continuousSpeciesIndices]];discrete=Complement[species,continuous];
