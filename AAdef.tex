@@ -22,23 +22,83 @@
 \newtheorem{hypothesis}{Hypothesis}
 \newtheorem{fact}{Fact}
 \newtheorem{example}{Example}
-\newtheorem{definition}{Definition}
-\newtheorem{open}{Open Problem}
 \newtheorem{question}{Question}
 \newtheorem{assumption}{Assumption}
+\usepackage[acronym,toc,sort=use]{glossaries}
+\makeglossaries
 
+% COUNTER DEFINITIONS
+\newcounter{defcounter}
+\newcounter{opcounter}
 
+% THEOREM ENVIRONMENTS
+\newtheorem{definition}{Definition}
+\newtheorem{open}{Open Problem}
+
+% UNIFIED GLOSSARY STYLE WITH SEPARATE COUNTERS
+\newglossarystyle{unifiedstyle}{
+  \setglossarystyle{list}
+  \renewcommand{\glossentry}[2]{
+    \item[%\bfseries 
+    \glsentryuserii{##1} \glsentryuseri{##1}:] ``\glossentryname{##1}''\dotfill##2
+  }
+}
+
+% DEFINITION COMMANDS
+\newcommand{\beD}[1][]{
+  \def\@temparg{#1}
+  \ifx\@temparg\@empty
+    \begin{definition}
+  \else
+    \refstepcounter{defcounter}
+    \begin{definition}[#1]
+    \label{d:#1}
+    \newglossaryentry{d\thedefcounter}{
+      name={#1},
+      description={p.~\pageref{d:#1}},
+      user1={\thedefcounter},
+      user2={Definition}
+    }
+  \fi
+}
+\newcommand{\eeD}{\end{definition}\glsadd{d\thedefcounter}}
+
+% OPEN PROBLEM COMMANDS
+\newcommand{\beO}[1][]{
+  \def\@temparg{#1}
+  \ifx\@temparg\@empty
+    \begin{open}
+  \else
+    \refstepcounter{opcounter}
+    \begin{open}[#1]
+    \label{op:#1}
+    \newglossaryentry{o\theopcounter}{
+      name={#1},
+      description={p.~\pageref{op:#1}},
+      user1={\theopcounter},
+      user2={Open Problem}
+    }
+  \fi
+}
+\newcommand{\eeO}{\end{open}\glsadd{o\theopcounter}}
+
+% PRINT COMMAND
+\newcommand{\printboth}{
+  \printglossary[style=unifiedstyle, title={Definitions and Open Problems}]
+}
 %Abreviations of theorem environments
 \def\beA{\begin{assumption}}\def\eeA{\end{assumption}}
  \def\beQ{\begin{question}}\def\eeQ{\end{question}}
-\def\beD{\begin{definition}} \def\eeD{\end{definition}}
+ 
+
+
 \def\beR{\begin{remark}} \def\eeR{\end{remark}}
 \def\beP{\begin{proposition}} \def\eeP{\end{proposition}}
 \def\beL{\begin{lemma}} \def\eeL{\end{lemma}}
 \def\beC{\begin{corollary}} \def\eeC{\end{corollary}}
   \def\beT{\begin{theorem}}\def\eeT{\end{theorem}}
 \def\beXa{\begin{example}} \def\eeXa{\end{example}}
-\def\beO{\begin{open}} \def\eeO{\end{open}}
+
 
 \def\bep{\begin{pmatrix}} \def\eep{\end{pmatrix}}
 \def\bev{\begin{vmatrix}} \def\eev{\end{vmatrix}}

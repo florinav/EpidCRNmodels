@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     44882,       1222]
-NotebookOptionsPosition[     43391,       1193]
-NotebookOutlinePosition[     43800,       1209]
-CellTagsIndexPosition[     43757,       1206]
+NotebookDataLength[     64195,       1785]
+NotebookOptionsPosition[     62700,       1756]
+NotebookOutlinePosition[     63109,       1772]
+CellTagsIndexPosition[     63066,       1769]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1166,7 +1166,570 @@ Cell[BoxData[
 }, Open  ]],
 
 Cell[BoxData[
- RowBox[{"\[IndentingNewLine]", "\[IndentingNewLine]"}]], "Input",
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "===", "===", "===", "===", "===", "===", "===", "===", "===", "===", "===",
+     "===", "===", "===", "===", "===", "===", "===", "===", "===", "===", "===",
+     "=="}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"METZLER", " ", "MATRIX", " ", "LYAPUNOV", " ", "TEST"}], "-", 
+    RowBox[{"VEEdot", " ", "NON"}], "-", "POSITIVITY"}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "===", "===", "===", "===", "===", "===", "===", "===", "===", "===", "===",
+     "===", "===", "===", "===", "===", "===", "===", "===", "===", "===", "===",
+     "=="}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "Clear", " ", "ALL", " ", "variables", " ", "to", " ", "avoid", " ", 
+    "conflicts"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Set", " ", "dimensions"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"n", "=", "1"}], ";"}], 
+   RowBox[{"(*", 
+    RowBox[{"Change", " ", "this", " ", "to", " ", "any", " ", "value"}], 
+    "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"m", "=", "2"}], ";"}], 
+   RowBox[{"(*", 
+    RowBox[{"Change", " ", "this", " ", "to", " ", "any", " ", "value"}], 
+    "*)"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Define", " ", "symbolic", " ", "variables", " ", "using", " ", "Array", 
+     " ", "to", " ", "avoid", " ", "symbol", " ", "conflicts"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"SA", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"S", ",", "n"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"iA", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"i", ",", "m"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"SbA", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"Sb", ",", "n"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"IbA", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"Ib", ",", "m"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"lA", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"l", ",", "n"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"muA", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"mu", ",", "n"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"y0A", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"y0", ",", "n"}], "]"}]}], ";"}], 
+   RowBox[{"(*", 
+    RowBox[{"DFE", " ", "values"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"onen", "=", 
+     RowBox[{"Table", "[", 
+      RowBox[{"1", ",", "n"}], "]"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Define", " ", "METZLER", " ", "matrix", " ", "A", " ", "with", " ", 
+     "positive", " ", "upper", " ", "diagonal", " ", "psi"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"A", "=", 
+     RowBox[{
+      RowBox[{"main", " ", "diagonal", 
+       RowBox[{"(", 
+        RowBox[{"-", "a"}], ")"}]}], "+", 
+      RowBox[{"lower", " ", "diagonal", 
+       RowBox[{"(", "ga", ")"}]}], "+", 
+      RowBox[{"upper", " ", "diagonal", 
+       RowBox[{"(", "psi", ")"}]}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"A", "=", 
+     RowBox[{
+      RowBox[{"DiagonalMatrix", "[", 
+       RowBox[{"Array", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", 
+           RowBox[{"a", "[", "#", "]"}]}], "&"}], ",", "m"}], "]"}], "]"}], 
+      "+", 
+      RowBox[{"DiagonalMatrix", "[", 
+       RowBox[{
+        RowBox[{"Array", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"ga", "[", "#", "]"}], "&"}], ",", 
+          RowBox[{"m", "-", "1"}]}], "]"}], ",", 
+        RowBox[{"-", "1"}]}], "]"}], "+", 
+      RowBox[{"DiagonalMatrix", "[", 
+       RowBox[{
+        RowBox[{"Array", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"psi", "[", "#", "]"}], "&"}], ",", 
+          RowBox[{"m", "-", "1"}]}], "]"}], ",", "1"}], "]"}]}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Metzler matrix A = \>\"", ",", 
+      RowBox[{"A", "//", "MatrixForm"}]}], "]"}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Ainv", "=", 
+     RowBox[{"Inverse", "[", "A", "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Define", " ", "al"}], "=", "e1"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"al", "=", 
+     RowBox[{"UnitVector", "[", 
+      RowBox[{"m", ",", "1"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"B", "=", 
+     RowBox[{"Array", "[", 
+      RowBox[{"b", ",", 
+       RowBox[{"{", 
+        RowBox[{"n", ",", "m"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Test", " ", 
+     RowBox[{"condition", ":", 
+      RowBox[{
+       RowBox[{"only", " ", 
+        RowBox[{"b", "[", 
+         RowBox[{"1", ",", "1"}], "]"}], " ", "non"}], "-", "zero"}]}]}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"cB1", "=", 
+     RowBox[{"Flatten", "[", 
+      RowBox[{"Table", "[", 
+       RowBox[{
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"i", "==", "1"}], "&&", 
+           RowBox[{"j", "==", "1"}]}], ",", "Nothing", ",", 
+          RowBox[{
+           RowBox[{"b", "[", 
+            RowBox[{"i", ",", "j"}], "]"}], "->", "0"}]}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"i", ",", "1", ",", "n"}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"j", ",", "1", ",", "m"}], "}"}]}], "]"}], "]"}]}], ";"}], 
+   "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"SYSTEM", " ", "DYNAMICS"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"SBI", "=", 
+     RowBox[{"SA", ".", "B", ".", "iA"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"idot", "=", 
+     RowBox[{
+      RowBox[{"SBI", "*", "al"}], "+", 
+      RowBox[{"A", ".", "iA"}]}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Sdot", "=", 
+     RowBox[{"lA", "-", 
+      RowBox[{"muA", "*", "SA"}], "-", 
+      RowBox[{
+       RowBox[{"DiagonalMatrix", "[", "SA", "]"}], ".", "B", ".", "iA"}]}]}], 
+    ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"FIVE", " ", "LAWS", " ", "IMPLEMENTATION", " ", 
+      RowBox[{"(", 
+       RowBox[{"SAME", " ", "AS", " ", "BEFORE"}], ")"}]}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"dwellTimes", "=", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"-", "Ainv"}], ")"}], ".", "al"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"IbE", "=", 
+     RowBox[{"Thread", "[", 
+      RowBox[{"IbA", "->", 
+       RowBox[{"k", "*", "dwellTimes"}]}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"mR", "=", 
+     RowBox[{
+      RowBox[{"B", ".", "dwellTimes"}], "//", "Simplify"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"SbE", " ", "from", " ", "five", " ", "laws"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"kM", "=", 
+     RowBox[{"Inverse", "[", 
+      RowBox[{"DiagonalMatrix", "[", 
+       RowBox[{
+        RowBox[{"k", " ", "mR"}], "+", "muA"}], "]"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"SbE", "=", 
+     RowBox[{"Thread", "[", 
+      RowBox[{"SbA", "->", 
+       RowBox[{"kM", ".", "lA"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Normalization", " ", "constraint"}], "*)"}], "\n", 
+   RowBox[{
+    RowBox[{"normEq", "=", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"SbA", ".", "mR"}], "/.", " ", "SbE"}], ")"}], "==", "1"}]}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"ck", "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"Solve", "[", 
+        RowBox[{"normEq", ",", "k"}], "]"}], "[", 
+       RowBox[{"[", "1", "]"}], "]"}], "//", "FullSimplify"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"normCt", "=", 
+     RowBox[{
+      RowBox[{"SbA", ".", "mR"}], "->", "1"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"cEE", "=", 
+     RowBox[{"Join", "[", 
+      RowBox[{"IbE", ",", "SbE", ",", 
+       RowBox[{"{", "normCt", "}"}]}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"cEEt", "=", 
+     RowBox[{"Join", "[", 
+      RowBox[{"cEE", ",", "ck"}], "]"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<Testing with n = \>\"", ",", "n", ",", "\"\<, m = \>\"", ",", "m"}],
+      "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Ainv = \>\"", ",", 
+      RowBox[{"Ainv", "//", "MatrixForm"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Ibar = k * dwellTimes: \>\"", ",", 
+      RowBox[{"IbA", "/.", " ", "IbE"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<k solution: \>\"", ",", "ck"}], "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"DEFINE", " ", "LYAPUNOV", " ", "FUNCTION"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"oneS", "=", 
+     RowBox[{"ConstantArray", "[", 
+      RowBox[{"1", ",", "n"}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"lS", "=", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"SA", "-", 
+        RowBox[{"SbA", "*", 
+         RowBox[{"Log", "[", "SA", "]"}]}]}], ")"}], ".", "oneS"}]}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"iminusLogI", "=", 
+     RowBox[{"iA", "-", 
+      RowBox[{"IbA", "*", 
+       RowBox[{"Log", "[", "iA", "]"}]}]}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"BAnegal", "=", 
+     RowBox[{"B", ".", 
+      RowBox[{"(", 
+       RowBox[{"-", "Ainv"}], ")"}]}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"lI", "=", 
+     RowBox[{"SbA", ".", "BAnegal", ".", "iminusLogI"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"VEE", "=", 
+     RowBox[{"lS", "+", "lI"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"TIME", " ", "DERIVATIVE"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"VEEdot", "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"Sum", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"D", "[", 
+           RowBox[{"VEE", ",", 
+            RowBox[{"SA", "[", 
+             RowBox[{"[", "j", "]"}], "]"}]}], "]"}], "*", 
+          RowBox[{"Sdot", "[", 
+           RowBox[{"[", "j", "]"}], "]"}]}], ",", 
+         RowBox[{"{", 
+          RowBox[{"j", ",", "1", ",", "n"}], "}"}]}], "]"}], "+", 
+       RowBox[{"Sum", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"D", "[", 
+           RowBox[{"VEE", ",", 
+            RowBox[{"iA", "[", 
+             RowBox[{"[", "k", "]"}], "]"}]}], "]"}], "*", 
+          RowBox[{"idot", "[", 
+           RowBox[{"[", "k", "]"}], "]"}]}], ",", 
+         RowBox[{"{", 
+          RowBox[{"k", ",", "1", ",", "m"}], "}"}]}], "]"}]}], "//", 
+      "Simplify"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<VEEdot = \>\"", ",", "VEEdot"}], "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"LYAPUNOV", " ", "PROPERTY", " ", "TEST"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<Testing Lyapunov property: VEEdot \[LessEqual] 0\>\"", 
+     "]"}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Apply", " ", "cB1", " ", "condition"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"VEEdot_cB1", "=", 
+     RowBox[{
+      RowBox[{"VEEdot", "/.", " ", "cB1"}], "//", "Simplify"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<VEEdot under cB1: \>\"", ",", "VEEdot_cB1"}], "]"}], ";"}], 
+   "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Apply", " ", "five", " ", "laws"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"VEEdot_eq", "=", 
+     RowBox[{
+      RowBox[{"VEEdot_cB1", "/.", " ", "cEEt"}], "//", "Simplify"}]}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<VEEdot at equilibrium (with five laws): \>\"", ",", "VEEdot_eq"}], 
+     "]"}], ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"SIGN", " ", "ANALYSIS"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"For", " ", "Lyapunov", " ", "property"}], ",", 
+     RowBox[{
+      RowBox[{"we", " ", "need", " ", "VEEdot"}], "\[LessEqual]", 
+      RowBox[{"0", " ", "away", " ", "from", " ", "equilibrium"}]}]}], "*)"}],
+    "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"and", " ", "VEEdot"}], "=", 
+     RowBox[{"0", " ", "only", " ", "at", " ", "equilibrium"}]}], "*)"}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Sign analysis of VEEdot:\>\"", "]"}], ";"}], 
+   "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Factor", " ", "VEEdot", " ", "to", " ", "understand", " ", "its", " ", 
+     "structure"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"VEEdot_factored", "=", 
+     RowBox[{"Factor", "[", "VEEdot_cB1", "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<VEEdot factored: \>\"", ",", "VEEdot_factored"}], "]"}], 
+    ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Check", " ", "specific", " ", "cases"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Testing specific parameter values:\>\"", "]"}],
+     ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Case", " ", "1"}], ":", 
+     RowBox[{"Test", " ", "with", " ", "positive", " ", "parameters"}]}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"testRules1", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"S", "[", "1", "]"}], "->", "2"}], ",", 
+       RowBox[{
+        RowBox[{"i", "[", "1", "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"i", "[", "2", "]"}], "->", "0.5"}], ",", 
+       RowBox[{
+        RowBox[{"Sb", "[", "1", "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Ib", "[", "1", "]"}], "->", "0.5"}], ",", 
+       RowBox[{
+        RowBox[{"Ib", "[", "2", "]"}], "->", "0.25"}], ",", 
+       RowBox[{
+        RowBox[{"l", "[", "1", "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"mu", "[", "1", "]"}], "->", "0.1"}], ",", 
+       RowBox[{
+        RowBox[{"a", "[", "1", "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"a", "[", "2", "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"ga", "[", "1", "]"}], "->", "0.5"}], ",", 
+       RowBox[{
+        RowBox[{"psi", "[", "1", "]"}], "->", "0.3"}], ",", 
+       RowBox[{"k", "->", "1"}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+   "\n", 
+   RowBox[{
+    RowBox[{"VEEdot_test1", "=", 
+     RowBox[{
+      RowBox[{"VEEdot_cB1", "/.", " ", "testRules1"}], "//", "N"}]}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Test 1 - VEEdot value: \>\"", ",", "VEEdot_test1"}], "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Test 1 - Sign: \>\"", ",", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"VEEdot_test1", "<", "0"}], ",", 
+        "\"\<Negative \[Checkmark]\>\"", ",", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{"VEEdot_test1", "==", "0"}], ",", "\"\<Zero\>\"", ",", 
+          "\"\<Positive \:2717\>\""}], "]"}]}], "]"}]}], "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Case", " ", "2"}], ":", 
+     RowBox[{"Test", " ", "at", " ", "equilibrium", " ", 
+      RowBox[{"(", 
+       RowBox[{"should", " ", "be", " ", "zero"}], ")"}]}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"testRules2", "=", 
+     RowBox[{"Join", "[", 
+      RowBox[{"testRules1", ",", 
+       RowBox[{"cEEt", "/.", " ", "testRules1"}]}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"VEEdot_test2", "=", 
+     RowBox[{
+      RowBox[{"VEEdot_cB1", "/.", " ", "testRules2"}], "//", "N"}]}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<Test 2 (at equilibrium) - VEEdot value: \>\"", ",", 
+      "VEEdot_test2"}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Test 2 - Sign: \>\"", ",", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Abs", "[", "VEEdot_test2", "]"}], "<", 
+         RowBox[{"10", "^", 
+          RowBox[{"-", "10"}]}]}], ",", "\"\<Zero \[Checkmark]\>\"", ",", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{"VEEdot_test2", "<", "0"}], ",", "\"\<Negative\>\"", ",", 
+          "\"\<Positive \:2717\>\""}], "]"}]}], "]"}]}], "]"}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{
+      RowBox[{"GENERAL", " ", "CONDITIONS", " ", "FOR", " ", "NON"}], "-", 
+      "POSITIVITY"}], "==="}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<Analyzing conditions for VEEdot \[LessEqual] 0:\>\"", 
+     "]"}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Examine", " ", "the", " ", "structure", " ", "to", " ", "identify", " ", 
+     "when", " ", "VEEdot", " ", "becomes", " ", "negative"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"VEEdot_collected", "=", 
+     RowBox[{"Collect", "[", 
+      RowBox[{"VEEdot_cB1", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"S", "[", "1", "]"}], "-", 
+          RowBox[{"Sb", "[", "1", "]"}]}], ",", 
+         RowBox[{
+          RowBox[{"i", "[", "1", "]"}], "-", 
+          RowBox[{"Ib", "[", "1", "]"}]}], ",", 
+         RowBox[{
+          RowBox[{"i", "[", "2", "]"}], "-", 
+          RowBox[{"Ib", "[", "2", "]"}]}]}], "}"}], ",", "Simplify"}], 
+      "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<VEEdot collected by deviation terms: \>\"", ",", 
+      "VEEdot_collected"}], "]"}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+     "The", " ", "Metzler", " ", "property", " ", "should", " ", "ensure", 
+      " ", "non"}], "-", 
+     RowBox[{
+     "positivity", " ", "through", " ", "the", " ", "upper", " ", "diagonal", 
+      " ", "terms"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Metzler matrix elements:\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Upper diagonal (psi): \>\"", ",", 
+      RowBox[{"Array", "[", 
+       RowBox[{"psi", ",", 
+        RowBox[{"m", "-", "1"}]}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Lower diagonal (ga): \>\"", ",", 
+      RowBox[{"Array", "[", 
+       RowBox[{"ga", ",", 
+        RowBox[{"m", "-", "1"}]}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{"\"\<Main diagonal (a): \>\"", ",", 
+      RowBox[{"Array", "[", 
+       RowBox[{"a", ",", "m"}], "]"}]}], "]"}], ";"}], "\[IndentingNewLine]", 
+   "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<For Lyapunov stability, we expect VEEdot \[LessEqual] 0 when system \
+is away from equilibrium.\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<The positive upper diagonal psi should contribute to \
+stability.\>\"", "]"}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]"}]}]], "Input",
  CellChangeTimes->{{3.961937307223442*^9, 3.961937307224411*^9}, {
    3.961937434175125*^9, 3.9619374577660923`*^9}, 3.961937492302823*^9, {
    3.9619375753795233`*^9, 3.961937579571206*^9}, {3.9619376125934687`*^9, 
@@ -1187,9 +1750,9 @@ Cell[BoxData[
    3.9619821502815638`*^9, {3.961982888876011*^9, 3.9619829138087273`*^9}, {
    3.961982944193905*^9, 3.961982969888586*^9}, {3.961983007304739*^9, 
    3.9619830251150293`*^9}, {3.961983093818696*^9, 3.9619832358432307`*^9}, 
-   3.961983461390257*^9},
- CellLabel->
-  "In[809]:=",ExpressionUUID->"bbffc3c2-d863-4c96-9bd0-c9c36dee9346"]
+   3.961983461390257*^9, 
+   3.9620980476862135`*^9},ExpressionUUID->"bbffc3c2-d863-4c96-9bd0-\
+c9c36dee9346"]
 },
 WindowSize->{811.7142857142857, 384},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
@@ -1223,7 +1786,7 @@ Cell[37514, 1033, 572, 12, 22, "Print",ExpressionUUID->"f071f455-5c2b-41f6-8e2f-
 }, Open  ]],
 Cell[38101, 1048, 3583, 116, 230, "Output",ExpressionUUID->"0098720b-1456-4e5b-8780-67831497a456"]
 }, Open  ]],
-Cell[41699, 1167, 1688, 24, 67, "Input",ExpressionUUID->"bbffc3c2-d863-4c96-9bd0-c9c36dee9346"]
+Cell[41699, 1167, 20997, 587, 2445, "Input",ExpressionUUID->"bbffc3c2-d863-4c96-9bd0-c9c36dee9346"]
 }
 ]
 *)
