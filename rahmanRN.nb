@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     25729,        682]
-NotebookOptionsPosition[     24233,        653]
-NotebookOutlinePosition[     24658,        669]
-CellTagsIndexPosition[     24615,        666]
+NotebookDataLength[     17282,        468]
+NotebookOptionsPosition[     15792,        439]
+NotebookOutlinePosition[     16217,        455]
+CellTagsIndexPosition[     16174,        452]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -77,274 +77,60 @@ Cell[BoxData[{
       RowBox[{"\"\<r\>\"", "->", "0"}]}], "                    ", 
      RowBox[{"(*", 
       RowBox[{"death", " ", "of", " ", "r"}], "*)"}], "}"}]}], ";"}], 
-  "\n"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"rts", "=", 
-   RowBox[{"{", 
-    RowBox[{"\[CapitalLambda]", ",", 
-     RowBox[{"(*", 
-      RowBox[{"birth", " ", "rate"}], "*)"}], 
-     RowBox[{"b1", "*", "s", "*", 
-      RowBox[{"i1", "/", 
-       RowBox[{"(", 
-        RowBox[{"1", "+", 
-         RowBox[{"a1", "*", "i1"}]}], ")"}]}]}], ",", 
-     RowBox[{"(*", 
-      RowBox[{
-      "infection", " ", "rate", " ", "strain", " ", "1", " ", "with", " ", 
-       "saturation"}], "*)"}], 
-     RowBox[{"b2", "*", "s", "*", 
-      RowBox[{"i2", "/", 
-       RowBox[{"(", 
-        RowBox[{"1", "+", 
-         RowBox[{"a2", "*", "i2"}]}], ")"}]}]}], ",", 
-     RowBox[{"(*", 
-      RowBox[{
-      "infection", " ", "rate", " ", "strain", " ", "2", " ", "with", " ", 
-       "saturation"}], "*)"}], 
-     RowBox[{"g1", "*", "i1"}], ",", 
-     RowBox[{"(*", 
-      RowBox[{"recovery", " ", "rate", " ", "strain", " ", "1"}], "*)"}], 
-     RowBox[{"g2", "*", "i2"}], ",", 
-     RowBox[{"(*", 
-      RowBox[{"recovery", " ", "rate", " ", "strain", " ", "2"}], "*)"}], 
-     RowBox[{"\[Mu]", "*", "s"}], ",", 
-     RowBox[{"(*", 
-      RowBox[{"death", " ", "rate", " ", "s"}], "*)"}], 
-     RowBox[{"m1", "*", "i1"}], ",", 
-     RowBox[{"(*", 
-      RowBox[{"death", " ", "rate", " ", "i1"}], "*)"}], 
-     RowBox[{"m2", "*", "i2"}], ",", 
-     RowBox[{"(*", 
-      RowBox[{"death", " ", "rate", " ", "i2"}], "*)"}], 
-     RowBox[{"\[Mu]", "*", "r"}]}], "                                     ", 
-    RowBox[{"(*", 
-     RowBox[{"death", " ", "rate", " ", "r"}], "*)"}], "}"}]}], 
-  ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\n", 
  RowBox[{
   RowBox[{
-   RowBox[{
-    RowBox[{"BdAnal", "[", 
-     RowBox[{"RN_", ",", "rts_"}], "]"}], ":=", 
-    RowBox[{"Module", "[", 
-     RowBox[{
-      RowBox[{"{", 
+   RowBox[{"rts", "=", 
+    RowBox[{"{", 
+     RowBox[{"\[CapitalLambda]", ",", 
+      RowBox[{"(*", 
+       RowBox[{"birth", " ", "rate"}], "*)"}], 
+      RowBox[{"b1", "*", "s", "*", 
+       RowBox[{"i1", "/", 
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          RowBox[{"a1", "*", "i1"}]}], ")"}]}]}], ",", 
+      RowBox[{"(*", 
        RowBox[{
-       "spe", ",", "al", ",", "be", ",", "gam", ",", "Rv", ",", "RHS", ",", 
-        "def", ",", "var", ",", "par", ",", "cp", ",", "cv", ",", "ct", ",", 
-        "mS", ",", "TS", ",", "TSsy", ",", "inf", ",", "mod", ",", "ng", ",", 
-        "K", ",", "eig", ",", "ROA", ",", "R0", ",", "cDFE", ",", "RDFE", ",",
-         "eq0", ",", "var0", ",", "E0", ",", "EA", ",", "cEi", ",", "RHSEi", 
-        ",", "eqEi", ",", "varEi"}], "}"}], ",", 
-      RowBox[{
+       "infection", " ", "rate", " ", "strain", " ", "1", " ", "with", " ", 
+        "saturation"}], "*)"}], 
+      RowBox[{"b2", "*", "s", "*", 
+       RowBox[{"i2", "/", 
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          RowBox[{"a2", "*", "i2"}]}], ")"}]}]}], ",", 
+      RowBox[{"(*", 
        RowBox[{
-        RowBox[{"{", 
-         RowBox[{
-         "spe", ",", "al", ",", "be", ",", "gam", ",", "Rv", ",", "RHS", ",", 
-          "def"}], "}"}], "=", 
-        RowBox[{"extMat", "[", "RN", "]"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"var", "=", 
-        RowBox[{"ToExpression", "[", "spe", "]"}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"RHS", "=", 
-        RowBox[{"gam", ".", "rts"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"Print", "[", 
-        RowBox[{"\"\<RHS= \>\"", ",", 
-         RowBox[{"RHS", "//", "MatrixForm"}], ",", "\"\< has par\>\"", ",", 
-         RowBox[{"par", "=", 
-          RowBox[{"Par", "[", 
-           RowBox[{"RHS", ",", "var"}], "]"}]}]}], "]"}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"cp", "=", 
-        RowBox[{"Thread", "[", 
-         RowBox[{"par", ">", "0"}], "]"}]}], ";", 
-       RowBox[{"cv", "=", 
-        RowBox[{"Thread", "[", 
-         RowBox[{"var", ">=", "0"}], "]"}]}], ";", 
-       RowBox[{"ct", "=", 
-        RowBox[{"Join", "[", 
-         RowBox[{"cp", ",", "cv"}], "]"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"mS", "=", 
-        RowBox[{"minSiph", "[", 
-         RowBox[{"spe", ",", 
-          RowBox[{"asoRea", "[", "RN", "]"}]}], "]"}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"Print", "[", 
-        RowBox[{
-        "\"\<minimal siphon \>\"", ",", "mS", ",", "\"\< Check siphon=\>\"", 
-         ",", 
-         RowBox[{
-          RowBox[{
-           RowBox[{"isSiph", "[", 
-            RowBox[{
-             RowBox[{"ToString", "/@", "var"}], ",", 
-             RowBox[{"asoRea", "[", "RN", "]"}], ",", "#"}], "]"}], "&"}], "/@",
-           "mS"}]}], "]"}], ";", "\[IndentingNewLine]", 
-       RowBox[{"(*", 
-        RowBox[{
-        "Get", " ", "infection", " ", "species", " ", "and", " ", "NGM"}], 
-        "*)"}], 
-       RowBox[{"TS", "=", 
-        RowBox[{"Union", "[", 
-         RowBox[{"Flatten", "[", "mS", "]"}], "]"}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"TSsy", "=", 
-        RowBox[{"ToExpression", "[", "TS", "]"}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"inf", "=", 
-        RowBox[{"Flatten", "[", 
-         RowBox[{
-          RowBox[{
-           RowBox[{"Position", "[", 
-            RowBox[{"var", ",", "#"}], "]"}], "&"}], "/@", "TSsy"}], "]"}]}], 
-       ";", "\[IndentingNewLine]", 
-       RowBox[{"Print", "[", 
-        RowBox[{
-        "\"\<Infection species: \>\"", ",", "TS", ",", 
-         "\"\< at positions: \>\"", ",", "inf"}], "]"}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"(*", 
-        RowBox[{"Compute", " ", "reproduction", " ", "numbers"}], "*)"}], 
-       RowBox[{"mod", "=", 
-        RowBox[{"{", 
-         RowBox[{"RHS", ",", "var", ",", "par"}], "}"}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"ng", "=", 
-        RowBox[{"NGM", "[", 
-         RowBox[{"mod", ",", "inf"}], "]"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"K", "=", 
-        RowBox[{
-         RowBox[{"ng", "[", 
-          RowBox[{"[", "4", "]"}], "]"}], "//", 
-         RowBox[{"FullSimplify", "/.", " ", 
-          RowBox[{
-           RowBox[{"Subscript", "[", 
-            RowBox[{"EpidCRN`Private`k", ",", "n_"}], "]"}], ":>", 
-           RowBox[{"Subscript", "[", 
-            RowBox[{"k", ",", "n"}], "]"}]}]}]}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"eig", "=", 
-        RowBox[{
-         RowBox[{"K", "//", "Eigenvalues"}], "//", "Simplify"}]}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"ROA", "=", 
-        RowBox[{"DeleteCases", "[", 
-         RowBox[{"eig", ",", "0"}], "]"}]}], ";", 
-       RowBox[{"(*", 
-        RowBox[{"Array", " ", "of", " ", "reproduction", " ", "functions"}], 
-        "*)"}], 
-       RowBox[{"(*", 
-        RowBox[{
-        "Compute", " ", "DFE", " ", "conditions", " ", "and", " ", "R0", " ", 
-         "at", " ", "DFE"}], "*)"}], 
-       RowBox[{"cDFE", "=", 
-        RowBox[{"Flatten", "[", 
-         RowBox[{
-          RowBox[{
-           RowBox[{"Thread", "[", 
-            RowBox[{
-             RowBox[{"ToExpression", "[", "#", "]"}], "->", "0"}], "]"}], 
-           "&"}], "/@", "mS"}], "]"}]}], ";", "\[IndentingNewLine]", 
-       "\[IndentingNewLine]", 
-       RowBox[{"(*", 
-        RowBox[{"Compute", " ", "DFE", " ", 
-         RowBox[{"(", "E0", ")"}]}], "*)"}], 
-       RowBox[{"RDFE", "=", 
-        RowBox[{"RHS", "/.", " ", "cDFE"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"eq0", "=", 
-        RowBox[{"Thread", "[", 
-         RowBox[{"RDFE", "==", "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"var0", "=", 
-        RowBox[{"Complement", "[", 
-         RowBox[{"var", ",", "TSsy"}], "]"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"E0", "=", 
-        RowBox[{"Solve", "[", 
-         RowBox[{"eq0", ",", "var0"}], "]"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"Print", "[", 
-        RowBox[{"\"\<DFE solution E0: \>\"", ",", "E0"}], "]"}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"R0", "=", 
-        RowBox[{
-         RowBox[{"Max", "[", 
-          RowBox[{
-           RowBox[{"ROA", "/.", " ", "cDFE"}], "/.", "E0"}], "]"}], "//", 
-         "FullSimplify"}]}], ";", 
-       RowBox[{"(*", 
-        RowBox[{
-        "Dominant", " ", "reproduction", " ", "number", " ", "at", " ", 
-         "DFE"}], "*)"}], 
-       RowBox[{"Print", "[", 
-        RowBox[{"\"\<Reproduction functions ROA: \>\"", ",", "ROA"}], "]"}], 
-       ";", "\[IndentingNewLine]", 
-       RowBox[{"Print", "[", 
-        RowBox[{"\"\<Dominant R0 at DFE: \>\"", ",", "R0"}], "]"}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"(*", 
-        RowBox[{
-         RowBox[{"Compute", " ", "boundary", " ", "equilibria", " ", 
-          RowBox[{"(", "EA", ")"}]}], "-", 
-         RowBox[{"equations", " ", "and", " ", "variables", " ", "only"}]}], 
-        "*)"}], 
-       RowBox[{"EA", "=", 
-        RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
-       RowBox[{"Do", "[", 
-        RowBox[{"(*", 
-         RowBox[{"For", " ", "strain", " ", "i", " ", 
-          RowBox[{"boundary", ":", 
-           RowBox[{
-           "set", " ", "other", " ", "strains", " ", "to", " ", "0"}]}]}], 
-         "*)"}], 
-        RowBox[{
-         RowBox[{
-          RowBox[{"cEi", "=", 
-           RowBox[{"Flatten", "[", 
-            RowBox[{
-             RowBox[{
-              RowBox[{"Thread", "[", 
-               RowBox[{
-                RowBox[{"ToExpression", "[", "#", "]"}], "->", "0"}], "]"}], 
-              "&"}], "/@", 
-             RowBox[{"Delete", "[", 
-              RowBox[{"mS", ",", "i"}], "]"}]}], "]"}]}], ";", 
-          "\[IndentingNewLine]", 
-          RowBox[{"RHSEi", "=", 
-           RowBox[{"RHS", "/.", " ", "cEi"}]}], ";", "\[IndentingNewLine]", 
-          RowBox[{"eqEi", "=", 
-           RowBox[{"Thread", "[", 
-            RowBox[{"RHSEi", "==", "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
-          RowBox[{"varEi", "=", "var"}], ";", 
-          RowBox[{"(*", 
-           RowBox[{
-           "All", " ", "variables", " ", "for", " ", "this", " ", "boundary", 
-            " ", "system"}], "*)"}], 
-          RowBox[{"AppendTo", "[", 
-           RowBox[{"EA", ",", 
-            RowBox[{"{", 
-             RowBox[{"eqEi", ",", "varEi"}], "}"}]}], "]"}], ";", 
-          "\[IndentingNewLine]", 
-          RowBox[{"Print", "[", 
-           RowBox[{
-           "\"\<Boundary system E\>\"", ",", "i", ",", "\"\<: \>\"", ",", 
-            RowBox[{"Length", "[", "eqEi", "]"}], ",", 
-            "\"\< equations in \>\"", ",", 
-            RowBox[{"Length", "[", "varEi", "]"}], ",", 
-            "\"\< variables\>\""}], "]"}]}], ",", 
-         RowBox[{"{", 
-          RowBox[{"i", ",", 
-           RowBox[{"Length", "[", "mS", "]"}]}], "}"}]}], "]"}], ";", 
-       "\[IndentingNewLine]", 
-       RowBox[{"{", 
-        RowBox[{
-        "R0", ",", "ROA", ",", "E0", ",", "EA", ",", "RHS", ",", "var"}], 
-        "}"}]}]}], "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+       "infection", " ", "rate", " ", "strain", " ", "2", " ", "with", " ", 
+        "saturation"}], "*)"}], 
+      RowBox[{"g1", "*", "i1"}], ",", 
+      RowBox[{"(*", 
+       RowBox[{"recovery", " ", "rate", " ", "strain", " ", "1"}], "*)"}], 
+      RowBox[{"g2", "*", "i2"}], ",", 
+      RowBox[{"(*", 
+       RowBox[{"recovery", " ", "rate", " ", "strain", " ", "2"}], "*)"}], 
+      RowBox[{"\[Mu]", "*", "s"}], ",", 
+      RowBox[{"(*", 
+       RowBox[{"death", " ", "rate", " ", "s"}], "*)"}], 
+      RowBox[{"m1", "*", "i1"}], ",", 
+      RowBox[{"(*", 
+       RowBox[{"death", " ", "rate", " ", "i1"}], "*)"}], 
+      RowBox[{"m2", "*", "i2"}], ",", 
+      RowBox[{"(*", 
+       RowBox[{"death", " ", "rate", " ", "i2"}], "*)"}], 
+      RowBox[{"\[Mu]", "*", "r"}]}], "                                     ", 
+     RowBox[{"(*", 
+      RowBox[{"death", " ", "rate", " ", "r"}], "*)"}], "}"}]}], ";"}], 
+  "\[IndentingNewLine]", "\n", "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{"Test", " ", "the", " ", "module"}], 
    "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"R0", ",", "ROA", ",", "E0", ",", "EA", ",", "RHS", ",", "var"}], 
-    "}"}], "=", 
+    RowBox[{
+    "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", ",", "R0A", ",", "E0", 
+     ",", "EA", ",", "E1", ",", "RHS", ",", "var", ",", "cp"}], "}"}], "=", 
    RowBox[{"BdAnal", "[", 
     RowBox[{"RN", ",", "rts"}], "]"}]}], ";"}], "\n", 
  RowBox[{
@@ -367,9 +153,9 @@ Cell[BoxData[{
    "FullSimplify"}]}]}], "Input",
  CellChangeTimes->{{3.9622000418432903`*^9, 3.9622000418449306`*^9}, {
   3.9622001172891436`*^9, 3.9622001232676077`*^9}, {3.9622001672341576`*^9, 
-  3.96220016788526*^9}},
- CellLabel->
-  "In[1480]:=",ExpressionUUID->"7af58bda-663c-4508-85f7-3873c409492d"],
+  3.96220016788526*^9}, {3.9624474818329725`*^9, 
+  3.9624474872270994`*^9}},ExpressionUUID->"7af58bda-663c-4508-85f7-\
+3873c409492d"],
 
 Cell[CellGroupData[{
 
@@ -669,20 +455,20 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 13607, 349, 1170, "Input",ExpressionUUID->"7af58bda-663c-4508-85f7-3873c409492d"],
+Cell[580, 22, 5166, 135, 428, "Input",ExpressionUUID->"7af58bda-663c-4508-85f7-3873c409492d"],
 Cell[CellGroupData[{
-Cell[14212, 375, 3138, 79, 94, "Print",ExpressionUUID->"24a3cd76-6d13-441a-8b7e-81322c5875a3"],
-Cell[17353, 456, 616, 16, 22, "Print",ExpressionUUID->"1181ce9c-8af9-48ad-bbc6-48cb893ae977"],
-Cell[17972, 474, 557, 13, 22, "Print",ExpressionUUID->"0903738a-1401-4f6a-8ebd-194792f64e87"],
-Cell[18532, 489, 606, 16, 38, "Print",ExpressionUUID->"99fa7600-3656-404d-bae2-eed6686dfddc"],
-Cell[19141, 507, 704, 19, 40, "Print",ExpressionUUID->"945159b4-6025-465e-bb37-dd219a164603"],
-Cell[19848, 528, 921, 23, 40, "Print",ExpressionUUID->"1c21e7f9-4fe8-4916-854c-04f2d57317a2"],
-Cell[20772, 553, 555, 12, 22, "Print",ExpressionUUID->"94ed3f18-6c2f-4d15-b86d-268aaccded93"],
-Cell[21330, 567, 557, 12, 22, "Print",ExpressionUUID->"7ded0567-341a-480f-b490-bd57fe99ff4e"],
-Cell[21890, 581, 420, 9, 22, "Print",ExpressionUUID->"e8451dbb-3f64-4453-bc52-d265cede45b2"]
+Cell[5771, 161, 3138, 79, 94, "Print",ExpressionUUID->"24a3cd76-6d13-441a-8b7e-81322c5875a3"],
+Cell[8912, 242, 616, 16, 22, "Print",ExpressionUUID->"1181ce9c-8af9-48ad-bbc6-48cb893ae977"],
+Cell[9531, 260, 557, 13, 22, "Print",ExpressionUUID->"0903738a-1401-4f6a-8ebd-194792f64e87"],
+Cell[10091, 275, 606, 16, 38, "Print",ExpressionUUID->"99fa7600-3656-404d-bae2-eed6686dfddc"],
+Cell[10700, 293, 704, 19, 40, "Print",ExpressionUUID->"945159b4-6025-465e-bb37-dd219a164603"],
+Cell[11407, 314, 921, 23, 40, "Print",ExpressionUUID->"1c21e7f9-4fe8-4916-854c-04f2d57317a2"],
+Cell[12331, 339, 555, 12, 22, "Print",ExpressionUUID->"94ed3f18-6c2f-4d15-b86d-268aaccded93"],
+Cell[12889, 353, 557, 12, 22, "Print",ExpressionUUID->"7ded0567-341a-480f-b490-bd57fe99ff4e"],
+Cell[13449, 367, 420, 9, 22, "Print",ExpressionUUID->"e8451dbb-3f64-4453-bc52-d265cede45b2"]
 }, Open  ]],
-Cell[22325, 593, 364, 9, 28, "Message",ExpressionUUID->"b12ccec0-ab96-4a4c-8677-7716900401a6"],
-Cell[22692, 604, 1525, 46, 112, "Output",ExpressionUUID->"7bc295f1-c492-4935-9ed0-477d06a1f240"]
+Cell[13884, 379, 364, 9, 28, "Message",ExpressionUUID->"b12ccec0-ab96-4a4c-8677-7716900401a6"],
+Cell[14251, 390, 1525, 46, 51, "Output",ExpressionUUID->"7bc295f1-c492-4935-9ed0-477d06a1f240"]
 }, Open  ]]
 }
 ]

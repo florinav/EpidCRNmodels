@@ -2,7 +2,7 @@
 \usepackage[novbox]{pdfsync}
 \usepackage{amssymb, amsfonts,mathtools}
 \usepackage{eurosym,graphicx,latexsym, amsmath,amsthm,times,nccmath,url}
-\usepackage{listings,verbatim,cases}
+\usepackage{listings,verbatim,cases,hyperref}
 \usepackage{graphicx,float,fancybox}
 \usepackage{epsfig}
 \usepackage{epstopdf,tikz}
@@ -39,7 +39,7 @@
 \newglossarystyle{unifiedstyle}{
   \setglossarystyle{list}
   \renewcommand{\glossentry}[2]{
-    \item[%\bfseries 
+    \item[%\bfseries
     \glsentryuserii{##1} \glsentryuseri{##1}:] ``\glossentryname{##1}''\dotfill##2
   }
 }
@@ -89,7 +89,7 @@
 %Abreviations of theorem environments
 \def\beA{\begin{assumption}}\def\eeA{\end{assumption}}
  \def\beQ{\begin{question}}\def\eeQ{\end{question}}
- 
+
 
 
 \def\beR{\begin{remark}} \def\eeR{\end{remark}}
@@ -209,8 +209,7 @@
 \def\v1{\vec {\bff 1}}
 \def\vn{\vec \de} \def\bg{\bff \Gamma}   \def\vz{\vec 0}
 \def\rd{\r_{dfe}} \def\sd{\s_{dfe}} \def\dd{D_{dfe}}\def\vd{v_{dfe}} \def\zd{z_{dfe}} \def\xd{\T x_{1}}
-\def\ie{i.e. }\def\re{\bar{\r}}\def\se{\bar{\s}}
-\def\ye{\bar{\y}}\def\xe{\bar{\x}}\def\we{\bar{\w}}\def\eE{\bar{\e}}
+\def\ie{i.e. }
  \def\for{\forall}\def\I{\infty}\def\prf{{\bf  Proof:}}  \def\QED{\hfill {$\square$}\goodbreak \medskip}
  \def\eqr{\eqref} \def\Eq{\Leftrightarrow} \def\Prf{{\bf  Proof:}}
  \def\no{\nonumber}  \def\fr{\frac} \def\lab{\label}
@@ -246,6 +245,8 @@
 \newcommand\op{\operatorname}
 \newcommand{\supp}{\op{supp}}
 %\newcommand{\G}{(\SS,\RR)} % the `name' of the CRN
+\def\Rot{R_{\tilde {1}}^2} \def\Rto{R_{\tilde {2}}^1}
+
 %Some text Abreviations
 
 \def\ece{eco-epidemiological model}\def\para{parameter}
@@ -322,6 +323,8 @@
 \def\itm{it may be checked that }\def\sub{substrate}
 \def\Me{M_{ee}}\def\dwt{dwell times}\def\pa{\paragraph}
 \def\dw{D_w}\def\xy{\x-\y}\def\x{\mathbf{x}}\def\y{\mathbf{y}}
+\def\ye{\bar{\y}}\def\xe{\bar{\x}}\def\we{\bar{\w}}\def\re{\bar{\r}}\def\se{\bar{\s}}
+\def\eE{\bar{\e}}
 \def\regS{regular splitting}\def\evec{eigenvector} \def\eval{eigenvalue}
 \def\fbp{fixed boundary point} \def\fbl{fixed boundary line}
 \def\adm{admissible}\def\isd{is defined by}\def\np{\newpage}

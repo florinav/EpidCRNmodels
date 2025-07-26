@@ -82,11 +82,15 @@ NGM[mod_,inf_] yields {Jx,F,V,K,Jy,Jxy,Jyx,chp(u),Kd};
 they are the infectious Jacobian, the new infections, transitions, 
 and next generation matrices, char. pol,  other blocks of Jacobian, and the alt K"; 
 NGMs::usage = "NGMs[mod_,inf_] simpler version of NGM[mod_,inf_], treats incorrectly denominators and exponents"; 
-JR0::usage = "{R0,co} = JR0[pol] computes basic reproduction number and coefficients";
+JR0::usage = "{R0,co} = JR0[pol,u] computes basic reproduction number R0J=con/cop
+and coefficients of Descartes-type pol";
+extHD::usage = "{hd,li}=extHD[pol,u];factors pol, extracts high degree and nontrivial 
+linear factors";
 DFE::usage = "{diseaseFreeeEquilibrium} = DFE[mod_,inf_] yields the DFE of the model";
 extP::usage ="{extinctionProb} = extP[mod_,inf_] yields the Bacaer equation for approximate extinction probability";
-
+mRts::usage = "rts=mRts[RN,ks]creates mass action rates with names ks";
 (* Stability analysis *)
+bdAnal::usage = "{K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,RHS,var,cp}=bdAnal[RN,rts]";
 Stab::usage = "{stabilityResult} = Stab[mod_,cfp_,cn_:{}] analyzes stability at fixed point";
 ACM::usage = "A2 = ACM[A,k] yields additive compound matrix";
 CofP::usage = "co = CofP[list] yields coefficients of a polynomial as required by Routh-Hurwitz theory, ie normalized so the free coefficient is 1 (see for example R\[ODoubleDot]st, Tekeli, Thm 4A)";
@@ -134,7 +138,7 @@ DerEq::usage = "{derivativeEq} = DerEq[fg,eq:{}] computes derivative equations; 
 (* ========================================================================= *)
 (* UTILITY FUNCTIONS *)
 (* ========================================================================= *)
-
+selZR::usage="selects zero rules";
 red::usage = "recl = red[re,cond] erases from the output of a Reduce all the conditions in cond";
 reCL::usage = "recl = reCL[re,cond] erases from the output of a Reduce all the conditions in cond";
 seZF::usage = "seZF[so_] removes in a list of lists those with a 0";
@@ -1621,7 +1625,8 @@ ine=Append[Thread[co>0],co[[1]] co[[2]]>co[[3]]];{co,h5,ine,H5}];
 H6[co_]:=Module[{hm},hm={{co[[1]],1,0,0,0,0},{co[[3]],co[[2]],co[[1]],1,0,0},{co[[5]],co[[4]],co[[3]],co[[2]],co[[1]],1},
 {0,co[[6]],co[[5]],co[[4]],co[[3]],co[[2]]},{0,0,0,co[[6]],co[[5]],co[[4]]},{0,0,0,0,0,co[[6]]}}];
 
-JTD[mod_,cn_:{}]:=Module[{dyn,X,jac,tr,det},dyn=mod[[1]];X=mod[[2]];jac=Grad[dyn,X]/.cn;tr=Tr[jac];det=Det[jac];{jac,tr,det}];
+JTD[mod_,cn_:{}]:=Module[{dyn,X,jac,tr,det},dyn=mod[[1]];X=mod[[2]];jac=Grad[dyn,X]/.cn;
+tr=Tr[jac];det=Det[jac];{jac,tr,det}];
 
 JTDP[mod_,\[Zeta]_:\[Zeta],cn_:{}]:=Module[{dyn,X,jac,tr,det,chp,cof},dyn=mod[[1]];X=mod[[2]];jac=Grad[dyn,X]/.cn;tr=Tr[jac];det=Det[jac];
 chp=CharacteristicPolynomial[jac,\[Zeta]];cof=CoefficientList[chp,\[Zeta]];{jac,tr,det,cof,chp}];
@@ -1658,9 +1663,89 @@ K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
 Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
 {Jx,F,V,K,Jy,Jxy,Jyx,chp,Kd}];
 
-JR0[pol_,u_]:=Module[{co,co1,cop,con,R0J},co=CoefficientList[pol,u];Print["the  factor  has degree ",Length[co]-1];
-Print["its leading  coefficient  is ",co[[Length[co]]]];co1=Expand[co[[1]] ];Print["its  constant coefficient  is ",co1];
-cop=Replace[co1, _. _?Negative -> 0, {1}];con=cop-co1;Print["R0J is"];R0J=con/cop//FullSimplify;{R0J,co}];
+JR0[pol_,u_]:=Module[{co,co1,cop,con,R0J},co=CoefficientList[pol,u];
+Print["the  factor  has degree ",Length[co]-1];
+Print["its leading  coefficient  is ",co[[Length[co]]]];co1=Expand[co[[1]] ];
+Print["its  constant coefficient  is ",co1];
+cop=Replace[co1, _. _?Negative -> 0, {1}];con=cop-co1;Print["R0J is"];
+R0J=con/cop//FullSimplify;{R0J,co}];
+
+extHD[poly_,var_]:=Module[{factored,factors,highDegree,linear},factored=Factor[poly];
+factors=If[Head[factored]===Times,List@@factored,{factored}];
+Print[factors//Length," factors: ",factors];
+(*Extract factors of degree>=2 and collect by var with simplified coefficients*)
+highDegree=Collect[#,var,Simplify]&/@Select[factors,PolynomialQ[#,var]&&Exponent[#,var]>=2&];
+(*Extract linear factors with negative constant terms*)
+linear=Collect[#,var,Simplify]&/@
+Select[factors,PolynomialQ[#,var]&&Exponent[#,var]==1&&MemberQ[List@@Expand[#/. var->0],_?Negative,Infinity]&];
+Print["High degree factors (degree >= 2): ",highDegree];
+Print["Linear factors with possibly negative constant terms: ",linear];
+{highDegree,linear}]
+
+
+mRts[RN_, ks_] := Module[{rts, spe, al, be, var}, 
+  {spe, al, be} = extMat[RN][[{1, 2, 3}]];
+  var = ToExpression[spe];
+  rts = Table[
+    ks[[i]] * Product[var[[j]]^al[[j, i]], {j, Length[var]}], 
+    {i, Length[RN]}
+  ];
+  rts
+]
+
+bdAnal[RN_] := Module[{rts, spe, al, be, var}, 
+  {spe, al, be} = extMat[RN][[{1, 2, 3}]];
+  var = ToExpression[spe];
+  rts = Table[
+    ToExpression["k[" <> ToString[i] <> "]"] * 
+    Product[var[[j]]^al[[j, i]], {j, Length[var]}], 
+    {i, Length[RN]}
+  ];
+  bdAnal[RN, rts]
+]
+bdAnal[RN_,rts_]:=Module[{spe,al,be,gam,Rv,RHS,def,var,par,
+cp,cv,ct,mS,mSi,inf,mod,ng,K,eig,R0A,R0,cDFE,RDFE,eq0,var0,E0,cE0,EA,
+cEi,RHSEi,eqEi,varEi,E1,Jx,Jy},
+{spe,al,be,gam,Rv,RHS,def}=extMat[RN];
+var=ToExpression[spe];
+RHS=gam . rts;
+Print["RHS= ",RHS//MatrixForm," has par",par=Par[RHS,var]];
+cp=Thread[par>0];cv=Thread[var>=0];ct=Join[cp,cv];
+mS=minSiph[spe,asoRea[RN]];
+Print["minimal siphons ",mS," Check siphon=",isSiph[ToString/@var,asoRea[RN],#]&/@mS];
+(*Get infection species and NGM*)
+mSi=Map[Flatten[Position[spe,#]&/@#]&,mS];
+inf=Union[Flatten[mSi]];
+Print["Infection species  at positions: ",inf];
+(*Compute DFE (E0)*)
+cDFE=Flatten[Thread[ToExpression[#]->0]&/@mS];RDFE=RHS/. cDFE;
+eq0=Thread[RDFE==0];
+var0=Complement[var,var[[inf]]];
+E0=Solve[eq0,var0];
+cE0=Select[Flatten[E0],(#[[2]]==0)&];
+Print["DFE solution E0: ",E0];
+(*Compute reproduction numbers*)
+mod={RHS,var,par};
+ng=NGM[mod,inf];Jx=ng[[1]]//FullSimplify/. Subscript[EpidCRN`Private`k,n_]:>Subscript[k,n];
+Jy=ng[[5]]//FullSimplify/. Subscript[EpidCRN`Private`k,n_]:>Subscript[k,n];
+K=ng[[4]]//FullSimplify/. Subscript[EpidCRN`Private`k,n_]:>Subscript[k,n];
+Print["NGM K= ",K//MatrixForm," =",(K/. cDFE/.cE0)//MatrixForm];
+eig=K//Eigenvalues//Simplify;
+
+R0A=DeleteCases[eig,0];(*Array of reproduction functions*)
+R0=Max[R0A/. cDFE/.cE0]//FullSimplify;(*reproduction functions*)
+Print["Reproduction functions R0A: ",R0A];
+Print["R0 at DFE: ",R0];
+(*Compute boundary equilibria (EA)-equations and variables only*)EA={};
+Do[(*For strain i boundary:set other strains to 0*)cEi=Thread[var[[Flatten[Delete[mSi,i]]]]->0];
+RHSEi=RHS/. cEi;
+eqEi=Thread[RHSEi==0];
+varEi=var;(*All variables for this boundary system*)AppendTo[EA,{eqEi,varEi}],{i,mS//Length}];
+E1=Solve[EA[[1]][[1]],EA[[1]][[2]]]//FullSimplify;
+Print["Number of boundary systems= ",Length[EA]," first sys has sols", E1];
+{K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,RHS,var,cp}];
+(*Test the module
+{K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,RHS,var,cp}=bdAnal[RN,rts];*)
 
 Hirono[S_, intRows_, intCols_] :=Module[{S11, S12, S21, S22, S11plus, Sred},
   S11 = S[[intRows, intCols]];S12 = S[[intRows, Complement[Range[Dimensions[S][[2]]], intCols]]];
@@ -1699,6 +1784,8 @@ Subscript[G,i,j]->(D[FG[[2]],{Global`u,i},{Global`v,j}]/. {Global`u->0,Global`v-
 L1=Subscript[F,3,0]+Subscript[F,1,2]+Subscript[G,0,3]+Subscript[G,2,1]+1/Global`ome*(Subscript[F,1,1]*(Subscript[F,2,0]+Subscript[F,0,2])-Subscript[G,1,1]*(Subscript[G,2,0]+Subscript[G,0,2])+Subscript[F,0,2]*Subscript[G,0,2]-Subscript[F,2,0]*Subscript[G,2,0]);
 L1=L1/. derivatives;F1=Sum[Subscript[F,i,j] Global`u^i Global`v^j,{i,0,3},{j,0,3-i}];G1=Sum[Subscript[G,i,j] Global`u^i Global`v^j,{i,0,3},{j,0,3-i}];
 normForm={F1,G1}/. derivatives;{L1,FG,normForm}];
+
+selZR[con_]:=Select[con,MatchQ[#,Rule[_,0]]&];
 
 DerEq[f_,var_,equilcon_]:=Module[{derivatives,order,deriv,i,j,k,A,B,CC,DD,EE,x,y,z,par,cp},n=Length[f];A=D[f,{var}]/.equilcon;
 {x,y,z}=var;par=Par[f,var];cp=Thread[par>0];derivatives={};order=2;
