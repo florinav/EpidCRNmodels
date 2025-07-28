@@ -1,7 +1,6 @@
 (* ::Package:: *)
 
 BeginPackage["EpidCRN`"];
-
 (* Global variables used throughout the package *)
 Global`ome;
 
@@ -533,6 +532,7 @@ stoichiometricMatrices[reactions_] := Module[{
   gamma = beta - alpha;
   {alpha, beta, gamma, species}
 ];
+(* {al, be, gam, species}=stoichiometricMatrices[RN]*)
 
 (* RHS generation *)
 reaToRHS[reactions_] := Module[{alpha, beta, gamma, species, var, rv, tk, Rv, RHS, convertedReactions},
@@ -1709,7 +1709,7 @@ cEi,RHSEi,eqEi,varEi,E1,Jx,Jy},
 {spe,al,be,gam,Rv,RHS,def}=extMat[RN];
 var=ToExpression[spe];
 RHS=gam . rts;
-Print["RHS= ",RHS//MatrixForm," has par",par=Par[RHS,var]];
+Print["RHS= ",RHS//MatrixForm," has var ",var," par",par=Par[RHS,var]];
 cp=Thread[par>0];cv=Thread[var>=0];ct=Join[cp,cv];
 mS=minSiph[spe,asoRea[RN]];
 Print["minimal siphons ",mS," Check siphon=",isSiph[ToString/@var,asoRea[RN],#]&/@mS];
@@ -1742,7 +1742,7 @@ RHSEi=RHS/. cEi;
 eqEi=Thread[RHSEi==0];
 varEi=var;(*All variables for this boundary system*)AppendTo[EA,{eqEi,varEi}],{i,mS//Length}];
 E1=Solve[EA[[1]][[1]],EA[[1]][[2]]]//FullSimplify;
-Print["Number of boundary systems= ",Length[EA]," first sys has sols", E1];
+Print["Number of boundary systems= ",Length[EA]," first sys has ",E1//Length," sols", E1];
 {K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,RHS,var,cp}];
 (*Test the module
 {K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,RHS,var,cp}=bdAnal[RN,rts];*)
