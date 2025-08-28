@@ -1,0 +1,709 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     29354,        699]
+NotebookOptionsPosition[     28970,        685]
+NotebookOutlinePosition[     29398,        701]
+CellTagsIndexPosition[     29355,        698]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{"EXECUTE", " ", "THIS", " ", 
+    RowBox[{"FIRST", ":"}]}], "*)"}], 
+  RowBox[{
+   RowBox[{"Clear", "[", "classifyOsc", "]"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Detailed", " ", "Oscillation", " ", "Classification"}], "-", 
+     RowBox[{
+     "analyzes", " ", "a", " ", "specific", " ", "oscillatory", " ", 
+      "point"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"classifyOsc", "[", 
+      RowBox[{
+      "RHS_", ",", "var_", ",", "par_", ",", "p0val_", ",", "oscVal_", ",", 
+       "plotInd_", ",", 
+       RowBox[{"gridRes_", ":", "Automatic"}], ",", 
+       RowBox[{"plot_", ":", "Automatic"}], ",", 
+       RowBox[{"delta_", ":", 
+        RowBox[{"1", "/", "20"}]}], ",", 
+       RowBox[{"tMax_", ":", "500"}], ",", 
+       RowBox[{"nInitials_", ":", "12"}], ",", 
+       RowBox[{"steadyTol_", ":", 
+        RowBox[{"10", "^", 
+         RowBox[{"(", 
+          RowBox[{"-", "5"}], ")"}]}]}], ",", 
+       RowBox[{"R01_", ":", "Automatic"}], ",", 
+       RowBox[{"R02_", ":", "Automatic"}], ",", 
+       RowBox[{"R21_", ":", "Automatic"}], ",", 
+       RowBox[{"R12_", ":", "Automatic"}], ",", 
+       RowBox[{"wRan_", ":", "1"}], ",", 
+       RowBox[{"hRan_", ":", "1"}]}], "]"}], ":=", 
+     RowBox[{"Block", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"stabTol", "=", 
+          RowBox[{"10", "^", 
+           RowBox[{"(", 
+            RowBox[{"-", "8"}], ")"}]}]}], ",", 
+         RowBox[{"maxSteps", "=", "25000"}], ",", 
+         RowBox[{"ndsMethod", "=", "\"\<StiffnessSwitching\>\""}], ",", 
+         RowBox[{"oscTol", "=", 
+          RowBox[{"10", "^", 
+           RowBox[{"(", 
+            RowBox[{"-", "4"}], ")"}]}]}], ",", "bifParIdx1", ",", 
+         "bifParIdx2", ",", "bifP1Val", ",", "bifP2Val", ",", "numpar", ",", 
+         "conPar", ",", "initialConditions", ",", "tsol", ",", "finalValues", 
+         ",", "I1val", ",", "I2val", ",", "tol", ",", "currentType", ",", 
+         "allSols", ",", "icSet", ",", "ic", ",", "rhsWithParams", ",", 
+         "rhsWithFunctions", ",", "odeSystem", ",", "initialCondSystem", ",", 
+         "I1Index", ",", "I2Index", ",", "longTsol", ",", "analysisTime", ",",
+          "sampleTimes", ",", "sampleValues", ",", "I1samples", ",", 
+         "I2samples", ",", "fftI1", ",", "fftI2", ",", "freqs", ",", 
+         "dominantFreqs", ",", "periodEstimate", ",", "amplitudeI1", ",", 
+         "amplitudeI2", ",", "meanI1", ",", "meanI2", ",", "correlationDim", 
+         ",", "poincareData", ",", "returnMapData", ",", "detailedResult"}], 
+        "}"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{
+        "Extract", " ", "parameter", " ", "values", " ", "from", " ", 
+         "oscillatory", " ", "point"}], "*)"}], 
+       RowBox[{
+        RowBox[{"bifParIdx1", "=", 
+         RowBox[{"First", "[", "plotInd", "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"bifParIdx2", "=", 
+         RowBox[{"Last", "[", "plotInd", "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"bifP1Val", "=", 
+         RowBox[{"oscVal", "[", 
+          RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"bifP2Val", "=", 
+         RowBox[{"oscVal", "[", 
+          RowBox[{"[", "2", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Find", " ", "indices", " ", "of", " ", "I1", " ", "and", " ", "I2", 
+          " ", "in", " ", "var"}], "*)"}], 
+        RowBox[{"I1Index", "=", 
+         RowBox[{
+          RowBox[{"Position", "[", 
+           RowBox[{"var", ",", "I1"}], "]"}], "[", 
+          RowBox[{"[", 
+           RowBox[{"1", ",", "1"}], "]"}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"I2Index", "=", 
+         RowBox[{
+          RowBox[{"Position", "[", 
+           RowBox[{"var", ",", "I2"}], "]"}], "[", 
+          RowBox[{"[", 
+           RowBox[{"1", ",", "1"}], "]"}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Set", " ", "parameters", " ", "to", " ", "the", " ", "oscillatory", 
+          " ", "point", " ", "values"}], "*)"}], 
+        RowBox[{"numpar", "=", "p0val"}], ";", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"numpar", "[", 
+          RowBox[{"[", "bifParIdx1", "]"}], "]"}], "=", "bifP1Val"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"numpar", "[", 
+          RowBox[{"[", "bifParIdx2", "]"}], "]"}], "=", "bifP2Val"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"conPar", "=", 
+         RowBox[{"Thread", "[", 
+          RowBox[{"par", "->", "numpar"}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"tol", "=", 
+         RowBox[{"10", "^", 
+          RowBox[{"(", 
+           RowBox[{"-", "6"}], ")"}]}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Create", " ", "diverse", " ", "initial", " ", "condition", " ", 
+          "sets", " ", "for", " ", "robust", " ", "analysis"}], "*)"}], 
+        RowBox[{"initialConditions", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"Set", " ", "1"}], ":", 
+          RowBox[{"DFE", "-", "like"}]}], "*)"}], 
+        RowBox[{"icSet", "=", 
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"0.01", "/", 
+            RowBox[{"Length", "[", "var", "]"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"Length", "[", "var", "]"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I1Index", "]"}], "]"}], "=", "0.001"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I2Index", "]"}], "]"}], "=", "0.001"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"initialConditions", ",", "icSet"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"Set", " ", "2"}], ":", 
+          RowBox[{"E1", "-", "like"}]}], "*)"}], 
+        RowBox[{"icSet", "=", 
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"0.01", "/", 
+            RowBox[{"Length", "[", "var", "]"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"Length", "[", "var", "]"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I1Index", "]"}], "]"}], "=", "0.1"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I2Index", "]"}], "]"}], "=", "0.001"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"initialConditions", ",", "icSet"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"Set", " ", "3"}], ":", 
+          RowBox[{"E2", "-", "like"}]}], "*)"}], 
+        RowBox[{"icSet", "=", 
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"0.01", "/", 
+            RowBox[{"Length", "[", "var", "]"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"Length", "[", "var", "]"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I1Index", "]"}], "]"}], "=", "0.001"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I2Index", "]"}], "]"}], "=", "0.1"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"initialConditions", ",", "icSet"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"Set", " ", "4"}], ":", 
+          RowBox[{"EE", "-", "like"}]}], "*)"}], 
+        RowBox[{"icSet", "=", 
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"0.01", "/", 
+            RowBox[{"Length", "[", "var", "]"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"Length", "[", "var", "]"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I1Index", "]"}], "]"}], "=", "0.1"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"icSet", "[", 
+          RowBox[{"[", "I2Index", "]"}], "]"}], "=", "0.1"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"AppendTo", "[", 
+         RowBox[{"initialConditions", ",", "icSet"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Additional", " ", "random", " ", "initial", " ", "conditions"}], 
+         "*)"}], 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"icSet", "=", 
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{"RandomReal", "[", 
+               RowBox[{"{", 
+                RowBox[{"0.001", ",", "0.3"}], "}"}], "]"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"Length", "[", "var", "]"}], "}"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"AppendTo", "[", 
+            RowBox[{"initialConditions", ",", "icSet"}], "]"}], ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"nInitials", "-", "4"}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{
+         "\"\<Analyzing oscillatory point: be1=\>\"", ",", "bifP1Val", ",", 
+          "\"\<, be2=\>\"", ",", "bifP2Val"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{
+         "\"\<Running detailed analysis with tMax=\>\"", ",", "tMax", ",", 
+          "\"\<...\>\""}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Substitute", " ", "parameters", " ", "in", " ", "RHS"}], 
+         "*)"}], 
+        RowBox[{"rhsWithParams", "=", 
+         RowBox[{"RHS", "/.", " ", "conPar"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"rhsWithFunctions", "=", 
+         RowBox[{"rhsWithParams", "/.", " ", 
+          RowBox[{"Thread", "[", 
+           RowBox[{"var", "->", 
+            RowBox[{"Through", "[", 
+             RowBox[{"var", "[", "t", "]"}], "]"}]}], "]"}]}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+         "Run", " ", "longer", " ", "simulation", " ", "for", " ", "detailed",
+           " ", "analysis"}], "*)"}], 
+        RowBox[{"allSols", "=", 
+         RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"ic", "=", 
+            RowBox[{"initialConditions", "[", 
+             RowBox[{"[", "k", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"odeSystem", "=", 
+            RowBox[{"MapThread", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{
+                RowBox[{
+                 RowBox[{"#1", "'"}], "[", "t", "]"}], "==", "#2"}], "&"}], 
+              ",", 
+              RowBox[{"{", 
+               RowBox[{"var", ",", "rhsWithFunctions"}], "}"}]}], "]"}]}], 
+           ";", "\[IndentingNewLine]", 
+           RowBox[{"initialCondSystem", "=", 
+            RowBox[{"MapThread", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{
+                RowBox[{"#1", "[", "0", "]"}], "==", "#2"}], "&"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"var", ",", "ic"}], "}"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"longTsol", "=", 
+            RowBox[{"Quiet", "[", 
+             RowBox[{"NDSolve", "[", 
+              RowBox[{
+               RowBox[{"Join", "[", 
+                RowBox[{"odeSystem", ",", "initialCondSystem"}], "]"}], ",", 
+               "var", ",", 
+               RowBox[{"{", 
+                RowBox[{"t", ",", "0", ",", "tMax"}], "}"}], ",", 
+               RowBox[{"Method", "->", "ndsMethod"}], ",", 
+               RowBox[{"MaxSteps", "->", "maxSteps"}]}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "longTsol", "]"}], ">", "0"}], "&&", 
+              RowBox[{
+               RowBox[{"longTsol", "[", 
+                RowBox[{"[", "1", "]"}], "]"}], "=!=", "$Failed"}]}], ",", 
+             RowBox[{
+              RowBox[{"AppendTo", "[", 
+               RowBox[{"allSols", ",", 
+                RowBox[{"longTsol", "[", 
+                 RowBox[{"[", "1", "]"}], "]"}]}], "]"}], ";"}]}], "]"}], 
+           ";"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"k", ",", "1", ",", 
+            RowBox[{"Length", "[", "initialConditions", "]"}]}], "}"}]}], 
+         "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Length", "[", "allSols", "]"}], ">", "0"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{
+           "Take", " ", "the", " ", "first", " ", "successful", " ", 
+            "solution", " ", "for", " ", "detailed", " ", "analysis"}], 
+           "*)"}], 
+          RowBox[{
+           RowBox[{"tsol", "=", 
+            RowBox[{"allSols", "[", 
+             RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Analyze", " ", "last", " ", "40", "%", " ", "of", " ", 
+             "simulation", " ", 
+             RowBox[{"(", 
+              RowBox[{"after", " ", "transients"}], ")"}]}], "*)"}], 
+           RowBox[{"analysisTime", "=", 
+            RowBox[{"0.6", "*", "tMax"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"sampleTimes", "=", 
+            RowBox[{"Table", "[", 
+             RowBox[{"t", ",", 
+              RowBox[{"{", 
+               RowBox[{"t", ",", "analysisTime", ",", "tMax", ",", 
+                RowBox[{
+                 RowBox[{"(", 
+                  RowBox[{"tMax", "-", "analysisTime"}], ")"}], "/", 
+                 "500"}]}], "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Extract", " ", "time", " ", "series", " ", "for", " ", "I1", " ",
+              "and", " ", "I2"}], "*)"}], 
+           RowBox[{"I1samples", "=", 
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"I1", "[", "t", "]"}], "/.", " ", "tsol"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"t", ",", "sampleTimes"}], "}"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"I2samples", "=", 
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"I2", "[", "t", "]"}], "/.", " ", "tsol"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"t", ",", "sampleTimes"}], "}"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Calculate", " ", "basic", " ", "statistics"}], "*)"}], 
+           RowBox[{"meanI1", "=", 
+            RowBox[{"Mean", "[", "I1samples", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"meanI2", "=", 
+            RowBox[{"Mean", "[", "I2samples", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"amplitudeI1", "=", 
+            RowBox[{
+             RowBox[{"Max", "[", "I1samples", "]"}], "-", 
+             RowBox[{"Min", "[", "I1samples", "]"}]}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"amplitudeI2", "=", 
+            RowBox[{
+             RowBox[{"Max", "[", "I2samples", "]"}], "-", 
+             RowBox[{"Min", "[", "I2samples", "]"}]}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Frequency", " ", "analysis", " ", "using", " ", "FFT"}], 
+            "*)"}], 
+           RowBox[{"fftI1", "=", 
+            RowBox[{"Abs", "[", 
+             RowBox[{"Fourier", "[", 
+              RowBox[{"I1samples", "-", "meanI1"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"fftI2", "=", 
+            RowBox[{"Abs", "[", 
+             RowBox[{"Fourier", "[", 
+              RowBox[{"I2samples", "-", "meanI2"}], "]"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"freqs", "=", 
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{"2", " ", "Pi", " ", 
+               RowBox[{"k", "/", 
+                RowBox[{"(", 
+                 RowBox[{"tMax", "-", "analysisTime"}], ")"}]}]}], ",", 
+              RowBox[{"{", 
+               RowBox[{"k", ",", "0", ",", 
+                RowBox[{
+                 RowBox[{"Length", "[", "fftI1", "]"}], "-", "1"}]}], "}"}]}],
+              "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Find", " ", "dominant", " ", "frequencies", " ", 
+             RowBox[{"(", 
+              RowBox[{"excluding", " ", "DC", " ", "component"}], ")"}]}], 
+            "*)"}], 
+           RowBox[{"dominantFreqs", "=", 
+            RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Length", "[", "fftI1", "]"}], ">", "10"}], ",", 
+             RowBox[{
+              RowBox[{"dominantI1Pos", "=", 
+               RowBox[{
+                RowBox[{"Ordering", "[", 
+                 RowBox[{
+                  RowBox[{"fftI1", "[", 
+                   RowBox[{"[", 
+                    RowBox[{"2", ";;", 
+                    RowBox[{"Min", "[", 
+                    RowBox[{"50", ",", 
+                    RowBox[{"Length", "[", "fftI1", "]"}]}], "]"}]}], "]"}], 
+                   "]"}], ",", 
+                  RowBox[{"-", "3"}]}], "]"}], "+", "1"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"dominantI2Pos", "=", 
+               RowBox[{
+                RowBox[{"Ordering", "[", 
+                 RowBox[{
+                  RowBox[{"fftI2", "[", 
+                   RowBox[{"[", 
+                    RowBox[{"2", ";;", 
+                    RowBox[{"Min", "[", 
+                    RowBox[{"50", ",", 
+                    RowBox[{"Length", "[", "fftI2", "]"}]}], "]"}]}], "]"}], 
+                   "]"}], ",", 
+                  RowBox[{"-", "3"}]}], "]"}], "+", "1"}]}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"dominantFreqs", "=", 
+               RowBox[{"Union", "[", 
+                RowBox[{
+                 RowBox[{"freqs", "[", 
+                  RowBox[{"[", "dominantI1Pos", "]"}], "]"}], ",", 
+                 RowBox[{"freqs", "[", 
+                  RowBox[{"[", "dominantI2Pos", "]"}], "]"}]}], "]"}]}], 
+              ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Estimate", " ", "period", " ", "from", " ", "dominant", " ", 
+             "frequency"}], "*)"}], 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "dominantFreqs", "]"}], ">", "0"}], "&&", 
+              RowBox[{
+               RowBox[{"dominantFreqs", "[", 
+                RowBox[{"[", "1", "]"}], "]"}], ">", "0"}]}], ",", 
+             RowBox[{
+              RowBox[{"periodEstimate", "=", 
+               RowBox[{"2", " ", 
+                RowBox[{"Pi", "/", 
+                 RowBox[{"dominantFreqs", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}]}]}]}], ";"}], ",", 
+             RowBox[{
+              RowBox[{"periodEstimate", "=", "\"\<Unknown\>\""}], ";"}]}], 
+            "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Poincar\[EAcute]", " ", "section", " ", "analysis", " ", 
+             RowBox[{"(", 
+              RowBox[{"I1", " ", "vs", " ", "I2", " ", "plot"}], ")"}]}], 
+            "*)"}], 
+           RowBox[{"poincareData", "=", 
+            RowBox[{"Transpose", "[", 
+             RowBox[{"{", 
+              RowBox[{"I1samples", ",", "I2samples"}], "}"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Return", " ", "map", " ", "analysis", " ", 
+             RowBox[{"(", 
+              RowBox[{"successive", " ", "maxima"}], ")"}]}], "*)"}], 
+           RowBox[{"I1maxima", "=", 
+            RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"i", ">", "1"}], "&&", 
+                RowBox[{"i", "<", 
+                 RowBox[{"Length", "[", "I1samples", "]"}]}], "&&", 
+                RowBox[{
+                 RowBox[{"I1samples", "[", 
+                  RowBox[{"[", "i", "]"}], "]"}], ">", 
+                 RowBox[{"I1samples", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"i", "-", "1"}], "]"}], "]"}]}], "&&", 
+                RowBox[{
+                 RowBox[{"I1samples", "[", 
+                  RowBox[{"[", "i", "]"}], "]"}], ">", 
+                 RowBox[{"I1samples", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"i", "+", "1"}], "]"}], "]"}]}]}], ",", 
+               RowBox[{
+                RowBox[{"AppendTo", "[", 
+                 RowBox[{"I1maxima", ",", 
+                  RowBox[{"I1samples", "[", 
+                   RowBox[{"[", "i", "]"}], "]"}]}], "]"}], ";"}]}], "]"}], 
+             ",", 
+             RowBox[{"{", 
+              RowBox[{"i", ",", "2", ",", 
+               RowBox[{
+                RowBox[{"Length", "[", "I1samples", "]"}], "-", "1"}]}], 
+              "}"}]}], "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"returnMapData", "=", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "I1maxima", "]"}], ">", "1"}], ",", 
+              RowBox[{"Transpose", "[", 
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"Most", "[", "I1maxima", "]"}], ",", 
+                 RowBox[{"Rest", "[", "I1maxima", "]"}]}], "}"}], "]"}], ",", 
+              RowBox[{"{", "}"}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{
+            "Classification", " ", "based", " ", "on", " ", "analysis"}], 
+            "*)"}], 
+           RowBox[{"currentType", "=", 
+            RowBox[{"Which", "[", 
+             RowBox[{"(*", 
+              RowBox[{
+              "Simple", " ", "periodic", " ", "if", " ", "single", " ", 
+               "dominant", " ", "frequency", " ", "and", " ", "consistent", 
+               " ", "amplitude"}], "*)"}], 
+             RowBox[{
+              RowBox[{
+               RowBox[{
+                RowBox[{"Length", "[", "dominantFreqs", "]"}], "==", "1"}], "&&", 
+               RowBox[{"amplitudeI1", ">", "0.01"}], "&&", 
+               RowBox[{"amplitudeI2", ">", "0.01"}], "&&", 
+               RowBox[{"periodEstimate", "=!=", "\"\<Unknown\>\""}]}], ",", 
+              "\"\<Limit-Cycle\>\"", ",", 
+              RowBox[{"(*", 
+               RowBox[{"Quasi", "-", 
+                RowBox[{
+                "periodic", " ", "if", " ", "multiple", " ", "incommensurate",
+                  " ", "frequencies"}]}], "*)"}], 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Length", "[", "dominantFreqs", "]"}], ">", "1"}], "&&", 
+               RowBox[{
+                RowBox[{"Length", "[", "dominantFreqs", "]"}], "<=", "3"}]}], 
+              ",", "\"\<Quasi-Periodic\>\"", ",", 
+              RowBox[{"(*", 
+               RowBox[{
+                RowBox[{"Complex", "/", "chaotic"}], " ", "if", " ", "many", 
+                " ", "frequencies", " ", "or", " ", "irregular"}], "*)"}], 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Length", "[", "dominantFreqs", "]"}], ">", "3"}], "||", 
+               RowBox[{"amplitudeI1", "<", "0.005"}], "||", 
+               RowBox[{"amplitudeI2", "<", "0.005"}]}], ",", 
+              "\"\<Chaotic\>\"", ",", 
+              RowBox[{"(*", 
+               RowBox[{
+               "Transient", " ", "if", " ", "very", " ", "small", " ", 
+                "amplitude"}], "*)"}], 
+              RowBox[{
+               RowBox[{"amplitudeI1", "<", "0.01"}], "&&", 
+               RowBox[{"amplitudeI2", "<", "0.01"}]}], ",", 
+              "\"\<Transient-Osc\>\"", ",", 
+              RowBox[{"(*", 
+               RowBox[{"Default", " ", "complex"}], "*)"}], "True", ",", 
+              "\"\<Complex-Osc\>\""}], "]"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Prepare", " ", "detailed", " ", "results"}], "*)"}], 
+           RowBox[{"detailedResult", "=", 
+            RowBox[{"<|", 
+             RowBox[{
+              RowBox[{"\"\<Classification\>\"", "->", "currentType"}], ",", 
+              RowBox[{"\"\<Parameters\>\"", "->", 
+               RowBox[{"{", 
+                RowBox[{"bifP1Val", ",", "bifP2Val"}], "}"}]}], ",", 
+              RowBox[{"\"\<MeanValues\>\"", "->", 
+               RowBox[{"{", 
+                RowBox[{"meanI1", ",", "meanI2"}], "}"}]}], ",", 
+              RowBox[{"\"\<Amplitudes\>\"", "->", 
+               RowBox[{"{", 
+                RowBox[{"amplitudeI1", ",", "amplitudeI2"}], "}"}]}], ",", 
+              RowBox[{"\"\<DominantFrequencies\>\"", "->", "dominantFreqs"}], 
+              ",", 
+              RowBox[{"\"\<EstimatedPeriod\>\"", "->", "periodEstimate"}], 
+              ",", 
+              RowBox[{"\"\<PoincareSection\>\"", "->", "poincareData"}], ",", 
+              RowBox[{"\"\<ReturnMap\>\"", "->", "returnMapData"}], ",", 
+              RowBox[{"\"\<TimeSeries\>\"", "->", 
+               RowBox[{"Transpose", "[", 
+                RowBox[{"{", 
+                 RowBox[{"sampleTimes", ",", "I1samples", ",", "I2samples"}], 
+                 "}"}], "]"}]}]}], "|>"}]}], ";", "\[IndentingNewLine]", 
+           RowBox[{"(*", 
+            RowBox[{"Print", " ", "summary"}], "*)"}], 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Classification: \>\"", ",", "currentType"}], "]"}], 
+           ";", "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Mean I1: \>\"", ",", 
+             RowBox[{"Round", "[", 
+              RowBox[{"meanI1", ",", "0.001"}], "]"}], ",", 
+             "\"\<, Mean I2: \>\"", ",", 
+             RowBox[{"Round", "[", 
+              RowBox[{"meanI2", ",", "0.001"}], "]"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Amplitude I1: \>\"", ",", 
+             RowBox[{"Round", "[", 
+              RowBox[{"amplitudeI1", ",", "0.001"}], "]"}], ",", 
+             "\"\<, Amplitude I2: \>\"", ",", 
+             RowBox[{"Round", "[", 
+              RowBox[{"amplitudeI2", ",", "0.001"}], "]"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Dominant frequencies: \>\"", ",", 
+             RowBox[{"Round", "[", 
+              RowBox[{"dominantFreqs", ",", "0.001"}], "]"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Estimated period: \>\"", ",", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{"NumberQ", "[", "periodEstimate", "]"}], ",", 
+               RowBox[{"Round", "[", 
+                RowBox[{"periodEstimate", ",", "0.1"}], "]"}], ",", 
+               "periodEstimate"}], "]"}]}], "]"}], ";", "\[IndentingNewLine]",
+            "detailedResult"}], ",", 
+          RowBox[{"(*", 
+           RowBox[{"No", " ", "successful", " ", "solutions"}], "*)"}], 
+          RowBox[{
+           RowBox[{
+           "Print", "[", 
+            "\"\<Failed to obtain solution for detailed analysis\>\"", "]"}], 
+           ";", "\[IndentingNewLine]", 
+           RowBox[{"<|", 
+            RowBox[{
+             RowBox[{"\"\<Classification\>\"", "->", "\"\<Failed\>\""}], ",", 
+             RowBox[{"\"\<Parameters\>\"", "->", 
+              RowBox[{"{", 
+               RowBox[{"bifP1Val", ",", "bifP2Val"}], "}"}]}]}], "|>"}]}]}], 
+         "]"}]}]}], "]"}]}], ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.964169519957176*^9, 
+  3.9641695199593773`*^9}},ExpressionUUID->"4a802910-656f-4748-9d4f-\
+491054f84659"]
+},
+WindowSize->{582.8571428571428, 306},
+WindowMargins->{{18, Automatic}, {Automatic, 22.285714285714285`}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"72adce5f-0303-46c6-a8fb-15348e25ea88"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 28408, 663, 2940, "Input",ExpressionUUID->"4a802910-656f-4748-9d4f-491054f84659"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

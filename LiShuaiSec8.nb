@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     60884,       1465]
-NotebookOptionsPosition[     58217,       1419]
-NotebookOutlinePosition[     58642,       1435]
-CellTagsIndexPosition[     58599,       1432]
+NotebookDataLength[     94265,       2224]
+NotebookOptionsPosition[     90102,       2159]
+NotebookOutlinePosition[     90527,       2175]
+CellTagsIndexPosition[     90484,       2172]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -38,115 +38,8 @@ Cell[BoxData[{
       RowBox[{
       "$HomeDirectory", ",", "\"\<Dropbox\>\"", ",", 
        "\"\<EpidCRNmodels\>\""}], "}"}], "]"}]}], "]"}], ";", 
-  RowBox[{"<<", "EpidCRN`"}], ";"}], "\n", 
- RowBox[{
-  RowBox[{"RN", "=", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"0", "->", "\"\<S1\>\""}], ",", 
-     RowBox[{"0", "->", "\"\<S2\>\""}], ",", 
-     RowBox[{
-      RowBox[{"\"\<S1\>\"", "+", "\"\<I1\>\""}], "->", 
-      RowBox[{"2", "*", "\"\<I1\>\""}]}], ",", 
-     RowBox[{
-      RowBox[{"\"\<S1\>\"", "+", "\"\<I2\>\""}], "->", 
-      RowBox[{"\"\<I1\>\"", "+", "\"\<I2\>\""}]}], ",", 
-     RowBox[{
-      RowBox[{"\"\<S2\>\"", "+", "\"\<I1\>\""}], "->", 
-      RowBox[{"\"\<I2\>\"", "+", "\"\<I1\>\""}]}], ",", 
-     RowBox[{
-      RowBox[{"\"\<S2\>\"", "+", "\"\<I2\>\""}], "->", 
-      RowBox[{"2", "*", "\"\<I2\>\""}]}], ",", 
-     RowBox[{"\"\<I1\>\"", "->", "0"}], ",", 
-     RowBox[{"\"\<I2\>\"", "->", "0"}], ",", 
-     RowBox[{"\"\<S1\>\"", "->", "0"}], ",", 
-     RowBox[{"\"\<S2\>\"", "->", "0"}]}], "}"}]}], 
-  ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"rts", "=", 
-   RowBox[{"{", 
-    RowBox[{"\[CapitalLambda]1", ",", "\[CapitalLambda]2", ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"\[Beta]", ",", "11"}], "]"}], "*", "S1", "*", "I1"}], ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"\[Beta]", ",", "12"}], "]"}], "*", "S1", "*", "I2"}], ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"\[Beta]", ",", "21"}], "]"}], "*", "S2", "*", "I1"}], ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"\[Beta]", ",", "22"}], "]"}], "*", "S2", "*", "I2"}], ",", 
-     RowBox[{
-      RowBox[{"(", 
-       RowBox[{
-        RowBox[{"Subscript", "[", 
-         RowBox[{"d", ",", "1"}], "]"}], "+", 
-        RowBox[{"Subscript", "[", 
-         RowBox[{"\[Gamma]", ",", "1"}], "]"}]}], ")"}], "*", "I1"}], ",", 
-     RowBox[{
-      RowBox[{"(", 
-       RowBox[{
-        RowBox[{"Subscript", "[", 
-         RowBox[{"d", ",", "2"}], "]"}], "+", 
-        RowBox[{"Subscript", "[", 
-         RowBox[{"\[Gamma]", ",", "2"}], "]"}]}], ")"}], "*", "I2"}], ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"d", ",", "1"}], "]"}], "*", "S1"}], ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"d", ",", "2"}], "]"}], "*", "S2"}]}], "}"}]}], ";", 
-  RowBox[{"cco", "=", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"\[Gamma]", ",", "1"}], "]"}], "->", "0"}], ",", 
-     RowBox[{
-      RowBox[{"Subscript", "[", 
-       RowBox[{"\[Gamma]", ",", "2"}], "]"}], "->", "0"}]}], "}"}]}], ";", 
-  RowBox[{"rtsc", "=", 
-   RowBox[{"rts", "/.", "cco"}]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"B", "=", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"B11", ",", "B12"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{"B21", ",", "B22"}], "}"}]}], "}"}]}], ";", 
-  RowBox[{"S", "=", 
-   RowBox[{"{", 
-    RowBox[{"S1", ",", "S2"}], "}"}]}], ";", 
-  RowBox[{"i", "=", 
-   RowBox[{"{", 
-    RowBox[{"I1", ",", "I2"}], "}"}]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"DiagonalMatrix", "[", "S", "]"}], ".", "B", ".", "i"}], "//", 
-  "MatrixForm"}], "\n", 
- RowBox[{
-  RowBox[{
-   RowBox[{"S", ".", "B", ".", 
-    RowBox[{"DiagonalMatrix", "[", "i", "]"}]}], "//", "MatrixForm"}], 
-  "\[IndentingNewLine]", 
-  RowBox[{"(*", 
-   RowBox[{
-    RowBox[{"{", 
-     RowBox[{"al", ",", " ", "be", ",", " ", "gam", ",", " ", "species"}], 
-     "}"}], "=", 
-    RowBox[{"stoichiometricMatrices", "[", "RN", "]"}]}], 
-   "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{
-    "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", ",", "R0A", ",", "E0", 
-     ",", "EA", ",", "E1", ",", "RHS", ",", "var", ",", "cp"}], "}"}], "=", 
-   RowBox[{"bdAnal", "[", 
-    RowBox[{"RN", ",", "rtsc"}], "]"}]}], ";"}]}], "Input",
+  RowBox[{"<<", "EpidCRN`"}], ";", 
+  RowBox[{"<<", "Hopf`"}], ";"}]}], "Input",
  CellChangeTimes->{{3.962157328347579*^9, 3.96215732835073*^9}, 
    3.9621574183958993`*^9, {3.962157470038954*^9, 3.962157475066625*^9}, {
    3.9621575769808693`*^9, 3.962157590045065*^9}, {3.962157716852888*^9, 
@@ -187,9 +80,754 @@ Cell[BoxData[{
    3.96264635249238*^9, 3.962646527476426*^9}, {3.962646567098082*^9, 
    3.9626465897535686`*^9}, {3.9626473987384768`*^9, 3.962647399507242*^9}, {
    3.962648159651099*^9, 3.96264816653481*^9}, {3.962648332660301*^9, 
-   3.962648416831913*^9}, {3.962648448500461*^9, 3.962648515421651*^9}},
+   3.962648416831913*^9}, {3.962648448500461*^9, 3.962648515421651*^9}, {
+   3.962677105404497*^9, 3.9626771065315523`*^9}, {3.9626796263184533`*^9, 
+   3.9626796363725133`*^9}, 3.962680256591114*^9, {3.9627817259234924`*^9, 
+   3.9627817317652144`*^9}},
+ CellLabel->"In[5]:=",ExpressionUUID->"25b95bbf-7d44-45bf-be98-ca749d9b1973"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"To find Hopf bifurcations, try:\"\>"], "Print",
+ CellChangeTimes->{3.9627817349700317`*^9},
  CellLabel->
-  "In[2939]:=",ExpressionUUID->"25b95bbf-7d44-45bf-be98-ca749d9b1973"],
+  "During evaluation of \
+In[5]:=",ExpressionUUID->"ba5813cc-c72f-4bca-bed1-3756aaa13b15"],
+
+Cell[BoxData["\<\"1. hopfT[RHS, var, exP, Subscript[\\\\[Sigma], 1], {0.01, \
+1.5}]\"\>"], "Print",
+ CellChangeTimes->{3.9627817350122623`*^9},
+ CellLabel->
+  "During evaluation of \
+In[5]:=",ExpressionUUID->"772c5c22-f03a-48bc-8da0-5f6ee3a4fa0c"],
+
+Cell[BoxData["\<\"2. hopfT[RHS, var, exP, Subscript[\\\\[Sigma], 2], {0.1, \
+0.8}]\"\>"], "Print",
+ CellChangeTimes->{3.9627817350652184`*^9},
+ CellLabel->
+  "During evaluation of \
+In[5]:=",ExpressionUUID->"d91693cb-0906-40ab-b6c6-d5b6d882c60c"],
+
+Cell[BoxData["\<\"3. hopfT[RHS, var, exP, Subscript[\\\\[Beta], 1], {0.5, \
+3.0}]\"\>"], "Print",
+ CellChangeTimes->{3.9627817351395082`*^9},
+ CellLabel->
+  "During evaluation of \
+In[5]:=",ExpressionUUID->"84938892-2bc4-4ed8-ac70-c8fc99121e43"],
+
+Cell[BoxData["\<\"4. hopfT[RHS, var, exP, Subscript[\\\\[Gamma], 1], {0.1, \
+2.0}]\"\>"], "Print",
+ CellChangeTimes->{3.9627817352204933`*^9},
+ CellLabel->
+  "During evaluation of \
+In[5]:=",ExpressionUUID->"be398de8-36d7-4d5b-b9b3-7ff2edeedf4f"],
+
+Cell[BoxData["\<\"Quick scan: scanPar[RHS, var, exP, Subscript[\\\\[Sigma], \
+1], {0.01, 1.0}]\"\>"], "Print",
+ CellChangeTimes->{3.9627817352718368`*^9},
+ CellLabel->
+  "During evaluation of \
+In[5]:=",ExpressionUUID->"ebdff8ee-cf8d-483e-9277-45eb79ebb59b"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "Universal", " ", "Boundary", " ", "Analysis", " ", "Solver", " ", "with", 
+    " ", "Time", " ", "Constraints"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"bdAnalC", "::", "usage"}], "=", 
+     "\"\<{K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,RHS,var,cp,allSolutions}=bdAnalC[RN,\
+rts] comprehensive boundary analysis that tries to solve each boundary system \
+within 15 second time limits. First attempts bdAnalEx, then systematically \
+tries all boundary equilibria until one is solved or all time out. Returns \
+E1='Aborted' if no system can be solved, and allSolutions contains all \
+attempted solutions.\>\""}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Version", " ", "with", " ", "automatic", " ", "rate", " ", 
+     "generation"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"bdAnalC", "[", "RN_", "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"rts", ",", "spe", ",", "al", ",", "be", ",", "var"}], "}"}], 
+      ",", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"spe", ",", "al", ",", "be"}], "}"}], "=", 
+        RowBox[{
+         RowBox[{"extMat", "[", "RN", "]"}], "[", 
+         RowBox[{"[", 
+          RowBox[{"{", 
+           RowBox[{"1", ",", "2", ",", "3"}], "}"}], "]"}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"var", "=", 
+        RowBox[{"ToExpression", "[", "spe", "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"rts", "=", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"ToExpression", "[", 
+            RowBox[{"\"\<k[\>\"", "<>", 
+             RowBox[{"ToString", "[", "i", "]"}], "<>", "\"\<]\>\""}], "]"}], 
+           "*", 
+           RowBox[{"Product", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"var", "[", 
+               RowBox[{"[", "j", "]"}], "]"}], "^", 
+              RowBox[{"al", "[", 
+               RowBox[{"[", 
+                RowBox[{"j", ",", "i"}], "]"}], "]"}]}], ",", 
+             RowBox[{"{", 
+              RowBox[{"j", ",", 
+               RowBox[{"Length", "[", "var", "]"}]}], "}"}]}], "]"}]}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "RN", "]"}]}], "}"}]}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"bdAnalC", "[", 
+        RowBox[{"RN", ",", "rts"}], "]"}]}]}], "]"}]}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Main", " ", "implementation", " ", "with", " ", "explicit", " ", 
+     "rates"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"bdAnalC", "[", 
+     RowBox[{"RN_", ",", "rts_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "bdExResult", ",", "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", 
+        ",", "R0A", ",", "E0", ",", "EA", ",", "E1", ",", "RHS", ",", "var", 
+        ",", "cp", ",", "i", ",", "eqEi", ",", "varEi", ",", "solAttempt", 
+        ",", "successfulSolution", ",", "timeLimit", ",", "spe", ",", "al", 
+        ",", "be", ",", "gam", ",", "Rv", ",", "def", ",", "par", ",", "cv", 
+        ",", "ct", ",", "mS", ",", "inf", ",", "mod", ",", "ng", ",", "eig", 
+        ",", "cDFE", ",", "RDFE", ",", "eq0", ",", "var0", ",", "cE0", ",", 
+        "cEi", ",", "RHSEi", ",", "boundaryIndex", ",", 
+        "solvedBoundarySystem", ",", "totalBoundarySystems", ",", 
+        "allSolutions"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"timeLimit", "=", "15"}], ";", 
+       RowBox[{"(*", 
+        RowBox[{
+        "15", " ", "seconds", " ", "time", " ", "limit", " ", "per", " ", 
+         "boundary", " ", "system"}], "*)"}], 
+       RowBox[{"allSolutions", "=", 
+        RowBox[{"{", "}"}]}], ";", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Store", " ", "all", " ", "attempted", " ", "solutions"}], 
+         ",", 
+         RowBox[{"including", " ", "failed", " ", "ones"}]}], "*)"}], 
+       RowBox[{
+       "Print", "[", 
+        "\"\<=== COMPREHENSIVE BOUNDARY ANALYSIS (bdAnalC) ===\>\"", "]"}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Step", " ", "1"}], ":", 
+         RowBox[{
+         "First", " ", "try", " ", "bdAnalEx", " ", "to", " ", "see", " ", 
+          "if", " ", "we", " ", "get", " ", "lucky", " ", "with", " ", "an", 
+          " ", "explicit", " ", "solution"}]}], "*)"}], 
+       RowBox[{
+       "Print", "[", 
+        "\"\<Step 1: Attempting bdAnalEx for explicit boundary point...\>\"", 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+        "Run", " ", "the", " ", "same", " ", "initial", " ", "analysis", " ", 
+         "as", " ", "bdAnalEx", " ", "but", " ", "capture", " ", "potential", 
+         " ", "errors"}], "*)"}], 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+         "spe", ",", "al", ",", "be", ",", "gam", ",", "Rv", ",", "RHS", ",", 
+          "def"}], "}"}], "=", 
+        RowBox[{"extMat", "[", "RN", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"var", "=", 
+        RowBox[{"ToExpression", "[", "spe", "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"RHS", "=", 
+        RowBox[{"gam", ".", "rts"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<RHS = \>\"", ",", 
+         RowBox[{"RHS", "//", "MatrixForm"}], ",", "\"\< has variables \>\"", 
+         ",", "var", ",", "\"\< and parameters \>\"", ",", 
+         RowBox[{"par", "=", 
+          RowBox[{"Par", "[", 
+           RowBox[{"RHS", ",", "var"}], "]"}]}]}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"cp", "=", 
+        RowBox[{"Thread", "[", 
+         RowBox[{"par", ">", "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"cv", "=", 
+        RowBox[{"Thread", "[", 
+         RowBox[{"var", ">=", "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"ct", "=", 
+        RowBox[{"Join", "[", 
+         RowBox[{"cp", ",", "cv"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"mS", "=", 
+        RowBox[{"minSiph", "[", 
+         RowBox[{"spe", ",", 
+          RowBox[{"asoRea", "[", "RN", "]"}]}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{
+        "\"\<Minimal siphons: \>\"", ",", "mS", ",", 
+         "\"\< Check siphon = \>\"", ",", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"isSiph", "[", 
+            RowBox[{
+             RowBox[{"ToString", "/@", "var"}], ",", 
+             RowBox[{"asoRea", "[", "RN", "]"}], ",", "#"}], "]"}], "&"}], "/@",
+           "mS"}]}], "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+        "Get", " ", "infection", " ", "species", " ", "and", " ", "NGM"}], 
+        "*)"}], 
+       RowBox[{"mSi", "=", 
+        RowBox[{"Map", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Flatten", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Position", "[", 
+               RowBox[{"spe", ",", "#"}], "]"}], "&"}], "/@", "#"}], "]"}], 
+           "&"}], ",", "mS"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"inf", "=", 
+        RowBox[{"Union", "[", 
+         RowBox[{"Flatten", "[", "mSi", "]"}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<Infection species at positions: \>\"", ",", "inf"}], 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{"Compute", " ", "DFE", " ", 
+         RowBox[{"(", "E0", ")"}]}], "*)"}], 
+       RowBox[{"cDFE", "=", 
+        RowBox[{"Flatten", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Thread", "[", 
+            RowBox[{
+             RowBox[{"ToExpression", "[", "#", "]"}], "->", "0"}], "]"}], 
+           "&"}], "/@", "mS"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"RDFE", "=", 
+        RowBox[{"RHS", "/.", " ", "cDFE"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"eq0", "=", 
+        RowBox[{"Thread", "[", 
+         RowBox[{"RDFE", "==", "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"var0", "=", 
+        RowBox[{"Complement", "[", 
+         RowBox[{"var", ",", 
+          RowBox[{"var", "[", 
+           RowBox[{"[", "inf", "]"}], "]"}]}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"E0", "=", 
+        RowBox[{"Solve", "[", 
+         RowBox[{"eq0", ",", "var0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"cE0", "=", 
+        RowBox[{"Select", "[", 
+         RowBox[{
+          RowBox[{"Flatten", "[", "E0", "]"}], ",", 
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"#", "[", 
+              RowBox[{"[", "2", "]"}], "]"}], "==", "0"}], ")"}], "&"}]}], 
+         "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<DFE solution E0: \>\"", ",", "E0"}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{"Compute", " ", "reproduction", " ", "numbers"}], "*)"}], 
+       RowBox[{"mod", "=", 
+        RowBox[{"{", 
+         RowBox[{"RHS", ",", "var", ",", "par"}], "}"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"ng", "=", 
+        RowBox[{"NGM", "[", 
+         RowBox[{"mod", ",", "inf"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Jx", "=", 
+        RowBox[{
+         RowBox[{"ng", "[", 
+          RowBox[{"[", "1", "]"}], "]"}], "//", 
+         RowBox[{"FullSimplify", "/.", " ", 
+          RowBox[{
+           RowBox[{"Subscript", "[", 
+            RowBox[{"EpidCRN`Private`k", ",", "n_"}], "]"}], ":>", 
+           RowBox[{"Subscript", "[", 
+            RowBox[{"k", ",", "n"}], "]"}]}]}]}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"Jy", "=", 
+        RowBox[{
+         RowBox[{"ng", "[", 
+          RowBox[{"[", "5", "]"}], "]"}], "//", 
+         RowBox[{"FullSimplify", "/.", " ", 
+          RowBox[{
+           RowBox[{"Subscript", "[", 
+            RowBox[{"EpidCRN`Private`k", ",", "n_"}], "]"}], ":>", 
+           RowBox[{"Subscript", "[", 
+            RowBox[{"k", ",", "n"}], "]"}]}]}]}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"K", "=", 
+        RowBox[{
+         RowBox[{"ng", "[", 
+          RowBox[{"[", "4", "]"}], "]"}], "//", 
+         RowBox[{"FullSimplify", "/.", " ", 
+          RowBox[{
+           RowBox[{"Subscript", "[", 
+            RowBox[{"EpidCRN`Private`k", ",", "n_"}], "]"}], ":>", 
+           RowBox[{"Subscript", "[", 
+            RowBox[{"k", ",", "n"}], "]"}]}]}]}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<NGM K = \>\"", ",", 
+         RowBox[{"K", "//", "MatrixForm"}], ",", "\"\< = \>\"", ",", 
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"K", "/.", " ", "cDFE"}], "/.", " ", "cE0"}], ")"}], "//",
+           "MatrixForm"}]}], "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"eig", "=", 
+        RowBox[{
+         RowBox[{"K", "//", "Eigenvalues"}], "//", "Simplify"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"R0A", "=", 
+        RowBox[{"DeleteCases", "[", 
+         RowBox[{"eig", ",", "0"}], "]"}]}], ";", 
+       RowBox[{"(*", 
+        RowBox[{"Array", " ", "of", " ", "reproduction", " ", "functions"}], 
+        "*)"}], 
+       RowBox[{"R0", "=", 
+        RowBox[{
+         RowBox[{"Max", "[", 
+          RowBox[{
+           RowBox[{"R0A", "/.", " ", "cDFE"}], "/.", " ", "cE0"}], "]"}], "//",
+          "FullSimplify"}]}], ";", 
+       RowBox[{"(*", 
+        RowBox[{"reproduction", " ", "number"}], "*)"}], 
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<Reproduction functions R0A: \>\"", ",", "R0A"}], "]"}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<R0 at DFE: \>\"", ",", "R0"}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Compute", " ", "boundary", " ", "equilibria", " ", 
+          RowBox[{"(", "EA", ")"}]}], "-", 
+         RowBox[{"equations", " ", "and", " ", "variables"}]}], "*)"}], 
+       RowBox[{"EA", "=", 
+        RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Do", "[", 
+        RowBox[{"(*", 
+         RowBox[{"For", " ", "strain", " ", "i", " ", 
+          RowBox[{"boundary", ":", 
+           RowBox[{
+           "set", " ", "other", " ", "strains", " ", "to", " ", "0"}]}]}], 
+         "*)"}], 
+        RowBox[{
+         RowBox[{
+          RowBox[{"cEi", "=", 
+           RowBox[{"Thread", "[", 
+            RowBox[{
+             RowBox[{"var", "[", 
+              RowBox[{"[", 
+               RowBox[{"Flatten", "[", 
+                RowBox[{"Delete", "[", 
+                 RowBox[{"mSi", ",", "i"}], "]"}], "]"}], "]"}], "]"}], "->", 
+             "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"RHSEi", "=", 
+           RowBox[{"RHS", "/.", " ", "cEi"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"eqEi", "=", 
+           RowBox[{"Thread", "[", 
+            RowBox[{"RHSEi", "==", "0"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"varEi", "=", "var"}], ";", 
+          RowBox[{"(*", 
+           RowBox[{
+           "All", " ", "variables", " ", "for", " ", "this", " ", "boundary", 
+            " ", "system"}], "*)"}], 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"EA", ",", 
+            RowBox[{"{", 
+             RowBox[{"eqEi", ",", "varEi"}], "}"}]}], "]"}]}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", 
+           RowBox[{"Length", "[", "mS", "]"}]}], "}"}]}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"totalBoundarySystems", "=", 
+        RowBox[{"Length", "[", "EA", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Print", "[", 
+        RowBox[{
+        "\"\<Total boundary systems to analyze: \>\"", ",", 
+         "totalBoundarySystems"}], "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Step", " ", "2"}], ":", 
+         RowBox[{
+         "Try", " ", "to", " ", "solve", " ", "the", " ", "first", " ", 
+          "boundary", " ", "system", " ", "quickly", " ", 
+          RowBox[{"(", 
+           RowBox[{"like", " ", "bdAnalEx", " ", "does"}], ")"}]}]}], "*)"}], 
+       RowBox[{
+       "Print", "[", 
+        "\"\<\\nStep 2: Quick attempt at first boundary system (bdAnalEx \
+approach)...\>\"", "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"totalBoundarySystems", ">", "0"}], ",", 
+         RowBox[{
+          RowBox[{"E1", "=", 
+           RowBox[{"TimeConstrained", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Solve", "[", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"EA", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}], "[", 
+                 RowBox[{"[", "1", "]"}], "]"}], ",", 
+                RowBox[{
+                 RowBox[{"EA", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}], "[", 
+                 RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "//", 
+              "FullSimplify"}], ",", "timeLimit", ",", "$TimedOut"}], "]"}]}],
+           ";", "\[IndentingNewLine]", 
+          RowBox[{"(*", 
+           RowBox[{
+           "Store", " ", "this", " ", "attempt", " ", "in", " ", 
+            "allSolutions"}], "*)"}], 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"allSolutions", ",", 
+            RowBox[{"{", 
+             RowBox[{"1", ",", "E1"}], "}"}]}], "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"E1", "=!=", "$TimedOut"}], "&&", 
+             RowBox[{"E1", "=!=", 
+              RowBox[{"{", "}"}]}], "&&", 
+             RowBox[{"E1", "=!=", "$Failed"}]}], ",", 
+            RowBox[{
+             RowBox[{
+             "Print", "[", 
+              "\"\<SUCCESS: First boundary system solved explicitly\>\"", 
+              "]"}], ";", "\[IndentingNewLine]", 
+             RowBox[{"Print", "[", 
+              RowBox[{
+              "\"\<Number of solutions in first boundary system: \>\"", ",", 
+               RowBox[{"Length", "[", "E1", "]"}]}], "]"}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"Return", "[", 
+              RowBox[{"{", 
+               RowBox[{
+               "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", ",", "R0A", 
+                ",", "E0", ",", "EA", ",", "E1", ",", "RHS", ",", "var", ",", 
+                "cp", ",", "allSolutions"}], "}"}], "]"}]}], ",", 
+            RowBox[{"Print", "[", 
+             RowBox[{
+             "\"\<First boundary system failed or timed out after \>\"", ",", 
+              "timeLimit", ",", "\"\< seconds\>\""}], "]"}]}], "]"}]}], ",", 
+         RowBox[{"Print", "[", "\"\<No boundary systems found\>\"", "]"}]}], 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Step", " ", "3"}], ":", 
+         RowBox[{
+         "Systematically", " ", "try", " ", "all", " ", "boundary", " ", 
+          "systems", " ", "with", " ", "time", " ", "constraints"}]}], "*)"}], 
+       RowBox[{
+       "Print", "[", 
+        "\"\<\\nStep 3: Systematic analysis of all boundary systems...\>\"", 
+        "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"successfulSolution", "=", 
+        RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"solvedBoundarySystem", "=", "0"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Start", " ", "from", " ", "i"}], "=", 
+          RowBox[{"1", " ", "if", " ", "first", " ", "system", " ", 
+           RowBox[{"wasn", "'"}], "t", " ", "tried"}]}], ",", 
+         RowBox[{
+          RowBox[{"or", " ", "i"}], "=", 
+          RowBox[{
+          "2", " ", "if", " ", "it", " ", "was", " ", "already", " ", 
+           "tried"}]}]}], "*)"}], 
+       RowBox[{"startIndex", "=", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"totalBoundarySystems", ">", "0"}], "&&", 
+           RowBox[{
+            RowBox[{"Length", "[", "allSolutions", "]"}], ">", "0"}]}], ",", 
+          "2", ",", "1"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", "=", "startIndex"}], ",", 
+         RowBox[{"i", "<=", "totalBoundarySystems"}], ",", 
+         RowBox[{"i", "++"}], ",", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"eqEi", ",", "varEi"}], "}"}], "=", 
+           RowBox[{"EA", "[", 
+            RowBox[{"[", "i", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"Print", "[", 
+           RowBox[{
+           "\"\<Attempting boundary system \>\"", ",", "i", ",", 
+            "\"\< of \>\"", ",", "totalBoundarySystems", ",", 
+            "\"\< (timeout: \>\"", ",", "timeLimit", ",", "\"\<s)...\>\""}], 
+           "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"solAttempt", "=", 
+           RowBox[{"TimeConstrained", "[", 
+            RowBox[{
+             RowBox[{"Module", "[", 
+              RowBox[{
+               RowBox[{"{", "sol", "}"}], ",", 
+               RowBox[{
+                RowBox[{"sol", "=", 
+                 RowBox[{"Solve", "[", 
+                  RowBox[{"eqEi", ",", "varEi"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", 
+                RowBox[{"If", "[", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"sol", "===", 
+                    RowBox[{"{", "}"}]}], "||", 
+                   RowBox[{"sol", "===", "$Failed"}]}], ",", 
+                  RowBox[{"(*", 
+                   RowBox[{
+                   "Try", " ", "with", " ", "different", " ", "methods"}], 
+                   "*)"}], 
+                  RowBox[{
+                   RowBox[{"sol", "=", 
+                    RowBox[{"Quiet", "[", 
+                    RowBox[{"NSolve", "[", 
+                    RowBox[{"eqEi", ",", "varEi", ",", "Reals"}], "]"}], 
+                    "]"}]}], ";", "\[IndentingNewLine]", 
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"sol", "===", 
+                    RowBox[{"{", "}"}]}], "||", 
+                    RowBox[{"sol", "===", "$Failed"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"sol", "=", 
+                    RowBox[{"Quiet", "[", 
+                    RowBox[{"Reduce", "[", 
+                    RowBox[{"eqEi", ",", "varEi", ",", "Reals"}], "]"}], 
+                    "]"}]}], ";"}]}], "]"}]}]}], "]"}], ";", 
+                "\[IndentingNewLine]", "sol"}]}], "]"}], ",", "timeLimit", 
+             ",", "$TimedOut"}], "]"}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"(*", 
+           RowBox[{
+           "Store", " ", "this", " ", "attempt", " ", "in", " ", 
+            "allSolutions"}], "*)"}], 
+          RowBox[{"AppendTo", "[", 
+           RowBox[{"allSolutions", ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", "solAttempt"}], "}"}]}], "]"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"solAttempt", "=!=", "$TimedOut"}], "&&", 
+             RowBox[{"solAttempt", "=!=", 
+              RowBox[{"{", "}"}]}], "&&", 
+             RowBox[{"solAttempt", "=!=", "$Failed"}]}], ",", 
+            RowBox[{
+             RowBox[{"Print", "[", 
+              RowBox[{
+              "\"\<SUCCESS: Boundary system \>\"", ",", "i", ",", 
+               "\"\< solved!\>\""}], "]"}], ";", "\[IndentingNewLine]", 
+             RowBox[{"successfulSolution", "=", "solAttempt"}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"solvedBoundarySystem", "=", "i"}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"Break", "[", "]"}]}], ",", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"solAttempt", "===", "$TimedOut"}], ",", 
+              RowBox[{"Print", "[", 
+               RowBox[{
+               "\"\<TIMEOUT: Boundary system \>\"", ",", "i", ",", 
+                "\"\< exceeded \>\"", ",", "timeLimit", ",", 
+                "\"\< seconds\>\""}], "]"}], ",", 
+              RowBox[{"Print", "[", 
+               RowBox[{
+               "\"\<FAILED: Boundary system \>\"", ",", "i", ",", 
+                "\"\< could not be solved\>\""}], "]"}]}], "]"}]}], "]"}]}]}],
+         "]"}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Step", " ", "4"}], ":", 
+         RowBox[{"Return", " ", "results"}]}], "*)"}], 
+       RowBox[{
+       "Print", "[", "\"\<\\n=== BOUNDARY ANALYSIS RESULTS ===\>\"", "]"}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{"successfulSolution", "===", 
+          RowBox[{"{", "}"}]}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<All non-DFE boundary points require more than 15 seconds each\
+\>\"", "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"E1", "=", "\"\<Aborted\>\""}], ";", "\[IndentingNewLine]", 
+          RowBox[{"{", 
+           RowBox[{
+           "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", ",", "R0A", ",", 
+            "E0", ",", "EA", ",", "E1", ",", "RHS", ",", "var", ",", "cp", 
+            ",", "allSolutions"}], "}"}]}], ",", 
+         RowBox[{
+          RowBox[{"Print", "[", 
+           RowBox[{
+           "\"\<Successfully solved boundary system \>\"", ",", 
+            "solvedBoundarySystem"}], "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{
+          "Print", "[", 
+           "\"\<solutions stored in allSolutions contain DFE and possibly \
+spurious solutions\>\"", "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"E1", "=", "successfulSolution"}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"{", 
+           RowBox[{
+           "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", ",", "R0A", ",", 
+            "E0", ",", "EA", ",", "E1", ",", "RHS", ",", "var", ",", "cp", 
+            ",", "allSolutions"}], "}"}]}]}], "]"}]}]}], "]"}]}], "\n", 
+   RowBox[{
+    RowBox[{"RN", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"0", "->", "\"\<S1\>\""}], ",", 
+       RowBox[{"0", "->", "\"\<S2\>\""}], ",", 
+       RowBox[{
+        RowBox[{"\"\<S1\>\"", "+", "\"\<I1\>\""}], "->", 
+        RowBox[{"2", "*", "\"\<I1\>\""}]}], ",", 
+       RowBox[{
+        RowBox[{"\"\<S1\>\"", "+", "\"\<I2\>\""}], "->", 
+        RowBox[{"\"\<I1\>\"", "+", "\"\<I2\>\""}]}], ",", 
+       RowBox[{
+        RowBox[{"\"\<S2\>\"", "+", "\"\<I1\>\""}], "->", 
+        RowBox[{"\"\<I2\>\"", "+", "\"\<I1\>\""}]}], ",", 
+       RowBox[{
+        RowBox[{"\"\<S2\>\"", "+", "\"\<I2\>\""}], "->", 
+        RowBox[{"2", "*", "\"\<I2\>\""}]}], ",", 
+       RowBox[{"\"\<I1\>\"", "->", "0"}], ",", 
+       RowBox[{"\"\<I2\>\"", "->", "0"}], ",", 
+       RowBox[{"\"\<S1\>\"", "->", "0"}], ",", 
+       RowBox[{"\"\<S2\>\"", "->", "0"}]}], "}"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"rts", "=", 
+     RowBox[{"{", 
+      RowBox[{"\[CapitalLambda]1", ",", "\[CapitalLambda]2", ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "11"}], "]"}], "*", "S1", "*", "I1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "12"}], "]"}], "*", "S1", "*", "I2"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "21"}], "]"}], "*", "S2", "*", "I1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "22"}], "]"}], "*", "S2", "*", "I2"}], ",", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"Subscript", "[", 
+           RowBox[{"d", ",", "1"}], "]"}], "+", 
+          RowBox[{"Subscript", "[", 
+           RowBox[{"\[Gamma]", ",", "1"}], "]"}]}], ")"}], "*", "I1"}], ",", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"Subscript", "[", 
+           RowBox[{"d", ",", "2"}], "]"}], "+", 
+          RowBox[{"Subscript", "[", 
+           RowBox[{"\[Gamma]", ",", "2"}], "]"}]}], ")"}], "*", "I2"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"d", ",", "1"}], "]"}], "*", "S1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"d", ",", "2"}], "]"}], "*", "S2"}]}], "}"}]}], ";", 
+    RowBox[{"cco", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "1"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "2"}], "]"}], "->", "0"}]}], "}"}]}], ";", 
+    RowBox[{"rtsc", "=", 
+     RowBox[{"rts", "/.", "cco"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"B", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"B11", ",", "B12"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"B21", ",", "B22"}], "}"}]}], "}"}]}], ";", 
+    RowBox[{"S", "=", 
+     RowBox[{"{", 
+      RowBox[{"S1", ",", "S2"}], "}"}]}], ";", 
+    RowBox[{"i", "=", 
+     RowBox[{"{", 
+      RowBox[{"I1", ",", "I2"}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"DiagonalMatrix", "[", "S", "]"}], ".", "B", ".", "i"}], "//", 
+    "MatrixForm"}], "\n", 
+   RowBox[{
+    RowBox[{"S", ".", "B", ".", 
+     RowBox[{"DiagonalMatrix", "[", "i", "]"}]}], "//", "MatrixForm"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"al", ",", " ", "be", ",", " ", "gam", ",", " ", "species"}], 
+      "}"}], "=", 
+     RowBox[{"stoichiometricMatrices", "[", "RN", "]"}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "K", ",", "Jx", ",", "Jy", ",", "mSi", ",", "R0", ",", "R0A", ",", "E0",
+        ",", "EA", ",", "E1", ",", "RHS", ",", "var", ",", "cp", ",", 
+       "allS"}], "}"}], "=", 
+     RowBox[{"bdAnalC", "[", 
+      RowBox[{"RN", ",", "rtsc"}], "]"}]}], ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.96268124148057*^9, 3.962681255998354*^9}, {
+  3.9626813322699137`*^9, 3.9626813338200965`*^9}},
+ CellLabel->
+  "In[735]:=",ExpressionUUID->"86cc5d56-2c1b-448d-8a27-8a376cbd87be"],
 
 Cell[BoxData[
  TagBox[
@@ -216,10 +854,12 @@ Cell[BoxData[
   Function[BoxForm`e$, 
    MatrixForm[BoxForm`e$]]]], "Output",
  CellChangeTimes->{3.9626465292065697`*^9, 3.9626465917722883`*^9, 
-  3.96264816795102*^9, 3.962648517204233*^9},
+  3.96264816795102*^9, 3.962648517204233*^9, 3.962677043066156*^9, 
+  3.9626771076845226`*^9, 3.962680331051881*^9, 3.9626812606496954`*^9, 
+  3.96268133571977*^9},
  CellLabel->
-  "Out[2946]//MatrixForm=",ExpressionUUID->"2922b696-9182-44f4-98d2-\
-5a83387ebe22"],
+  "Out[741]//MatrixForm=",ExpressionUUID->"484fbabd-bf75-40b9-93f0-\
+f4acb206e53e"],
 
 Cell[BoxData[
  TagBox[
@@ -250,16 +890,42 @@ Cell[BoxData[
   Function[BoxForm`e$, 
    MatrixForm[BoxForm`e$]]]], "Output",
  CellChangeTimes->{3.9626465292065697`*^9, 3.9626465917722883`*^9, 
-  3.96264816795102*^9, 3.9626485172448606`*^9},
+  3.96264816795102*^9, 3.962648517204233*^9, 3.962677043066156*^9, 
+  3.9626771076845226`*^9, 3.962680331051881*^9, 3.9626812606496954`*^9, 
+  3.9626813357603927`*^9},
  CellLabel->
-  "Out[2947]//MatrixForm=",ExpressionUUID->"840fe18c-fb3f-4131-b9e6-\
-78a2a1a3a0b3"],
+  "Out[742]//MatrixForm=",ExpressionUUID->"bf4bbaf4-f0b5-439e-bc20-\
+89d3ecf69d4f"],
 
 Cell[CellGroupData[{
 
+Cell[BoxData["\<\"=== COMPREHENSIVE BOUNDARY ANALYSIS (bdAnalC) ===\"\>"], \
+"Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681335819318*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"66ea3d2f-344d-4043-8345-0742fb0e76b3"],
+
+Cell[BoxData["\<\"Step 1: Attempting bdAnalEx for explicit boundary \
+point...\"\>"], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813358899364`*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"5e62f5c1-b9e3-408b-94e5-bd45563c96a8"],
+
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"RHS= \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"RHS = \"\>", "\[InvisibleSpace]", 
    TagBox[
     RowBox[{"(", "\[NoBreak]", 
      TagBox[GridBox[{
@@ -308,11 +974,11 @@ Cell[BoxData[
            Offset[0.2]}}],
       Column], "\[NoBreak]", ")"}],
     Function[BoxForm`e$, 
-     MatrixForm[BoxForm`e$]]], "\[InvisibleSpace]", "\<\" has var \"\>", 
-   "\[InvisibleSpace]", 
+     MatrixForm[BoxForm`e$]]], "\[InvisibleSpace]", "\<\" has variables \"\>",
+    "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{"S1", ",", "S2", ",", "I1", ",", "I2"}], "}"}], 
-   "\[InvisibleSpace]", "\<\" par\"\>", "\[InvisibleSpace]", 
+   "\[InvisibleSpace]", "\<\" and parameters \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{"\[CapitalLambda]1", ",", "\[CapitalLambda]2", ",", 
      SubscriptBox["d", "1"], ",", 
@@ -321,80 +987,79 @@ Cell[BoxData[
      SubscriptBox["\[Beta]", "12"], ",", 
      SubscriptBox["\[Beta]", "21"], ",", 
      SubscriptBox["\[Beta]", "22"]}], "}"}]}],
-  SequenceForm["RHS= ", 
-   MatrixForm[{
-    EpidCRN`Private`\[CapitalLambda]1 - EpidCRN`Private`S1 
-     Subscript[EpidCRN`Private`d, 1] - EpidCRN`Private`I1 EpidCRN`Private`S1 
-     Subscript[EpidCRN`Private`\[Beta], 11] - EpidCRN`Private`I2 
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`\[Beta], 12], 
-     EpidCRN`Private`\[CapitalLambda]2 - EpidCRN`Private`S2 
-     Subscript[EpidCRN`Private`d, 2] - EpidCRN`Private`I1 EpidCRN`Private`S2 
-     Subscript[EpidCRN`Private`\[Beta], 21] - EpidCRN`Private`I2 
-     EpidCRN`Private`S2 
-     Subscript[EpidCRN`Private`\[Beta], 22], -EpidCRN`Private`I1 
-      Subscript[EpidCRN`Private`d, 1] + 
-     EpidCRN`Private`I1 EpidCRN`Private`S1 
-      Subscript[EpidCRN`Private`\[Beta], 11] + 
-     EpidCRN`Private`I2 EpidCRN`Private`S1 
-      Subscript[EpidCRN`Private`\[Beta], 12], -EpidCRN`Private`I2 
-      Subscript[EpidCRN`Private`d, 2] + 
-     EpidCRN`Private`I1 EpidCRN`Private`S2 
-      Subscript[EpidCRN`Private`\[Beta], 21] + 
-     EpidCRN`Private`I2 EpidCRN`Private`S2 
-      Subscript[EpidCRN`Private`\[Beta], 22]}], " has var ", {
-   EpidCRN`Private`S1, EpidCRN`Private`S2, EpidCRN`Private`I1, 
-    EpidCRN`Private`I2}, " par", {
-   EpidCRN`Private`\[CapitalLambda]1, EpidCRN`Private`\[CapitalLambda]2, 
-    Subscript[EpidCRN`Private`d, 1], 
-    Subscript[EpidCRN`Private`d, 2], 
-    Subscript[EpidCRN`Private`\[Beta], 11], 
-    Subscript[EpidCRN`Private`\[Beta], 12], 
-    Subscript[EpidCRN`Private`\[Beta], 21], 
-    Subscript[EpidCRN`Private`\[Beta], 22]}],
+  SequenceForm["RHS = ", 
+   MatrixForm[{$CellContext`\[CapitalLambda]1 - $CellContext`S1 
+     Subscript[$CellContext`d, 1] - $CellContext`I1 $CellContext`S1 
+     Subscript[$CellContext`\[Beta], 11] - $CellContext`I2 $CellContext`S1 
+     Subscript[$CellContext`\[Beta], 
+       12], $CellContext`\[CapitalLambda]2 - $CellContext`S2 
+     Subscript[$CellContext`d, 2] - $CellContext`I1 $CellContext`S2 
+     Subscript[$CellContext`\[Beta], 21] - $CellContext`I2 $CellContext`S2 
+     Subscript[$CellContext`\[Beta], 22], -$CellContext`I1 
+      Subscript[$CellContext`d, 1] + $CellContext`I1 $CellContext`S1 
+      Subscript[$CellContext`\[Beta], 11] + $CellContext`I2 $CellContext`S1 
+      Subscript[$CellContext`\[Beta], 12], -$CellContext`I2 
+      Subscript[$CellContext`d, 2] + $CellContext`I1 $CellContext`S2 
+      Subscript[$CellContext`\[Beta], 21] + $CellContext`I2 $CellContext`S2 
+      Subscript[$CellContext`\[Beta], 22]}], 
+   " has variables ", {$CellContext`S1, $CellContext`S2, $CellContext`I1, \
+$CellContext`I2}, 
+   " and parameters ", {$CellContext`\[CapitalLambda]1, $CellContext`\
+\[CapitalLambda]2, 
+    Subscript[$CellContext`d, 1], 
+    Subscript[$CellContext`d, 2], 
+    Subscript[$CellContext`\[Beta], 11], 
+    Subscript[$CellContext`\[Beta], 12], 
+    Subscript[$CellContext`\[Beta], 21], 
+    Subscript[$CellContext`\[Beta], 22]}],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.962648517291853*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813359376802`*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"8f443537-784c-4f9e-af9d-d94d584e10cc"],
+In[735]:=",ExpressionUUID->"2e03352f-56ff-4050-89ed-cff257f28be6"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"minimal siphons \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"Minimal siphons: \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{"{", 
      RowBox[{"\<\"I1\"\>", ",", "\<\"I2\"\>"}], "}"}], "}"}], 
-   "\[InvisibleSpace]", "\<\" Check siphon=\"\>", "\[InvisibleSpace]", 
+   "\[InvisibleSpace]", "\<\" Check siphon = \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", "True", "}"}]}],
-  SequenceForm["minimal siphons ", {{"I1", "I2"}}, " Check siphon=", {True}],
+  SequenceForm[
+  "Minimal siphons: ", {{"I1", "I2"}}, " Check siphon = ", {True}],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.96264851737088*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681336006156*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"6328ccbf-4a48-4e5e-afa8-0135be56f9d1"],
+In[735]:=",ExpressionUUID->"79fbc69e-a59c-4bbc-a36f-74e5b448bdbb"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"Infection species  at positions: \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"Infection species at positions: \"\>", "\[InvisibleSpace]", 
    RowBox[{"{", 
     RowBox[{"3", ",", "4"}], "}"}]}],
-  SequenceForm["Infection species  at positions: ", {3, 4}],
+  SequenceForm["Infection species at positions: ", {3, 4}],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.962648517457972*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681336087225*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"312be27b-991e-4ee8-a5a1-ef864e26e51d"],
+In[735]:=",ExpressionUUID->"382b888c-2f62-49e6-af0d-d35a4bde72b6"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -409,24 +1074,24 @@ Cell[BoxData[
        FractionBox["\[CapitalLambda]2", 
         SubscriptBox["d", "2"]]}]}], "}"}], "}"}]}],
   SequenceForm[
-  "DFE solution E0: ", {{
-    EpidCRN`Private`S1 -> 
-     EpidCRN`Private`\[CapitalLambda]1/Subscript[EpidCRN`Private`d, 1], 
-     EpidCRN`Private`S2 -> 
-     EpidCRN`Private`\[CapitalLambda]2/Subscript[EpidCRN`Private`d, 2]}}],
+  "DFE solution E0: ", {{$CellContext`S1 -> $CellContext`\[CapitalLambda]1/
+      Subscript[$CellContext`d, 
+       1], $CellContext`S2 -> $CellContext`\[CapitalLambda]2/
+      Subscript[$CellContext`d, 2]}}],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.9626485175135756`*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813361645904`*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"5587ea93-d584-4077-96bd-f6e8978bb00d"],
+In[735]:=",ExpressionUUID->"7cc32dc1-807b-4eee-a4d6-02ade0f7b286"],
 
 Cell[BoxData[
  InterpretationBox[
-  RowBox[{"\<\"NGM K= \"\>", "\[InvisibleSpace]", 
+  RowBox[{"\<\"NGM K = \"\>", "\[InvisibleSpace]", 
    TagBox[
     RowBox[{"(", "\[NoBreak]", GridBox[{
        {
@@ -457,7 +1122,7 @@ Cell[BoxData[
            Offset[0.4]}, 
           Offset[0.2]}}], "\[NoBreak]", ")"}],
     Function[BoxForm`e$, 
-     MatrixForm[BoxForm`e$]]], "\[InvisibleSpace]", "\<\" =\"\>", 
+     MatrixForm[BoxForm`e$]]], "\[InvisibleSpace]", "\<\" = \"\>", 
    "\[InvisibleSpace]", 
    TagBox[
     RowBox[{"(", "\[NoBreak]", GridBox[{
@@ -490,34 +1155,33 @@ Cell[BoxData[
           Offset[0.2]}}], "\[NoBreak]", ")"}],
     Function[BoxForm`e$, 
      MatrixForm[BoxForm`e$]]]}],
-  SequenceForm["NGM K= ", 
-   MatrixForm[{{
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`d, 1]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 11], EpidCRN`Private`S1 
-      Subscript[EpidCRN`Private`d, 2]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 12]}, {
-     EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 21], EpidCRN`Private`S2 
-      Subscript[EpidCRN`Private`d, 2]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 22]}}], " =", 
-   MatrixForm[{{
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`d, 1]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 11], EpidCRN`Private`S1 
-      Subscript[EpidCRN`Private`d, 2]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 12]}, {
-     EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 21], EpidCRN`Private`S2 
-      Subscript[EpidCRN`Private`d, 2]^(-1) 
-      Subscript[EpidCRN`Private`\[Beta], 22]}}]],
+  SequenceForm["NGM K = ", 
+   MatrixForm[{{$CellContext`S1 Subscript[$CellContext`d, 1]^(-1) 
+      Subscript[$CellContext`\[Beta], 11], $CellContext`S1 
+      Subscript[$CellContext`d, 2]^(-1) 
+      Subscript[$CellContext`\[Beta], 12]}, {$CellContext`S2 
+      Subscript[$CellContext`d, 1]^(-1) 
+      Subscript[$CellContext`\[Beta], 21], $CellContext`S2 
+      Subscript[$CellContext`d, 2]^(-1) 
+      Subscript[$CellContext`\[Beta], 22]}}], " = ", 
+   MatrixForm[{{$CellContext`S1 Subscript[$CellContext`d, 1]^(-1) 
+      Subscript[$CellContext`\[Beta], 11], $CellContext`S1 
+      Subscript[$CellContext`d, 2]^(-1) 
+      Subscript[$CellContext`\[Beta], 12]}, {$CellContext`S2 
+      Subscript[$CellContext`d, 1]^(-1) 
+      Subscript[$CellContext`\[Beta], 21], $CellContext`S2 
+      Subscript[$CellContext`d, 2]^(-1) 
+      Subscript[$CellContext`\[Beta], 22]}}]],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.962648517587682*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681336252593*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"f80d18bc-2741-4904-a37c-43997217b744"],
+In[735]:=",ExpressionUUID->"9fa72fdd-370e-4057-8d73-7a5738417e43"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -590,48 +1254,46 @@ Cell[BoxData[
        SubscriptBox["d", "2"]}]]}], "}"}]}],
   SequenceForm[
   "Reproduction functions R0A: ", {
-   Rational[1, 2] Subscript[EpidCRN`Private`d, 1]^(-1) 
-    Subscript[EpidCRN`Private`d, 2]^(-1) (
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`d, 2] 
-      Subscript[EpidCRN`Private`\[Beta], 11] + 
-     EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1] 
-      Subscript[EpidCRN`Private`\[Beta], 22] - (
-      EpidCRN`Private`S1^2 Subscript[EpidCRN`Private`d, 2]^2 
-       Subscript[EpidCRN`Private`\[Beta], 11]^2 + 
-      EpidCRN`Private`S2^2 Subscript[EpidCRN`Private`d, 1]^2 
-       Subscript[EpidCRN`Private`\[Beta], 22]^2 + 
-      2 EpidCRN`Private`S1 EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1] 
-       Subscript[EpidCRN`Private`d, 2] (
-        2 Subscript[EpidCRN`Private`\[Beta], 12] 
-         Subscript[EpidCRN`Private`\[Beta], 21] - 
-        Subscript[EpidCRN`Private`\[Beta], 11] 
-        Subscript[EpidCRN`Private`\[Beta], 22]))^Rational[1, 2]), 
-    Rational[1, 2] Subscript[EpidCRN`Private`d, 1]^(-1) 
-    Subscript[EpidCRN`Private`d, 2]^(-1) (
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`d, 2] 
-      Subscript[EpidCRN`Private`\[Beta], 11] + 
-     EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1] 
-      Subscript[EpidCRN`Private`\[Beta], 22] + (
-       EpidCRN`Private`S1^2 Subscript[EpidCRN`Private`d, 2]^2 
-        Subscript[EpidCRN`Private`\[Beta], 11]^2 + 
-       EpidCRN`Private`S2^2 Subscript[EpidCRN`Private`d, 1]^2 
-        Subscript[EpidCRN`Private`\[Beta], 22]^2 + 
-       2 EpidCRN`Private`S1 EpidCRN`Private`S2 
-        Subscript[EpidCRN`Private`d, 1] 
-        Subscript[EpidCRN`Private`d, 2] (
-         2 Subscript[EpidCRN`Private`\[Beta], 12] 
-          Subscript[EpidCRN`Private`\[Beta], 21] - 
-         Subscript[EpidCRN`Private`\[Beta], 11] 
-         Subscript[EpidCRN`Private`\[Beta], 22]))^Rational[1, 2])}],
+   Rational[1, 2] Subscript[$CellContext`d, 1]^(-1) 
+    Subscript[$CellContext`d, 2]^(-1) ($CellContext`S1 
+      Subscript[$CellContext`d, 2] 
+      Subscript[$CellContext`\[Beta], 11] + $CellContext`S2 
+      Subscript[$CellContext`d, 1] 
+      Subscript[$CellContext`\[Beta], 22] - ($CellContext`S1^2 
+       Subscript[$CellContext`d, 2]^2 
+       Subscript[$CellContext`\[Beta], 11]^2 + $CellContext`S2^2 
+       Subscript[$CellContext`d, 1]^2 Subscript[$CellContext`\[Beta], 22]^2 + 
+      2 $CellContext`S1 $CellContext`S2 Subscript[$CellContext`d, 1] 
+       Subscript[$CellContext`d, 2] (
+        2 Subscript[$CellContext`\[Beta], 12] 
+         Subscript[$CellContext`\[Beta], 21] - 
+        Subscript[$CellContext`\[Beta], 11] 
+        Subscript[$CellContext`\[Beta], 22]))^Rational[1, 2]), Rational[1, 2] 
+    Subscript[$CellContext`d, 1]^(-1) 
+    Subscript[$CellContext`d, 2]^(-1) ($CellContext`S1 
+      Subscript[$CellContext`d, 2] 
+      Subscript[$CellContext`\[Beta], 11] + $CellContext`S2 
+      Subscript[$CellContext`d, 1] 
+      Subscript[$CellContext`\[Beta], 22] + ($CellContext`S1^2 
+        Subscript[$CellContext`d, 2]^2 
+        Subscript[$CellContext`\[Beta], 11]^2 + $CellContext`S2^2 
+        Subscript[$CellContext`d, 1]^2 Subscript[$CellContext`\[Beta], 22]^2 + 
+       2 $CellContext`S1 $CellContext`S2 Subscript[$CellContext`d, 1] 
+        Subscript[$CellContext`d, 2] (
+         2 Subscript[$CellContext`\[Beta], 12] 
+          Subscript[$CellContext`\[Beta], 21] - 
+         Subscript[$CellContext`\[Beta], 11] 
+         Subscript[$CellContext`\[Beta], 22]))^Rational[1, 2])}],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.962648518306065*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681336303653*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"bc30e0d1-3330-4c10-8fae-0fbca2d6620e"],
+In[735]:=",ExpressionUUID->"14e4edcf-32c4-4ffe-a1c7-3ddf39d49c46"],
 
 Cell[BoxData[
  InterpretationBox[
@@ -703,48 +1365,126 @@ Cell[BoxData[
        SubscriptBox["d", "1"], " ", 
        SubscriptBox["d", "2"]}]]}], "]"}]}],
   SequenceForm["R0 at DFE: ", 
-   Max[Rational[1, 2] Subscript[EpidCRN`Private`d, 1]^(-1) 
-    Subscript[EpidCRN`Private`d, 2]^(-1) (
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`d, 2] 
-      Subscript[EpidCRN`Private`\[Beta], 11] + 
-     EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1] 
-      Subscript[EpidCRN`Private`\[Beta], 22] - (
-      EpidCRN`Private`S1^2 Subscript[EpidCRN`Private`d, 2]^2 
-       Subscript[EpidCRN`Private`\[Beta], 11]^2 + 
-      EpidCRN`Private`S2^2 Subscript[EpidCRN`Private`d, 1]^2 
-       Subscript[EpidCRN`Private`\[Beta], 22]^2 + 
-      2 EpidCRN`Private`S1 EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1] 
-       Subscript[EpidCRN`Private`d, 2] (
-        2 Subscript[EpidCRN`Private`\[Beta], 12] 
-         Subscript[EpidCRN`Private`\[Beta], 21] - 
-        Subscript[EpidCRN`Private`\[Beta], 11] 
-        Subscript[EpidCRN`Private`\[Beta], 22]))^Rational[1, 2]), 
-    Rational[1, 2] Subscript[EpidCRN`Private`d, 1]^(-1) 
-    Subscript[EpidCRN`Private`d, 2]^(-1) (
-     EpidCRN`Private`S1 Subscript[EpidCRN`Private`d, 2] 
-      Subscript[EpidCRN`Private`\[Beta], 11] + 
-     EpidCRN`Private`S2 Subscript[EpidCRN`Private`d, 1] 
-      Subscript[EpidCRN`Private`\[Beta], 22] + (
-       EpidCRN`Private`S1^2 Subscript[EpidCRN`Private`d, 2]^2 
-        Subscript[EpidCRN`Private`\[Beta], 11]^2 + 
-       EpidCRN`Private`S2^2 Subscript[EpidCRN`Private`d, 1]^2 
-        Subscript[EpidCRN`Private`\[Beta], 22]^2 + 
-       2 EpidCRN`Private`S1 EpidCRN`Private`S2 
-        Subscript[EpidCRN`Private`d, 1] 
-        Subscript[EpidCRN`Private`d, 2] (
-         2 Subscript[EpidCRN`Private`\[Beta], 12] 
-          Subscript[EpidCRN`Private`\[Beta], 21] - 
-         Subscript[EpidCRN`Private`\[Beta], 11] 
-         Subscript[EpidCRN`Private`\[Beta], 22]))^Rational[1, 2])]],
+   Max[Rational[1, 2] Subscript[$CellContext`d, 1]^(-1) 
+    Subscript[$CellContext`d, 2]^(-1) ($CellContext`S1 
+      Subscript[$CellContext`d, 2] 
+      Subscript[$CellContext`\[Beta], 11] + $CellContext`S2 
+      Subscript[$CellContext`d, 1] 
+      Subscript[$CellContext`\[Beta], 22] - ($CellContext`S1^2 
+       Subscript[$CellContext`d, 2]^2 
+       Subscript[$CellContext`\[Beta], 11]^2 + $CellContext`S2^2 
+       Subscript[$CellContext`d, 1]^2 Subscript[$CellContext`\[Beta], 22]^2 + 
+      2 $CellContext`S1 $CellContext`S2 Subscript[$CellContext`d, 1] 
+       Subscript[$CellContext`d, 2] (
+        2 Subscript[$CellContext`\[Beta], 12] 
+         Subscript[$CellContext`\[Beta], 21] - 
+        Subscript[$CellContext`\[Beta], 11] 
+        Subscript[$CellContext`\[Beta], 22]))^Rational[1, 2]), Rational[1, 2] 
+    Subscript[$CellContext`d, 1]^(-1) 
+    Subscript[$CellContext`d, 2]^(-1) ($CellContext`S1 
+      Subscript[$CellContext`d, 2] 
+      Subscript[$CellContext`\[Beta], 11] + $CellContext`S2 
+      Subscript[$CellContext`d, 1] 
+      Subscript[$CellContext`\[Beta], 22] + ($CellContext`S1^2 
+        Subscript[$CellContext`d, 2]^2 
+        Subscript[$CellContext`\[Beta], 11]^2 + $CellContext`S2^2 
+        Subscript[$CellContext`d, 1]^2 Subscript[$CellContext`\[Beta], 22]^2 + 
+       2 $CellContext`S1 $CellContext`S2 Subscript[$CellContext`d, 1] 
+        Subscript[$CellContext`d, 2] (
+         2 Subscript[$CellContext`\[Beta], 12] 
+          Subscript[$CellContext`\[Beta], 21] - 
+         Subscript[$CellContext`\[Beta], 11] 
+         Subscript[$CellContext`\[Beta], 22]))^Rational[1, 2])]],
   Editable->False]], "Print",
  CellChangeTimes->{
   3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
    3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
    3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
-   3.962648518349745*^9},
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813364057612`*^9},
  CellLabel->
   "During evaluation of \
-In[2939]:=",ExpressionUUID->"e29c4aa1-3bc8-483d-99d4-e4be85b9df07"]
+In[735]:=",ExpressionUUID->"b23899ed-3215-4d9d-ba2f-253335191d6c"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Total boundary systems to analyze: \"\>", "\[InvisibleSpace]", 
+   "1"}],
+  SequenceForm["Total boundary systems to analyze: ", 1],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813365046453`*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"30cf112a-45f2-401e-8583-19a62fa2ad83"],
+
+Cell[BoxData["\<\"\\nStep 2: Quick attempt at first boundary system (bdAnalEx \
+approach)...\"\>"], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681336600048*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"91c39ba2-58f8-4b87-8c1a-c20504bf979e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"First boundary system failed or timed out after \"\>", 
+   "\[InvisibleSpace]", "15", "\[InvisibleSpace]", "\<\" seconds\"\>"}],
+  SequenceForm[
+  "First boundary system failed or timed out after ", 15, " seconds"],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813507476144`*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"a093c13d-0260-485f-9803-ca9113bb4141"],
+
+Cell[BoxData["\<\"\\nStep 3: Systematic analysis of all boundary systems...\"\
+\>"], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681350787201*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"e70e69f6-ea18-4f4e-a470-7bedfd693b3b"],
+
+Cell[BoxData["\<\"\\n=== BOUNDARY ANALYSIS RESULTS ===\"\>"], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.9626813508368015`*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"42de31eb-1d6a-4298-b047-e9960a64ca41"],
+
+Cell[BoxData["\<\"All non-DFE boundary points require more than 15 seconds \
+each\"\>"], "Print",
+ CellChangeTimes->{
+  3.9626117199707637`*^9, 3.9626121788173313`*^9, 3.9626156802334995`*^9, 
+   3.962645285912879*^9, {3.962646263651451*^9, 3.962646280307354*^9}, 
+   3.9626465292452245`*^9, 3.962646591853936*^9, 3.962648168051543*^9, 
+   3.962648517291853*^9, 3.962677043191517*^9, 3.9626771077660785`*^9, 
+   3.962680331145279*^9, 3.962681260756916*^9, 3.962681350903884*^9},
+ CellLabel->
+  "During evaluation of \
+In[735]:=",ExpressionUUID->"cdc47845-2073-4bec-8de0-cd04d2cdd870"]
 }, Open  ]]
 }, Open  ]],
 
@@ -1435,37 +2175,56 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 7583, 169, 352, "Input",ExpressionUUID->"25b95bbf-7d44-45bf-be98-ca749d9b1973"],
-Cell[8166, 193, 962, 28, 61, "Output",ExpressionUUID->"2922b696-9182-44f4-98d2-5a83387ebe22"],
-Cell[9131, 223, 1048, 32, 61, "Output",ExpressionUUID->"840fe18c-fb3f-4131-b9e6-78a2a1a3a0b3"],
+Cell[580, 22, 4036, 64, 143, "Input",ExpressionUUID->"25b95bbf-7d44-45bf-be98-ca749d9b1973"],
 Cell[CellGroupData[{
-Cell[10204, 259, 4265, 102, 67, "Print",ExpressionUUID->"8f443537-784c-4f9e-af9d-d94d584e10cc"],
-Cell[14472, 363, 775, 17, 22, "Print",ExpressionUUID->"6328ccbf-4a48-4e5e-afa8-0135be56f9d1"],
-Cell[15250, 382, 628, 14, 22, "Print",ExpressionUUID->"312be27b-991e-4ee8-a5a1-ef864e26e51d"],
-Cell[15881, 398, 1032, 26, 40, "Print",ExpressionUUID->"5587ea93-d584-4077-96bd-f6e8978bb00d"],
-Cell[16916, 426, 3470, 93, 59, "Print",ExpressionUUID->"f80d18bc-2741-4904-a37c-43997217b744"],
-Cell[20389, 521, 4705, 112, 91, "Print",ExpressionUUID->"bc30e0d1-3330-4c10-8fae-0fbca2d6620e"],
-Cell[25097, 635, 4678, 111, 91, "Print",ExpressionUUID->"e29c4aa1-3bc8-483d-99d4-e4be85b9df07"]
+Cell[4641, 90, 213, 4, 22, "Print",ExpressionUUID->"ba5813cc-c72f-4bca-bed1-3756aaa13b15"],
+Cell[4857, 96, 247, 5, 22, "Print",ExpressionUUID->"772c5c22-f03a-48bc-8da0-5f6ee3a4fa0c"],
+Cell[5107, 103, 246, 5, 22, "Print",ExpressionUUID->"d91693cb-0906-40ab-b6c6-d5b6d882c60c"],
+Cell[5356, 110, 245, 5, 22, "Print",ExpressionUUID->"84938892-2bc4-4ed8-ac70-c8fc99121e43"],
+Cell[5604, 117, 246, 5, 22, "Print",ExpressionUUID->"be398de8-36d7-4d5b-b9b3-7ff2edeedf4f"],
+Cell[5853, 124, 258, 5, 22, "Print",ExpressionUUID->"ebdff8ee-cf8d-483e-9277-45eb79ebb59b"]
 }, Open  ]]
 }, Open  ]],
-Cell[29802, 750, 6132, 144, 333, "Input",ExpressionUUID->"455ca5b8-ac27-457f-9323-27159c6fc4a6"],
 Cell[CellGroupData[{
-Cell[35959, 898, 1058, 25, 67, "Input",ExpressionUUID->"57a9673d-611e-4ba2-ae27-9a231fef0a53"],
+Cell[6160, 135, 28386, 694, 2331, "Input",ExpressionUUID->"86cc5d56-2c1b-448d-8a27-8a376cbd87be"],
+Cell[34549, 831, 1080, 30, 61, "Output",ExpressionUUID->"484fbabd-bf75-40b9-93f0-f4acb206e53e"],
+Cell[35632, 863, 1167, 34, 61, "Output",ExpressionUUID->"bf4bbaf4-f0b5-439e-bc20-89d3ecf69d4f"],
 Cell[CellGroupData[{
-Cell[37042, 927, 4300, 95, 62, "Print",ExpressionUUID->"63d91c1e-fefd-4ebd-b603-368a1494f6e0"],
-Cell[41345, 1024, 2125, 54, 42, "Print",ExpressionUUID->"5ddb21bc-2c42-4fe3-9138-2196fdd2e5c1"],
-Cell[43473, 1080, 1130, 26, 22, "Print",ExpressionUUID->"94c39aa0-59d2-4029-80cc-1fa8c297a023"],
-Cell[44606, 1108, 507, 11, 22, "Print",ExpressionUUID->"bae73ec3-3739-4e0e-9af8-6689adc49c92"],
-Cell[45116, 1121, 515, 11, 22, "Print",ExpressionUUID->"e35149a7-074a-457f-ae42-f264e1167648"],
-Cell[45634, 1134, 1040, 24, 22, "Print",ExpressionUUID->"026c84f6-0783-48cc-a5f4-15c3304a0b45"],
-Cell[46677, 1160, 361, 7, 22, "Print",ExpressionUUID->"00aef83b-4a5c-409a-b2bf-dfb3f28a1e98"]
+Cell[36824, 901, 572, 10, 22, "Print",ExpressionUUID->"66ea3d2f-344d-4043-8345-0742fb0e76b3"],
+Cell[37399, 913, 583, 10, 22, "Print",ExpressionUUID->"5e62f5c1-b9e3-408b-94e5-bd45563c96a8"],
+Cell[37985, 925, 4248, 98, 90, "Print",ExpressionUUID->"2e03352f-56ff-4050-89ed-cff257f28be6"],
+Cell[42236, 1025, 900, 19, 22, "Print",ExpressionUUID->"79fbc69e-a59c-4bbc-a36f-74e5b448bdbb"],
+Cell[43139, 1046, 741, 15, 22, "Print",ExpressionUUID->"382b888c-2f62-49e6-af0d-d35a4bde72b6"],
+Cell[43883, 1063, 1128, 26, 40, "Print",ExpressionUUID->"7cc32dc1-807b-4eee-a4d6-02ade0f7b286"],
+Cell[45014, 1091, 3507, 92, 59, "Print",ExpressionUUID->"9fa72fdd-370e-4057-8d73-7a5738417e43"],
+Cell[48524, 1185, 4670, 110, 91, "Print",ExpressionUUID->"14e4edcf-32c4-4ffe-a1c7-3ddf39d49c46"],
+Cell[53197, 1297, 4645, 109, 91, "Print",ExpressionUUID->"b23899ed-3215-4d9d-ba2f-253335191d6c"],
+Cell[57845, 1408, 699, 14, 22, "Print",ExpressionUUID->"30cf112a-45f2-401e-8583-19a62fa2ad83"],
+Cell[58547, 1424, 595, 10, 40, "Print",ExpressionUUID->"91c39ba2-58f8-4b87-8c1a-c20504bf979e"],
+Cell[59145, 1436, 783, 15, 22, "Print",ExpressionUUID->"a093c13d-0260-485f-9803-ca9113bb4141"],
+Cell[59931, 1453, 580, 10, 40, "Print",ExpressionUUID->"e70e69f6-ea18-4f4e-a470-7bedfd693b3b"],
+Cell[60514, 1465, 559, 9, 40, "Print",ExpressionUUID->"42de31eb-1d6a-4298-b047-e9960a64ca41"],
+Cell[61076, 1476, 584, 10, 22, "Print",ExpressionUUID->"cdc47845-2073-4bec-8de0-cd04d2cdd870"]
+}, Open  ]]
 }, Open  ]],
-Cell[47053, 1170, 979, 29, 50, "Output",ExpressionUUID->"bb530fa8-64b4-4b48-a91a-24ff41a86dd2"],
-Cell[48035, 1201, 1298, 38, 50, "Output",ExpressionUUID->"2e1daa63-c994-4fc5-9acc-8e03ed86b07e"]
+Cell[61687, 1490, 6132, 144, 333, "Input",ExpressionUUID->"455ca5b8-ac27-457f-9323-27159c6fc4a6"],
+Cell[CellGroupData[{
+Cell[67844, 1638, 1058, 25, 67, "Input",ExpressionUUID->"57a9673d-611e-4ba2-ae27-9a231fef0a53"],
+Cell[CellGroupData[{
+Cell[68927, 1667, 4300, 95, 62, "Print",ExpressionUUID->"63d91c1e-fefd-4ebd-b603-368a1494f6e0"],
+Cell[73230, 1764, 2125, 54, 42, "Print",ExpressionUUID->"5ddb21bc-2c42-4fe3-9138-2196fdd2e5c1"],
+Cell[75358, 1820, 1130, 26, 22, "Print",ExpressionUUID->"94c39aa0-59d2-4029-80cc-1fa8c297a023"],
+Cell[76491, 1848, 507, 11, 22, "Print",ExpressionUUID->"bae73ec3-3739-4e0e-9af8-6689adc49c92"],
+Cell[77001, 1861, 515, 11, 22, "Print",ExpressionUUID->"e35149a7-074a-457f-ae42-f264e1167648"],
+Cell[77519, 1874, 1040, 24, 22, "Print",ExpressionUUID->"026c84f6-0783-48cc-a5f4-15c3304a0b45"],
+Cell[78562, 1900, 361, 7, 22, "Print",ExpressionUUID->"00aef83b-4a5c-409a-b2bf-dfb3f28a1e98"]
+}, Open  ]],
+Cell[78938, 1910, 979, 29, 50, "Output",ExpressionUUID->"bb530fa8-64b4-4b48-a91a-24ff41a86dd2"],
+Cell[79920, 1941, 1298, 38, 50, "Output",ExpressionUUID->"2e1daa63-c994-4fc5-9acc-8e03ed86b07e"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[49370, 1244, 422, 11, 28, "Input",ExpressionUUID->"486dd5b9-1c68-42a3-9eaa-93188a89ce80"],
-Cell[49795, 1257, 8406, 159, 146, "Output",ExpressionUUID->"f422ff11-3b03-4271-aab0-3dc1b6cad2bb"]
+Cell[81255, 1984, 422, 11, 28, "Input",ExpressionUUID->"486dd5b9-1c68-42a3-9eaa-93188a89ce80"],
+Cell[81680, 1997, 8406, 159, 146, "Output",ExpressionUUID->"f422ff11-3b03-4271-aab0-3dc1b6cad2bb"]
 }, Open  ]]
 }
 ]

@@ -1,0 +1,482 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     19276,        474]
+NotebookOptionsPosition[     18285,        452]
+NotebookOutlinePosition[     18710,        468]
+CellTagsIndexPosition[     18667,        465]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{"Define", " ", "categories"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{"categories", "=", 
+     RowBox[{"{", 
+      RowBox[{
+      "\"\<City Access\>\"", ",", "\"\<Beach Access\>\"", ",", 
+       "\"\<Air Quality\>\"", ",", "\"\<Water & Swim Season\>\"", ",", 
+       "\"\<Safety\>\"", ",", "\"\<Parks Access\>\"", ",", 
+       "\"\<Housing Cost\>\""}], "}"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Define", " ", "neighborhoods"}], ",", "scores", ",", 
+     RowBox[{"and", " ", "closest", " ", "cities"}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"neighborhoodData", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\"\<Sormiou\>\"", ",", "\"\<Marseille\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "8", ",", "9", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Almyrida\>\"", ",", "\"\<Chania\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "8", ",", "9", ",", "9", ",", "9", ",", "9", ",", "8", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Portim\[ATilde]o\>\"", ",", "\"\<Faro\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "9", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Los Alc\[AAcute]zares\>\"", ",", "\"\<Murcia\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "9", ",", "8", ",", "8"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Kalamata\>\"", ",", "\"\<Kalamata\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "8", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Ortigia\>\"", ",", "\"\<Syracuse\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "8", ",", "9", ",", "8", ",", "8", ",", "8", ",", "8", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Kotor Bay\>\"", ",", "\"\<Kotor\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Ajaccio\>\"", ",", "\"\<Ajaccio\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Split\>\"", ",", "\"\<Split\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "10", ",", "10", ",", "9", ",", "9", ",", "9", ",", "9", ",", "7"}],
+           "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Cagliari\>\"", ",", "\"\<Cagliari\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "8", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Konyaalt\[DotlessI]\>\"", ",", "\"\<Antalya\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "8", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Vegueta\>\"", ",", "\"\<Las Palmas\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "10", ",", "10", ",", "9", ",", "9", ",", "9", ",", "9", ",", "6"}],
+           "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Mondello\>\"", ",", "\"\<Palermo\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "8", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Cabanyal\>\"", ",", "\"\<Valencia\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "10", ",", "10", ",", "9", ",", "9", ",", "9", ",", "9", ",", "7"}],
+           "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Alfama\>\"", ",", "\"\<Lisbon\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Cimiez\>\"", ",", "\"\<Nice\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "5"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Tarragona\>\"", ",", "\"\<Tarragona\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "9", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Amoudara\>\"", ",", "\"\<Heraklion\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Bitez\>\"", ",", "\"\<Bodrum\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "8", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Montenegro\>\"", ",", "\"\<Faro\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Pedregalejo\>\"", ",", "\"\<M\[AAcute]laga\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "10", ",", "10", ",", "9", ",", "9", ",", "9", ",", "9", ",", "7"}],
+           "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Perea\>\"", ",", "\"\<Thessaloniki\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "8"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Aci Castello\>\"", ",", "\"\<Catania\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "8", ",", "9", ",", "9", ",", "9", ",", "7"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Lapad\>\"", ",", "\"\<Dubrovnik\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "9", ",", "6"}], 
+          "}"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<San Juan\>\"", ",", "\"\<Alicante\>\"", ",", 
+         RowBox[{"{", 
+          RowBox[{
+          "10", ",", "10", ",", "9", ",", "9", ",", "9", ",", "9", ",", "7"}],
+           "}"}]}], "}"}]}], "}"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Default", " ", "weights"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"weights", "=", 
+     RowBox[{"{", 
+      RowBox[{
+      "1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], 
+      "}"}]}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Compute", " ", "scored", " ", "table"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"scoredData", "=", 
+     RowBox[{"neighborhoodData", "/.", " ", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"name_", ",", "city_", ",", "scores_"}], "}"}], ":>", 
+        RowBox[{"{", 
+         RowBox[{"name", ",", "city", ",", 
+          RowBox[{"Sequence", "@@", "scores"}], ",", 
+          RowBox[{"Total", "[", 
+           RowBox[{"scores", ".", "weights"}], "]"}]}], "}"}]}], "}"}]}]}], 
+    ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"headers", "=", 
+     RowBox[{"Join", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\"\<Neighborhood\>\"", ",", "\"\<Closest City\>\""}], "}"}], 
+       ",", "categories", ",", 
+       RowBox[{"{", "\"\<Total Score\>\"", "}"}]}], "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"sorted", "=", 
+     RowBox[{"Reverse", "@", 
+      RowBox[{"SortBy", "[", 
+       RowBox[{"scoredData", ",", "Last"}], "]"}]}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"finalTable", "=", 
+     RowBox[{"Grid", "[", 
+      RowBox[{
+       RowBox[{"Prepend", "[", 
+        RowBox[{"sorted", ",", "headers"}], "]"}], ",", 
+       RowBox[{"Frame", "->", "All"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Display", " ", "interactive", " ", "version"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"Manipulate", "[", 
+    RowBox[{
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"scored", ",", "sortedTable"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"weights", "=", 
+         RowBox[{"{", 
+          RowBox[{
+          "w1", ",", "w2", ",", "w3", ",", "w4", ",", "w5", ",", "w6", ",", 
+           "w7"}], "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"scored", "=", 
+         RowBox[{"neighborhoodData", "/.", " ", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"name_", ",", "city_", ",", "scores_"}], "}"}], ":>", 
+            RowBox[{"{", 
+             RowBox[{"name", ",", "city", ",", 
+              RowBox[{"Sequence", "@@", "scores"}], ",", 
+              RowBox[{"Total", "[", 
+               RowBox[{"scores", ".", "weights"}], "]"}]}], "}"}]}], 
+           "}"}]}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"sortedTable", "=", 
+         RowBox[{"Reverse", "@", 
+          RowBox[{"SortBy", "[", 
+           RowBox[{"scored", ",", "Last"}], "]"}]}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"finalTable", "=", 
+         RowBox[{"Grid", "[", 
+          RowBox[{
+           RowBox[{"Prepend", "[", 
+            RowBox[{"sortedTable", ",", "headers"}], "]"}], ",", 
+           RowBox[{"Frame", "->", "All"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", "finalTable"}]}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w1", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w2", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w3", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w4", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w5", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w6", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"w7", ",", "1"}], "}"}], ",", "0", ",", "5", ",", 
+       RowBox[{"Appearance", "->", "\"\<Labeled\>\""}]}], "}"}]}], "]"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Export", " ", "command"}], "\[LongDash]", 
+     RowBox[{
+     "run", " ", "this", " ", "after", " ", "setting", " ", "weights"}]}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{"Export", "[", 
+    RowBox[{"\"\<NeighborhoodScores.pdf\>\"", ",", "finalTable"}], "]"}], 
+   "\n"}]}]], "Input",
+ CellChangeTimes->{{3.9643180076093655`*^9, 3.9643180076102734`*^9}},
+ CellLabel->
+  "In[220]:=",ExpressionUUID->"4ca5001c-5f5f-436e-bb86-9f208bef5f68"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`w1$$ = 1, $CellContext`w2$$ = 
+    1, $CellContext`w3$$ = 1, $CellContext`w4$$ = 1, $CellContext`w5$$ = 
+    1, $CellContext`w6$$ = 1, $CellContext`w7$$ = 1, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`w1$$], 1}, 0, 5}, {{
+       Hold[$CellContext`w2$$], 1}, 0, 5}, {{
+       Hold[$CellContext`w3$$], 1}, 0, 5}, {{
+       Hold[$CellContext`w4$$], 1}, 0, 5}, {{
+       Hold[$CellContext`w5$$], 1}, 0, 5}, {{
+       Hold[$CellContext`w6$$], 1}, 0, 5}, {{
+       Hold[$CellContext`w7$$], 1}, 0, 5}}, Typeset`size$$ = {
+    403.646023614066, {2.6660156808793545`, 9.045410345840667}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = True}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`w1$$ = 1, $CellContext`w2$$ = 
+        1, $CellContext`w3$$ = 1, $CellContext`w4$$ = 1, $CellContext`w5$$ = 
+        1, $CellContext`w6$$ = 1, $CellContext`w7$$ = 1}, 
+      "ControllerVariables" :> {}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> 
+      Module[{$CellContext`scored$, $CellContext`sortedTable$}, \
+$CellContext`weights = {$CellContext`w1$$, $CellContext`w2$$, \
+$CellContext`w3$$, $CellContext`w4$$, $CellContext`w5$$, $CellContext`w6$$, \
+$CellContext`w7$$}; $CellContext`scored$ = 
+         ReplaceAll[$CellContext`neighborhoodData, {{
+              Pattern[$CellContext`name, 
+               Blank[]], 
+              Pattern[$CellContext`city, 
+               Blank[]], 
+              Pattern[$CellContext`scores, 
+               Blank[]]} :> {$CellContext`name, $CellContext`city, 
+              Apply[Sequence, $CellContext`scores], 
+              Total[
+               
+               Dot[$CellContext`scores, $CellContext`weights]]}}]; \
+$CellContext`sortedTable$ = Reverse[
+           SortBy[$CellContext`scored$, Last]]; $CellContext`finalTable = Grid[
+           Prepend[$CellContext`sortedTable$, $CellContext`headers], Frame -> 
+           All]; $CellContext`finalTable], 
+      "Specifications" :> {{{$CellContext`w1$$, 1}, 0, 5, Appearance -> 
+         "Labeled"}, {{$CellContext`w2$$, 1}, 0, 5, Appearance -> 
+         "Labeled"}, {{$CellContext`w3$$, 1}, 0, 5, Appearance -> 
+         "Labeled"}, {{$CellContext`w4$$, 1}, 0, 5, Appearance -> 
+         "Labeled"}, {{$CellContext`w5$$, 1}, 0, 5, Appearance -> 
+         "Labeled"}, {{$CellContext`w6$$, 1}, 0, 5, Appearance -> 
+         "Labeled"}, {{$CellContext`w7$$, 1}, 0, 5, Appearance -> "Labeled"}},
+       "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{450., {114.1340331430547, 119.8659668569453}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{
+  3.9643168883766365`*^9, 3.9643169530001335`*^9, {3.96431708166162*^9, 
+   3.9643171023820906`*^9}, 3.964317229484788*^9, 3.9643180104696245`*^9},
+ CellLabel->
+  "Out[227]=",ExpressionUUID->"70cd8346-15c7-4859-b310-2fad87aa4d1d"],
+
+Cell[BoxData["\<\"NeighborhoodScores.pdf\"\>"], "Output",
+ CellChangeTimes->{
+  3.9643168883766365`*^9, 3.9643169530001335`*^9, {3.96431708166162*^9, 
+   3.9643171023820906`*^9}, 3.964317229484788*^9, 3.9643180115291915`*^9},
+ CellLabel->
+  "Out[228]=",ExpressionUUID->"b0f304f4-f932-40eb-84c7-2443ee98645e"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "SortBy", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"SortBy\\\", \
+\\\"[\\\", RowBox[{\\\"neighborhoodData\\\", \\\",\\\", \\\"Last\\\"}], \\\"]\
+\\\"}]\\).\"", 2, 248, 53, 24826843969486055801, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9643194949456587`*^9},
+ CellLabel->"",ExpressionUUID->"25dbf3f7-3e97-4cb5-a1df-f69ccfa2223b"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "SortBy", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"SortBy\\\", \
+\\\"[\\\", RowBox[{\\\"Last\\\", \\\",\\\", \\\"neighborhoodData\\\"}], \\\"]\
+\\\"}]\\).\"", 2, 248, 54, 24826843969486055801, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9643194950100546`*^9},
+ CellLabel->"",ExpressionUUID->"ccda087a-e609-4b4f-8e73-ce8ae13c55c4"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "SortBy", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"SortBy\\\", \
+\\\"[\\\", RowBox[{\\\"headers\\\", \\\",\\\", \\\"Last\\\", \\\",\\\", \
+\\\"neighborhoodData\\\"}], \\\"]\\\"}]\\).\"", 2, 248, 55, 
+   24826843969486055801, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9643194950757484`*^9},
+ CellLabel->"",ExpressionUUID->"07866c07-9c7c-4661-9315-9eff7224a938"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General", "stop", 
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"SortBy\\\", \\\"::\\\", \
+\\\"normal\\\"}], \\\"MessageName\\\"]\\) will be suppressed during this \
+calculation.\"", 2, 248, 56, 24826843969486055801, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.964319495143429*^9},
+ CellLabel->"",ExpressionUUID->"dde08646-9758-47f4-a1f6-cc8bbd82e1d1"]
+}, Open  ]]
+},
+WindowSize->{791.1428571428571, 371.57142857142856`},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"621b9070-31fc-4bf8-bfde-b63bdece541d"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 11820, 303, 923, "Input",ExpressionUUID->"4ca5001c-5f5f-436e-bb86-9f208bef5f68"],
+Cell[12403, 327, 3696, 71, 253, "Output",ExpressionUUID->"70cd8346-15c7-4859-b310-2fad87aa4d1d"],
+Cell[16102, 400, 308, 5, 32, "Output",ExpressionUUID->"b0f304f4-f932-40eb-84c7-2443ee98645e"],
+Cell[16413, 407, 465, 9, 28, "Message",ExpressionUUID->"25dbf3f7-3e97-4cb5-a1df-f69ccfa2223b"],
+Cell[16881, 418, 465, 9, 28, "Message",ExpressionUUID->"ccda087a-e609-4b4f-8e73-ce8ae13c55c4"],
+Cell[17349, 429, 497, 10, 28, "Message",ExpressionUUID->"07866c07-9c7c-4661-9315-9eff7224a938"],
+Cell[17849, 441, 420, 8, 28, "Message",ExpressionUUID->"dde08646-9758-47f4-a1f6-cc8bbd82e1d1"]
+}, Open  ]]
+}
+]
+*)
+

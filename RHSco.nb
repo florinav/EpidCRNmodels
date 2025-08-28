@@ -1,0 +1,257 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      9574,        249]
+NotebookOptionsPosition[      8586,        227]
+NotebookOutlinePosition[      9014,        243]
+CellTagsIndexPosition[      8971,        240]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"RHS2RN", "[", 
+    RowBox[{"RHS_List", ",", "var_List"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"reactions", "=", 
+        RowBox[{"{", "}"}]}], ",", "par", ",", "terms", ",", "term", ",", 
+       "rate", ",", "reactants", ",", "sign"}], "}"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"Infer", " ", "parameters"}], "*)"}], 
+     RowBox[{
+      RowBox[{"par", "=", 
+       RowBox[{"Complement", "[", 
+        RowBox[{
+         RowBox[{"Variables", "[", "RHS", "]"}], ",", "var"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"(*", 
+       RowBox[{
+       "Loop", " ", "through", " ", "each", " ", "RHS", " ", "expression"}], 
+       "*)"}], 
+      RowBox[{"Do", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"terms", "=", 
+          RowBox[{"List", "@@", 
+           RowBox[{"Expand", "[", 
+            RowBox[{"RHS", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], "]"}]}]}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"Do", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"term", "=", 
+             RowBox[{"terms", "[", 
+              RowBox[{"[", "j", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+            RowBox[{"reactants", "=", 
+             RowBox[{"Select", "[", 
+              RowBox[{
+               RowBox[{"List", "@@", "term"}], ",", 
+               RowBox[{
+                RowBox[{"MemberQ", "[", 
+                 RowBox[{"var", ",", "#"}], "]"}], "&"}]}], "]"}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"rate", "=", 
+             RowBox[{"Times", "@@", 
+              RowBox[{"Select", "[", 
+               RowBox[{
+                RowBox[{"List", "@@", "term"}], ",", 
+                RowBox[{
+                 RowBox[{"MemberQ", "[", 
+                  RowBox[{"par", ",", "#"}], "]"}], "&"}]}], "]"}]}]}], ";", 
+            "\[IndentingNewLine]", 
+            RowBox[{"sign", "=", 
+             RowBox[{"Sign", "[", 
+              RowBox[{"Coefficient", "[", 
+               RowBox[{
+                RowBox[{"RHS", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}], ",", "term"}], "]"}], 
+              "]"}]}], ";", "\[IndentingNewLine]", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"reactants", "=!=", 
+                RowBox[{"{", "}"}]}], "&&", 
+               RowBox[{
+                RowBox[{"NumericQ", "[", "rate", "]"}], "==", "False"}]}], 
+              ",", 
+              RowBox[{
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{"sign", "<", "0"}], ",", 
+                 RowBox[{"AppendTo", "[", 
+                  RowBox[{"reactions", ",", 
+                   RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"Sort", "[", "reactants", "]"}], ",", 
+                    "\"\<\[RightArrow]\>\"", ",", "rate"}], "}"}]}], "]"}], 
+                 ",", 
+                 RowBox[{"AppendTo", "[", 
+                  RowBox[{"reactions", ",", 
+                   RowBox[{"{", 
+                    RowBox[{"\"\<\[RightArrow]\>\"", ",", 
+                    RowBox[{"Sort", "[", "reactants", "]"}], ",", "rate"}], 
+                    "}"}]}], "]"}]}], "]"}], ";"}]}], "]"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"j", ",", 
+             RowBox[{"Length", "[", "terms", "]"}]}], "}"}]}], "]"}]}], ",", 
+        RowBox[{"{", 
+         RowBox[{"i", ",", 
+          RowBox[{"Length", "[", "RHS", "]"}]}], "}"}]}], "]"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"DeleteDuplicates", "[", "reactions", "]"}]}]}], "]"}]}], 
+  "\[IndentingNewLine]", "\n", 
+  RowBox[{"(*", 
+   RowBox[{"\|01f52c", " ", "Test", " ", "with", " ", "SIR", " ", "model"}], 
+   "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"sirRHS", "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "\[Beta]"}], " ", "S", " ", "i"}], ",", 
+      RowBox[{
+       RowBox[{"\[Beta]", " ", "S", " ", "i"}], "-", 
+       RowBox[{"\[Gamma]", " ", "i"}]}], ",", 
+      RowBox[{"\[Gamma]", " ", "iI"}]}], "}"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"vars", "=", 
+    RowBox[{"{", 
+     RowBox[{"S", ",", "i", ",", "R"}], "}"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{"RHS2RN", "[", 
+  RowBox[{"sirRHS", ",", "vars"}], "]"}], "\n"}], "Input",
+ CellChangeTimes->{{3.963901990067602*^9, 3.963901990067602*^9}, {
+  3.963902024335998*^9, 3.963902038287187*^9}},
+ CellLabel->"In[21]:=",ExpressionUUID->"48b5cb96-2ba6-472c-bfc2-5254a4195fce"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Select", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Select\\\", \
+\\\"[\\\", RowBox[{RowBox[{\\\"-\\\", \\\"1\\\"}], \\\",\\\", \
+RowBox[{RowBox[{\\\"MemberQ\\\", \\\"[\\\", RowBox[{RowBox[{\\\"{\\\", \
+RowBox[{\\\"S\\\", \\\",\\\", \\\"i\\\", \\\",\\\", \\\"R\\\"}], \\\"}\\\"}], \
+\\\",\\\", \\\"#1\\\"}], \\\"]\\\"}], \\\"&\\\"}]}], \\\"]\\\"}]\\).\"", 2, 
+   24, 12, 24824155672750028729, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.963901994134544*^9, 3.963902039501546*^9},
+ CellLabel->
+  "During evaluation of \
+In[21]:=",ExpressionUUID->"7c8b3dfc-5a7a-42f2-9392-7c33e22fcab5"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Select", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Select\\\", \
+\\\"[\\\", RowBox[{RowBox[{\\\"-\\\", \\\"1\\\"}], \\\",\\\", \
+RowBox[{RowBox[{\\\"MemberQ\\\", \\\"[\\\", RowBox[{\\\"par$14572\\\", \
+\\\",\\\", \\\"#1\\\"}], \\\"]\\\"}], \\\"&\\\"}]}], \\\"]\\\"}]\\).\"", 2, 
+   24, 13, 24824155672750028729, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.963901994134544*^9, 3.9639020395872393`*^9},
+ CellLabel->
+  "During evaluation of \
+In[21]:=",ExpressionUUID->"d6ef2f21-693f-46e0-a4a0-25ca508d4007"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Coefficient", "ivar", 
+   "\"\\!\\(\\*RowBox[{\\\"-\\\", \\\"1\\\"}]\\) is not a valid variable.\"", 
+   2, 24, 14, 24824155672750028729, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.963901994134544*^9, 3.963902039646159*^9},
+ CellLabel->
+  "During evaluation of \
+In[21]:=",ExpressionUUID->"c4277276-5ee9-42fe-8a86-51f0c216129d"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Select", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Select\\\", \
+\\\"[\\\", RowBox[{\\\"S\\\", \\\",\\\", RowBox[{RowBox[{\\\"MemberQ\\\", \
+\\\"[\\\", RowBox[{RowBox[{\\\"{\\\", RowBox[{\\\"S\\\", \\\",\\\", \
+\\\"i\\\", \\\",\\\", \\\"R\\\"}], \\\"}\\\"}], \\\",\\\", \\\"#1\\\"}], \
+\\\"]\\\"}], \\\"&\\\"}]}], \\\"]\\\"}]\\).\"", 2, 24, 15, 
+   24824155672750028729, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.963901994134544*^9, 3.9639020397269125`*^9},
+ CellLabel->
+  "During evaluation of \
+In[21]:=",ExpressionUUID->"e3bd71c6-8c20-44b2-879f-cadf55ce3ee0"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General", "stop", 
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"Select\\\", \\\"::\\\", \
+\\\"normal\\\"}], \\\"MessageName\\\"]\\) will be suppressed during this \
+calculation.\"", 2, 24, 16, 24824155672750028729, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.963901994134544*^9, 3.9639020397944794`*^9},
+ CellLabel->
+  "During evaluation of \
+In[21]:=",ExpressionUUID->"acca681d-7a38-4cdf-950f-d3b583835cc5"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{"\<\"\[RightArrow]\"\>", ",", 
+    RowBox[{"{", 
+     RowBox[{"2", ",", "S"}], "}"}], ",", "\[Beta]"}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{3.9639014409528956`*^9, 3.9639014958712864`*^9, 
+  3.9639017269204483`*^9, 3.963901994685477*^9, 3.9639020398545475`*^9},
+ CellLabel->"Out[24]=",ExpressionUUID->"a97f3788-ce85-4124-9d41-bb0c9b392638"]
+}, Open  ]]
+},
+WindowSize->{671.5714285714286, 306},
+WindowMargins->{{Automatic, 39}, {29.571428571428555`, Automatic}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"4b68a44c-5830-4a6b-a8b5-b1b6efd73246"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 4645, 122, 409, "Input",ExpressionUUID->"48b5cb96-2ba6-472c-bfc2-5254a4195fce"],
+Cell[5228, 146, 718, 14, 28, "Message",ExpressionUUID->"7c8b3dfc-5a7a-42f2-9392-7c33e22fcab5"],
+Cell[5949, 162, 640, 13, 28, "Message",ExpressionUUID->"d6ef2f21-693f-46e0-a4a0-25ca508d4007"],
+Cell[6592, 177, 389, 9, 28, "Message",ExpressionUUID->"c4277276-5ee9-42fe-8a86-51f0c216129d"],
+Cell[6984, 188, 699, 14, 28, "Message",ExpressionUUID->"e3bd71c6-8c20-44b2-879f-cadf55ce3ee0"],
+Cell[7686, 204, 477, 10, 28, "Message",ExpressionUUID->"acca681d-7a38-4cdf-950f-d3b583835cc5"],
+Cell[8166, 216, 404, 8, 32, "Output",ExpressionUUID->"a97f3788-ce85-4124-9d41-bb0c9b392638"]
+}, Open  ]]
+}
+]
+*)
+

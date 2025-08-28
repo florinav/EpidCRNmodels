@@ -1,0 +1,271 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\lstset{
+    language=Mathematica,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    breaklines=true,
+    frame=single
+}
+
+\title{EpidCRN Package Documentation}
+\author{Context File for AI Assistant}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Package Overview}
+
+\textbf{EpidCRN} is a Mathematica package for epidemiological models, which uses Chemical Reaction Network Theory (CRNT) methods. It  aims to analyze  models with unique disease-free boundary fixed point (DFE), possibly  multi-strain (ie. with other boundary fixed points besides the DFE), and with unique positive fixed point (endemic).
+
+\section{Package Structure}
+
+\subsection{Modular Organization}
+The package is split into subpackages to reduce monolithic complexity:
+
+\begin{itemize}
+\item \texttt{EpidCRN.wl} - Main loader package
+\item \texttt{Core.wl} - Basic network analysis (\texttt{EpidCRN`Core`})
+\item \texttt{CRNT.wl} - Chemical reaction network theory (\texttt{EpidCRN`CRNT`})
+\item \texttt{Boundary.wl} - NGM and boundary analysis (\texttt{EpidCRN`Boundary`})
+\item \texttt{Bifurcation.wl} - Hopf bifurcations and parameter scanning (\texttt{EpidCRN`Bifurcation`})
+\item \texttt{Siphons.wl} - Siphon and persistence analysis (\texttt{EpidCRN`Siphons`})
+\item \texttt{Utils.wl} - Utility functions (\texttt{EpidCRN`Utils`})
+\end{itemize}
+
+\subsection{Dependency Chain}
+\texttt{Core} $\rightarrow$ \texttt{CRNT} $\rightarrow$ \texttt{Boundary} $\rightarrow$ \texttt{Bifurcation} $\rightarrow$ \texttt{Siphons}
+
+\section{Key Functions by Category}
+
+\subsection{Core Functions (EpidCRN`Core`)}
+
+\begin{itemize}
+\item \texttt{extMat[reactions]} - Master function extracting \{species, $\alpha$, $\beta$, $\gamma$, $R_v$, RHS, deficiency\}
+\item \texttt{compToAsso[side]} - Parses reaction side to association of species $\rightarrow$ coefficients
+\item \texttt{extSpe[reactions]} - Extracts species list
+\item \texttt{asoRea[RN]} - Converts to association format with "Substrates"/"Products" keys
+\end{itemize}
+
+\subsection{CRNT Functions (EpidCRN`CRNT`)}
+
+\begin{itemize}
+\item \texttt{getComE[RN]} - Extracts \{complexes, edges\} from reaction network
+\item \texttt{IaFHJ[vertices, edges]} - Incidence matrix analysis, returns \{matrix, tableForm\}
+\item \texttt{IkFHJ[vertices, edges, rates]} - Ik matrix (n\_reactions $\times$ n\_complexes)
+\item \texttt{lapK[RN, rates]} - Laplacian matrix computation
+\item \texttt{SpeComInc[complexes, species]} - Species-complex incidence matrix
+\end{itemize}
+
+\subsection{Boundary Analysis (EpidCRN`Boundary`)}
+
+\begin{itemize}
+\item \texttt{NGM[mod, inf]} - Next Generation Matrix analysis
+\item \texttt{bd1[RN, rts]} - Single strain boundary analysis (DFE + 1 endemic)
+\item \texttt{bd2[RN, rts]} - Two strain analysis (DFE + 2 boundary + 1 coexistence)
+\item \texttt{DFE[mod, inf]} - Disease-Free Equilibrium computation
+\item \texttt{mRts[RN, ks]} - Mass action rates with parameter names
+\end{itemize}
+
+\subsection{Bifurcation Analysis (EpidCRN`Bifurcation`)}
+
+\begin{itemize}
+\item \texttt{fpHopf[RHS, var, par, p0val]} - Fixed point finder with Hopf analysis, returns angle = ArcTan[Re/Im]*180/Pi
+\item \texttt{simpleOptHopf[RHS, var, par, coP, optInd, numTries]} - Simple random search optimization for Hopf bifurcations
+\item \texttt{optHopf[RHS, var, par, coP, optInd, timeLimit, method, accGoal, precGoal, maxIter]} - Sophisticated NMaximize-based Hopf optimization
+\item \texttt{cont[RHS, var, par, p0val, stepSize, plotInd, bifInd, analyticalPlot]} - Continuation analysis with overlay capability
+\item \texttt{hopfD[curve]} - Hopf bifurcation detection from continuation curve data
+\item \texttt{scanPar[RHS, var, par, p0val, plotInd, gridRes, plot, ...]} - Comprehensive parameter space scanning with equilibrium classification
+\item \texttt{pertIC[equilibrium, var, factor, minq, n]} - Generate perturbed initial conditions
+\item \texttt{TS[RHS, var, par, p0val, tmax]} - Time series simulation using NDSolve
+\item \texttt{intEq[RHS, var, par, p0val, att]} - Interactive equilibrium finding with perturbations
+\end{itemize}
+
+\section{Critical Workflows}
+
+\subsection{Laplacian Matrix Construction}
+For "invasion CRN" (network projected on classes that become 0 at DFE):
+
+\begin{lstlisting}
+{complexes, edges} = getComE[RN];
+incidenceMatrix = IaFHJ[complexes, edges][[1]];
+ikMatrix = IkFHJ[complexes, edges, rates];
+laplacian = ikMatrix; (* or incidenceMatrix . ikMatrix *)
+\end{lstlisting}
+
+\subsection{Boundary Analysis Pipeline}
+\begin{lstlisting}
+(* Single strain *)
+result1 = bd1[RN, rates];
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1} = result1;
+
+(* Two strain *)
+result2 = bd2[RN, rates];
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1t, E2t} = result2;
+\end{lstlisting}
+
+\subsection{Hopf Bifurcation Detection}
+For detecting Hopf bifurcations through parameter optimization:
+
+\begin{lstlisting}
+(* Simple approach - random search *)
+{bestAngle, bestValues, finalP0Val} =
+  simpleOptHopf[RHS, var, par, coP, {3,4}, 50];
+
+(* Sophisticated approach - NMaximize *)
+{bestAngle, bestValues, finalP0Val} =
+  optHopf[RHS, var, par, coP, {3,4}, 120, "NelderMead", 4, 4, 500];
+
+(* Angle interpretation: negative = stable focus, positive = Hopf *)
+\end{lstlisting}
+
+\subsection{Continuation Analysis}
+For tracking equilibria along parameter paths:
+
+\begin{lstlisting}
+(* Basic continuation along parameter 4 *)
+curve = cont[RHS, var, par, p0val, 0.01, {3,4}, 4, None];
+
+(* With analytical plot overlay *)
+curve = cont[RHS, var, par, p0val, 0.01, {3,4}, 4, analyticalPlot];
+
+(* Detect Hopf points from continuation curve *)
+hopfPoints = hopfD[curve];
+\end{lstlisting}
+
+\subsection{Parameter Space Scanning}
+For comprehensive equilibrium classification:
+
+\begin{lstlisting}
+(* Grid mode scanning *)
+{plot, errors, results} = scanPar[RHS, var, par, p0val, {1,2},
+  30, Automatic, 0.01, 1/20, 0.5, 0.5, R01, R02, R21, R12];
+
+(* Range mode scanning *)
+{plot, errors, results} = scanPar[RHS, var, par, p0val, {1,2},
+  Automatic, basePlot, 0.01, 0.05, 1.0, 1.0, R01, R02, R21, R12];
+\end{lstlisting}
+
+\section{Important Implementation Details}
+
+\subsection{Function Compatibility Issues}
+\begin{itemize}
+\item \texttt{IaFHJ} and \texttt{IkFHJ} use \texttt{Table[gg[vert[[i]], edg[[j]]], ...]} NOT \texttt{Outer[gg, vert, edg]} due to Part specification errors
+\item Functions expect exact expression matching using \texttt{===} operator
+\item Species can be strings ("S1"), expressions ("I1" + "S1"), or symbols depending on context
+\end{itemize}
+
+\subsection{Data Format Standards}
+\begin{itemize}
+\item Reactions: \texttt{\{\{leftSide, rightSide\}, ...\}} or \texttt{\{leftSide -> rightSide, ...\}}
+\item Species: List of strings \texttt{\{"S1", "I1", "I2"\}}
+\item Rates: List parallel to reactions \texttt{\{k1, k2, k3\}}
+\item Returns: Most functions return lists, not associations (user preference)
+\end{itemize}
+
+\section{Key Concepts}
+
+\subsection{Invasion Species}
+Species that become zero at Disease-Free Equilibrium, typically infection classes. Found using \texttt{minSiph[species, asoRea[RN]]}.
+
+\subsection{Boundary Analysis Types}
+\begin{itemize}
+\item \texttt{bd1}: Single strain - expects DFE and one endemic equilibrium
+\item \texttt{bd2}: Two strain - expects DFE, two boundary points, one coexistence equilibrium
+\end{itemize}
+
+\subsection{Matrix Conventions}
+\begin{itemize}
+\item $\alpha$: reactant stoichiometric matrix (species $\times$ reactions)
+\item $\beta$: product stoichiometric matrix
+\item $\gamma = \beta - \alpha$: net stoichiometric matrix
+\item Laplacian: follows CRNT conventions, NOT standard graph theory (row sums = 0)
+\end{itemize}
+
+\section{Removed/Deprecated Functions}
+
+\begin{itemize}
+\item \texttt{NGMs} - Removed (noted as treating "denominators and exponents incorrectly")
+\item \texttt{bdAnalG}, \texttt{bdAnalG0} - Removed (unclear differences from bd1/bd2)
+\item Multiple near-duplicate functions consolidated into master functions
+\end{itemize}
+
+\section{File Structure}
+
+\begin{verbatim}
+EpidCRN/
+    EpidCRN.wl       (main package loader)
+    Core.wl          (EpidCRN`Core` context)
+    CRNT.wl          (EpidCRN`CRNT` context)
+    Boundary.wl      (EpidCRN`Boundary` context)
+    Bifurcation.wl   (EpidCRN`Bifurcation` context)
+    Siphons.wl       (EpidCRN`Siphons` context)
+    Utils.wl         (EpidCRN`Utils` context)
+\end{verbatim}
+
+\textbf{Critical}: File names must match subcontext names exactly for \texttt{Get[]} to work automatically.
+
+\section{Usage Patterns}
+
+\subsection{Loading}
+\begin{lstlisting}
+(* Load full package *)
+Get["EpidCRN`"];
+
+(* Load individual subpackage for testing *)
+Get["EpidCRN`Core`"];
+\end{lstlisting}
+
+\subsection{Typical Analysis Sequence}
+\begin{lstlisting}
+(* 1. Extract network structure *)
+{species, alpha, beta, gamma, Rv, RHS, deficiency} = extMat[RN];
+
+(* 2. Boundary analysis *)
+boundaryResults = bd2[RN, rates];
+
+(* 3. Parameter space scanning *)
+{plot, errors, results} = scanPar[RHS, variables, parameters, p0val,
+  {1,2}, 30, Automatic];
+
+(* 4. Hopf bifurcation search *)
+{bestAngle, bestValues, finalP0Val} =
+  optHopf[RHS, variables, parameters, coP, {3,4}, 120];
+
+(* 5. Continuation analysis *)
+curve = cont[RHS, variables, parameters, finalP0Val, 0.01, {3,4}, 4];
+hopfPoints = hopfD[curve];
+
+(* 6. Laplacian for invasion dynamics *)
+{laplacian, complexes, edges} = lapK[RN, rates];
+
+(* 7. NGM analysis *)
+mod = {RHS, variables, parameters};
+ngmResults = NGM[mod, infectionIndices];
+\end{lstlisting}
+
+\section{Notes for Future Development}
+
+\begin{itemize}
+\item User strongly prefers list returns over association returns
+\item Focus on functions that work symbolically and numerically
+\item Avoid vague descriptions like "complete analysis" - specify what differs between functions
+\item Package grew organically with substantial duplication - consolidation ongoing
+\item Core functions like \texttt{extMat} are dependency roots for most other functions
+\item \texttt{Bifurcation} subpackage focuses on dynamical systems analysis - works numerically with NDSolve
+\item Hopf detection uses angle criterion: negative = stable focus, positive = Hopf bifurcation
+\item Parameter scanning supports both grid mode (fixed resolution) and range mode (adaptive stepping)
+\item Continuation analysis can overlay results on analytical plots when bifurcation parameter is in plot indices
+\end{itemize}
+
+\end{document}

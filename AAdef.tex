@@ -1,4 +1,5 @@
 %Packages
+\usepackage{makecell}
 \usepackage[novbox]{pdfsync}
 \usepackage{amssymb, amsfonts,mathtools}
 \usepackage{eurosym,graphicx,latexsym, amsmath,amsthm,times,nccmath,url}
@@ -12,9 +13,9 @@
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{calc}
 
-%\iffalse
+
 %Theorem environments
-\newtheorem{theorem}{Theorem}
+\newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}{Lemma}
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
@@ -26,6 +27,7 @@
 \newtheorem{assumption}{Assumption}
 \usepackage[acronym,toc,sort=use]{glossaries}
 \makeglossaries
+
 
 % COUNTER DEFINITIONS
 \newcounter{defcounter}
@@ -43,6 +45,15 @@
     \glsentryuserii{##1} \glsentryuseri{##1}:] ``\glossentryname{##1}''\dotfill##2
   }
 }
+
+
+
+% Define custom colors
+\definecolor{funccolor}{RGB}{25,25,112}
+\definecolor{desccolor}{RGB}{64,64,64}
+
+% Custom command for function names
+\newcommand{\func}[1]{\texttt{\textcolor{funccolor}{#1}}}
 
 % DEFINITION COMMANDS
 \newcommand{\beD}[1][]{
@@ -216,8 +227,8 @@
  \def\De{\Delta} \def\mG{{\mathcal G}}
 \def\mR{\mathcal R} \def\mI{\mathcal I}
 \newcommand{\R}{\mathbb{R}}
-\renewcommand{\r}{ \mathsf r}
-\newcommand{\s}{ \mathsf s}
+\renewcommand{\r}{r}
+\newcommand{\s}{s}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\Z}{\mathbb{Z}}
  %\def{\i }{\mathsf i}
@@ -230,7 +241,7 @@
 \def\bx{\bff x}
 \def\z{\zeta} \def\bz{\bff 0} \def\f{\varphi} \def\T{\widetilde} \def\mT{\mathcal{T}}
 \def\eE{\mathsf e_{ee}} \def\de{\delta}\def\eps{\varepsilon}
-\def\Roc{R_{1,c}}\def\Rtc{R_{2,c}}
+
 %MathOperators
 \DeclareMathOperator{\TV}{TV}
 \DeclareMathOperator{\Cov}{Cov}
@@ -245,7 +256,8 @@
 \newcommand\op{\operatorname}
 \newcommand{\supp}{\op{supp}}
 %\newcommand{\G}{(\SS,\RR)} % the `name' of the CRN
-\def\Rot{R_{\tilde {1}}^2} \def\Rto{R_{\tilde {2}}^1}
+\def\Rot{R_{ {1}}^{\tilde{2}}} \def\Rto{R_{{2}}^{\tilde{1}}}
+\def\Roc{R_{1,c}}\def\Rtc{R_{2,c}}
 
 %Some text Abreviations
 
@@ -276,7 +288,7 @@
 \def\mubw{must be written as }\def\sta{stability}
 \def\ito{it turns out that }
 \def\itf{it follows that}\def\equ{equation}
-\newcommand\CRN{chemical reaction network }
+\newcommand\CRN{chemical reaction networks }
 \newcommand\RN{reaction network }
 \newcommand\BIN{biological interaction network }
 \newcommand\CRNNoSpace{chemical reaction network}
@@ -330,4 +342,5 @@
 \def\adm{admissible}\def\isd{is defined by}\def\np{\newpage}
 \def\spfp{strictly positive fixed  point} \def\RUR{rational univariate representation}\def\oth{otherwise}\def\ma{mass action}
 \def\how{however}\def\nt{non trivial}\def\fif{forward invariant face}
+\def\repF{reproduction functions}
 \def\The{The main hero of mathematical epidemiology (ME) is the DFE}

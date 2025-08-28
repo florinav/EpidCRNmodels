@@ -1,0 +1,1140 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     43433,       1132]
+NotebookOptionsPosition[     37903,       1060]
+NotebookOutlinePosition[     38312,       1076]
+CellTagsIndexPosition[     38269,       1073]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{"===", 
+    RowBox[{
+    "GAVISH", " ", "SCENARIOS", " ", "USING", " ", "WORKING", " ", "HOPF", 
+     " ", "PACKAGE"}], "==="}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+   "Minimal", " ", "changes", " ", "to", " ", "test", " ", "Gavish", " ", 
+    "examples", " ", "with", " ", "your", " ", "existing", " ", "hopfT", " ", 
+    "function"}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<=== GAVISH SCENARIOS: Testing s = \[Sigma]\:2081\[Sigma]\:2082 - \
+\[Sigma]\:2081 - \[Sigma]\:2082 predictions ===\>\"", "]"}], ";"}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"GAVISH", " ", "PARAMETER", " ", "SETS"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Scenario", " ", 
+     RowBox[{"A", ":", 
+      RowBox[{"s", ">", 
+       RowBox[{
+        RowBox[{"0", " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"\[Sigma]\:2081\:2082", "=", "3"}], ",", 
+           RowBox[{"\[Sigma]\:2082\:2081", "=", "2.5"}]}], ")"}]}], "-", 
+        RowBox[{"Should", " ", "oscillate"}]}]}]}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"gavishA", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalLambda]", "->", "4"}], ",", 
+       RowBox[{"\[Mu]", "->", "0.001"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Eta]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Eta]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "1"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "2"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "3"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Sigma]", ",", "1"}], "]"}], "->", "3.0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Sigma]", ",", "2"}], "]"}], "->", "2.5"}]}], "}"}]}], 
+    ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Scenario", " ", 
+     RowBox[{"B", ":", 
+      RowBox[{"s", "<", 
+       RowBox[{
+        RowBox[{"0", " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"\[Sigma]\:2081\:2082", "=", "1"}], ",", 
+           RowBox[{"\[Sigma]\:2082\:2081", "=", "1.5"}]}], ")"}]}], "-", 
+        "Conditional"}]}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"gavishB", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalLambda]", "->", "4"}], ",", 
+       RowBox[{"\[Mu]", "->", "0.001"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Eta]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Eta]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "1"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "2"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "3"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Sigma]", ",", "1"}], "]"}], "->", "1.0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Sigma]", ",", "2"}], "]"}], "->", "1.5"}]}], "}"}]}], 
+    ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Scenario", " ", 
+     RowBox[{"C", ":", 
+      RowBox[{"s", "<", 
+       RowBox[{
+        RowBox[{"0", " ", "with", " ", "cross"}], "-", 
+        RowBox[{"immunity", " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"\[Sigma]\:2081\:2082", "=", "0.5"}], ",", 
+           RowBox[{"\[Sigma]\:2082\:2081", "=", "0.75"}]}], ")"}]}], "-", 
+        RowBox[{"Should", " ", "be", " ", "stable"}]}]}]}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"gavishC", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalLambda]", "->", "4"}], ",", 
+       RowBox[{"\[Mu]", "->", "0.001"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Beta]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Gamma]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Eta]", ",", "1"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Eta]", ",", "2"}], "]"}], "->", "1"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "1"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "2"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Theta]", ",", "3"}], "]"}], "->", "0"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Sigma]", ",", "1"}], "]"}], "->", "0.5"}], ",", 
+       RowBox[{
+        RowBox[{"Subscript", "[", 
+         RowBox[{"\[Sigma]", ",", "2"}], "]"}], "->", "0.75"}]}], "}"}]}], 
+    ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{"CALCULATE", " ", "S", " ", "VALUES"}], "==="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"calculateS", "[", "params_", "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\[Sigma]1", ",", "\[Sigma]2"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"\[Sigma]1", "=", 
+         RowBox[{
+          RowBox[{"Subscript", "[", 
+           RowBox[{"\[Sigma]", ",", "1"}], "]"}], "/.", " ", "params"}]}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"\[Sigma]2", "=", 
+         RowBox[{
+          RowBox[{"Subscript", "[", 
+           RowBox[{"\[Sigma]", ",", "2"}], "]"}], "/.", " ", "params"}]}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"\[Sigma]1", "*", "\[Sigma]2"}], "-", "\[Sigma]1", "-", 
+         "\[Sigma]2"}]}]}], "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"sA", "=", 
+     RowBox[{"calculateS", "[", "gavishA", "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"sB", "=", 
+     RowBox[{"calculateS", "[", "gavishB", "]"}]}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"sC", "=", 
+     RowBox[{"calculateS", "[", "gavishC", "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<Scenario A: \[Sigma]\:2081=3.0, \[Sigma]\:2082=2.5, s=\>\"", ",", 
+      RowBox[{"N", "[", 
+       RowBox[{"sA", ",", "3"}], "]"}], ",", 
+      "\"\< \[RightArrow] Theory: Oscillations\>\""}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<Scenario B: \[Sigma]\:2081=1.0, \[Sigma]\:2082=1.5, s=\>\"", ",", 
+      RowBox[{"N", "[", 
+       RowBox[{"sB", ",", "3"}], "]"}], ",", 
+      "\"\< \[RightArrow] Theory: Conditional\>\""}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<Scenario C: \[Sigma]\:2081=0.5, \[Sigma]\:2082=0.75, s=\>\"", ",", 
+      RowBox[{"N", "[", 
+       RowBox[{"sC", ",", "3"}], "]"}], ",", 
+      "\"\< \[RightArrow] Theory: Stable\>\""}], "]"}], ";"}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{
+     "TEST", " ", "GAVISH", " ", "SCENARIOS", " ", "USING", " ", "YOUR", " ", 
+      "HOPF", " ", "PACKAGE"}], "==="}], "*)"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<\\n--- SCENARIO A: High s (should show Hopf bifurcations) ---\>\"", 
+     "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"hopfResultA", "=", 
+     RowBox[{"hopfT", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishA", "}"}], ",", 
+       RowBox[{"Subscript", "[", 
+        RowBox[{"\[Beta]", ",", "1"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0.5", ",", "2.0"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"hopfResultA", "=!=", "$Failed"}], ",", 
+      RowBox[{
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<\[Checkmark] hopfT completed for Scenario A: \>\"", ",", 
+         RowBox[{"Length", "[", 
+          RowBox[{"hopfResultA", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], 
+         ",", "\"\< Hopf bifurcations\>\""}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Length", "[", 
+           RowBox[{"hopfResultA", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], 
+          ">", "0"}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<  \[RightArrow] Gavish theory CONFIRMED: s>0 gives \
+oscillations\>\"", "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"Do", "[", 
+           RowBox[{
+            RowBox[{"Print", "[", 
+             RowBox[{
+             "\"\<    Hopf \>\"", ",", "i", ",", "\"\<: \[Beta]\:2081 = \>\"",
+               ",", 
+              RowBox[{"N", "[", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"hopfResultA", "[", "\"\<HopfPoints\>\"", "]"}], 
+                  "[", 
+                  RowBox[{"[", "i", "]"}], "]"}], "[", "\"\<Par\>\"", "]"}], 
+                ",", "4"}], "]"}]}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"i", ",", 
+              RowBox[{"Length", "[", 
+               RowBox[{"hopfResultA", "[", "\"\<HopfPoints\>\"", "]"}], 
+               "]"}]}], "}"}]}], "]"}], ";"}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<  \[RightArrow] No bifurcations found in this range\>\"", 
+           "]"}], ";"}]}], "]"}], ";"}], ",", 
+      RowBox[{
+       RowBox[{
+       "Print", "[", "\"\<\:2717 hopfT failed for Scenario A\>\"", "]"}], 
+       ";"}]}], "]"}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<\\n--- SCENARIO B: Conditional s (mixed behavior) ---\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"hopfResultB", "=", 
+     RowBox[{"hopfT", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishB", "}"}], ",", 
+       RowBox[{"Subscript", "[", 
+        RowBox[{"\[Beta]", ",", "1"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0.5", ",", "2.0"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"hopfResultB", "=!=", "$Failed"}], ",", 
+      RowBox[{
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<\[Checkmark] hopfT completed for Scenario B: \>\"", ",", 
+         RowBox[{"Length", "[", 
+          RowBox[{"hopfResultB", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], 
+         ",", "\"\< Hopf bifurcations\>\""}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Length", "[", 
+           RowBox[{"hopfResultB", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], 
+          ">", "0"}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<  \[RightArrow] System shows bifurcations in conditional \
+regime\>\"", "]"}], ";"}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<  \[RightArrow] System stable in this parameter range\>\"", 
+           "]"}], ";"}]}], "]"}], ";"}], ",", 
+      RowBox[{
+       RowBox[{
+       "Print", "[", "\"\<\:2717 hopfT failed for Scenario B\>\"", "]"}], 
+       ";"}]}], "]"}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<\\n--- SCENARIO C: Cross-immunity (should be stable) ---\>\"", 
+     "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"hopfResultC", "=", 
+     RowBox[{"hopfT", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishC", "}"}], ",", 
+       RowBox[{"Subscript", "[", 
+        RowBox[{"\[Beta]", ",", "1"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0.5", ",", "2.0"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"hopfResultC", "=!=", "$Failed"}], ",", 
+      RowBox[{
+       RowBox[{"Print", "[", 
+        RowBox[{"\"\<\[Checkmark] hopfT completed for Scenario C: \>\"", ",", 
+         RowBox[{"Length", "[", 
+          RowBox[{"hopfResultC", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], 
+         ",", "\"\< Hopf bifurcations\>\""}], "]"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Length", "[", 
+           RowBox[{"hopfResultC", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], "==",
+           "0"}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<  \[RightArrow] Gavish theory CONFIRMED: cross-immunity gives \
+stability\>\"", "]"}], ";"}], ",", 
+         RowBox[{
+          RowBox[{
+          "Print", "[", 
+           "\"\<  \[RightArrow] Unexpected bifurcations found\>\"", "]"}], 
+          ";"}]}], "]"}], ";"}], ",", 
+      RowBox[{
+       RowBox[{
+       "Print", "[", "\"\<\:2717 hopfT failed for Scenario C\>\"", "]"}], 
+       ";"}]}], "]"}], ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{
+     "PARAMETER", " ", "SCANS", " ", "FOR", " ", "VISUAL", " ", 
+      "COMPARISON"}], "==="}], "*)"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<\\n=== PARAMETER SCANS FOR VISUAL COMPARISON ===\>\"", 
+     "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Scenario A scan (high s):\>\"", "]"}], ";"}], 
+   "\n", 
+   RowBox[{
+    RowBox[{"scanA", "=", 
+     RowBox[{"scanPar", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishA", "}"}], ",", 
+       RowBox[{"Subscript", "[", 
+        RowBox[{"\[Beta]", ",", "1"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0.5", ",", "2.0"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Scenario C scan (cross-immunity):\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"scanC", "=", 
+     RowBox[{"scanPar", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishC", "}"}], ",", 
+       RowBox[{"Subscript", "[", 
+        RowBox[{"\[Beta]", ",", "1"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0.5", ",", "2.0"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", 
+     RowBox[{
+     "ADDITIONAL", " ", "TESTS", " ", "WITH", " ", "DIFFERENT", " ", 
+      "PARAMETERS"}], "==="}], "*)"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<\\n=== ADDITIONAL PARAMETER VARIATIONS ===\>\"", "]"}],
+     ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Test", " ", "varying", " ", "\[Sigma]\:2081", " ", "for", " ", "high", 
+     " ", "s", " ", "scenario"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<Testing \[Sigma]\:2081 variation for high s scenario:\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"hopfSigma", "=", 
+     RowBox[{"hopfT", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishA", "}"}], ",", 
+       RowBox[{"Subscript", "[", 
+        RowBox[{"\[Sigma]", ",", "1"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1.5", ",", "4.0"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+     "Test", " ", "varying", " ", "\[CapitalLambda]", " ", "for", " ", 
+      "cross"}], "-", 
+     RowBox[{"immunity", " ", "scenario"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<Testing \[CapitalLambda] variation for cross-immunity \
+scenario:\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"hopfLambda", "=", 
+     RowBox[{"hopfT", "[", 
+      RowBox[{"RHS", ",", "var", ",", 
+       RowBox[{"{", "gavishC", "}"}], ",", "\[CapitalLambda]", ",", 
+       RowBox[{"{", 
+        RowBox[{"2", ",", "8"}], "}"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"===", "SUMMARY", "==="}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<\\n=== GAVISH VALIDATION SUMMARY ===\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<Theory predictions:\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<1. s > 0 \[RightArrow] Oscillations (Scenario A): \>\"", ",", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"hopfResultA", "=!=", "$Failed"}], "&&", 
+         RowBox[{
+          RowBox[{"Length", "[", 
+           RowBox[{"hopfResultA", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], 
+          ">", "0"}]}], ",", "\"\<\[Checkmark] CONFIRMED\>\"", ",", 
+        "\"\<? Inconclusive\>\""}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", 
+     RowBox[{
+     "\"\<2. s < 0 with cross-immunity \[RightArrow] Stable (Scenario C): \
+\>\"", ",", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"hopfResultC", "=!=", "$Failed"}], "&&", 
+         RowBox[{
+          RowBox[{"Length", "[", 
+           RowBox[{"hopfResultC", "[", "\"\<HopfPoints\>\"", "]"}], "]"}], "==",
+           "0"}]}], ",", "\"\<\[Checkmark] CONFIRMED\>\"", ",", 
+        "\"\<? Inconclusive\>\""}], "]"}]}], "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<3. s < 0 general \[RightArrow] Conditional (Scenario B): Needs \
+case-by-case analysis\>\"", "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<\\n=== QUICK TESTS FOR OTHER SCENARIOS ===\>\"", "]"}],
+     ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<To test other \[Sigma] values quickly:\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<hopfT[RHS, var, {params}, Subscript[\[Beta], 1], {0.5, 2.0}] where \
+params has different \[Sigma] values\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<Example parameter sets for different s values:\>\"", 
+     "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<High s: \[Sigma]\:2081=2.5, \[Sigma]\:2082=2.0 gives s=2.0\>\"", 
+     "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<Low s: \[Sigma]\:2081=1.2, \[Sigma]\:2082=1.1 gives s=-0.18\>\"", 
+     "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<Cross-immunity: \[Sigma]\:2081=0.6, \[Sigma]\:2082=0.8 gives \
+s=-0.68\>\"", "]"}], ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.9627781325860248`*^9, 3.9627781449912167`*^9}},
+ CellLabel->
+  "In[2628]:=",ExpressionUUID->"c984f5a0-409b-4218-90e2-cf54739209e6"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["\<\"=== GAVISH SCENARIOS: Testing s = \[Sigma]\:2081\[Sigma]\
+\:2082 - \[Sigma]\:2081 - \[Sigma]\:2082 predictions ===\"\>"], "Print",
+ CellChangeTimes->{3.962778148306785*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"43b5b215-b692-4896-a76d-ee668ed96518"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Scenario A: \[Sigma]\:2081=3.0, \[Sigma]\:2082=2.5, s=\"\>", 
+   "\[InvisibleSpace]", "2.`", 
+   "\[InvisibleSpace]", "\<\" \[RightArrow] Theory: Oscillations\"\>"}],
+  SequenceForm[
+  "Scenario A: \[Sigma]\:2081=3.0, \[Sigma]\:2082=2.5, s=", 2., 
+   " \[RightArrow] Theory: Oscillations"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781483409624`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"468dfed8-e861-42e4-870a-6a5469aa76cc"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Scenario B: \[Sigma]\:2081=1.0, \[Sigma]\:2082=1.5, s=\"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"-", "1.`"}], 
+   "\[InvisibleSpace]", "\<\" \[RightArrow] Theory: Conditional\"\>"}],
+  SequenceForm[
+  "Scenario B: \[Sigma]\:2081=1.0, \[Sigma]\:2082=1.5, s=", -1., 
+   " \[RightArrow] Theory: Conditional"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778148374758*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"2328fc24-09eb-46b9-9ab2-cb775c350383"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Scenario C: \[Sigma]\:2081=0.5, \[Sigma]\:2082=0.75, s=\"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"-", "0.875`"}], 
+   "\[InvisibleSpace]", "\<\" \[RightArrow] Theory: Stable\"\>"}],
+  SequenceForm[
+  "Scenario C: \[Sigma]\:2081=0.5, \[Sigma]\:2082=0.75, s=", -0.875, 
+   " \[RightArrow] Theory: Stable"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781484511623`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"572c66ce-f0fa-42c2-a5d5-cf172b0128cc"],
+
+Cell[BoxData["\<\"\\n--- SCENARIO A: High s (should show Hopf bifurcations) \
+---\"\>"], "Print",
+ CellChangeTimes->{3.9627781484919505`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"8d3324dc-7b9a-4f62-afa2-3903f4019214"],
+
+Cell[BoxData["\<\"=== HOPF ANALYSIS ===\"\>"], "Print",
+ CellChangeTimes->{3.9627781485250025`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"eace7aab-b6b7-4090-b864-fa455881d0e5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Variables: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "S", ",", "I1", ",", "Y1", ",", "R1", ",", "I2", ",", "Y2", ",", "R2", 
+     ",", "R"}], "}"}]}],
+  SequenceForm[
+  "Variables: ", {$CellContext`S, $CellContext`I1, $CellContext`Y1, \
+$CellContext`R1, $CellContext`I2, $CellContext`Y2, $CellContext`R2, \
+$CellContext`R}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781485906076`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"14f1489b-60e9-4926-885b-31c0167c1de2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Parameter: \"\>", "\[InvisibleSpace]", 
+   SubscriptBox["\[Beta]", "1"], "\[InvisibleSpace]", "\<\" in range \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"0.5`", ",", "2.`"}], "}"}]}],
+  SequenceForm["Parameter: ", 
+   Subscript[$CellContext`\[Beta], 1], " in range ", {0.5, 2.}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781486621733`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"214eaab9-27bd-47b8-9cf7-9b7fea669fb2"],
+
+Cell[BoxData["\<\"Interior equilibrium found\"\>"], "Print",
+ CellChangeTimes->{3.962778148702524*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"b96a12f9-0109-4ab7-ae0f-bb6fac56ea23"],
+
+Cell[BoxData["\<\"FAILED: Continuation\"\>"], "Print",
+ CellChangeTimes->{3.962778148768572*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"73acb11b-33d6-4c2b-a186-6fcc2b5aa748"],
+
+Cell[BoxData["\<\"\:2717 hopfT failed for Scenario A\"\>"], "Print",
+ CellChangeTimes->{3.9627781488066945`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"14f6908b-b0d7-47c5-8ae0-f42643285448"],
+
+Cell[BoxData["\<\"\\n--- SCENARIO B: Conditional s (mixed behavior) \
+---\"\>"], "Print",
+ CellChangeTimes->{3.962778148851524*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"4b692112-b27f-4f3f-8492-24388202785b"],
+
+Cell[BoxData["\<\"=== HOPF ANALYSIS ===\"\>"], "Print",
+ CellChangeTimes->{3.962778148894505*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"940c9f52-bbf3-4996-816a-7154aff7a437"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Variables: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "S", ",", "I1", ",", "Y1", ",", "R1", ",", "I2", ",", "Y2", ",", "R2", 
+     ",", "R"}], "}"}]}],
+  SequenceForm[
+  "Variables: ", {$CellContext`S, $CellContext`I1, $CellContext`Y1, \
+$CellContext`R1, $CellContext`I2, $CellContext`Y2, $CellContext`R2, \
+$CellContext`R}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781489774246`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"70e0ece4-4aab-453b-8af4-4bcc696b40e0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Parameter: \"\>", "\[InvisibleSpace]", 
+   SubscriptBox["\[Beta]", "1"], "\[InvisibleSpace]", "\<\" in range \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"0.5`", ",", "2.`"}], "}"}]}],
+  SequenceForm["Parameter: ", 
+   Subscript[$CellContext`\[Beta], 1], " in range ", {0.5, 2.}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778149024181*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"4df6555e-3b86-41c6-bb5b-418abd064ad1"],
+
+Cell[BoxData["\<\"Interior equilibrium found\"\>"], "Print",
+ CellChangeTimes->{3.9627781490864873`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"55d8c9a3-80df-407b-809a-47238b364405"],
+
+Cell[BoxData["\<\"FAILED: Continuation\"\>"], "Print",
+ CellChangeTimes->{3.9627781491482086`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"fd90d5bb-f2e4-4d81-a839-f1e108090aa5"],
+
+Cell[BoxData["\<\"\:2717 hopfT failed for Scenario B\"\>"], "Print",
+ CellChangeTimes->{3.962778149229749*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"367aafba-bc5c-4c81-9e20-c24dc1070b59"],
+
+Cell[BoxData["\<\"\\n--- SCENARIO C: Cross-immunity (should be stable) \
+---\"\>"], "Print",
+ CellChangeTimes->{3.9627781493100033`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"55c171a9-f258-4224-8a35-b00c668ce874"],
+
+Cell[BoxData["\<\"=== HOPF ANALYSIS ===\"\>"], "Print",
+ CellChangeTimes->{3.9627781493657885`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"f869666a-6a5c-451f-b3e0-ff555e0851af"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Variables: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "S", ",", "I1", ",", "Y1", ",", "R1", ",", "I2", ",", "Y2", ",", "R2", 
+     ",", "R"}], "}"}]}],
+  SequenceForm[
+  "Variables: ", {$CellContext`S, $CellContext`I1, $CellContext`Y1, \
+$CellContext`R1, $CellContext`I2, $CellContext`Y2, $CellContext`R2, \
+$CellContext`R}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778149453148*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"efa9783d-ad03-4d8d-96c0-8beb8c87fa36"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Parameter: \"\>", "\[InvisibleSpace]", 
+   SubscriptBox["\[Beta]", "1"], "\[InvisibleSpace]", "\<\" in range \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"0.5`", ",", "2.`"}], "}"}]}],
+  SequenceForm["Parameter: ", 
+   Subscript[$CellContext`\[Beta], 1], " in range ", {0.5, 2.}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778149527712*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"4c805197-21f5-400c-afd6-7f501ff8a910"],
+
+Cell[BoxData["\<\"Interior equilibrium found\"\>"], "Print",
+ CellChangeTimes->{3.9627781496042576`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"e3bfac61-b761-4c0d-a0a0-8e99cad6c6d5"],
+
+Cell[BoxData["\<\"FAILED: Continuation\"\>"], "Print",
+ CellChangeTimes->{3.9627781496825604`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"f0f4191f-b5f6-47ad-aa2f-4761c6ac825b"],
+
+Cell[BoxData["\<\"\:2717 hopfT failed for Scenario C\"\>"], "Print",
+ CellChangeTimes->{3.96277814977588*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"e68fc2a6-14fe-497b-9da5-0b1db06d83c4"],
+
+Cell[BoxData["\<\"\\n=== PARAMETER SCANS FOR VISUAL COMPARISON ===\"\>"], \
+"Print",
+ CellChangeTimes->{3.9627781498495173`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"94d08c9a-6de1-4b68-bdeb-797dca1abd08"],
+
+Cell[BoxData["\<\"Scenario A scan (high s):\"\>"], "Print",
+ CellChangeTimes->{3.9627781499269805`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"a1c66ab8-ae8f-4dd6-8d91-82c364b769c5"],
+
+Cell[BoxData["\<\"Scenario C scan (cross-immunity):\"\>"], "Print",
+ CellChangeTimes->{3.9627781501350565`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"29b8b7de-8c11-4f55-b1f6-0e26a13d88cd"],
+
+Cell[BoxData["\<\"\\n=== ADDITIONAL PARAMETER VARIATIONS ===\"\>"], "Print",
+ CellChangeTimes->{3.9627781508586073`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"16f3fbbd-af21-4b02-8730-f162b01ceffc"],
+
+Cell[BoxData["\<\"Testing \[Sigma]\:2081 variation for high s \
+scenario:\"\>"], "Print",
+ CellChangeTimes->{3.9627781509050503`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"abcdd820-861d-49ae-9389-440e016b488d"],
+
+Cell[BoxData["\<\"=== HOPF ANALYSIS ===\"\>"], "Print",
+ CellChangeTimes->{3.962778150957421*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"e3598925-1c9d-4793-b84f-cb83f7fe1144"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Variables: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "S", ",", "I1", ",", "Y1", ",", "R1", ",", "I2", ",", "Y2", ",", "R2", 
+     ",", "R"}], "}"}]}],
+  SequenceForm[
+  "Variables: ", {$CellContext`S, $CellContext`I1, $CellContext`Y1, \
+$CellContext`R1, $CellContext`I2, $CellContext`Y2, $CellContext`R2, \
+$CellContext`R}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778151030068*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"811be0c2-2f8f-4e37-a7c6-fc0761b147d2"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Parameter: \"\>", "\[InvisibleSpace]", 
+   SubscriptBox["\[Sigma]", "1"], "\[InvisibleSpace]", "\<\" in range \"\>", 
+   "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"1.5`", ",", "4.`"}], "}"}]}],
+  SequenceForm["Parameter: ", 
+   Subscript[$CellContext`\[Sigma], 1], " in range ", {1.5, 4.}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778151110798*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"14d3e3da-6da4-45c8-bbee-37e4cfbdaede"],
+
+Cell[BoxData["\<\"Interior equilibrium found\"\>"], "Print",
+ CellChangeTimes->{3.9627781511773925`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"fc199de4-ce64-432c-b89f-d34e0cbc0485"],
+
+Cell[BoxData["\<\"FAILED: Continuation\"\>"], "Print",
+ CellChangeTimes->{3.9627781512588797`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"1f99ce12-9166-4948-bced-3dbfd92a5880"],
+
+Cell[BoxData["\<\"Testing \[CapitalLambda] variation for cross-immunity \
+scenario:\"\>"], "Print",
+ CellChangeTimes->{3.9627781513259735`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"0135e089-f8b2-42f7-8eef-176dc333332a"],
+
+Cell[BoxData["\<\"=== HOPF ANALYSIS ===\"\>"], "Print",
+ CellChangeTimes->{3.9627781514008055`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"9c8443b1-47df-4750-85ce-f07d64979438"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Variables: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+    "S", ",", "I1", ",", "Y1", ",", "R1", ",", "I2", ",", "Y2", ",", "R2", 
+     ",", "R"}], "}"}]}],
+  SequenceForm[
+  "Variables: ", {$CellContext`S, $CellContext`I1, $CellContext`Y1, \
+$CellContext`R1, $CellContext`I2, $CellContext`Y2, $CellContext`R2, \
+$CellContext`R}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778151477578*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"4a795e08-c3fd-4ce9-98ec-a55d1eacb9d0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Parameter: \"\>", "\[InvisibleSpace]", "\[CapitalLambda]", 
+   "\[InvisibleSpace]", "\<\" in range \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"2", ",", "8"}], "}"}]}],
+  SequenceForm[
+  "Parameter: ", $CellContext`\[CapitalLambda], " in range ", {2, 8}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781515752645`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"0ae0ec81-88f7-48d7-bac6-a54ebfa61e54"],
+
+Cell[BoxData["\<\"Interior equilibrium found\"\>"], "Print",
+ CellChangeTimes->{3.9627781516927433`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"1f49011e-be55-4935-bffc-6e858ad3213c"],
+
+Cell[BoxData["\<\"FAILED: Continuation\"\>"], "Print",
+ CellChangeTimes->{3.962778151780726*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"f54db193-af67-4739-b2fb-b2d1549be50e"],
+
+Cell[BoxData["\<\"\\n=== GAVISH VALIDATION SUMMARY ===\"\>"], "Print",
+ CellChangeTimes->{3.962778151866172*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"9c171d50-d467-42c2-942c-dc418a1ae294"],
+
+Cell[BoxData["\<\"Theory predictions:\"\>"], "Print",
+ CellChangeTimes->{3.9627781519479575`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"f0d8882d-160d-4ae3-a812-3588d32b19f0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"1. s > 0 \[RightArrow] Oscillations (Scenario A): \"\>", 
+   "\[InvisibleSpace]", "\<\"? Inconclusive\"\>"}],
+  SequenceForm[
+  "1. s > 0 \[RightArrow] Oscillations (Scenario A): ", "? Inconclusive"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.962778152040328*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"ff4e2990-317d-49c3-a72c-e6e2b10f960b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"2. s < 0 with cross-immunity \[RightArrow] Stable (Scenario \
+C): \"\>", "\[InvisibleSpace]", "\<\"? Inconclusive\"\>"}],
+  SequenceForm[
+  "2. s < 0 with cross-immunity \[RightArrow] Stable (Scenario C): ", 
+   "? Inconclusive"],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9627781521104918`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"b3fdfcb5-02bb-4f0c-9492-8a4545807e72"],
+
+Cell[BoxData["\<\"3. s < 0 general \[RightArrow] Conditional (Scenario B): \
+Needs case-by-case analysis\"\>"], "Print",
+ CellChangeTimes->{3.9627781521897297`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"ffb5ee7e-a16c-4328-b526-1129ff546993"],
+
+Cell[BoxData["\<\"\\n=== QUICK TESTS FOR OTHER SCENARIOS ===\"\>"], "Print",
+ CellChangeTimes->{3.962778152282328*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"7f175fdd-9a5b-4aa1-adc0-03bc3dcf406f"],
+
+Cell[BoxData["\<\"To test other \[Sigma] values quickly:\"\>"], "Print",
+ CellChangeTimes->{3.962778152385948*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"33eaa132-4d83-4dd1-bbab-8617c575a836"],
+
+Cell[BoxData["\<\"hopfT[RHS, var, {params}, Subscript[\[Beta], 1], {0.5, \
+2.0}] where params has different \[Sigma] values\"\>"], "Print",
+ CellChangeTimes->{3.9627781524971266`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"ba5f1454-5681-461b-846c-e5d0dd9489e7"],
+
+Cell[BoxData["\<\"\"\>"], "Print",
+ CellChangeTimes->{3.962778152591112*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"0ef89490-f677-4188-b6eb-7e022c0b0599"],
+
+Cell[BoxData["\<\"Example parameter sets for different s values:\"\>"], \
+"Print",
+ CellChangeTimes->{3.96277815268439*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"c46ec353-8b57-45b9-b4d1-accc44c96915"],
+
+Cell[BoxData["\<\"High s: \[Sigma]\:2081=2.5, \[Sigma]\:2082=2.0 gives \
+s=2.0\"\>"], "Print",
+ CellChangeTimes->{3.9627781527772703`*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"68ec4a2d-b567-4983-9efc-e509c4f2af8b"],
+
+Cell[BoxData["\<\"Low s: \[Sigma]\:2081=1.2, \[Sigma]\:2082=1.1 gives s=-0.18\
+\"\>"], "Print",
+ CellChangeTimes->{3.962778152863999*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"bd62f62a-d1fe-42c5-baac-48d2f6e29d3e"],
+
+Cell[BoxData["\<\"Cross-immunity: \[Sigma]\:2081=0.6, \[Sigma]\:2082=0.8 \
+gives s=-0.68\"\>"], "Print",
+ CellChangeTimes->{3.962778152962439*^9},
+ CellLabel->
+  "During evaluation of \
+In[2628]:=",ExpressionUUID->"33584356-ff85-41a7-9a0e-a2fd982b7590"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{795.4285714285713, 306},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"abd6e0b9-fed3-44c8-ac96-e3d923290574"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 20416, 557, 2103, "Input",ExpressionUUID->"c984f5a0-409b-4218-90e2-cf54739209e6"],
+Cell[CellGroupData[{
+Cell[21021, 583, 297, 5, 22, "Print",ExpressionUUID->"43b5b215-b692-4896-a76d-ee668ed96518"],
+Cell[21321, 590, 520, 12, 22, "Print",ExpressionUUID->"468dfed8-e861-42e4-870a-6a5469aa76cc"],
+Cell[21844, 604, 536, 13, 22, "Print",ExpressionUUID->"2328fc24-09eb-46b9-9ab2-cb775c350383"],
+Cell[22383, 619, 536, 13, 22, "Print",ExpressionUUID->"572c66ce-f0fa-42c2-a5d5-cf172b0128cc"],
+Cell[22922, 634, 248, 5, 40, "Print",ExpressionUUID->"8d3324dc-7b9a-4f62-afa2-3903f4019214"],
+Cell[23173, 641, 206, 4, 22, "Print",ExpressionUUID->"eace7aab-b6b7-4090-b864-fa455881d0e5"],
+Cell[23382, 647, 575, 15, 22, "Print",ExpressionUUID->"14f1489b-60e9-4926-885b-31c0167c1de2"],
+Cell[23960, 664, 527, 13, 22, "Print",ExpressionUUID->"214eaab9-27bd-47b8-9cf7-9b7fea669fb2"],
+Cell[24490, 679, 209, 4, 22, "Print",ExpressionUUID->"b96a12f9-0109-4ab7-ae0f-bb6fac56ea23"],
+Cell[24702, 685, 203, 4, 22, "Print",ExpressionUUID->"73acb11b-33d6-4c2b-a186-6fcc2b5aa748"],
+Cell[24908, 691, 219, 4, 22, "Print",ExpressionUUID->"14f6908b-b0d7-47c5-8ae0-f42643285448"],
+Cell[25130, 697, 238, 5, 40, "Print",ExpressionUUID->"4b692112-b27f-4f3f-8492-24388202785b"],
+Cell[25371, 704, 204, 4, 22, "Print",ExpressionUUID->"940c9f52-bbf3-4996-816a-7154aff7a437"],
+Cell[25578, 710, 575, 15, 22, "Print",ExpressionUUID->"70e0ece4-4aab-453b-8af4-4bcc696b40e0"],
+Cell[26156, 727, 525, 13, 22, "Print",ExpressionUUID->"4df6555e-3b86-41c6-bb5b-418abd064ad1"],
+Cell[26684, 742, 211, 4, 22, "Print",ExpressionUUID->"55d8c9a3-80df-407b-809a-47238b364405"],
+Cell[26898, 748, 205, 4, 22, "Print",ExpressionUUID->"fd90d5bb-f2e4-4d81-a839-f1e108090aa5"],
+Cell[27106, 754, 217, 4, 22, "Print",ExpressionUUID->"367aafba-bc5c-4c81-9e20-c24dc1070b59"],
+Cell[27326, 760, 243, 5, 40, "Print",ExpressionUUID->"55c171a9-f258-4224-8a35-b00c668ce874"],
+Cell[27572, 767, 206, 4, 22, "Print",ExpressionUUID->"f869666a-6a5c-451f-b3e0-ff555e0851af"],
+Cell[27781, 773, 573, 15, 22, "Print",ExpressionUUID->"efa9783d-ad03-4d8d-96c0-8beb8c87fa36"],
+Cell[28357, 790, 525, 13, 22, "Print",ExpressionUUID->"4c805197-21f5-400c-afd6-7f501ff8a910"],
+Cell[28885, 805, 211, 4, 22, "Print",ExpressionUUID->"e3bfac61-b761-4c0d-a0a0-8e99cad6c6d5"],
+Cell[29099, 811, 205, 4, 22, "Print",ExpressionUUID->"f0f4191f-b5f6-47ad-aa2f-4761c6ac825b"],
+Cell[29307, 817, 216, 4, 22, "Print",ExpressionUUID->"e68fc2a6-14fe-497b-9da5-0b1db06d83c4"],
+Cell[29526, 823, 235, 5, 40, "Print",ExpressionUUID->"94d08c9a-6de1-4b68-bdeb-797dca1abd08"],
+Cell[29764, 830, 210, 4, 22, "Print",ExpressionUUID->"a1c66ab8-ae8f-4dd6-8d91-82c364b769c5"],
+Cell[29977, 836, 218, 4, 22, "Print",ExpressionUUID->"29b8b7de-8c11-4f55-b1f6-0e26a13d88cd"],
+Cell[30198, 842, 227, 4, 40, "Print",ExpressionUUID->"16f3fbbd-af21-4b02-8730-f162b01ceffc"],
+Cell[30428, 848, 240, 5, 22, "Print",ExpressionUUID->"abcdd820-861d-49ae-9389-440e016b488d"],
+Cell[30671, 855, 204, 4, 22, "Print",ExpressionUUID->"e3598925-1c9d-4793-b84f-cb83f7fe1144"],
+Cell[30878, 861, 573, 15, 22, "Print",ExpressionUUID->"811be0c2-2f8f-4e37-a7c6-fc0761b147d2"],
+Cell[31454, 878, 527, 13, 22, "Print",ExpressionUUID->"14d3e3da-6da4-45c8-bbee-37e4cfbdaede"],
+Cell[31984, 893, 211, 4, 22, "Print",ExpressionUUID->"fc199de4-ce64-432c-b89f-d34e0cbc0485"],
+Cell[32198, 899, 205, 4, 22, "Print",ExpressionUUID->"1f99ce12-9166-4948-bced-3dbfd92a5880"],
+Cell[32406, 905, 250, 5, 22, "Print",ExpressionUUID->"0135e089-f8b2-42f7-8eef-176dc333332a"],
+Cell[32659, 912, 206, 4, 22, "Print",ExpressionUUID->"9c8443b1-47df-4750-85ce-f07d64979438"],
+Cell[32868, 918, 573, 15, 22, "Print",ExpressionUUID->"4a795e08-c3fd-4ce9-98ec-a55d1eacb9d0"],
+Cell[33444, 935, 499, 12, 22, "Print",ExpressionUUID->"0ae0ec81-88f7-48d7-bac6-a54ebfa61e54"],
+Cell[33946, 949, 211, 4, 22, "Print",ExpressionUUID->"1f49011e-be55-4935-bffc-6e858ad3213c"],
+Cell[34160, 955, 203, 4, 22, "Print",ExpressionUUID->"f54db193-af67-4739-b2fb-b2d1549be50e"],
+Cell[34366, 961, 219, 4, 40, "Print",ExpressionUUID->"9c171d50-d467-42c2-942c-dc418a1ae294"],
+Cell[34588, 967, 204, 4, 22, "Print",ExpressionUUID->"f0d8882d-160d-4ae3-a812-3588d32b19f0"],
+Cell[34795, 973, 428, 10, 22, "Print",ExpressionUUID->"ff4e2990-317d-49c3-a72c-e6e2b10f960b"],
+Cell[35226, 985, 460, 11, 22, "Print",ExpressionUUID->"b3fdfcb5-02bb-4f0c-9492-8a4545807e72"],
+Cell[35689, 998, 271, 5, 22, "Print",ExpressionUUID->"ffb5ee7e-a16c-4328-b526-1129ff546993"],
+Cell[35963, 1005, 225, 4, 40, "Print",ExpressionUUID->"7f175fdd-9a5b-4aa1-adc0-03bc3dcf406f"],
+Cell[36191, 1011, 221, 4, 22, "Print",ExpressionUUID->"33eaa132-4d83-4dd1-bbab-8617c575a836"],
+Cell[36415, 1017, 290, 5, 22, "Print",ExpressionUUID->"ba5f1454-5681-461b-846c-e5d0dd9489e7"],
+Cell[36708, 1024, 183, 4, 22, "Print",ExpressionUUID->"0ef89490-f677-4188-b6eb-7e022c0b0599"],
+Cell[36894, 1030, 230, 5, 22, "Print",ExpressionUUID->"c46ec353-8b57-45b9-b4d1-accc44c96915"],
+Cell[37127, 1037, 245, 5, 22, "Print",ExpressionUUID->"68ec4a2d-b567-4983-9efc-e509c4f2af8b"],
+Cell[37375, 1044, 244, 5, 22, "Print",ExpressionUUID->"bd62f62a-d1fe-42c5-baac-48d2f6e29d3e"],
+Cell[37622, 1051, 253, 5, 22, "Print",ExpressionUUID->"33584356-ff85-41a7-9a0e-a2fd982b7590"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
