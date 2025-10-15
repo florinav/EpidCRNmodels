@@ -1,13 +1,6 @@
 (* ::Package:: *)
 
-(* EpidCRN Core Subpackage - Basic network analysis and utilities *)
-BeginPackage["EpidCRN`Core`"];
-
-(* ========================================================================= *)
-(* CORE UTILITIES - Reaction parsing and species extraction *)
-(* ========================================================================= *)
-
-
+BeginPackage["EpidCRN`"];
 Begin["`Private`"];
 
 (* ========================================================================= *)
@@ -81,46 +74,163 @@ compToAsso[side_] := Module[{coeffs},
     If[StringQ[side], coeffs[side] = 1]]];
   coeffs];
 
+
+
+cons[gamma_, cp_: {}] := Module[{
+  nullSpace, positiveConservationLaws, constraints},
+  
+  (* Find the left nullspace of gamma (vectors w such that w.gamma = 0) *)
+  nullSpace = Quiet[NullSpace[Transpose[gamma]]];
+  
+  If[nullSpace === {} || nullSpace === $Failed,
+    (* No conservation laws *)
+    {},
+    
+    (* If gamma is numeric, filter for positive conservation laws *)
+    If[MatrixQ[gamma, NumericQ],
+      (* Numeric case: select positive vectors *)
+      positiveConservationLaws = Select[nullSpace,
+        AllTrue[#, # >= 0 &] && AnyTrue[#, # > 0 &] &
+      ];
+      
+      (* If no positive ones found, try negation *)
+      If[Length[positiveConservationLaws] == 0,
+        positiveConservationLaws = Select[nullSpace,
+          AllTrue[-#, # >= 0 &] && AnyTrue[-#, # > 0 &] &
+        ];
+        positiveConservationLaws = -# & /@ positiveConservationLaws;
+      ];
+      
+      positiveConservationLaws,
+      
+      (* Symbolic case: return nullspace basis, user applies constraints cp *)
+      (* The constraints cp can be used with Reduce/Solve to find positive parametrization *)
+      If[cp === {},
+        nullSpace,
+        (* Apply constraints if provided *)
+        constraints = Join[Flatten[Thread[# >= 0] & /@ nullSpace], cp];
+        {nullSpace, constraints}
+      ]
+    ]
+  ]
+];
+(* Numeric matrix - automatic positive parametrization 
+cons[{{-1, 1, 0}, {0, -1, 1}}]*)
+(* Returns positive conservation vectors *)
+
+(* Symbolic matrix - returns basis 
+cons[{{-a, b, 0}, {0, -c, d}}]*)
+(* Returns nullspace basis for user to parametrize *)
+
+(* Symbolic matrix with constraints 
+cons[{{-a, b, 0}, {0, -c, d}}, {a > 0, b > 0, c > 0, d > 0}]*)
+(* Returns {nullspace, constraints} for Reduce/Solve *)
+
+
 (* Main extMat function *)
 extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
   numReactions, numSpecies, reactants, products, 
   var, rv, tk, complexes, linkageClasses, deficiency,
-  defFormula, defTerms, defResult, Nc, l, s, leftSide, rightSide},
+  defFormula, defTerms, defResult, Nc, l, s, leftSide, rightSide,
+  compToAssoLocal, expMLocal,mSi},
+  
+  (* Local helper function to convert compound expressions to associations *)
+  compToAssoLocal = Function[{expr},
+    Module[{terms, result},
+      If[expr === 0 || expr === Null,
+        Association[], (* Empty association for zero or null *)
+        terms = If[Head[expr] === Plus, List @@ expr, {expr}];
+        result = Association[];
+        Do[
+          Which[
+            Head[term] === Times && Length[term] >= 2 && NumericQ[First[term]],
+            (* Handle cases like 2*A *)
+            result[Last[term]] = First[term],
+            Head[term] === Times,
+            (* Handle cases like A*B (coefficient 1) *)
+            result[term] = 1,
+            True,
+            (* Handle single species *)
+            result[term] = 1
+          ];
+        , {term, terms}];
+        result
+      ]
+    ]
+  ];
+  
+  (* Local helper function for exponential matrix *)
+  expMLocal = Function[{vars, matrix},
+    Module[{},
+      If[Length[vars] == 0 || Length[matrix] == 0,
+        ConstantArray[1, Length[matrix]],
+        (* Create the exponential terms *)
+        Table[
+          If[Length[vars] > 0 && Length[matrix[[j]]] > 0,
+            Product[
+              If[matrix[[j, i]] == 0, 1, vars[[i]]^matrix[[j, i]]], 
+              {i, Length[vars]}
+            ],
+            1
+          ],
+          {j, Length[matrix]}
+        ]
+      ]
+    ]
+  ];
   
   (* Extract species *)
-  spe = Module[{allSpecies, reactants, products}, 
-    allSpecies = {};
+  spe = Module[{allSpecies = {}}, 
     Do[
-      If[Head[reactions[[i]]] === Rule,
-        leftSide = First[reactions[[i]]];
-        rightSide = Last[reactions[[i]]],
-        leftSide = reactions[[i, 1]];
-        rightSide = reactions[[i, 2]]
+      (* Handle different input formats *)
+      {leftSide, rightSide} = Which[
+        Head[reactions[[i]]] === Rule, 
+        {reactions[[i, 1]], reactions[[i, 2]]},
+        Head[reactions[[i]]] === List && Length[reactions[[i]]] >= 2,
+        {reactions[[i, 1]], reactions[[i, 2]]},
+        True,
+        (Print["Warning: Unrecognized reaction format at position ", i]; 
+         Continue[])
       ];
-      reactants = compToAsso[leftSide];
-      products = compToAsso[rightSide];
+      
+      reactants = compToAssoLocal[leftSide];
+      products = compToAssoLocal[rightSide];
       allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
     , {i, Length[reactions]}];
     DeleteDuplicates[allSpecies]
   ];
   
+  (* Check if species were found *)
+  If[Length[spe] == 0,
+    Print["Error: No species found in reactions"];
+    Return[$Failed]
+  ];
+  
   numSpecies = Length[spe];
   numReactions = Length[reactions];
   
-  (* Build stoichiometric matrices *)
-  al = Table[0, {numSpecies}, {numReactions}];
-  be = Table[0, {numSpecies}, {numReactions}];
+  (* Initialize stoichiometric matrices *)
+  al = ConstantArray[0, {numSpecies, numReactions}];
+  be = ConstantArray[0, {numSpecies, numReactions}];
   
+  (* Build stoichiometric matrices *)
   Do[
-    If[Head[reactions[[j]]] === Rule,
-      leftSide = First[reactions[[j]]];
-      rightSide = Last[reactions[[j]]],
-      leftSide = reactions[[j, 1]];
-      rightSide = reactions[[j, 2]]
+    (* Handle different input formats *)
+    {leftSide, rightSide} = Which[
+      Head[reactions[[j]]] === Rule,
+      {reactions[[j, 1]], reactions[[j, 2]]},
+      Head[reactions[[j]]] === List && Length[reactions[[j]]] >= 2,
+      {reactions[[j, 1]], reactions[[j, 2]]},
+      True,
+      (Print["Warning: Unrecognized reaction format at position ", j]; 
+       Continue[])
     ];
-    reactants = compToAsso[leftSide];
-    products = compToAsso[rightSide];
+    
+    reactants = compToAssoLocal[leftSide];
+    products = compToAssoLocal[rightSide];
+    
+    (* Fill in the matrices *)
     Do[
       If[KeyExistsQ[reactants, spe[[i]]], 
         al[[i, j]] = reactants[spe[[i]]]];
@@ -129,46 +239,60 @@ extMat[reactions_] := Module[{
     , {i, numSpecies}];
   , {j, numReactions}];
   
+  (* Calculate derived matrices and terms *)
   gamma = be - al;
-  var = ToExpression[spe];
-  rv = expM[var, al // Transpose];
-  tk = Array[Symbol["k" <> ToString[#]] &, numReactions];
+  
+  (* Convert species to variables more safely *)
+  var = Table[ToExpression[ToString[spe[[i]]]], {i, Length[spe]}];
+  
+  (* Calculate reaction rates *)
+  rv = expMLocal[var, Transpose[al]];
+  tk = Table[Symbol["k" <> ToString[j]], {j, numReactions}];
   Rv = tk*rv;
   RHS = gamma . Rv;
   
-  (* Deficiency calculation *)
-  complexes = Module[{complexList},
-    complexList = {};
+  (* Calculate complexes for deficiency *)
+  complexes = Module[{complexList = {}},
     Do[
-      If[Head[reactions[[i]]] === Rule,
-        leftSide = First[reactions[[i]]];
-        rightSide = Last[reactions[[i]]],
-        leftSide = reactions[[i, 1]];
-        rightSide = reactions[[i, 2]]
+      {leftSide, rightSide} = Which[
+        Head[reactions[[i]]] === Rule,
+        {reactions[[i, 1]], reactions[[i, 2]]},
+        Head[reactions[[i]]] === List && Length[reactions[[i]]] >= 2,
+        {reactions[[i, 1]], reactions[[i, 2]]},
+        True,
+        Continue[]
       ];
-      If[!MemberQ[complexList, leftSide], AppendTo[complexList, leftSide]];
-      If[!MemberQ[complexList, rightSide], AppendTo[complexList, rightSide]];
+      
+      If[!MemberQ[complexList, leftSide], 
+        AppendTo[complexList, leftSide]];
+      If[!MemberQ[complexList, rightSide], 
+        AppendTo[complexList, rightSide]];
     , {i, Length[reactions]}];
     complexList
   ];
   
+  (* Deficiency calculation *)
   Nc = Length[complexes];
-  l = 1; (* Simplified - would need proper linkage class calculation *)
-  s = If[gamma == {}, 0, MatrixRank[gamma]];
+  l = 1; (* Simplified linkage class calculation *)
+  s = Which[
+    gamma === {}, 0,
+    AllTrue[Flatten[gamma], # == 0 &], 0,
+    True, MatrixRank[gamma]
+  ];
   
+  (* Format deficiency results *)
   defFormula = "\[Delta] = Nc - \[ScriptL] - s";
-  defTerms = StringJoin[
-    "Nc = ", ToString[Nc], " (complexes), ",
-    "\[ScriptL] = ", ToString[l], " (linkage classes), ", 
-    "s = ", ToString[s], " (stoich dimension)"
-  ];
-  defResult = StringJoin[
-    "\[Delta] = ", ToString[Nc], " - ", ToString[l], " - ", ToString[s], 
-    " = ", ToString[Nc - l - s]
-  ];
-  
-  {spe, al, be, gamma, Rv, RHS, {defFormula, defTerms, defResult}}
+  defTerms = "Nc = " <> ToString[Nc] <> " (complexes), " <>
+             "\[ScriptL] = " <> ToString[l] <> " (linkage classes), " <> 
+             "s = " <> ToString[s] <> " (stoich dimension)";
+  defResult = "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <> 
+              " - " <> ToString[s] <> " = " <> ToString[Nc - l - s];
+  mSi = minSiph[spe, asoRea[reactions]];
+  (* Return results *)
+  {spe, al, be, gamma, Rv, RHS, mSi, 
+  {defFormula, defTerms, defResult}}
 ];
+
 
 (* Other core functions *)
 extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
@@ -180,7 +304,7 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
    , {i, Length[reactions]}];
   DeleteDuplicates[allSpecies]];
 
-convertReactionFormat[reactions_] := Module[{converted},
+arrow2pairReac[reactions_] := Module[{converted},
   If[Length[reactions] == 0, Return[{}]];
   If[Head[reactions[[1]]] === Rule,
     converted = Table[
@@ -191,6 +315,7 @@ convertReactionFormat[reactions_] := Module[{converted},
     Return[reactions]
   ]
 ];
+
 
 asoRea[RN_]:=Module[{parseSide,extractSpecies},
   extractSpecies[expr_]:=Module[{terms,species},
@@ -204,6 +329,8 @@ asoRea[RN_]:=Module[{parseSide,extractSpecies},
     DeleteDuplicates[species]];
   parseSide[expr_]:=extractSpecies[expr];
   Map[Function[r,Association["Substrates"->parseSide[r[[1]]],"Products"->parseSide[r[[2]]]]],RN]];
+
+
 
 stoichiometricMatrices[reactions_] := Module[{
   species, numReactions, numSpecies, 
@@ -252,7 +379,9 @@ reaToRHS[reactions_] := Module[{alpha, beta, gamma, species, var, rv, tk, Rv, RH
 ];
 
 expM=Inner[OperatorApplied[Power],#2,#1,Times]&;
-
+(*Basic parameter extraction*)
+Par[RHS_,X_]:=Complement[Variables[RHS],X];
+(*Par[{a*x+b*y,c*x+d*y},{x,y}] returns {a,b,c,d}*)
 End[];
 EndPackage[];
 (*Testing example-uncomment to test core package*)

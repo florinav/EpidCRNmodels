@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+
+\section*{Suggestions for EpidCRN Package}
+
+\begin{itemize}
+  \item \textbf{Species Format:} Ensure consistent use of strings vs. symbols across modules. If strings like "S1" are required for compatibility, verify that all helper functions (e.g., \texttt{compToAsso}) handle them correctly.
+
+  \item \textbf{Function Isolation:} Check that each submodule (e.g., matrix builders, rate evaluators) has no hidden dependencies on global variables or context from \texttt{EpidCRNo}.
+
+  \item \textbf{Evaluation Order:} Use \texttt{Trace[]} or \texttt{Echo[]} to inspect how expressions like \texttt{ToExpression[spe]} behave after modularization.
+
+  \item \textbf{Shape Errors:} Confirm that \texttt{spe}, \texttt{al}, \texttt{be}, and \texttt{gamma} are all populated correctly before computing \texttt{RHS}. Use \texttt{Dimensions[]} to verify matrix shapes.
+
+  \item \textbf{Legacy Compatibility:} If older notebooks rely on implicit context or symbol definitions, consider adding a wrapper that normalizes reaction formats before passing to \texttt{extMat}.
+
+  \item \textbf{Testing:} Create a minimal test notebook that loads only \texttt{EpidCRN.wl} and runs \texttt{extMat[]} on a simple reaction list. Compare output with legacy behavior.
+
+  \item \textbf{Documentation:} Add brief usage notes to each module header to clarify expected input formats and dependencies.
+
+\end{itemize}
+
+\end{document}

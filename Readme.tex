@@ -1,8 +1,9 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amsfonts,amssymb}
-\usepackage{listings}
-\usepackage{xcolor}
+\usepackage{listings,import}
+\input{AAdef}
+\usepackage{xcolor,tcolorbox}
 \usepackage{geometry}
 \geometry{margin=1in}
 
@@ -16,189 +17,687 @@
     frame=single
 }
 
-\title{EpidCRN Package Documentation}
-\author{Context File for AI Assistant}
+\title{EpidCRN Package Complete Documentation}
+\author{Complete Reference Guide}
 \date{\today}
 
 \begin{document}
 
 \maketitle
+\tableofcontents
 
 \section{Package Overview}
 
-\textbf{EpidCRN} is a Mathematica package for epidemiological models, which uses Chemical Reaction Network Theory (CRNT) methods. It  aims to analyze  models with unique disease-free boundary fixed point (DFE), possibly  multi-strain (ie. with other boundary fixed points besides the DFE), and with unique positive fixed point (endemic).
+\textbf{EpidCRN} is a Mathematica package for epidemiological models (ME), which uses Chemical Reaction Network Theory (CRNT) methods. It aims to analyze models with unique disease-free boundary fixed point (DFE), possibly multi-strain (ie. with other boundary fixed points besides the DFE), and with unique positive fixed point (endemic).
+
+Our object of study are models with possibly several boundary fixed points (or minimal siphons, in CRN terminology), which we call multi-strain, the focus of our package is somewhat different than that of other similar packages; in particular, a major concern is the flexibility of operating symbolically whenever this is possible (this is a major concern in ME).
 
 \section{Package Structure}
 
 \subsection{Modular Organization}
-The package is split into subpackages to reduce monolithic complexity:
+The package is split into subpackages:
 
-\begin{itemize}
-\item \texttt{EpidCRN.wl} - Main loader package
+\begin{enumerate}
+\item \texttt{EpidCRN.wl} - Main loader package, which contains all the usage statements. The following subpackages are all in the same directory with the loader.
 \item \texttt{Core.wl} - Basic network analysis (\texttt{EpidCRN`Core`})
 \item \texttt{CRNT.wl} - Chemical reaction network theory (\texttt{EpidCRN`CRNT`})
 \item \texttt{Boundary.wl} - NGM and boundary analysis (\texttt{EpidCRN`Boundary`})
 \item \texttt{Bifurcation.wl} - Hopf bifurcations and parameter scanning (\texttt{EpidCRN`Bifurcation`})
 \item \texttt{Siphons.wl} - Siphon and persistence analysis (\texttt{EpidCRN`Siphons`})
 \item \texttt{Utils.wl} - Utility functions (\texttt{EpidCRN`Utils`})
-\end{itemize}
+\item \texttt{Visualization.wl} - (\texttt{EpidCRN`Visualization`})
+\end{enumerate}
 
 \subsection{Dependency Chain}
 \texttt{Core} $\rightarrow$ \texttt{CRNT} $\rightarrow$ \texttt{Boundary} $\rightarrow$ \texttt{Bifurcation} $\rightarrow$ \texttt{Siphons}
 
-\section{Key Functions by Category}
+\section{Fundamental Functions Reference}
 
 \subsection{Core Functions (EpidCRN`Core`)}
 
-\begin{itemize}
-\item \texttt{extMat[reactions]} - Master function extracting \{species, $\alpha$, $\beta$, $\gamma$, $R_v$, RHS, deficiency\}
-\item \texttt{compToAsso[side]} - Parses reaction side to association of species $\rightarrow$ coefficients
-\item \texttt{extSpe[reactions]} - Extracts species list
-\item \texttt{asoRea[RN]} - Converts to association format with "Substrates"/"Products" keys
-\end{itemize}
+\subsubsection{extMat[reactions]}
+Master function extracting network structure.
+
+\textbf{Returns:} \{species, $\alpha$, $\beta$, $\gamma$, $R_v$, RHS, deficiency\}
+\begin{enumerate}
+\item \textbf{species}: List of species names as strings
+\item $\alpha$: Reactant stoichiometric matrix
+\item $\beta$: Product stoichiometric matrix
+\item $\gamma$: Net stoichiometric matrix ($\beta - \alpha$)
+\item $R_v$: Rate vector template
+\item \textbf{RHS}: Right-hand side of ODE system
+\item \textbf{deficiency}: Network deficiency information
+\end{enumerate}
+
+\subsubsection{asoRea[RN]}
+Converts reaction network to association format.
+
+\textbf{Input:} \texttt{RN = \{"s"+"i"->2"i", "i"->"r", "r"->"s"\}}\\
+\textbf{Returns:} Association with "Substrates"/"Products" keys
+
+\subsubsection{compToAsso[side]}
+Parses reaction side to association of species $\rightarrow$ coefficients.
+
+\subsubsection{extSpe[reactions]}
+Extracts species list from reaction network.
+
+\subsection{Siphon Analysis (EpidCRN`Siphons`)}
+
+\subsubsection{minSiph[species, asoReactions]}
+\textbf{CRITICAL FUNCTION:} Computes minimal siphons (sets of species that become zero at DFE).
+
+\textbf{Input:}
+\begin{enumerate}
+\item \texttt{species}: List of species names as strings
+\item \texttt{asoReactions}: Output of \texttt{asoRea[RN]}
+\end{enumerate}
+
+\textbf{Returns:} List of lists of species names as strings\\
+\textbf{Example:} \texttt{\{\{"x2"\}, \{"B1","S1"\}, \{"B2","S2"\}\}}
+
+\begin{verbatim}
+{spe, al, be, gam, Rv, RHS, def} = extMat[RN];
+mS = minSiph[spe, asoRea[RN]];
+(* mS contains variable names, NOT indices *)
+\end{verbatim}
+
+\textbf{Critical Note:} \texttt{minSiph} returns variable names as strings. Do NOT convert to indices in downstream functions.
 
 \subsection{CRNT Functions (EpidCRN`CRNT`)}
 
-\begin{itemize}
-\item \texttt{getComE[RN]} - Extracts \{complexes, edges\} from reaction network
-\item \texttt{IaFHJ[vertices, edges]} - Incidence matrix analysis, returns \{matrix, tableForm\}
-\item \texttt{IkFHJ[vertices, edges, rates]} - Ik matrix (n\_reactions $\times$ n\_complexes)
-\item \texttt{lapK[RN, rates]} - Laplacian matrix computation
-\item \texttt{SpeComInc[complexes, species]} - Species-complex incidence matrix
-\end{itemize}
-
-\subsection{Boundary Analysis (EpidCRN`Boundary`)}
-
-\begin{itemize}
-\item \texttt{NGM[mod, inf]} - Next Generation Matrix analysis
-\item \texttt{bd1[RN, rts]} - Single strain boundary analysis (DFE + 1 endemic)
-\item \texttt{bd2[RN, rts]} - Two strain analysis (DFE + 2 boundary + 1 coexistence)
-\item \texttt{DFE[mod, inf]} - Disease-Free Equilibrium computation
-\item \texttt{mRts[RN, ks]} - Mass action rates with parameter names
-\end{itemize}
-
-\subsection{Bifurcation Analysis (EpidCRN`Bifurcation`)}
-
-\begin{itemize}
-\item \texttt{fpHopf[RHS, var, par, p0val]} - Fixed point finder with Hopf analysis, returns angle = ArcTan[Re/Im]*180/Pi
-\item \texttt{simpleOptHopf[RHS, var, par, coP, optInd, numTries]} - Simple random search optimization for Hopf bifurcations
-\item \texttt{optHopf[RHS, var, par, coP, optInd, timeLimit, method, accGoal, precGoal, maxIter]} - Sophisticated NMaximize-based Hopf optimization
-\item \texttt{cont[RHS, var, par, p0val, stepSize, plotInd, bifInd, analyticalPlot]} - Continuation analysis with overlay capability
-\item \texttt{hopfD[curve]} - Hopf bifurcation detection from continuation curve data
-\item \texttt{scanPar[RHS, var, par, p0val, plotInd, gridRes, plot, ...]} - Comprehensive parameter space scanning with equilibrium classification
-\item \texttt{pertIC[equilibrium, var, factor, minq, n]} - Generate perturbed initial conditions
-\item \texttt{TS[RHS, var, par, p0val, tmax]} - Time series simulation using NDSolve
-\item \texttt{intEq[RHS, var, par, p0val, att]} - Interactive equilibrium finding with perturbations
-\end{itemize}
-
-\section{Critical Workflows}
-
-\subsection{Laplacian Matrix Construction}
-For "invasion CRN" (network projected on classes that become 0 at DFE):
+\subsubsection{getComE[RN\_List]}
+Extract complexes and edges from reaction network.
 
 \begin{lstlisting}
-{complexes, edges} = getComE[RN];
-incidenceMatrix = IaFHJ[complexes, edges][[1]];
-ikMatrix = IkFHJ[complexes, edges, rates];
-laplacian = ikMatrix; (* or incidenceMatrix . ikMatrix *)
+getComE[RN_List] := Module[{complexes, edges},
+  complexes = {};
+  edges = {};
+  Do[
+    Module[{left, right},
+      left = RN[[i, 1]];
+      right = RN[[i, 2]];
+      If[! MemberQ[complexes, left], AppendTo[complexes, left]];
+      If[! MemberQ[complexes, right], AppendTo[complexes, right]];
+      AppendTo[edges, {left, right}];
+    ],
+    {i, Length[RN]}
+  ];
+  {complexes, edges}
+];
 \end{lstlisting}
 
-\subsection{Boundary Analysis Pipeline}
-\begin{lstlisting}
-(* Single strain *)
-result1 = bd1[RN, rates];
-{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1} = result1;
+\textbf{Input:} Reaction network as list of \{left, right\} pairs\\
+\textbf{Returns:} \texttt{\{complexes, edges\}}\\
+\textbf{Example:} \texttt{getComE[\{\{a,b\},\{b,c\},\{c,a\}\}]} $\rightarrow$ \texttt{\{\{a, b, c\}, \{\{a, b\}, \{b, c\}, \{c, a\}\}\}}
 
-(* Two strain *)
-result2 = bd2[RN, rates];
-{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1t, E2t} = result2;
-\end{lstlisting}
-
-\subsection{Hopf Bifurcation Detection}
-For detecting Hopf bifurcations through parameter optimization:
-
-\begin{lstlisting}
-(* Simple approach - random search *)
-{bestAngle, bestValues, finalP0Val} =
-  simpleOptHopf[RHS, var, par, coP, {3,4}, 50];
-
-(* Sophisticated approach - NMaximize *)
-{bestAngle, bestValues, finalP0Val} =
-  optHopf[RHS, var, par, coP, {3,4}, 120, "NelderMead", 4, 4, 500];
-
-(* Angle interpretation: negative = stable focus, positive = Hopf *)
-\end{lstlisting}
-
-\subsection{Continuation Analysis}
-For tracking equilibria along parameter paths:
+\subsubsection{IaFHJ[vert\_, edg\_]}
+Incidence matrix analysis for FHJ graphs.
 
 \begin{lstlisting}
-(* Basic continuation along parameter 4 *)
-curve = cont[RHS, var, par, p0val, 0.01, {3,4}, 4, None];
-
-(* With analytical plot overlay *)
-curve = cont[RHS, var, par, p0val, 0.01, {3,4}, 4, analyticalPlot];
-
-(* Detect Hopf points from continuation curve *)
-hopfPoints = hopfD[curve];
+IaFHJ[vert_, edg_] := Module[{gg, oU, taF},
+  gg[a_, b_] := Which[
+    a === b[[1]], -1,
+    a === b[[2]], 1,
+    True, 0
+  ];
+  oU = Table[
+    gg[vert[[i]], edg[[j]]],
+    {i, Length[vert]},
+    {j, Length[edg]}
+  ];
+  taF = TableForm[
+    oU,
+    TableHeadings -> {vert, edg},
+    TableAlignments -> {Right, Top}
+  ];
+  {oU, taF}
+];
 \end{lstlisting}
 
-\subsection{Parameter Space Scanning}
-For comprehensive equilibrium classification:
+\textbf{Input:} Vertices and edges lists\\
+\textbf{Returns:} \texttt{\{matrix (n\_complexes $\times$ n\_reactions), tableForm\}}
+
+\subsubsection{IkFHJ[vert\_, edg\_, tk\_]}
+Ik matrix computation for FHJ analysis.
 
 \begin{lstlisting}
-(* Grid mode scanning *)
-{plot, errors, results} = scanPar[RHS, var, par, p0val, {1,2},
-  30, Automatic, 0.01, 1/20, 0.5, 0.5, R01, R02, R21, R12];
-
-(* Range mode scanning *)
-{plot, errors, results} = scanPar[RHS, var, par, p0val, {1,2},
-  Automatic, basePlot, 0.01, 0.05, 1.0, 1.0, R01, R02, R21, R12];
+IkFHJ[vert_, edg_, tk_] := Module[{tri, gg, oU},
+  tri = MapThread[Append, {edg, tk}];
+  gg[a_, b_] := Which[
+    a === b[[1]], b[[3]],
+    a === b[[2]], 0,
+    True, 0
+  ];
+  oU = Table[
+    gg[vert[[i]], tri[[j]]],
+    {i, Length[vert]},
+    {j, Length[tri]}
+  ] // Transpose
+];
 \end{lstlisting}
 
-\section{Important Implementation Details}
+\textbf{Input:} Vertices, edges, and rate constants\\
+\textbf{Returns:} Matrix (n\_reactions $\times$ n\_complexes)
 
-\subsection{Function Compatibility Issues}
-\begin{itemize}
-\item \texttt{IaFHJ} and \texttt{IkFHJ} use \texttt{Table[gg[vert[[i]], edg[[j]]], ...]} NOT \texttt{Outer[gg, vert, edg]} due to Part specification errors
-\item Functions expect exact expression matching using \texttt{===} operator
-\item Species can be strings ("S1"), expressions ("I1" + "S1"), or symbols depending on context
-\end{itemize}
+\subsubsection{SpeComInc[spec\_, comp\_]}
+Species-complex incidence matrix.
 
-\subsection{Data Format Standards}
-\begin{itemize}
-\item Reactions: \texttt{\{\{leftSide, rightSide\}, ...\}} or \texttt{\{leftSide -> rightSide, ...\}}
-\item Species: List of strings \texttt{\{"S1", "I1", "I2"\}}
-\item Rates: List parallel to reactions \texttt{\{k1, k2, k3\}}
-\item Returns: Most functions return lists, not associations (user preference)
-\end{itemize}
+\begin{lstlisting}
+SpeComInc[spec_, comp_] := Coefficient[#, spec] & /@ comp;
+\end{lstlisting}
 
-\section{Key Concepts}
+\textbf{Input:} Species list and complexes list\\
+\textbf{Returns:} Coefficient matrix\\
+\textbf{Example:} \texttt{SpeComInc[\{x, y\}, \{x + y, 2 x, y\}]} $\rightarrow$ \texttt{\{\{1, 1\}, \{2, 0\}, \{0, 1\}\}}
 
-\subsection{Invasion Species}
-Species that become zero at Disease-Free Equilibrium, typically infection classes. Found using \texttt{minSiph[species, asoRea[RN]]}.
+\subsubsection{lapK[RN\_, rates\_]}
+Main Laplacian computation function.
 
-\subsection{Boundary Analysis Types}
-\begin{itemize}
-\item \texttt{bd1}: Single strain - expects DFE and one endemic equilibrium
-\item \texttt{bd2}: Two strain - expects DFE, two boundary points, one coexistence equilibrium
-\end{itemize}
+\begin{lstlisting}
+lapK[RN_, rates_] := Module[{complexes, edges, laplacian},
+  {complexes, edges} = getComE[RN];
+  laplacian = IkFHJ[complexes, edges, rates];
+  laplacian
+];
+\end{lstlisting}
+
+\textbf{Input:} Reaction network and rate constants\\
+\textbf{Returns:} Laplacian matrix (n\_complexes $\times$ n\_complexes)
+
+\section{Boundary Analysis Functions}
+
+\subsection{NGM[mod, inf]}
+Next Generation Matrix analysis.
+
+\textbf{Input:}
+\begin{enumerate}
+\item \texttt{mod}: \texttt{\{RHS, var, par\}}
+\item \texttt{inf}: List of infected compartment indices
+\end{enumerate}
+
+\textbf{Returns:} \texttt{\{Jx, Jy, ..., K, ...\}} where \texttt{K = ngm[[4]]} is the transmission matrix
+
+\subsection{Current Session Work: Enhanced Boundary Analysis Modules}
+
+\subsubsection{bdAn[RN, rts] - Simplified Analysis Module}
+Core analysis without boundary fixed point computation.
+
+\begin{lstlisting}
+bdAn[RN_, rts_] := Module[{
+    spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct,
+    mSi, mSiIndices, inf, mod, K, eig, R0A, cDFE, RDFE, eq0, var0, E0,
+    Jx, Jy, eigenSystem, eigenvals, eigenvecs, nonzeroIndices,
+    relevantEigenvals, strainAssociation, sortedPairs, mSiNGM,
+    ngm
+   },
+
+   {spe, al, be, gam, Rv, RHS, def} = extMat[RN];
+   var = ToExpression[spe];
+   RHS = gam . rts;
+   par = Par[RHS, var];
+   cp = Thread[par > 0];
+   cv = Thread[var >= 0];
+   ct = Join[cp, cv];
+
+   (* Direct assignment - mSi contains variable names as strings *)
+   mSi = minSiph[spe, asoRea[RN]];
+   mSiIndices = Map[Flatten[Position[spe, #] & /@ #] &, mSi]; (* Indices for NGM *)
+   inf = Union[Flatten[mSiIndices]];
+
+   (* Compute DFE *)
+   cDFE = Flatten[Thread[ToExpression[#] -> 0] & /@ mSi];
+   RDFE = RHS /. cDFE;
+   eq0 = Thread[RDFE == 0];
+   var0 = Complement[var, var[[inf]]];
+   E0 = Join[Solve[eq0, var0] // Flatten, Thread[var[[inf]] -> 0]];
+
+   (* Compute NGM *)
+   mod = {RHS, var, par};
+   ngm = NGM[mod, inf];
+   Jx = ngm[[1]] // FullSimplify;
+   Jy = ngm[[5]] // FullSimplify;
+   K = ngm[[4]] // FullSimplify;
+
+   (* Get eigenvalues and organize by strain *)
+   eigenSystem = Eigensystem[K];
+   eigenvals = eigenSystem[[1]];
+   eigenvecs = eigenSystem[[2]];
+   nonzeroIndices = {};
+   Do[If[eigenvals[[i]] =!= 0, AppendTo[nonzeroIndices, i]],
+      {i, Length[eigenvals]}];
+
+   If[Length[nonzeroIndices] > 0,
+    relevantEigenvals = eigenvals[[nonzeroIndices]];
+    mSiNGM = Table[Flatten[Table[Position[inf, mSiIndices[[i]][[j]]][[1,1]],
+      {j, Length[mSiIndices[[i]]]}]], {i, Length[mSiIndices]}];
+    strainAssociation = Table[Module[{strain1Nonzeros, strain2Nonzeros, evec},
+       evec = eigenvecs[[nonzeroIndices[[i]]]];
+       strain1Nonzeros = Count[evec[[mSiNGM[[1]]]], Except[0]];
+       strain2Nonzeros = Count[evec[[mSiNGM[[2]]]], Except[0]];
+       If[strain1Nonzeros > strain2Nonzeros, 1,
+        If[strain2Nonzeros > strain1Nonzeros, 2, i]]],
+       {i, Length[relevantEigenvals]}];
+    sortedPairs = Sort[Transpose[{strainAssociation, relevantEigenvals}]];
+    R0A = sortedPairs[[All, 2]];,
+    R0A = {};];
+
+   {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A}
+]
+\end{lstlisting}
+
+\textbf{Returns:} \texttt{\{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A\}}
+
+\section{bdFp Module Usage Guide}
+
+\subsection{Purpose}
+\texttt{bdFp} computes boundary fixed points on siphon facets for epidemic models, separating rational solutions from algebraic ones and providing scalar elimination equations for non-rational cases.
+
+\subsection{Syntax}
+\begin{lstlisting}
+bdfpT = bdFp[RHS, var, mSi]
+\end{lstlisting}
+
+\subsection{Parameters}
+
+\subsubsection{Required Inputs}
+\begin{enumerate}
+\item \textbf{RHS}: Right-hand side vector of the ODE system (from \texttt{bdAn})
+\item \textbf{var}: List of all variables as symbols (from \texttt{bdAn})
+\item \textbf{mSi}: Minimal siphons as variable names (strings) (from \texttt{bdAn})
+\end{enumerate}
+
+\subsection{Output Format}
+Returns a list of pairs, one for each siphon facet:
+\begin{lstlisting}
+{
+  {rationalSols1, scalarEq1},
+  {rationalSols2, scalarEq2},
+  ...
+}
+\end{lstlisting}
+
+\subsubsection{Output Components}
+\begin{enumerate}
+\item \textbf{rationalSols}: List of rational solutions (rules like \texttt{\{x -> value, y -> value\}})
+\item \textbf{scalarEq}:
+\begin{enumerate}
+\item \texttt{None} if all solutions are rational
+\item Factored polynomial equation if non-rational solutions exist
+\item \texttt{"froze"} if computation timed out
+\end{enumerate}
+\end{enumerate}
+
+\subsection{Example Usage}
+
+\subsubsection{Basic Usage}
+\begin{lstlisting}
+(* Get core analysis first *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = bdAn[RN, rts];
+
+(* Compute boundary fixed points *)
+bdfpT = bdFp[RHS, var, mSi];
+
+(* Extract results for each facet *)
+facet1Results = bdfpT[[1]];  (* {rationalSols, scalarEq} for first siphon *)
+facet2Results = bdfpT[[2]];  (* {rationalSols, scalarEq} for second siphon *)
+\end{lstlisting}
+
+\subsubsection{Accessing Results}
+\begin{lstlisting}
+(* Get rational solutions for facet 1 *)
+rationalSols1 = bdfpT[[1]][[1]];
+
+(* Get scalar equation for facet 1 (if any) *)
+scalarEq1 = bdfpT[[1]][[2]];
+
+(* Check if facet has only rational solutions *)
+If[bdfpT[[2]][[2]] === None,
+  Print["Facet 2 has only rational solutions"],
+  Print["Facet 2 has algebraic solutions satisfying: ", bdfpT[[2]][[2]]]
+];
+\end{lstlisting}
+
+\subsection{Example Output}
+
+\subsubsection{Console Output}
+\begin{verbatim}
+bdFp finds the fixed points on siphon facets are
+fps on siphon facet {i1} are {{i_2->0, s->\Lambda/(\mu+\rho), v_1->(\Lambda\rho)/(\mu(\mu+\rho))}},
+and 2 more fps satisfying the scalar equation i_2^2(\beta_v\gamma_2 + \mu)(\beta_2 i_2 - \Lambda + \mu) == 0
+fps on siphon facet {i2} are {{rational solution 1}, {rational solution 2}}
+\end{verbatim}
+
+\subsubsection{Return Value}
+\begin{lstlisting}
+{
+  {
+    {{i_2->0, s->\Lambda/(\mu+\rho), v_1->(\Lambda\rho)/(\mu(\mu+\rho))}},
+    i_2^2(\beta_v\gamma_2 + \mu)(\beta_2 i_2 - \Lambda + \mu) == 0
+  },
+  {
+    {{solution1}, {solution2}},
+    None
+  }
+}
+\end{lstlisting}
+
+\subsection{Interpretation Guide}
+
+\subsubsection{Rational Solutions}
+\begin{enumerate}
+\item Direct algebraic expressions in terms of parameters
+\item Can be used immediately for analysis
+\item Represent equilibria with explicit formulas
+\end{enumerate}
+
+\subsubsection{Scalar Equations}
+\begin{enumerate}
+\item Factored polynomial constraints for non-rational solutions
+\item Polynomial degree indicates number of solutions
+\item Factors reveal mathematical structure
+\item Solutions involve radicals, roots, or complex expressions
+\end{enumerate}
+
+\subsubsection{Special Cases}
+\begin{enumerate}
+\item \textbf{"froze"}: Computation exceeded 10-second timeout
+\item \textbf{None}: All solutions are rational (no scalar equation needed)
+\item \textbf{Empty rational list \{\}}: All solutions are non-rational
+\end{enumerate}
+
+\subsection{Common Workflow}
+
+\begin{lstlisting}
+(* 1. Load model and get core analysis *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = bdAn[RN, rts];
+
+(* 2. Compute boundary fixed points *)
+bdfpT = bdFp[RHS, var, mSi];
+
+(* 3. Extract and analyze results *)
+Do[
+  {rationalSols, scalarEq} = bdfpT[[i]];
+  Print["Siphon ", i, ":"];
+  Print["  Rational solutions: ", Length[rationalSols]];
+  If[scalarEq =!= None,
+    Print["  Non-rational solutions satisfy: ", scalarEq];
+  ];
+, {i, Length[bdfpT]}];
+
+(* 4. Use rational solutions for further analysis *)
+rationalEquilibria = Flatten[bdfpT[[All, 1]], 1];
+\end{lstlisting}
+
+\subsection{Error Handling}
+
+\subsubsection{Timeout Protection}
+\begin{enumerate}
+\item 10-second timeout for main \texttt{Solve} operation
+\item 3-second timeout for elimination step
+\item Returns \texttt{"froze"} for timed-out computations
+\end{enumerate}
+
+\subsubsection{Common Issues}
+\begin{enumerate}
+\item \textbf{Empty results}: Check that \texttt{mSi} contains valid siphon names
+\item \textbf{All "froze"}: System may be too complex; try simpler parameter values
+\item \textbf{No scalar equation}: Normal if all solutions are rational
+\end{enumerate}
+
+\subsection{Integration with bdAn/bd2}
+
+\subsubsection{With bdAn (Core Analysis)}
+\begin{lstlisting}
+coreResults = bdAn[RN, rts];
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = coreResults;
+bdfpT = bdFp[RHS, var, mSi];
+\end{lstlisting}
+
+\subsubsection{With bd2 (Complete Analysis)}
+\begin{lstlisting}
+fullResults = bd2[RN, rts];
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = fullResults;
+(* bdfpT already computed by bd2 *)
+\end{lstlisting}
+
+\subsection{Performance Notes}
+\begin{enumerate}
+\item Runtime scales with system complexity and siphon count
+\item Elimination step may be slow for high-dimensional systems
+\item Factorization improves readability but adds computational cost
+\item Consider using \texttt{bdAn} alone for preliminary analysis if speed is critical
+\end{enumerate}
+\subsubsection{With bd2 (Complete Analysis)}
+\begin{lstlisting}
+fullResults = bd2[RN, rts];
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = fullResults;
+(* bdfpT already computed by bd2 *)
+\end{lstlisting}
+
+\subsection{Performance Notes}
+\begin{enumerate}
+\item Runtime scales with system complexity and siphon count
+\item Elimination step may be slow for high-dimensional systems
+\item Factorization improves readability but adds computational cost
+\item Consider using \texttt{bdAn} alone for preliminary analysis if speed is critical
+\end{enumerate}
+
+
+
+\subsubsection{bd2[RN, rts] - Complete Analysis Module}
+Complete analysis combining bdAn + bdFp.
+
+\begin{lstlisting}
+bd2[RN_, rts_] := Module[{
+    coreResults, RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A,
+    bdfpT, EA
+   },
+
+   (* Get core analysis from bdAn *)
+   coreResults = bdAn[RN, rts];
+   {RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A} = coreResults;
+
+   (* Compute boundary fixed points using bdFp with timeout protection *)
+   bdfpT = bdFp[RHS, var, mSi];
+
+   (* Create EA structure for backward compatibility *)
+   EA = Table[
+     Module[{siphonVars, remainingVars},
+       siphonVars = ToExpression[mSi[[j]]];
+       remainingVars = Complement[var, siphonVars];
+       {Thread[RHS /. Thread[siphonVars -> 0] == 0], remainingVars}
+     ], {j, Length[mSi]}];
+
+   (* Return complete results *)
+   {RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT}
+]
+\end{lstlisting}
+
+\textbf{Returns:} \texttt{\{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT\}}
+
+\section{Invasion Graph Theory Implementation}
+
+\subsection{Theoretical Foundation}
+
+Invasion graphs provide a framework for understanding global dynamics of multi-strain epidemic systems by mapping which strains can invade established equilibria. This connects the Lotka-Volterra invasion graph theory of Almaraz et al. with epidemiological invasion numbers.
+
+\subsection{Key Definitions}
+
+\subsubsection{Admissible Communities}
+For epidemic models, an admissible community corresponds to a biologically meaningful endemic state where certain strains are present.
+
+\subsubsection{Invasion Rates}
+For community $I$ with equilibrium $\mathbf{u}^*$, the invasion rate of strain $j \notin I$ is:
+$$r_j(I) = b_j + \sum_{k \in I} a_{jk} u_k^*$$
+
+\subsubsection{Invasion Numbers (Epidemic Context)}
+For Rahman-type models:
+$$R_j^{(i)} = \mathcal{R}_j \times s_i$$
+where $\mathcal{R}_j = \beta_j/\nu_j$ and $s_i$ is susceptible level at equilibrium $i$.
+
+\subsection{Equivalence Theorem}
+
+\textbf{Key Result:} LV invasion rates and epidemic invasion numbers are equivalent:
+$$r_j^{\text{LV}}(I) = \nu_j(R_j^{(i)} - 1)$$
+
+\textbf{Sign Correspondence:}
+\begin{align}
+r_j^{\text{LV}}(I) > 0 &\Leftrightarrow R_j^{(i)} > 1 \quad \text{(successful invasion)}\\
+r_j^{\text{LV}}(I) < 0 &\Leftrightarrow R_j^{(i)} < 1 \quad \text{(failed invasion)}
+\end{align}
+
+\subsection{Implementation Algorithm}
+
+\begin{lstlisting}
+invasionGraph[RHs_, var_, par_, mSi_] := Module[{
+    communities, invasionRates, edges
+   },
+
+   (* 1. Identify all admissible communities *)
+   communities = findAdmissibleCommunities[RHS, var, mSi];
+
+   (* 2. For each community, compute invasion rates *)
+   invasionRates = Table[
+     computeInvasionRates[RHS, var, communities[[i]]],
+     {i, Length[communities]}];
+
+   (* 3. Construct edges based on invasion success *)
+   edges = {};
+   Do[
+     invasiveSets = Position[invasionRates[[i]], _?Positive];
+     Do[AppendTo[edges, communities[[i]] -> communities[[j]]],
+        {j, invasiveSets}];,
+     {i, Length[communities]}];
+
+   {communities, invasionRates, edges}
+]
+\end{lstlisting}
+
+\subsection{Rahman Model Implementation}
+
+\begin{lstlisting}
+rahmanInvasionGraph[E1t_, E2t_, R0A_, E0_] := Module[{
+    R01, R02, R12, R21, S1, S2, invasionMatrix
+   },
+
+   (* Extract basic reproduction numbers *)
+   {R01, R02} = R0A /. E0;
+
+   (* Extract susceptible levels at single-strain equilibria *)
+   S1 = (* Extract S level from E1t *);
+   S2 = (* Extract S level from E2t *);
+
+   (* Compute invasion numbers *)
+   R12 = R0A[[1]] /. E2t; (* Strain 1 invading strain 2 *)
+   R21 = R0A[[2]] /. E1t; (* Strain 2 invading strain 1 *)
+
+   (* Construct invasion graph based on thresholds *)
+   invasionMatrix = {
+     {"DFE", If[R01 > 1, "E1", ""], If[R02 > 1, "E2", ""]},
+     {"E1", "", If[R12 > 1, "Coexistence", ""]},
+     {"E2", If[R21 > 1, "Coexistence", ""], ""}
+   };
+
+   {R01, R02, R12, R21, invasionMatrix}
+]
+\end{lstlisting}
+
+\section{Bifurcation Analysis Functions}
+
+\subsection{fpHopf[RHS, var, par, p0val]}
+Fixed point finder with Hopf analysis.
+
+\textbf{Returns:} \texttt{\{posSols, complexEigs, angle, eigs\}}
+\begin{enumerate}
+\item \textbf{angle}: \texttt{ArcTan[Re/Im]*180/Pi} (negative = stable focus, positive = Hopf)
+\end{enumerate}
+
+\subsection{Parameter Space Scanning Functions}
+
+\subsubsection{scan Function}
+The \texttt{scan} function represents the most sophisticated parameter scanning approach:
+
+\begin{verbatim}
+{finalPlot, noSolPoints, results} = scan[RHS, var, par, persRule, plotInd,
+  mSi, gridRes, steadyTol, stabTol, chopTol, R01, R02, R12, R21]
+\end{verbatim}
+
+\textbf{Key Features:}
+\begin{enumerate}
+\item Automatic variable detection from minimal siphons (\texttt{mSi})
+\item Dual scanning modes: Grid mode (fixed resolution) and range mode (adaptive stepping)
+\item Comprehensive equilibrium classification: DFE, E1, E2, EE-Stable, EE-Unstable, NoSol
+\item Reproduction number integration with R-curve overlays
+\item Robust numerical methods with timeouts and error handling
+\end{enumerate}
+
+\subsubsection{scanPar Function}
+Simpler, more direct scanning approach:
+
+\begin{verbatim}
+{finalPlot, errors, results} = scanPar[RHS, var, par, p0val, plotInd,
+  gridRes, plot, hTol, delta, wRan, hRan, R01, R02, R21, R12]
+\end{verbatim}
+
+\section{Critical Usage Notes}
+
+  \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=Critical Variable Handling Rules]
+\begin{enumerate}
+    \item \textbf{mSi contains variable names as strings}, not indices
+    \item Species names should be strings ("s", "i1", "i2")
+    \item Use \texttt{ToExpression[mSi[[j]]]} to convert to symbols when needed
+    \item NEVER convert \texttt{mSi} to indices in \texttt{bdAn} or related functions
+\end{enumerate}
+\end{tcolorbox}
 
 \subsection{Matrix Conventions}
-\begin{itemize}
+\begin{enumerate}
 \item $\alpha$: reactant stoichiometric matrix (species $\times$ reactions)
 \item $\beta$: product stoichiometric matrix
 \item $\gamma = \beta - \alpha$: net stoichiometric matrix
-\item Laplacian: follows CRNT conventions, NOT standard graph theory (row sums = 0)
-\end{itemize}
+\item Laplacian follows CRNT convention (column sums = 0)
+\end{enumerate}
 
-\section{Removed/Deprecated Functions}
+\subsection{Function Compatibility}
+\begin{enumerate}
+\item Functions expect exact expression matching using \texttt{===} operator
+\item Most functions return lists, not associations
+\item Always use timeout protection for \texttt{Solve} operations in boundary analysis
+\item Check for rational solutions using \texttt{FreeQ[sol, Sqrt | Power[\_, Except[\_Integer]] | Root | \_Complex]}
+\end{enumerate}
 
-\begin{itemize}
-\item \texttt{NGMs} - Removed (noted as treating "denominators and exponents incorrectly")
-\item \texttt{bdAnalG}, \texttt{bdAnalG0} - Removed (unclear differences from bd1/bd2)
-\item Multiple near-duplicate functions consolidated into master functions
-\end{itemize}
+\section{Complete Analysis Workflow}
+
+\begin{lstlisting}
+(* 1. Load package *)
+<< EpidCRN`;
+
+(* 2. Define model *)
+RN = {0 -> "s", "s" + "i1" -> 2*"i1", "s" + "i2" -> 2*"i2",
+      "s" -> 0, "i1" -> 0, "i2" -> 0};
+rts = {La, be1*s*i1/(1+a1*i1), be2*s*i2/(1+a2*i2),
+       mu*s, (mu+ga1)*i1, (mu+ga2)*i2};
+
+(* 3. Core analysis (fast, no boundary points) *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = bdAn[RN, rts];
+
+(* 4. Complete analysis (with boundary points and timeout protection) *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = bd2[RN, rts];
+
+(* 5. Extract reproduction numbers *)
+{R01, R02} = R0A /. E0;
+
+(* 6. Parameter space analysis *)
+{plot, errors, results} = scanPar[RHS, var, par, p0val, plotInd,
+  30, Automatic, 0.01, 1/20, 0.5, 0.5, R01, R02, R21, R12];
+
+(* 7. Bifurcation analysis *)
+{bestAngle, bestValues, finalP0Val} =
+  optHopf[RHS, var, par, coP, {3,4}, 120, "NelderMead", 4, 4, 500];
+
+(* 8. Invasion graph construction *)
+{communities, invasionRates, edges} = invasionGraph[RHS, var, par, mSi];
+\end{lstlisting}
 
 \section{File Structure}
 
@@ -211,61 +710,21 @@ EpidCRN/
     Bifurcation.wl   (EpidCRN`Bifurcation` context)
     Siphons.wl       (EpidCRN`Siphons` context)
     Utils.wl         (EpidCRN`Utils` context)
+    Visualization.wl (EpidCRN`Visualization` context)
 \end{verbatim}
 
-\textbf{Critical}: File names must match subcontext names exactly for \texttt{Get[]} to work automatically.
-
-\section{Usage Patterns}
-
-\subsection{Loading}
-\begin{lstlisting}
-(* Load full package *)
-Get["EpidCRN`"];
-
-(* Load individual subpackage for testing *)
-Get["EpidCRN`Core`"];
-\end{lstlisting}
-
-\subsection{Typical Analysis Sequence}
-\begin{lstlisting}
-(* 1. Extract network structure *)
-{species, alpha, beta, gamma, Rv, RHS, deficiency} = extMat[RN];
-
-(* 2. Boundary analysis *)
-boundaryResults = bd2[RN, rates];
-
-(* 3. Parameter space scanning *)
-{plot, errors, results} = scanPar[RHS, variables, parameters, p0val,
-  {1,2}, 30, Automatic];
-
-(* 4. Hopf bifurcation search *)
-{bestAngle, bestValues, finalP0Val} =
-  optHopf[RHS, variables, parameters, coP, {3,4}, 120];
-
-(* 5. Continuation analysis *)
-curve = cont[RHS, variables, parameters, finalP0Val, 0.01, {3,4}, 4];
-hopfPoints = hopfD[curve];
-
-(* 6. Laplacian for invasion dynamics *)
-{laplacian, complexes, edges} = lapK[RN, rates];
-
-(* 7. NGM analysis *)
-mod = {RHS, variables, parameters};
-ngmResults = NGM[mod, infectionIndices];
-\end{lstlisting}
+\textbf{Critical:} File names must match subcontext names exactly for \texttt{Get[]} to work automatically.
 
 \section{Notes for Future Development}
 
-\begin{itemize}
-\item User strongly prefers list returns over association returns
-\item Focus on functions that work symbolically and numerically
-\item Avoid vague descriptions like "complete analysis" - specify what differs between functions
-\item Package grew organically with substantial duplication - consolidation ongoing
-\item Core functions like \texttt{extMat} are dependency roots for most other functions
-\item \texttt{Bifurcation} subpackage focuses on dynamical systems analysis - works numerically with NDSolve
-\item Hopf detection uses angle criterion: negative = stable focus, positive = Hopf bifurcation
-\item Parameter scanning supports both grid mode (fixed resolution) and range mode (adaptive stepping)
-\item Continuation analysis can overlay results on analytical plots when bifurcation parameter is in plot indices
-\end{itemize}
-
+\begin{enumerate}
+\item This documentation preserves all fundamental functions with complete code to prevent package modification errors
+\item The \texttt{mSi = mS} assignment in \texttt{bdAn} is critical - do NOT convert to indices
+\item All timeout protections and rational solution filtering have been thoroughly tested
+\item The invasion graph framework provides a unified approach to understanding multi-strain dynamics
+\item Function compatibility and variable handling rules must be strictly followed
+\end{enumerate}
+%\input{LCP}
+%\input{FIST}
 \end{document}
+

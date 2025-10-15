@@ -1,0 +1,97 @@
+\section{Linear Complementarity Problem Approach for Epidemic Fixed Points}
+
+\subsection{Mathematical Framework}
+
+For epidemic models with infection variables $x = (i_1, i_2, \ldots, i_n)$ corresponding to minimal siphons, the infection dynamics can be written as:
+$$x' = \text{diag}(x) \cdot M(y) \cdot \mathbf{1}$$
+where $y$ represents non-infection variables (susceptibles, vaccinated, etc.) and $M(y)$ is the infection matrix with diagonal elements:
+$$M_{jj}(y) = \text{transmission rate}_j - \text{removal rate}_j$$
+
+\subsection{Linear Complementarity Formulation}
+
+At equilibrium, $x' = 0$, which gives us the complementarity conditions:
+$$\begin{aligned}
+x &\geq 0 \\
+M(y) \cdot \mathbf{1} &\geq 0 \\
+x_j \cdot M_{jj}(y) &= 0 \quad \forall j
+\end{aligned}$$
+
+This means for each infection $i_j$: either $x_j = 0$ OR $M_{jj}(y) = 0$.
+
+\subsection{Solution Cases}
+
+\subsubsection{Disease-Free Equilibrium (DFE)}
+When all $x_j = 0$, solve the non-infection subsystem:
+$$g(y) = 0$$
+where $g(y)$ represents the non-infection dynamics with infections set to zero.
+
+\subsubsection{Boundary Equilibria}
+For each proper subset $S \subset \{1,2,\ldots,n\}$:
+\begin{itemize}
+\item Active infections: $x_j > 0$ for $j \in S$ $\Rightarrow M_{jj}(y) = 0$
+\item Inactive infections: $x_j = 0$ for $j \notin S$
+\end{itemize}
+
+Solve the system:
+$$\begin{aligned}
+M_{jj}(y) &= 0 \quad \forall j \in S \\
+g(y, x_s) &= 0 \\
+x_j &= 0 \quad \forall j \notin S
+\end{aligned}$$
+
+\subsubsection{Interior Equilibria}
+When all $x_j > 0$, all diagonal elements must vanish:
+$$M_{jj}(y) = 0 \quad \forall j \in \{1,2,\ldots,n\}$$
+
+\subsection{Connection to Reproduction Numbers}
+
+The infection matrix diagonal elements are related to reproduction numbers:
+$$M_{jj}(y) = (\gamma_j + \mu_j) \left( \mathcal{R}_j(y) - 1 \right)$$
+where $\mathcal{R}_j(y)$ is the reproduction number for strain $j$ in state $y$.
+
+Thus, the complementarity condition $M_{jj}(y) = 0$ is equivalent to $\mathcal{R}_j(y) = 1$.
+
+\subsection{Algorithm Implementation}
+
+\begin{algorithm}[H]
+\caption{Infection Linear Complementarity Solver}
+\begin{algorithmic}[1]
+\REQUIRE ODE right-hand side $RHS$, variables $var$, minimal siphons $mSi$
+\STATE Extract infection variables $x$ from $mSi$
+\STATE Extract infection equations and factor as $x_j' = x_j \cdot M_{jj}(y)$
+\STATE Solve DFE: $x = 0$, solve $g(y) = 0$
+\FOR{each subset $S \subseteq \{1,\ldots,n\}$, $S \neq \emptyset, S \neq \{1,\ldots,n\}$}
+    \STATE Set $x_j = 0$ for $j \notin S$
+    \STATE Solve $M_{jj}(y) = 0$ for $j \in S$ and $g(y,x_s) = 0$
+    \STATE Check positivity of $x_j$ for $j \in S$
+\ENDFOR
+\STATE Solve interior case: $M_{jj}(y) = 0$ for all $j$ and $g(y,x) = 0$
+\RETURN $\{DFE, \text{boundary equilibria}, \text{interior equilibria}\}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Advantages of LCP Approach}
+
+\begin{enumerate}
+\item \textbf{Systematic enumeration}: Guarantees finding all equilibrium types
+\item \textbf{Biological interpretation}: Direct connection to reproduction numbers
+\item \textbf{Computational efficiency}: Avoids high-degree polynomial solving
+\item \textbf{Stability analysis}: Natural framework for local stability
+\end{enumerate}
+
+\subsection{Relationship to \texttt{bdFp}}
+
+The LCP approach complements \texttt{bdFp}:
+\begin{itemize}
+\item \textbf{LCP}: Provides systematic complementarity structure and biological interpretation
+\item \textbf{bdFp}: Provides complete algebraic characterization including non-rational solutions
+\item \textbf{Combined}: LCP identifies equilibrium types, bdFp gives exact algebraic forms
+\end{itemize}
+
+For the SI$^2$R example:
+\begin{align}
+M_{11} &= \beta_1 s - (\gamma_1 + \mu) \\
+M_{22} &= \beta_2 s + \beta_v v_1 - (\gamma_2 + \mu)
+\end{align}
+
+The scalar equation from \text 

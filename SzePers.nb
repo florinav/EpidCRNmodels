@@ -1,0 +1,2139 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     87084,       2131]
+NotebookOptionsPosition[     85695,       2098]
+NotebookOutlinePosition[     86392,       2120]
+CellTagsIndexPosition[     86287,       2115]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], "\n", 
+ RowBox[{
+  RowBox[{"SetDirectory", "[", 
+   RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";", 
+  RowBox[{"SetOptions", "[", 
+   RowBox[{"$FrontEndSession", ",", 
+    RowBox[{"NotebookAutoSave", "->", "True"}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"NotebookSave", "[", "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"AppendTo", "[", 
+    RowBox[{"$Path", ",", 
+     RowBox[{"FileNameJoin", "[", 
+      RowBox[{"{", 
+       RowBox[{
+       "$HomeDirectory", ",", "\"\<Dropbox\>\"", ",", 
+        "\"\<EpidCRNmodels\>\""}], "}"}], "]"}]}], "]"}], ";", 
+   RowBox[{"Needs", "[", "\"\<EpidCRN`\>\"", "]"}], ";", 
+   RowBox[{"RN", "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+      RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I1\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I1\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I2\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I2\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I12\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I12\>\""}]}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "\"\<I1\>\""}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "\"\<I2\>\""}], ",", 
+      RowBox[{
+       RowBox[{"\"\<I1\>\"", "+", "\"\<I2\>\""}], "->", "\"\<I12\>\""}], ",", 
+      RowBox[{"\"\<I1\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I2\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "0"}]}], "}"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"RN", "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+      RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I1\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I1\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I2\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I2\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I12\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I12\>\""}]}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "\"\<I1\>\""}], ",", 
+      RowBox[{
+       RowBox[{"\"\<I1\>\"", "+", "\"\<I2\>\""}], "->", "\"\<I12\>\""}], ",", 
+      RowBox[{
+       RowBox[{"\"\<I1\>\"", "+", "\"\<I12\>\""}], "->", "\"\<I2\>\""}], ",", 
+      RowBox[{"\"\<I1\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I2\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "0"}]}], "}"}]}], ";"}], "\n", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"rts", " ", "uses", " ", "plain", " ", "symbols", " ", 
+    RowBox[{"(", 
+     RowBox[{"no", " ", "quotes"}], ")"}]}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"rts", "=", 
+   RowBox[{"{", 
+    RowBox[{"muS", ",", 
+     RowBox[{"(*", 
+      RowBox[{"0", "->", "S"}], "*)"}], 
+     RowBox[{"muS", "*", "S"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"S", "->", "0"}], "*)"}], 
+     RowBox[{"beta1", "*", "S", "*", "I1"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"S", "+", "I1"}], "->", 
+       RowBox[{"2", " ", "I1"}]}], "*)"}], 
+     RowBox[{"beta2", "*", "S", "*", "I2"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"S", "+", "I2"}], "->", 
+       RowBox[{"2", " ", "I2"}]}], "*)"}], 
+     RowBox[{"beta12", "*", "S", "*", "I12"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"S", "+", "I12"}], "->", 
+       RowBox[{"2", " ", "I12"}]}], "*)"}], 
+     RowBox[{"m21", "*", "I12"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"I12", "->", 
+       RowBox[{"I1", "[", 
+        RowBox[{"earlier", " ", "block", " ", "only"}], "]"}]}], "*)"}], 
+     RowBox[{"delta12", "*", "I1", "*", "I2"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"I1", "+", "I2"}], "->", 
+       RowBox[{"I12", "[", 
+        RowBox[{"vanishes", " ", "at", " ", "DFE"}], "]"}]}], "*)"}], 
+     RowBox[{"eta", "*", "I1", "*", "I12"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"I1", "+", "I12"}], "->", 
+       RowBox[{"I2", "[", 
+        RowBox[{"vanishes", " ", "at", " ", "DFE"}], "]"}]}], "*)"}], 
+     RowBox[{"mu1", "*", "I1"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"I1", "->", "0"}], "*)"}], 
+     RowBox[{"mu2", "*", "I2"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"I2", "->", "0"}], "*)"}], 
+     RowBox[{"mu12", "*", "I12"}]}], "            ", 
+    RowBox[{"(*", 
+     RowBox[{"I12", "->", "0"}], "*)"}], "}"}]}], ";"}], "\n", 
+ RowBox[{"Print", "[", 
+  RowBox[{"\"\<reactions and transitions: \>\"", ",", 
+   RowBox[{
+    RowBox[{"Transpose", "[", 
+     RowBox[{"{", 
+      RowBox[{"RN", ",", "rts"}], "}"}], "]"}], "//", "MatrixForm"}]}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+    "RHS", ",", " ", "var", ",", " ", "par", ",", " ", "cp", ",", " ", "mSi", 
+     ",", " ", "Jx", ",", " ", "Jy", ",", " ", "E0", ",", " ", "Kp", ",", " ",
+      "R0A", ",", " ", "infV", ",", "ngm"}], "}"}], "=", 
+   RowBox[{"bdAn", "[", 
+    RowBox[{"RN", ",", "rts"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Print", "[", 
+  RowBox[{
+  "\"\<E0 is\>\"", ",", "E0", ",", "\"\< mSi=\>\"", ",", " ", "mSi", ",", 
+   "\"\< infV=\>\"", ",", "infV", ",", "\"\< the \>\"", ",", 
+   RowBox[{"R0A", "//", "Length"}], ",", "\"\<repr fns=\>\"", ",", "R0A", ",", 
+   RowBox[{"Kp", "//", "MatrixForm"}]}], 
+  "]"}], "\[IndentingNewLine]", "Kp", "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.968734714882238*^9, 3.968734714882238*^9}, 
+   3.968734763039586*^9, {3.968734828238323*^9, 3.968734828871845*^9}, 
+   3.9687348866084113`*^9, 3.9687353997235184`*^9, 3.968735782609889*^9, {
+   3.968735871997905*^9, 3.968735884432628*^9}, {3.9687359263517456`*^9, 
+   3.9687359317511654`*^9}, {3.968735992854699*^9, 3.968735994455556*^9}, {
+   3.968736064859342*^9, 3.9687360835772038`*^9}, 3.968737750575331*^9},
+ CellLabel->"In[50]:=",ExpressionUUID->"241aebfa-141e-4398-aa9a-f964768b25f2"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"reactions and transitions: \"\>", "\[InvisibleSpace]", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        RowBox[{"0", "\[Rule]", "\<\"S\"\>"}], "muS"},
+       {
+        RowBox[{"\<\"S\"\>", "\[Rule]", "0"}], 
+        RowBox[{"muS", " ", "S"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I1\"\>", "+", "\<\"S\"\>"}], "\[Rule]", 
+         RowBox[{"2", " ", "\<\"I1\"\>"}]}], 
+        RowBox[{"beta1", " ", "I1", " ", "S"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I2\"\>", "+", "\<\"S\"\>"}], "\[Rule]", 
+         RowBox[{"2", " ", "\<\"I2\"\>"}]}], 
+        RowBox[{"beta2", " ", "I2", " ", "S"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I12\"\>", "+", "\<\"S\"\>"}], "\[Rule]", 
+         RowBox[{"2", " ", "\<\"I12\"\>"}]}], 
+        RowBox[{"beta12", " ", "I12", " ", "S"}]},
+       {
+        RowBox[{"\<\"I12\"\>", "\[Rule]", "\<\"I1\"\>"}], 
+        RowBox[{"I12", " ", "m21"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I1\"\>", "+", "\<\"I2\"\>"}], 
+         "\[Rule]", "\<\"I12\"\>"}], 
+        RowBox[{"delta12", " ", "I1", " ", "I2"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I1\"\>", "+", "\<\"I12\"\>"}], 
+         "\[Rule]", "\<\"I2\"\>"}], 
+        RowBox[{"eta", " ", "I1", " ", "I12"}]},
+       {
+        RowBox[{"\<\"I1\"\>", "\[Rule]", "0"}], 
+        RowBox[{"I1", " ", "mu1"}]},
+       {
+        RowBox[{"\<\"I2\"\>", "\[Rule]", "0"}], 
+        RowBox[{"I2", " ", "mu2"}]},
+       {
+        RowBox[{"\<\"I12\"\>", "\[Rule]", "0"}], 
+        RowBox[{"I12", " ", "mu12"}]}
+      },
+      GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}],
+  SequenceForm["reactions and transitions: ", 
+   MatrixForm[{{0 -> "S", $CellContext`muS}, {
+     "S" -> 0, $CellContext`muS $CellContext`S}, {
+     "I1" + "S" -> 
+      2 "I1", $CellContext`beta1 $CellContext`I1 $CellContext`S}, {
+     "I2" + "S" -> 
+      2 "I2", $CellContext`beta2 $CellContext`I2 $CellContext`S}, {
+     "I12" + "S" -> 
+      2 "I12", $CellContext`beta12 $CellContext`I12 $CellContext`S}, {
+     "I12" -> "I1", $CellContext`I12 $CellContext`m21}, {
+     "I1" + "I2" -> 
+      "I12", $CellContext`delta12 $CellContext`I1 $CellContext`I2}, {
+     "I1" + "I12" -> 
+      "I2", $CellContext`eta $CellContext`I1 $CellContext`I12}, {
+     "I1" -> 0, $CellContext`I1 $CellContext`mu1}, {
+     "I2" -> 0, $CellContext`I2 $CellContext`mu2}, {
+     "I12" -> 0, $CellContext`I12 $CellContext`mu12}}]],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9687348884750357`*^9, 3.968735401572461*^9, 3.9687357887957964`*^9, 
+   3.9687359343013506`*^9, {3.9687360668993425`*^9, 3.9687360852198424`*^9}, 
+   3.968737754444154*^9},
+ CellLabel->
+  "During evaluation of \
+In[50]:=",ExpressionUUID->"203442f1-ea84-4c53-876b-01daef063cc5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"E0 is\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"S", "\[Rule]", "1"}], ",", 
+     RowBox[{"I1", "\[Rule]", "0"}], ",", 
+     RowBox[{"I12", "\[Rule]", "0"}], ",", 
+     RowBox[{"I2", "\[Rule]", "0"}]}], "}"}], 
+   "\[InvisibleSpace]", "\<\" mSi=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"I1", ",", "I12"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"I2", ",", "I12"}], "}"}]}], "}"}], 
+   "\[InvisibleSpace]", "\<\" infV=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"I1", ",", "I12", ",", "I2"}], "}"}], 
+   "\[InvisibleSpace]", "\<\" the \"\>", "\[InvisibleSpace]", "3", 
+   "\[InvisibleSpace]", "\<\"repr fns=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     FractionBox[
+      RowBox[{"beta2", " ", "S"}], "mu2"], ",", 
+     FractionBox[
+      RowBox[{"beta12", " ", "S"}], 
+      RowBox[{"m21", "+", "mu12"}]], ",", 
+     FractionBox[
+      RowBox[{"beta1", " ", "S"}], "mu1"]}], "}"}], "\[InvisibleSpace]", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        FractionBox[
+         RowBox[{"beta1", " ", "S"}], "mu1"], 
+        FractionBox[
+         RowBox[{"beta1", " ", "m21", " ", "S"}], 
+         RowBox[{
+          RowBox[{"m21", " ", "mu1"}], "+", 
+          RowBox[{"mu1", " ", "mu12"}]}]], "0"},
+       {"0", 
+        FractionBox[
+         RowBox[{"beta12", " ", "S"}], 
+         RowBox[{"m21", "+", "mu12"}]], "0"},
+       {"0", "0", 
+        FractionBox[
+         RowBox[{"beta2", " ", "S"}], "mu2"]}
+      },
+      GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}],
+  SequenceForm[
+  "E0 is", {$CellContext`S -> 1, $CellContext`I1 -> 0, $CellContext`I12 -> 
+    0, $CellContext`I2 -> 0}, 
+   " mSi=", {{$CellContext`I1, $CellContext`I12}, {$CellContext`I2, \
+$CellContext`I12}}, 
+   " infV=", {$CellContext`I1, $CellContext`I12, $CellContext`I2}, " the ", 3,
+    "repr fns=", {$CellContext`beta2 $CellContext`mu2^(-1) $CellContext`S, \
+$CellContext`beta12 ($CellContext`m21 + $CellContext`mu12)^(-1) \
+$CellContext`S, $CellContext`beta1 $CellContext`mu1^(-1) $CellContext`S}, 
+   MatrixForm[{{$CellContext`beta1 $CellContext`mu1^(-1) $CellContext`S, \
+$CellContext`beta1 $CellContext`m21 ($CellContext`m21 $CellContext`mu1 + \
+$CellContext`mu1 $CellContext`mu12)^(-1) $CellContext`S, 0}, {
+     0, $CellContext`beta12 ($CellContext`m21 + $CellContext`mu12)^(-1) \
+$CellContext`S, 0}, {
+     0, 0, $CellContext`beta2 $CellContext`mu2^(-1) $CellContext`S}}]],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9687348884750357`*^9, 3.968735401572461*^9, 3.9687357887957964`*^9, 
+   3.9687359343013506`*^9, {3.9687360668993425`*^9, 3.9687360852198424`*^9}, 
+   3.9687377544710217`*^9},
+ CellLabel->
+  "During evaluation of \
+In[50]:=",ExpressionUUID->"828a7156-d4df-465c-8ce8-fa44de23d8d6"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     FractionBox[
+      RowBox[{"beta1", " ", "S"}], "mu1"], ",", 
+     FractionBox[
+      RowBox[{"beta1", " ", "m21", " ", "S"}], 
+      RowBox[{
+       RowBox[{"m21", " ", "mu1"}], "+", 
+       RowBox[{"mu1", " ", "mu12"}]}]], ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", 
+     FractionBox[
+      RowBox[{"beta12", " ", "S"}], 
+      RowBox[{"m21", "+", "mu12"}]], ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", 
+     FractionBox[
+      RowBox[{"beta2", " ", "S"}], "mu2"]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.9687360853953147`*^9, 3.9687377544908886`*^9},
+ CellLabel->"Out[59]=",ExpressionUUID->"62e40569-9ad7-4c17-8005-461b8c26d300"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"?", "EpidCRN`*"}]], "Input",
+ CellChangeTimes->{{3.9691335657482176`*^9, 3.969133570906143*^9}},
+ CellLabel->
+  "In[530]:=",ExpressionUUID->"88f7d066-f603-4f80-8418-037dad62e992"],
+
+Cell[BoxData[
+ StyleBox[
+  FrameBox[GridBox[{
+     {
+      DynamicModuleBox[{Typeset`open$$ = True}, 
+       PaneSelectorBox[{False->
+        ButtonBox[
+         RowBox[{
+          
+          DynamicBox[FEPrivate`FrontEndResource[
+           "FEBitmaps", "RightPointerOpener"]], " ", 
+          StyleBox["EpidCRN`", "InformationGridGroupHeader"]}],
+         Appearance->None,
+         BaseStyle->"InformationGridLink",
+         ButtonFunction:>FEPrivate`Set[Typeset`open$$, True],
+         Evaluator->Automatic,
+         Method->"Preemptive"], True->
+        PaneBox[GridBox[{
+           {
+            ButtonBox[
+             RowBox[{
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "DownPointerOpener"],
+               ImageSizeCache->{10., {3., 7.}}], " ", 
+              StyleBox["EpidCRN`", "InformationGridGroupHeader"]}],
+             Appearance->None,
+             BaseStyle->"InformationGridLink",
+             ButtonFunction:>FEPrivate`Set[Typeset`open$$, False],
+             Evaluator->Automatic,
+             Method->"Preemptive"]},
+           {
+            PaneBox[GridBox[{
+               {
+                ButtonBox[
+                 StyleBox["ACM", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "ACM", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Grobpol", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Grobpol", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["onePR", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "onePR", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["albe", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "albe", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["H4", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "H4", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["onlyP", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "onlyP", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["arrow2pairReac", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "arrow2pairReac", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["H6", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "H6", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["optHopf", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "optHopf", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["asoRea", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "asoRea", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Hirono", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Hirono", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Par", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Par", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["autocatalysisReport", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "autocatalysisReport", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["hopfD", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "hopfD", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["perC", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "perC", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["bd1", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "bd1", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Hur2", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Hur2", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["perR", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "perR", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["bd2", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "bd2", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Hur3M", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Hur3M", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["persistenceAnalysis", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "persistenceAnalysis", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["bdAn", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "bdAn", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Hur4M", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Hur4M", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["persistenceReport", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "persistenceReport", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["bdCo", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "bdCo", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Hur5M", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Hur5M", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["pertIC", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "pertIC", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["bdFp", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "bdFp", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["IaFHJ", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "IaFHJ", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["phasePl2", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "phasePl2", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["Bifp", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Bifp", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["IkFHJ", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "IkFHJ", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["posL", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "posL", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["catalysisAnalysis", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "catalysisAnalysis", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["intEq", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "intEq", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["posM", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "posM", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["checkPersistence", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "checkPersistence", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["invFace", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "invFace", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["reaToRHS", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "reaToRHS", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["chRN", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "chRN", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["invN", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "invN", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["reCL", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "reCL", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["CofP", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "CofP", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["invN2", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "invN2", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["remZ", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "remZ", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["CofRH", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "CofRH", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isCatalytic", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isCatalytic", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Res1F", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Res1F", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["compToAsso", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "compToAsso", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isCritical", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isCritical", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["RHS2RN", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "RHS2RN", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["cont", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "cont", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isDrainable", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isDrainable", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["rtS", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "rtS", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["convertReactionFormat", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "convertReactionFormat", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isEndotactic", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isEndotactic", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["RUR", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "RUR", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["convNum", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "convNum", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isInvariantFacet", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isInvariantFacet", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["scan", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "scan", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["countMS", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "countMS", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isSelfReplicable", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isSelfReplicable", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["scanPar", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "scanPar", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["CreateMassActionRate", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "CreateMassActionRate", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isSiph", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isSiph", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["selZR", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "selZR", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["Deg", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Deg", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["isStronglyEndotactic", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "isStronglyEndotactic", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["seZF", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "seZF", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["DerEq", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "DerEq", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["JR0", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "JR0", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["simpleOptHopf", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "simpleOptHopf", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["DerL", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "DerL", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["JTD", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "JTD", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["siphonAnalysis", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "siphonAnalysis", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["DFE", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "DFE", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["JTDP", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "JTDP", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["SpeComInc", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "SpeComInc", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["endo", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "endo", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["L13", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "L13", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["sta", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "sta", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["EucFHJ", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "EucFHJ", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["L1Planar", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "L1Planar", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Sta", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Sta", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["expM", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "expM", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["L23", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "L23", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Stab", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Stab", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["expon", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "expon", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["l2L", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "l2L", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["Stodola", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "Stodola", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["extHD", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "extHD", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["lapK", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "lapK", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["stoichiometricMatrices", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "stoichiometricMatrices", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["extMat", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "extMat", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["ListFunctionsByPackage", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "ListFunctionsByPackage", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["str2Sym", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "str2Sym", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["extSpe", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "extSpe", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["m2toM", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "m2toM", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["strEdg", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "strEdg", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["FHJ", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "FHJ", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["makeLPM", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "makeLPM", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["strToSymb", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "strToSymb", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["findCatalyticSets", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "findCatalyticSets", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["mat2Matl", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "mat2Matl", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["sym2Str", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "sym2Str", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 
+                 StyleBox["findMinimalCriticalSiphons", 
+                  "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "findMinimalCriticalSiphons", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["matl2Mat", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "matl2Mat", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["symbToStr", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "symbToStr", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["fpHopf", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "fpHopf", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["matlr2Mat", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "matlr2Mat", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["toProd", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "toProd", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["FposEx", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "FposEx", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["minSiph", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "minSiph", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["toSum", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "toSum", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["GBH", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "GBH", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["mRts", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "mRts", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["TS", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "TS", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["getComE", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "getComE", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["mSim", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "mSim", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["whenP", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "whenP", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["getInfectionIndices", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "getInfectionIndices", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["NewtPol", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "NewtPol", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["WhereIs", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "WhereIs", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic]},
+               {
+                ButtonBox[
+                 StyleBox["GetVec", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "GetVec", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], 
+                ButtonBox[
+                 StyleBox["NGM", "InformationGridButton"],
+                 Appearance->None,
+                 BaseStyle->"InformationGridLink",
+                 
+                 ButtonData:>{
+                  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", {
+                   "NGM", "EpidCRN`"}, False},
+                 ButtonNote->"EpidCRN`",
+                 Evaluator->Automatic], ""}
+              },
+              DefaultBaseStyle->"Text",
+              
+              GridBoxAlignment->{
+               "Columns" -> {{Left}}, "Rows" -> {{Baseline}}},
+              GridBoxItemSize->{"Columns" -> {{
+                   Scaled[0.31666666666666665`]}}}],
+             ImageMargins->{{10, 0}, {0, 2}}]}
+          },
+          GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}}],
+         FrameMargins->{{0, 0}, {8, 0}}]}, Dynamic[Typeset`open$$],
+        ImageSize->Automatic]]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}},
+    GridBoxDividers->{"ColumnsIndexed" -> {{False}}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.5599999999999999]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.8]}, 
+        Offset[0.2]}}],
+   BaseStyle->"InformationTitleFrame"], "InformationGridPlain"]], "Output",
+ CellChangeTimes->{3.969133572999241*^9},
+ CellLabel->
+  "Out[530]=",ExpressionUUID->"10a79a62-bad2-4c92-9859-3429a8f02d0b"],
+
+Cell[BoxData[
+ InterpretationBox[
+  StyleBox[
+   FrameBox[
+    DynamicModuleBox[{System`InformationDump`open$$ = False, 
+     System`InformationDump`mouseOver$$ = False}, 
+     PaneSelectorBox[{True->
+      TagBox[GridBox[{
+         {
+          ItemBox[
+           PaneBox[
+            StyleBox["\<\" Symbol\"\>", "InformationTitleText",
+             StripOnInput->False,
+             BaseStyle -> None],
+            FrameMargins->{{4, 0}, {-1, 1}}],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False]},
+         {
+          ItemBox[
+           PaneBox[
+            
+            StyleBox["\<\"(Siphons)isDrainable[reactions, speciesSet] checks \
+if speciesSet is drainable for the given reaction network. A set is drainable \
+if there exists a reaction pathway that decreases all species in the set\"\>",
+              "InformationUsageText",
+             StripOnInput->False,
+             LineSpacing->{1.5, 1.5, 3.}],
+            FrameMargins->{{10, 10}, {8, 10}}],
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False]},
+         {
+          PaneBox[
+           TagBox[GridBox[{
+              {
+               StyleBox[
+                TagBox[
+                 TooltipBox[
+                  StyleBox["\<\" Definitions\"\>", "InformationRowLabel",
+                   StripOnInput->False],
+                  "\"Definitions\"",
+                  TooltipStyle->"TextStyling"],
+                 Annotation[#, "Definitions", "Tooltip"]& ], "DialogStyle",
+                StripOnInput->False]},
+              {
+               TemplateBox[{"\"\[ThinSpace]\"", 
+                 GridBox[{{
+                    RowBox[{
+                    RowBox[{"isDrainable", "[", 
+                    
+                    RowBox[{
+                    "EpidCRN`Private`RN_", ",", 
+                    "EpidCRN`Private`speciesSet_List"}], "]"}], ":=", 
+                    RowBox[{"Module", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    
+                    RowBox[{"EpidCRN`Private`RND", ",", "EpidCRN`Private`spe",
+                     ",", "EpidCRN`Private`gamma", ",", 
+                    "EpidCRN`Private`speciesIndices", ",", 
+                    "EpidCRN`Private`coeffs", ",", 
+                    "EpidCRN`Private`constraints", ",", 
+                    "EpidCRN`Private`solution"}], "}"}], ",", 
+                    RowBox[{
+                    RowBox[{"EpidCRN`Private`RND", "=", 
+                    RowBox[{"extMat", "[", "EpidCRN`Private`RN", "]"}]}], ";", 
+                    RowBox[{"EpidCRN`Private`spe", "=", 
+                    
+                    RowBox[{"EpidCRN`Private`RND", "\[LeftDoubleBracket]", 
+                    "1", "\[RightDoubleBracket]"}]}], ";", 
+                    RowBox[{"EpidCRN`Private`gamma", "=", 
+                    
+                    RowBox[{"EpidCRN`Private`RND", "\[LeftDoubleBracket]", 
+                    "4", "\[RightDoubleBracket]"}]}], ";", 
+                    RowBox[{"EpidCRN`Private`speciesIndices", "=", 
+                    RowBox[{"Flatten", "[", 
+                    RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"Position", "[", 
+                    RowBox[{"EpidCRN`Private`spe", ",", "#1"}], "]"}], "&"}], 
+                    ")"}], "/@", "EpidCRN`Private`speciesSet"}], "]"}]}], ";", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    
+                    RowBox[{"Length", "[", "EpidCRN`Private`speciesIndices", 
+                    "]"}], "\[NotEqual]", 
+                    
+                    RowBox[{"Length", "[", "EpidCRN`Private`speciesSet", 
+                    "]"}]}], ",", 
+                    RowBox[{
+                    
+                    RowBox[{"Print", "[", 
+                    "\"Warning: Some species not found in network\"", "]"}], 
+                    ";", 
+                    RowBox[{"Return", "[", "False", "]"}]}]}], "]"}], ";", 
+                    RowBox[{"EpidCRN`Private`coeffs", "=", 
+                    RowBox[{"Array", "[", 
+                    RowBox[{"EpidCRN`Private`c", ",", 
+                    RowBox[{
+                    RowBox[{"Dimensions", "[", "EpidCRN`Private`gamma", "]"}],
+                     "\[LeftDoubleBracket]", "2", "\[RightDoubleBracket]"}]}],
+                     "]"}]}], ";", 
+                    RowBox[{"EpidCRN`Private`linearComb", "=", 
+                    RowBox[{"EpidCRN`Private`coeffs", ".", 
+                    
+                    RowBox[{"Transpose", "[", "EpidCRN`Private`gamma", 
+                    "]"}]}]}], ";", 
+                    RowBox[{"EpidCRN`Private`constraints", "=", 
+                    RowBox[{"Join", "[", 
+                    RowBox[{
+                    RowBox[{"Thread", "[", 
+                    
+                    RowBox[{"EpidCRN`Private`coeffs", "\[GreaterEqual]", 
+                    "0"}], "]"}], ",", 
+                    RowBox[{"Thread", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"EpidCRN`Private`linearComb", 
+                    "\[LeftDoubleBracket]", "EpidCRN`Private`speciesIndices", 
+                    "\[RightDoubleBracket]"}], "<", "0"}], "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"Total", "[", "EpidCRN`Private`coeffs", "]"}], 
+                    ">", "0"}], "}"}]}], "]"}]}], ";", 
+                    RowBox[{"EpidCRN`Private`solution", "=", 
+                    RowBox[{"FindInstance", "[", 
+                    
+                    RowBox[{"EpidCRN`Private`constraints", ",", 
+                    "EpidCRN`Private`coeffs", ",", 
+                    TemplateBox[{}, "Reals"]}], "]"}]}], ";", 
+                    RowBox[{
+                    RowBox[{"Length", "[", "EpidCRN`Private`solution", "]"}], 
+                    ">", "0"}]}]}], "]"}]}]}, {" "}}, 
+                  GridBoxAlignment -> {"Columns" -> {{Left}}}, 
+                  DefaultBaseStyle -> "Column", 
+                  GridBoxItemSize -> {
+                   "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
+                "RowDefault"]}
+             },
+             DefaultBaseStyle->"Column",
+             GridBoxAlignment->{"Columns" -> {{Left}}},
+             
+             GridBoxItemSize->{
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+            "Column"],
+           FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
+         {
+          PaneBox[GridBox[{
+             {
+              
+              DynamicModuleBox[{System`InformationDump`open$$ = {
+               False, False, False, False, False, False}}, 
+               StyleBox[GridBox[{
+                  {
+                   TagBox[
+                    TooltipBox[
+                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
+                    StripOnInput->False],
+                    "\"FullName\"",
+                    TooltipStyle->"TextStyling"],
+                    
+                    Annotation[#, "FullName", 
+                    "Tooltip"]& ], "\<\"EpidCRN`isDrainable\"\>"}
+                 },
+                 AutoDelete->False,
+                 GridBoxAlignment->{"Columns" -> {Right, Left}},
+                 GridBoxDividers->None,
+                 GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
+                 GridBoxSpacings->{"Columns" -> {
+                    Offset[0.27999999999999997`], {
+                    Offset[0.5599999999999999]}, 
+                    Offset[0.27999999999999997`]}, "Rows" -> {
+                    Offset[0.2], {
+                    Offset[0.8]}, 
+                    Offset[0.2]}}], "DialogStyle",
+                StripOnInput->False],
+               DynamicModuleValues:>{}]}
+            },
+            DefaultBaseStyle->"Column",
+            GridBoxAlignment->{"Columns" -> {{Left}}},
+            GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+            GridBoxSpacings->{"Columns" -> {
+                Offset[0.27999999999999997`], {
+                 Offset[0.5599999999999999]}, 
+                Offset[0.27999999999999997`]}, "Rows" -> {
+                Offset[0.2], {
+                 Offset[3.6]}, 
+                Offset[0.2]}}],
+           FrameMargins->{{6, 6}, {6, 3}}], ""},
+         {
+          ItemBox[
+           TagBox[
+            ButtonBox[
+             PaneSelectorBox[{False->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "UpPointerOpener"]], True->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
+              System`InformationDump`mouseOver$$]],
+             Alignment->Left,
+             Appearance->{"Default" -> None},
+             
+             ButtonFunction:>FEPrivate`Set[
+              System`InformationDump`open$$, False],
+             Evaluator->Automatic,
+             FrameMargins->{{9, 0}, {0, 0}},
+             ImageMargins->0,
+             ImageSize->Full,
+             Method->"Preemptive"],
+            
+            EventHandlerTag[{
+             "MouseEntered" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
+              "MouseExited" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
+              Method -> "Preemptive", PassEventsDown -> Automatic, 
+              PassEventsUp -> True}]],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], "\[SpanFromLeft]"}
+        },
+        AutoDelete->False,
+        FrameStyle->Directive[
+          GrayLevel[0.8], 
+          Thickness[Tiny]],
+        GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
+        GridBoxDividers->{
+         "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
+        GridBoxItemSize->{
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+       "Grid"], False->
+      TagBox[GridBox[{
+         {
+          ItemBox[
+           PaneBox[
+            StyleBox["\<\" Symbol\"\>", "InformationTitleText",
+             StripOnInput->False],
+            FrameMargins->{{4, 0}, {-1, 1}}],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False]},
+         {
+          ItemBox[
+           PaneBox[
+            
+            StyleBox["\<\"(Siphons)isDrainable[reactions, speciesSet] checks \
+if speciesSet is drainable for the given reaction network. A set is drainable \
+if there exists a reaction pathway that decreases all species in the set\"\>",
+              "InformationUsageText",
+             StripOnInput->False,
+             LineSpacing->{1.5, 1.5, 3.}],
+            FrameMargins->{{10, 10}, {8, 10}}],
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False]},
+         {
+          ItemBox[
+           TagBox[
+            ButtonBox[
+             PaneSelectorBox[{False->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "DownPointerOpener"],
+               ImageSizeCache->{10., {3., 7.}}], True->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "DownPointerOpenerHot"],
+               ImageSizeCache->{10., {3., 7.}}]}, Dynamic[
+              System`InformationDump`mouseOver$$]],
+             Alignment->Left,
+             Appearance->{"Default" -> None},
+             
+             ButtonFunction:>FEPrivate`Set[
+              System`InformationDump`open$$, True],
+             Evaluator->Automatic,
+             FrameMargins->{{9, 0}, {0, 0}},
+             ImageMargins->0,
+             ImageSize->Full,
+             Method->"Preemptive"],
+            
+            EventHandlerTag[{
+             "MouseEntered" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
+              "MouseExited" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
+              Method -> "Preemptive", PassEventsDown -> Automatic, 
+              PassEventsUp -> True}]],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], "\[SpanFromLeft]"}
+        },
+        AutoDelete->False,
+        FrameStyle->Directive[
+          GrayLevel[0.8], 
+          Thickness[Tiny]],
+        GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
+        GridBoxDividers->{
+         "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
+        GridBoxItemSize->{
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+       "Grid"]}, Dynamic[System`InformationDump`open$$],
+      BaselinePosition->Baseline,
+      FrameMargins->0,
+      ImageSize->Automatic],
+     DynamicModuleValues:>{}],
+    BaseStyle->"InformationGridFrame",
+    StripOnInput->False], "InformationGridPlain",
+   StripOnInput->False],
+  InformationData[<|
+   "ObjectType" -> "Symbol", "Usage" -> 
+    "(Siphons)isDrainable[reactions, speciesSet] checks if speciesSet is \
+drainable for the given reaction network. A set is drainable if there exists \
+a reaction pathway that decreases all species in the set", "Documentation" -> 
+    None, "OwnValues" -> None, "UpValues" -> None, "DownValues" -> 
+    Information`InformationValueForm[
+     DownValues, EpidCRN`isDrainable, {EpidCRN`isDrainable[
+         Pattern[EpidCRN`Private`RN, 
+          Blank[]], 
+         Pattern[EpidCRN`Private`speciesSet, 
+          Blank[List]]] :> 
+       Module[{EpidCRN`Private`RND, EpidCRN`Private`spe, 
+          EpidCRN`Private`gamma, EpidCRN`Private`speciesIndices, 
+          EpidCRN`Private`coeffs, EpidCRN`Private`constraints, 
+          EpidCRN`Private`solution}, 
+         EpidCRN`Private`RND = EpidCRN`extMat[EpidCRN`Private`RN]; 
+         EpidCRN`Private`spe = Part[EpidCRN`Private`RND, 1]; 
+         EpidCRN`Private`gamma = Part[EpidCRN`Private`RND, 4]; 
+         EpidCRN`Private`speciesIndices = Flatten[
+            Map[
+            Position[EpidCRN`Private`spe, #]& , EpidCRN`Private`speciesSet]]; 
+         If[Length[EpidCRN`Private`speciesIndices] != 
+           Length[EpidCRN`Private`speciesSet], 
+           Print["Warning: Some species not found in network"]; 
+           Return[False]]; EpidCRN`Private`coeffs = Array[EpidCRN`Private`c, 
+            Part[
+             Dimensions[EpidCRN`Private`gamma], 2]]; 
+         EpidCRN`Private`linearComb = Dot[EpidCRN`Private`coeffs, 
+            Transpose[EpidCRN`Private`gamma]]; 
+         EpidCRN`Private`constraints = Join[
+            Thread[EpidCRN`Private`coeffs >= 0], 
+            Thread[
+            Part[EpidCRN`Private`linearComb, EpidCRN`Private`speciesIndices] < 
+             0], {Total[EpidCRN`Private`coeffs] > 0}]; 
+         EpidCRN`Private`solution = 
+          FindInstance[
+           EpidCRN`Private`constraints, EpidCRN`Private`coeffs, Reals]; 
+         Length[EpidCRN`Private`solution] > 0]}], "SubValues" -> None, 
+    "DefaultValues" -> None, "NValues" -> None, "FormatValues" -> None, 
+    "Options" -> None, "Attributes" -> {}, "FullName" -> 
+    "EpidCRN`isDrainable"|>, False]]], "Print",
+ CellTags->
+  "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a",ExpressionUUID->"8d539364-6845-\
+4b7f-8e52-d703d95b1eb8"]
+}, Open  ]]
+},
+WindowSize->{793.2857142857142, 371.57142857142856`},
+WindowMargins->{{Automatic, 0}, {0, Automatic}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"42bcc446-dd9b-4d92-8299-167b36120a62"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a"->{
+  Cell[69851, 1729, 15828, 366, 107, "Print",ExpressionUUID->"8d539364-6845-4b7f-8e52-d703d95b1eb8",
+   CellTags->"Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a"]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a", 86103, 2109}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 5971, 150, 466, "Input",ExpressionUUID->"241aebfa-141e-4398-aa9a-f964768b25f2"],
+Cell[CellGroupData[{
+Cell[6576, 176, 3143, 82, 175, "Print",ExpressionUUID->"203442f1-ea84-4c53-876b-01daef063cc5"],
+Cell[9722, 260, 3218, 80, 102, "Print",ExpressionUUID->"828a7156-d4df-465c-8ce8-fa44de23d8d6"]
+}, Open  ]],
+Cell[12955, 343, 768, 22, 48, "Output",ExpressionUUID->"62e40569-9ad7-4c17-8005-461b8c26d300"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13760, 370, 203, 4, 28, "Input",ExpressionUUID->"88f7d066-f603-4f80-8418-037dad62e992"],
+Cell[13966, 376, 55882, 1351, 994, "Output",ExpressionUUID->"10a79a62-bad2-4c92-9859-3429a8f02d0b"],
+Cell[69851, 1729, 15828, 366, 107, "Print",ExpressionUUID->"8d539364-6845-4b7f-8e52-d703d95b1eb8",
+ CellTags->"Info-3ea8d93f-7f24-4de6-aa41-50fa4cc6831a"]
+}, Open  ]]
+}
+]
+*)
+

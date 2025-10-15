@@ -1,0 +1,397 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     14491,        389]
+NotebookOptionsPosition[     13739,        368]
+NotebookOutlinePosition[     14183,        384]
+CellTagsIndexPosition[     14140,        381]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], "\n", 
+ RowBox[{
+  RowBox[{"SetDirectory", "[", 
+   RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";", 
+  RowBox[{"SetOptions", "[", 
+   RowBox[{"$FrontEndSession", ",", 
+    RowBox[{"NotebookAutoSave", "->", "True"}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"NotebookSave", "[", "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"AppendTo", "[", 
+    RowBox[{"$Path", ",", 
+     RowBox[{"FileNameJoin", "[", 
+      RowBox[{"{", 
+       RowBox[{
+       "$HomeDirectory", ",", "\"\<Dropbox\>\"", ",", 
+        "\"\<EpidCRNmodels\>\""}], "}"}], "]"}]}], "]"}], ";", 
+   RowBox[{"Needs", "[", "\"\<EpidCRN`\>\"", "]"}], ";", 
+   RowBox[{"RN", "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+      RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I1\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I1\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I2\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I2\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I12\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I12\>\""}]}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "\"\<I1\>\""}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "\"\<I2\>\""}], ",", 
+      RowBox[{
+       RowBox[{"\"\<I1\>\"", "+", "\"\<I2\>\""}], "->", "\"\<I12\>\""}], ",", 
+      RowBox[{"\"\<I1\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I2\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "0"}]}], "}"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"RN", "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"0", "->", "\"\<S\>\""}], ",", 
+      RowBox[{"\"\<S\>\"", "->", "0"}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I1\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I1\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I2\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I2\>\""}]}], ",", 
+      RowBox[{
+       RowBox[{"\"\<S\>\"", "+", "\"\<I12\>\""}], "->", 
+       RowBox[{"2", "*", "\"\<I12\>\""}]}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "\"\<I1\>\""}], ",", 
+      RowBox[{
+       RowBox[{"\"\<I1\>\"", "+", "\"\<I2\>\""}], "->", "\"\<I12\>\""}], ",", 
+      RowBox[{
+       RowBox[{"\"\<I1\>\"", "+", "\"\<I12\>\""}], "->", "\"\<I2\>\""}], ",", 
+      RowBox[{"\"\<I1\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I2\>\"", "->", "0"}], ",", 
+      RowBox[{"\"\<I12\>\"", "->", "0"}]}], "}"}]}], ";"}], "\n", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"rts", " ", "uses", " ", "plain", " ", "symbols", " ", 
+    RowBox[{"(", 
+     RowBox[{"no", " ", "quotes"}], ")"}]}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"rts", "=", 
+   RowBox[{"{", 
+    RowBox[{"muS", ",", 
+     RowBox[{"(*", 
+      RowBox[{"0", "->", "S"}], "*)"}], 
+     RowBox[{"muS", "*", "S"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"S", "->", "0"}], "*)"}], 
+     RowBox[{"beta1", "*", "S", "*", "I1"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"S", "+", "I1"}], "->", 
+       RowBox[{"2", " ", "I1"}]}], "*)"}], 
+     RowBox[{"beta2", "*", "S", "*", "I2"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"S", "+", "I2"}], "->", 
+       RowBox[{"2", " ", "I2"}]}], "*)"}], 
+     RowBox[{"beta12", "*", "S", "*", "I12"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"S", "+", "I12"}], "->", 
+       RowBox[{"2", " ", "I12"}]}], "*)"}], 
+     RowBox[{"m21", "*", "I12"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"I12", "->", 
+       RowBox[{"I1", "[", 
+        RowBox[{"earlier", " ", "block", " ", "only"}], "]"}]}], "*)"}], 
+     RowBox[{"delta12", "*", "I1", "*", "I2"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"I1", "+", "I2"}], "->", 
+       RowBox[{"I12", "[", 
+        RowBox[{"vanishes", " ", "at", " ", "DFE"}], "]"}]}], "*)"}], 
+     RowBox[{"eta", "*", "I1", "*", "I12"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{
+       RowBox[{"I1", "+", "I12"}], "->", 
+       RowBox[{"I2", "[", 
+        RowBox[{"vanishes", " ", "at", " ", "DFE"}], "]"}]}], "*)"}], 
+     RowBox[{"mu1", "*", "I1"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"I1", "->", "0"}], "*)"}], 
+     RowBox[{"mu2", "*", "I2"}], ",", 
+     RowBox[{"(*", 
+      RowBox[{"I2", "->", "0"}], "*)"}], 
+     RowBox[{"mu12", "*", "I12"}]}], "            ", 
+    RowBox[{"(*", 
+     RowBox[{"I12", "->", "0"}], "*)"}], "}"}]}], ";"}], "\n", 
+ RowBox[{"Print", "[", 
+  RowBox[{"\"\<reactions and transitions: \>\"", ",", 
+   RowBox[{
+    RowBox[{"Transpose", "[", 
+     RowBox[{"{", 
+      RowBox[{"RN", ",", "rts"}], "}"}], "]"}], "//", "MatrixForm"}]}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+    "RHS", ",", " ", "var", ",", " ", "par", ",", " ", "cp", ",", " ", "mSi", 
+     ",", " ", "Jx", ",", " ", "Jy", ",", " ", "E0", ",", " ", "Kp", ",", " ",
+      "R0A", ",", " ", "infV", ",", "ngm"}], "}"}], "=", 
+   RowBox[{"bdAn", "[", 
+    RowBox[{"RN", ",", "rts"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Print", "[", 
+  RowBox[{
+  "\"\<E0 is\>\"", ",", "E0", ",", "\"\< mSi=\>\"", ",", " ", "mSi", ",", 
+   "\"\< infV=\>\"", ",", "infV", ",", "\"\< the \>\"", ",", 
+   RowBox[{"R0A", "//", "Length"}], ",", "\"\<repr fns=\>\"", ",", "R0A", ",", 
+   RowBox[{"Kp", "//", "MatrixForm"}]}], 
+  "]"}], "\[IndentingNewLine]", "Kp", "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.968734714882238*^9, 3.968734714882238*^9}, 
+   3.968734763039586*^9, {3.968734828238323*^9, 3.968734828871845*^9}, 
+   3.9687348866084113`*^9, 3.9687353997235184`*^9, 3.968735782609889*^9, {
+   3.968735871997905*^9, 3.968735884432628*^9}, {3.9687359263517456`*^9, 
+   3.9687359317511654`*^9}, {3.968735992854699*^9, 3.968735994455556*^9}, {
+   3.968736064859342*^9, 3.9687360835772038`*^9}, 3.968737750575331*^9},
+ CellLabel->"In[50]:=",ExpressionUUID->"241aebfa-141e-4398-aa9a-f964768b25f2"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"reactions and transitions: \"\>", "\[InvisibleSpace]", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        RowBox[{"0", "\[Rule]", "\<\"S\"\>"}], "muS"},
+       {
+        RowBox[{"\<\"S\"\>", "\[Rule]", "0"}], 
+        RowBox[{"muS", " ", "S"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I1\"\>", "+", "\<\"S\"\>"}], "\[Rule]", 
+         RowBox[{"2", " ", "\<\"I1\"\>"}]}], 
+        RowBox[{"beta1", " ", "I1", " ", "S"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I2\"\>", "+", "\<\"S\"\>"}], "\[Rule]", 
+         RowBox[{"2", " ", "\<\"I2\"\>"}]}], 
+        RowBox[{"beta2", " ", "I2", " ", "S"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I12\"\>", "+", "\<\"S\"\>"}], "\[Rule]", 
+         RowBox[{"2", " ", "\<\"I12\"\>"}]}], 
+        RowBox[{"beta12", " ", "I12", " ", "S"}]},
+       {
+        RowBox[{"\<\"I12\"\>", "\[Rule]", "\<\"I1\"\>"}], 
+        RowBox[{"I12", " ", "m21"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I1\"\>", "+", "\<\"I2\"\>"}], 
+         "\[Rule]", "\<\"I12\"\>"}], 
+        RowBox[{"delta12", " ", "I1", " ", "I2"}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"I1\"\>", "+", "\<\"I12\"\>"}], 
+         "\[Rule]", "\<\"I2\"\>"}], 
+        RowBox[{"eta", " ", "I1", " ", "I12"}]},
+       {
+        RowBox[{"\<\"I1\"\>", "\[Rule]", "0"}], 
+        RowBox[{"I1", " ", "mu1"}]},
+       {
+        RowBox[{"\<\"I2\"\>", "\[Rule]", "0"}], 
+        RowBox[{"I2", " ", "mu2"}]},
+       {
+        RowBox[{"\<\"I12\"\>", "\[Rule]", "0"}], 
+        RowBox[{"I12", " ", "mu12"}]}
+      },
+      GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}],
+  SequenceForm["reactions and transitions: ", 
+   MatrixForm[{{0 -> "S", $CellContext`muS}, {
+     "S" -> 0, $CellContext`muS $CellContext`S}, {
+     "I1" + "S" -> 
+      2 "I1", $CellContext`beta1 $CellContext`I1 $CellContext`S}, {
+     "I2" + "S" -> 
+      2 "I2", $CellContext`beta2 $CellContext`I2 $CellContext`S}, {
+     "I12" + "S" -> 
+      2 "I12", $CellContext`beta12 $CellContext`I12 $CellContext`S}, {
+     "I12" -> "I1", $CellContext`I12 $CellContext`m21}, {
+     "I1" + "I2" -> 
+      "I12", $CellContext`delta12 $CellContext`I1 $CellContext`I2}, {
+     "I1" + "I12" -> 
+      "I2", $CellContext`eta $CellContext`I1 $CellContext`I12}, {
+     "I1" -> 0, $CellContext`I1 $CellContext`mu1}, {
+     "I2" -> 0, $CellContext`I2 $CellContext`mu2}, {
+     "I12" -> 0, $CellContext`I12 $CellContext`mu12}}]],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9687348884750357`*^9, 3.968735401572461*^9, 3.9687357887957964`*^9, 
+   3.9687359343013506`*^9, {3.9687360668993425`*^9, 3.9687360852198424`*^9}, 
+   3.968737754444154*^9},
+ CellLabel->
+  "During evaluation of \
+In[50]:=",ExpressionUUID->"203442f1-ea84-4c53-876b-01daef063cc5"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"E0 is\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"S", "\[Rule]", "1"}], ",", 
+     RowBox[{"I1", "\[Rule]", "0"}], ",", 
+     RowBox[{"I12", "\[Rule]", "0"}], ",", 
+     RowBox[{"I2", "\[Rule]", "0"}]}], "}"}], 
+   "\[InvisibleSpace]", "\<\" mSi=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"I1", ",", "I12"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"I2", ",", "I12"}], "}"}]}], "}"}], 
+   "\[InvisibleSpace]", "\<\" infV=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"I1", ",", "I12", ",", "I2"}], "}"}], 
+   "\[InvisibleSpace]", "\<\" the \"\>", "\[InvisibleSpace]", "3", 
+   "\[InvisibleSpace]", "\<\"repr fns=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     FractionBox[
+      RowBox[{"beta2", " ", "S"}], "mu2"], ",", 
+     FractionBox[
+      RowBox[{"beta12", " ", "S"}], 
+      RowBox[{"m21", "+", "mu12"}]], ",", 
+     FractionBox[
+      RowBox[{"beta1", " ", "S"}], "mu1"]}], "}"}], "\[InvisibleSpace]", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        FractionBox[
+         RowBox[{"beta1", " ", "S"}], "mu1"], 
+        FractionBox[
+         RowBox[{"beta1", " ", "m21", " ", "S"}], 
+         RowBox[{
+          RowBox[{"m21", " ", "mu1"}], "+", 
+          RowBox[{"mu1", " ", "mu12"}]}]], "0"},
+       {"0", 
+        FractionBox[
+         RowBox[{"beta12", " ", "S"}], 
+         RowBox[{"m21", "+", "mu12"}]], "0"},
+       {"0", "0", 
+        FractionBox[
+         RowBox[{"beta2", " ", "S"}], "mu2"]}
+      },
+      GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}],
+  SequenceForm[
+  "E0 is", {$CellContext`S -> 1, $CellContext`I1 -> 0, $CellContext`I12 -> 
+    0, $CellContext`I2 -> 0}, 
+   " mSi=", {{$CellContext`I1, $CellContext`I12}, {$CellContext`I2, \
+$CellContext`I12}}, 
+   " infV=", {$CellContext`I1, $CellContext`I12, $CellContext`I2}, " the ", 3,
+    "repr fns=", {$CellContext`beta2 $CellContext`mu2^(-1) $CellContext`S, \
+$CellContext`beta12 ($CellContext`m21 + $CellContext`mu12)^(-1) \
+$CellContext`S, $CellContext`beta1 $CellContext`mu1^(-1) $CellContext`S}, 
+   MatrixForm[{{$CellContext`beta1 $CellContext`mu1^(-1) $CellContext`S, \
+$CellContext`beta1 $CellContext`m21 ($CellContext`m21 $CellContext`mu1 + \
+$CellContext`mu1 $CellContext`mu12)^(-1) $CellContext`S, 0}, {
+     0, $CellContext`beta12 ($CellContext`m21 + $CellContext`mu12)^(-1) \
+$CellContext`S, 0}, {
+     0, 0, $CellContext`beta2 $CellContext`mu2^(-1) $CellContext`S}}]],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9687348884750357`*^9, 3.968735401572461*^9, 3.9687357887957964`*^9, 
+   3.9687359343013506`*^9, {3.9687360668993425`*^9, 3.9687360852198424`*^9}, 
+   3.9687377544710217`*^9},
+ CellLabel->
+  "During evaluation of \
+In[50]:=",ExpressionUUID->"828a7156-d4df-465c-8ce8-fa44de23d8d6"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     FractionBox[
+      RowBox[{"beta1", " ", "S"}], "mu1"], ",", 
+     FractionBox[
+      RowBox[{"beta1", " ", "m21", " ", "S"}], 
+      RowBox[{
+       RowBox[{"m21", " ", "mu1"}], "+", 
+       RowBox[{"mu1", " ", "mu12"}]}]], ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", 
+     FractionBox[
+      RowBox[{"beta12", " ", "S"}], 
+      RowBox[{"m21", "+", "mu12"}]], ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", 
+     FractionBox[
+      RowBox[{"beta2", " ", "S"}], "mu2"]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.9687360853953147`*^9, 3.9687377544908886`*^9},
+ CellLabel->"Out[59]=",ExpressionUUID->"62e40569-9ad7-4c17-8005-461b8c26d300"]
+}, Open  ]]
+},
+WindowSize->{793.2857142857142, 371.57142857142856`},
+WindowMargins->{{Automatic, 1.2857142857142208`}, {-9, Automatic}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"51e2f671-d270-4483-87b7-3a743b623db8"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 5971, 150, 466, "Input",ExpressionUUID->"241aebfa-141e-4398-aa9a-f964768b25f2"],
+Cell[CellGroupData[{
+Cell[6576, 176, 3143, 82, 175, "Print",ExpressionUUID->"203442f1-ea84-4c53-876b-01daef063cc5"],
+Cell[9722, 260, 3218, 80, 102, "Print",ExpressionUUID->"828a7156-d4df-465c-8ce8-fa44de23d8d6"]
+}, Open  ]],
+Cell[12955, 343, 768, 22, 48, "Output",ExpressionUUID->"62e40569-9ad7-4c17-8005-461b8c26d300"]
+}, Open  ]]
+}
+]
+*)
+

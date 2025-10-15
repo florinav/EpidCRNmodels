@@ -1,0 +1,428 @@
+%%%%%%%%%%%%%%%%%%%%%%
+\iffalse
+\def\y{S} \def\x{I} \def\ye{\bar{S}}\def\xe{\bar{I}}
+
+\section{Extracting the fundamental matrices of $\mathbf{x}-\mathbf{y}$ \ABP s} \lab{s:ABa}
+
+The papers  [Fall et al., 2007, Iggidr et al., 2006,
+451
+Bonzi et al., 2011]  further analyzed the ``$\mathbf{x}-\mathbf{y}$ type models" appearing in the celebrated paper  [Van den Driessche and Watmough, 2002]. Before this work, it was not well appreciated that the path to the stability threshold of the DFE is intertwined with that for the stability threshold of the endemic equilibrium (EE). In retrospect, this connection is not surprising, since even in simple models, the DFE and EE are members of a ``stability relay team" --- one takes over the stability from the other. This connection translates into a list of five laws for \ABa s presented in what follows, a sixth determinant law discovered in  [Avram et al., 2023a], and the Lyapunov laws in Sections \ref{s:LDFE} and \ref{s:LEE}.
+
+ Let us clarify that some of these laws are continually being reproved in particular examples in the ME literature, without making reference to the common structure of \ABP s [Fall et al., 2007, Iggidr et al., 2006, Bonzi et al., 2011].. We unify and present all of them in this section.
+
+ In these works the x \com s are denoted by $I$, and the y \com s are denoted by $S$. We chose to adopt their notation in this section %and also to revert the meaning of $n,m,$
+to facilitate comparison with the original work. Consider the following model:
+
+% \begin{keyresult}[Mathematical Framework]
+\be{DSI}
+\bc
+\y'=\f(\y)- \y^t \diag ( \bbe \x ) , \qu \f(\y)=\Lambda +A_S \y, \text { with } A_S \text { a \MH\ matrix }\\
+\x'=P \y^t \diag (\bbe \x ) + A \x %:=M(\y) \x , M(\y)=\pp{K(\y)- I_k} (-A), K(\y)= \ba \y^t \bbe (-A )^{-1}.
+\ec,
+\ee
+\iffalse
+\begin{align}
+\dot{S} &= \Lambda - \diag(\mu_S) S + A_S S - \diag(BI) S \\
+\dot{I} &= P \diag(BI) S - \diag(\mu_I + \gamma_I) I + A I, \\
+\end{align}
+\fi
+% \end{keyresult}
+where
+\begin{itemize}
+ \item $S \in \R^m_+$: $m$ susceptible compartments.
+ \item $I \in \R^n_+$: $n$ infected/infectious compartments.
+ \item $\bbe \in R_+^{m,n} > 0$: WAIFW (Who Acquires Infection From Whom) matrix; here $ \bbe (i,j) $ denotes the contact and infectivity rate of $ \x _j $ within the group $ \y_i $.
+ \item $A_S \in R_+^{m,m}, A\in R_+^{n,n}$: stable Metzler matrices modeling the intra flows between S and I compartments, \resp.
+ \item $P\in R_+^{n,m}$: Column-stochastic matrix that distributes the vector $\diag (\bbe \x ) \y$ among the $\x$ \com s of the infection.
+ \item $\f $: the dynamics in the $\y$ \com s, in the absence of the $\x$ \com s, with $\La\in \mathbb{R}_+^m$.
+ \end{itemize}
+
+
+
+\begin{hypothesis} \label{hyp: bilinear_model}
+\begin{itemize}
+\item Any susceptible compartment is accessible from a susceptible compartment with recruitment.
+
+\item Any infected-infectious compartment is accessible from at least one entry-point for infection.
+\end{itemize}
+\end{hypothesis}
+
+\beR We will call \eqr{DSI} an \ABP; it represents a very general class
+of quadratic ME models. \Fr more general ME models can be defined by replacing the quadratic rates of an \ABP\ by admissible rates in the sense of CRN; see [Angeli et al., 2007].
+\eeR
+
+
+
+
+The parameterization of \eqr{DSI} via matrices makes explicit several formulas. In particular,
+\BEN \im
+the DFE is unique and \sats\
+$$\y_0=(-A_S)^{-1}\Lambda\in \mathbb{R}_+^m$$
+(recall that assuming $A_S$ is Metzler stable ensures the element-wise positivity of $(-A_S)^{-1})$).
+
+\im
+the basic reproduction number is
+$${R}_0 = \rho\left(P \diag(\y_0) B \pr{-A}^{-1}\right),$$
+where $\y_0$ is the disease-free equilibrium.
+\EEN
+ Further explicit formulas hold when either $P=\ba (1,1, ...,1)$ or $\bbe=\ba \vbe$ are of rank one. In the first case,
+$\ba\in \mathbb{R}_+^{n,1}$ is a column probability vector modeling the insertion probabilities of a susceptible individual among disease states, denoted by \ABa s in what follows.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\subsection{The Five Laws of \ABa s}
+
+The relevant Mathematica file for \ABa s is BonziEE.nb. When $P=\ba \bff 1^t$ is of rank one, the \ABP model \mbw
+\be{FIS0}
+\bc
+\y'=\f( \y)- \diag[\y](\bbe \x)=\f( \y)- \diag[\bbe \x] \y , \\
+\x'=\pp{\ba \y^t \bbe + A} \x:=M(\y) \x=\pp{K(\y)- I_k} (-A) x, K(\y)=\ba \y^t \bbe (-A )^{-1},
+\ec
+\ee
+where $K(\y)$ denotes the NGM. This model does not take into account the origin of susceptible individuals after infection. Once infected, individuals enter the infectious compartments according to the stochastic vector $\ba$.
+
+
+\begin{definition}[Fundamental bilinear form of balanced bilinear models] $$f(\x,\y)= \y^t \bbe (-A )^{-1} \x $$ is called the fundamental bilinear form.
+\end{definition}
+
+We next recall a classical concept in the theory of Markov processes, which has also been useful in mathematical epidemiology; see, for example, [Hurtado and Kirosingh, 2019a,
+507
+Hurtado and Kirosingh, 2019b, Avram et al., 2023b, Avram et al., 2024a].
+\begin{definition} [dwell times] For any finite-space irreducible CTMC with absorbing states and transitions between the transient states encapsulated in a matrix $A$, dwell times are the (positive) elements of the matrix $(-A)^{-1}$. \end{definition}
+
+The name is explained by the well-known fact that these are precisely the means (averages) of times before absorption, conditioned on both a starting point and a last point before absorption. We will also use this term for the vector obtained after multiplication by a starting probability vector $\ba$.
+
+\beT \lab{t:end} [The Five Laws of \ABa\ s]
+
+For any \ABa\ \eqref{FIS0}
+% \be{FIS}
+% \bc
+% \y'=\f( \y)- \diag[\y](\bbe \x)=\f( \y)- \diag[\bbe \x] \y , \\
+% \x'=\pp{\ba \y^t \bbe + A} \x:=M(\y) \x=\pp{K(\y)- I_k} (-A) \x, K(\y)=\ba \y^t \bbe (-A )^{-1},
+% \ec
+% \ee
+\satg Hypothesis~\ref{hyp: bilinear_model}, the following formulas hold:
+\BEN
+\im
+\textbf{First Law: The Basic Reproduction Number \cite[(3.2)]{Fall}, \cite[(6)]{Bonzi} of \eqr{FIS0}} is
+\be{R0ABa}
+R_0=\y_0^t \bbe (-A^{-1})\ba :=\y_0^t \mR =f(\y_0,\ba),
+\ee
+where\footnote{Note the change in order of the factors $ \bbe, \ba$ in \eqr{R0ABa} \wrt $K(\y)$ in \eqr{DSI},
+and the fact that the NGM $K=\bff \al. \y^t \bbe (-A^{-1})$ has rank one. Particular cases of this formula, with only one \sus\ class, also appear in \cite{IggidrCEP,Arino,AABBGH}.}
+\be{mR}\mR=\bbe (-A^{-1})\ba\ee will be called {\bf replacement vector}.
+
+
+\im The steady-state endemic $\x$ coordinates are proportional to the dwell times~\cite[(3.5)]{Fall}
+ \be{xee}\xe=(\y^t \bbe \x) (-A )^{-1}\ba:=k D_w, \quad D_w:=(-A)^{-1} \ba.
+ \ee
+
+\im \textbf{Steady-state endemic $\ye$ coordinates} \saty:
+\be{yee}
+ \ye =\pr{\diag[ \bbe \xe]-A_S}^{-1} \La =\pp{(-A_S)^{-1} \diag[\bbe \xe]+I }^{-1} \y_0
+\ee
+ and
+ \be{yeeAB}
+ \ye=\pr{k\diag[ \mR]-A_S}^{-1} \La.%=\pp{k(-A_S)^{-1} \diag[\mR]+I }^{-1} \y_0.
+ \ee
+ where $k$ is s a normalization constant.
+
+\im
+\textbf{$\ye$ normalization Law} \cite[(3.6)]{Fall}, \cite[(4)]{Bonzi}:
+\be{mRv}
+ \ye ^t .{\mR} =1. \ee
+ The normalization constant $k=\ye^t \bbe \xe$ must satisfy
+\be{H}
+ H(k) := \mR^t \ye = \mR^t \pr{k\diag[ \mR]-A_S}^{-1} \La = 1.
+\ee
+
+For example,
+$ A_S=\diag[-\mu_S] \Lra H(k)=(\fr{\mR}{k \mR+\mu})^t \La=
+\sum_j \fr{\mR_j}{k \mR_j+\mu_j} \La_{j},$ and
+\be{n1}n=1 \Lra \ye=\fr 1{\mR}, k=\mu_S (S_0 -\ye)=\mu_S \ye(R_0 -1)=\La-\fr {\mu_S}{\mR}.\ee
+
+\im There exists a unique endemic equilibrium $(\xe,\ye)$ with strictly positive coordinates if and only if $R_0 >1$.
+\EEN
+% The vector $x_ {ee}$ checks the general SIR-PH normalization formula \eqr{ino}.
+
+\eeT
+
+
+
+\beR When there is more than one variable in $\y$, $k$ is not rational, making an explicit determination of the endemic point $(\xe,\ye)$ impossible.
+
+
+\eeR
+
+
+\begin{proof} 2. Note from the $\x'$ equation that at any fixed point,
+\be{xsb}\x= (\y^t \bbe \x) (-A )^{-1}\ba\ee
+ must be proportional to $D_w=(-A )^{-1}\ba >0$
+(recall that $A$ is \MH and therefore invertible,  with inverse having only nonnegative elements).
+
+3. The equation \eqr{yee} follows from the $\y$ system:
+$$\ye =\pr{\diag[ \bbe \xe]-A_S}^{-1} \La =\pp{(-A_S)^{-1} \diag[\bbe \xe]+I }^{-1} \y_0 .$$
+
+ \eqr{yeeAB} follows by using the proportionality of $\xe$ to $D_w$.
+
+
+4. Now multiplying \eqr{xsb} by $\y^t \bbe$
+ yields:
+\be{ssb}\y^t \bbe \x= (\y^t \bbe \x) \y^t \bbe (-A )^{-1}\ba,\ee
+which implies that either
+$$\bc \y^t \bbe \x =0&\te{ or}\\
+1=\y^t \bbe (-A )^{-1}\ba = \y^t \mR\ec, $$
+establishing \eqr{mRv}.
+The normalization law \eqr{H} follows by multiplying \eqr{yee} on the left by $\mR^t$, and using \eqr{mRv}.
+
+5. It may be verified that $H(k)$ is a strictly decreasing function satisfying $\displaystyle\lim_{x \to \I} H(x) = 0$. Therefore, a unique positive solution to the normalization law exists if and only if $H(0)=R_0 > 1, $ and the positivity of $k$ entails that of $\xe,\ye$.
+\end{proof}
+
+\beR For probabilistic interpretations, note that
+\BEN \im $\dw =( - A)^{-1} . \ba$ may be interpreted
+as ``expected infection times until recovery", starting in the first state with law $\ba$;
+
+\im
+$\mR$ is the vector whose $j$'th component is the expected infections of type $j$
+generated by an $\y$ individual in class $1$;
+
+\im
+the \elt s $c_{ij}$ of the {\bf infections rates matrix}
+$$C=\bbe (-A^{-1})$$ are precisely the probabilities of an infection of type $i$
+generated by one \sus\ individual in class $j$, before absorption, in absorption CTMC.
+\EEN
+\eeR
+
+\subsection{An explicit \Lf\ establishing global asymptotic stability of the DFE for \ABa\ when $R_0< 1$} \lab{s:LDFE}
+
+The following result describes a Lyapunov function for establishing the global asymptotic stability of the DFE.
+
+\beT [Stability of DFE]
+\lab{t:DFE} For an $\xy$ ODE
+\bea
+\bc
+\y'=\f(\y)- \y \circ (\bbe \x)=\f(\y)- \diag[\y](\bbe \x)=\f(\y)- \diag[\bbe \x] \y , \\
+\x'=\pp{\ba \y^t \bbe + A} \x,
+\ec
+\eea
+let $R_0$ be defined by the natural \regS\ of the \jin\ into $\ba \y^t \bbe$ and $A$. The following holds:
+\begin{itemize}
+\item If ${R}_0 > 1$, then the disease-free equilibrium is unstable.
+
+\item If ${R}_0 \leq 1$, and {$A_S=-\diag(\mu_S)$
+ is a strictly negative diagonal matrix}, then
+ the function
+$V_{DF}(\x,\y):\mathbb{R}_+^n\times \mathbb{R}_+^m \to \mathbb{R}$
+\be{LDFE}
+V_{DF}(\x,\y)=R_0 ({\bff 1^t} \y- \y_0^t \ln({\y}))+\y_0^t
+\bbe (-A^{-1})\x=R_0 ({\bff 1^t} \y- \y_0^t \ln({\y}))+\y_0^t C\x
+\ee
+is a \Lf, whose minimum is attained uniquely
+at the DFE, and the disease-free
+ equilibrium is globally asymptotically stable.
+\end{itemize}
+\eeT
+
+\beR Note that \BEN \im the linear second term $f(\y_0,\x)=\y_0^t
+B(-A)^{-1}\x$ may be obtained from the formula for $R_0$ of \cite{Fall,Arino}
+by replacing $\ba$ with $\x$, and
+ \im
+ the first is the Volterra \Lf, multiplied by $R_0$.
+ \EEN
+\eeR
+
+\begin{proof}[Proof of Theorem~\ref{t:DFE}]
+ The time derivative of the Lyapunov function is
+% $$V_{DF}(S,I) = {R}_0 (\mathbf{1}^T S - S_0^T \ln(S)) + S_0^T B(-A^{-1})I$$
+% is:
+\bea
+&& V_{DF}'= R_0 {\bff 1^t}(\f(\y)- \diag(\y) (\bbe \x) )-
+R_0 \y_0^t\pp{\frac{\f(\y)}{\y}- (\bbe \x) }+\y_0^t C(\ba \y^t \bbe \x+ A \x)\\
+&& =R_0 {\bff 1^t}(\f(\y)- \red{\diag(\y) (\bbe \x) })-
+R_0 \y_0^t \pp{\frac{\f(\y)}{\y}- {(\bbe \x)}}+ R_0 \red{\y^t \bbe \x}- {\y_0^t \bbe \x}\\&&
+=R_0 \pp{\bff 1^t. \f(\y) -
+\y_0^t.\frac{\f(\y)}{\y}}+\y_0^t \bbe \x (R_0-1)=R_0 \pp{\y^t -
+\y_0^t} \frac{\f(\y)}{\y}+\y_0^t \bbe \x (R_0-1),
+\eea
+where we used $ R_0=\y_0^t C\ba$, and the cancellation of the red %and blue
+terms due to $ {\bff 1^t} diag(\y) =\y^t.
+%\; \y_0^t diag(\bbe \x) {\bff 1}=\y_0^t \bbe \x.$
+$
+
+Since $f(S) =A_S(S - S_0)= -\diag(\mu_S)(S - S_0)$, it follows that
+\be{can}
+ V_{DF}'
+=-R_0 \sum_j
+\frac{\mu_j(\y_j-\y_{0,j})^2}{\y_j}+\y_0^t \bbe \x (R_0-1).
+\ee
+\textbf{Case 1: ${R}_0 < 1$}
+Both terms in the derivative are $\leq 0$, with equality if and only if $S = S_0$ and $I = 0$.
+\textbf{Case 2: ${R}_0 = 1$}, then
+$$\dot{V}_{DF} = -\sum_j \frac{\mu_j(S_j - S_{0,j})^2}{S_j} \leq 0.$$
+The largest invariant set where $\dot{V}_{DF} = 0$ satisfies $S = S_0$,
+which implies $I = 0$. Global asymptotic stability then follows from the LaSalle's invariance principle.
+\end{proof}
+
+ \iffalse
+\BEN
+
+\im The Jacobian is: \be{JF}J(X)=J(\x,\y)=\bep \ba \y^t \bbe + A&|&\ba\pr{ \bbe \x }^t\\\hline \\ -\diag(\y) \bbe&|& A_S -\diag( \bbe \x )\eep\ee
+
+\im The determinant of the Jacobian at the DFE is $$\dd=det(\ba \y_0^t \bbe + A) det(A_S), \y_0=(-A_S)^{-1}\Lambda.$$
+
+ %\im The endemic point is unique and explicit, and the determinant of the Jacobian at the EE is $-\dd.$
+\im Lyapunov functions allowing to prove the GAS property of the two fixed points are also available-- see next section.
+\EEN
+\fi
+
+ The works [IggidrCEP,Fall,Bonzi] suggest the natural question of the existence of an explicit \Lf\ which establishes the global stability of the EE of \ABa s when $R_0> 1$. They offer a positive answer, reviewed in the next section, for the case where $A$ is a bidiagonal matrix:
+\begin{equation} \label{eq: bidiagonal_A}
+A = \begin{pmatrix}
+-\alpha_1 & 0 & 0 & \cdots & 0 \\
+\gamma_1 & -\alpha_2 & 0 & \cdots & 0 \\
+0 & \gamma_2 & -\alpha_3 & \cdots & 0 \\
+\vdots & \ddots & \ddots & \ddots & \vdots \\
+0 & \cdots & 0 & \gamma_{m-1} & -\alpha_m
+\end{pmatrix}
+\end{equation}
+where $\alpha_i = \gamma_{i} + \mu_{i} > 0, \gamma_i \geq 0$ (which they call a Staged Progression Infectivity Model [Bonzi]).
+
+
+\subsection{A \Lf\ establishing the Global Stability of the Endemic Equilibrium in the Staged Progression Case}\lab{s:LEE}
+While the results presented until now apply to all \ABP s, the one in this section holds only for the staged progression case with a bidiagonal $A$ defined in \eqref{eq: bidiagonal_A}; see Fig.~\ref{f:StagedProgression} for an illustration.
+
+\begin{figure}
+ \caption{Staged progression update.}
+ \label{f:StagedProgression}
+\scalebox{0.8}{
+\begin{tikzpicture}[
+ node distance=1.5cm,
+ susceptible/.style={rectangle, draw=black, fill=green!30, minimum width=1.2cm, minimum height=0.8cm, font=\small},
+ infected/.style={rectangle, draw=black, fill=red!30, minimum width=1.2cm, minimum height=0.8cm, font=\small},
+ recovered/.style={rectangle, draw=black, fill=blue!30, minimum width=1.2cm, minimum height=0.8cm, font=\small},
+ arrow/.style={-{Stealth[length=3mm]}, thick},
+ rate/.style={font=\scriptsize}
+]
+
+% Susceptible compartments
+\node[susceptible] (S1) {$S_1$};
+\node[susceptible, right=of S1] (S2) {$S_2$};
+\node[right=0.75cm of S2] (Sdots) {$\cdots$};
+\node[susceptible, right=0.75cm of Sdots] (Sn) {$S_n$};
+
+% Birth rates
+\foreach \i in {1,2,n} {
+ \draw[arrow] ([yshift=1cm]S\i.north) -- (S\i.north) node[midway, right, rate] {$\Lambda_\i$};
+}
+
+% Death rates from susceptible
+\foreach \i in {1,2,n} {
+ \draw[arrow] (S\i.south) -- ([yshift=-1cm]S\i.south) node[midway,
+ right, rate] {$\mu {S_\i}$};
+}
+
+% Infected compartments (staged progression)
+\node[infected, below=2.5cm of S1] (I1) {$I_1$};
+\node[infected, right=of I1] (I2) {$I_2$};
+\node[right=of I2] (Idots) {$\dots$};
+\node[infected, right=of Idots] (Im) {$I_m$};
+
+% Infection rates (from all S_i to I_1)
+\draw[arrow] (S1.-115) to[out=-120, in=120] (I1.135) node[midway,
+ yshift=-1.5cm, xshift=-1.75cm, rate]
+% {$\beta_{11}I_1 + \beta_{12}I_2 + \cdots + \beta_{1m}I_m$};
+ {$S_1\sum_{j=1}^m \beta_{1j}I_j$};
+\draw[arrow] (S2.-115) to[out=-90, in=90] (I1.north) node[midway,
+rotate=30, yshift=-1.75cm, xshift=0.5cm, rate]
+%{$\beta_{21}I_1 + \beta_{22}I_2 + \cdots + \beta_{2m}I_m$};
+ {$S_2\sum_{j=1}^m \beta_{2j}I_j$};
+\draw[arrow] (Sn.-115) to[out=-90, in=60] (I1.45) node[midway,
+yshift=-2.cm, xshift=4cm, rate]
+%{$\beta_{n1}I_1 + \beta_{n2}I_2 + \cdots + \beta_{nm}I_m$};
+ {$S_n\sum_{j=1}^m \beta_{nj}I_j$};
+
+% Progression rates between infected classes
+\draw[arrow] (I1.east) -- (I2.west) node[midway, above, rate] {$\gamma_1 I_1$};
+\draw[arrow] (I2.east) -- (Idots.west) node[midway, above, rate]
+{$\gamma_{2} I_{2}$};
+\draw[arrow] (Idots.east) -- (Im.west) node[midway, above, rate]
+{$\gamma_{m-1} I_{m-1}$};
+
+% Death rates from infected classes
+\draw[arrow] (I1.south) -- ([yshift=-1cm]I1.south) node[midway, right, rate]
+{$\mu_1 {I_1}$};
+\draw[arrow] (I2.south) -- ([yshift=-1cm]I2.south) node[midway, right, rate]
+{$\mu_2 {I_2}$};
+\draw[arrow] (Im.south) -- ([yshift=-1cm]Im.south) node[midway, right, rate]
+{$\mu_m I_m$};
+
+% Recovery compartment
+\node[recovered, right=of Im] (R) {$R$};
+
+% Recovery rate
+\draw[arrow] (Im.east) -- (R.west) node[midway, above, rate] {$\gamma_m I_m$};
+
+% Death rate from recovery
+\draw[arrow] (R.south) -- ([yshift=-1.0cm]R.south) node[midway, right,
+rate] {$\mu R$};
+
+% Labels
+%\node[above=2cm of S2, font=\small] {Birth rates: $\Lambda_1, \Lambda_2, \Lambda_3, \ldots, \Lambda_n$};
+\node[left=1cm of I1, font=\small, align=center] {staged\\progression:};
+%\node[right=2.5cm of I2, font=\small, align=center] {Death rates:\\$\mu_{I_1}, \mu_{I_2}, \ldots, \mu_{I_m}$};
+\end{tikzpicture}
+}
+\end{figure}
+
+\beT [\cite{IggidrCEP,Bonzi}]\lab{t:GASee} Assume that $\f( \y)=\La+ A_S \y,$ with {$A_S=-\diag[\mu_S]>0$, $\al=e_1$, and that the progression matrix $A$ has the bidiagonal progression structure in \eqref{eq: bidiagonal_A}}. If $R_0> 1$, then the unique endemic equilibrium $(\bar{S}=\fr{\La}{k \mR +\mu_S}, \bar{I})$ is globally asymptotically stable on $\Rplus^{n+m} \setminus \{(S,I) : I = 0\}$, and the function
+\be{Vee} V_{EE}(\x,\y)=
+ (\bff 1^t \y- \ye^t \circ \ln \y) + b (\x -\xe \circ\ln \x ), \qu b=\ye^t
+\bbe (-A^{-1}):=\ye^t C
+\ee
+is a (Volterra type) Lyapunov function,
+which has a unique global minimum at the EE $(\xe , \ye)$.
+\eeT
+
+\begin{proof} Using
+\bea && \ye^t C\ba=1, C A=-\bbe\\&& \Lambda = -A_S \bar{S} + \diag(\bar{S})B \bar{I} \Lra \f(\y)=A_S(\y-\ye)+ \diag(\bar{S})B \bar{I},\eea
+note that the derivative of $V_{EE}$ along trajectories of system is
+\bea
+V_{EE}' && =(\bff 1-\fr {\ye}{\y}).\pp{\f( \y)- \diag(\y) (\bbe \x) }+
+\ye^t C \diag \pp{\bff 1-\fr {\xe}{\x}} (\ba \y^t \bbe \x+ A \x)
+\\
+&&=(\bff 1-\fr {\ye}{\y}).\f( \y)-\blue{\y^t (\bbe \x)}+\green{\ye^t \bbe \x}
++\blue{\y^t (\bbe \x)}- \green{\ye^t \bbe \x}
+\\&& \qquad - \ye^t C \diag \pp{\fr {\xe}{\x}} (\ba \y^t \bbe \x+ A \x)
+\\&&=(\bff 1-\fr {\ye}{\y}). \pp{A_S(\y-\ye)+ \diag(\bar{S})B \bar{I}}- \ye^t C \diag \pp{\fr {\xe}{\x}} \pp{\ba \y^t \bbe \x+ A \x}
+\\&&=(\bff 1-\fr {\ye}{\y}). A_S(\y-\ye)+ \Omega_1+\Omega_2+\Omega_3+\Omega_4,
+\eea
+where
+\begin{align}
+\Omega_1 &=\bar{S}^t B \bar{I} = \sum_{i=1}^n \sum_{j=1}^m \beta_{ij} \bar{S}_i \bar{I}_j,\\
+\Omega_2 &=-(\fr {\ye^2}{\y})^t B \bar{I} = -\sum_{i=1}^n \sum_{j=1}^m \frac{\bar{S}_i^2}{S_i}\beta_{ij} \bar{I}_j \\
+\Omega_3 &=-(\y^t \bbe \x )
+\ye^t B(-A)^{-1} \diag \pp{\fr {\xe}{\x}}\ba \\ \nonumber
+& = -\langle B I, S \rangle (\ye^t B(-A)^{-1} \ba) \frac{\bar{I}_1}{I_1}=-\frac{\bar{I}_1}{I_1} \sum_{i=1}^n \sum_{j=1}^m \beta_{ij} I_j S_i \\ \nonumber
+&= -\sum_{i=1}^n \beta_{i1} \bar{S}_i \bar{I}_1 \frac{S_i}{\bar{S}_i} - \frac{\bar{I}_1}{I_1}\sum_{i=1}^n \sum_{j=2}^m \beta_{ij} \bar{S}_i \bar{I}_j \frac{S_i}{\bar{S}_i} \frac{I_j}{\bar{I}_j} \\
+\Omega_4 &=- \ye^t B(-A)^{-1} \diag \pp{\fr {\xe}{\x}} A \x.
+\end{align}
+
+Each $\Omega_i$ represents a distinct biological and mathematical aspect:
+
+\begin{itemize}
+\item $\Omega_1$: Direct transmission effect at equilibrium
+\item $\Omega_2$: Correction for deviation of susceptible populations from equilibrium
+\item $\Omega_3$: Effect of new infections entering the first infected stage
+\item $\Omega_4$: Staged progression effects through the infected compartments
+\end{itemize}
+
+Finally, Bonzi shows that the sum of the four omegas may be written as:
+\be{Bid} \bc
+\sum_{i=1}^4 \Omega_i &= \sum_{i=1}^n \beta_{i1} \bar{S}_i \bar{I}_1 \left(2 - \frac{\bar{S}_i}{S_i} - \frac{S_i}{\bar{S}_i}\right) \\
+&\quad + \sum_{i=1}^n \sum_{j=2}^m \beta_{ij} \bar{S}_i \bar{I}_j \left[j + 1 - \frac{\bar{S}_i}{S_i} - \frac{S_i}{\bar{S}_i} \frac{\bar{I}_1}{I_1} \frac{I_j}{\bar{I}_j} - \sum_{k=1}^{j-1} \frac{I_k}{\bar{I}_k} \frac{\bar{I}_{k+1}}{I_{k+1}}\right]\ec
+\ee
+and that it is always non-positive, and strictly negative if $(\x,\y) \neq (\xe,\ye)$. Global asymptotic stability thus follows. The last step is quite intricate, and we have provided a check in the Mathematica file BonziEE.nb.
+\end{proof}
+
+\fi
+

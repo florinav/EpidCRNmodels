@@ -1,0 +1,494 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     18897,        484]
+NotebookOptionsPosition[     18516,        470]
+NotebookOutlinePosition[     18941,        486]
+CellTagsIndexPosition[     18898,        483]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+   "Apply", " ", "LCP", " ", "algorithm", " ", "to", " ", "your", " ", "SI2R",
+     " ", "model"}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Assuming", " ", "you", " ", "already", " ", "have", " ", "RHS"}],
+     ",", "var", ",", 
+    RowBox[{"mSi", " ", "from", " ", 
+     RowBox[{"bdAn", "[", 
+      RowBox[{"RN", ",", "rts"}], "]"}]}]}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+    "Print", "[", 
+     "\"\<=== SI2R MODEL: LINEAR COMPLEMENTARITY ANALYSIS ===\>\"", "]"}], 
+    ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Manual", " ", "implementation", " ", "for", " ", "your", " ", "specific",
+      " ", "case"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"analyzeS2R", "[", 
+      RowBox[{"RHS_", ",", "var_", ",", "mSi_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+        "infectionVars", ",", "s", ",", "v1", ",", "i1", ",", "i2", ",", 
+         "nonInfectionEqs", ",", "M1", ",", "M2", ",", "dfeSol", ",", 
+         "boundary1", ",", "boundary2", ",", "interior"}], "}"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{"Extract", " ", "variables", " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"assuming", " ", 
+            RowBox[{"order", ":", "s"}]}], ",", "i1", ",", "i2", ",", "v1"}], 
+          ")"}]}], "*)"}], 
+       RowBox[{
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"s", ",", "i1", ",", "i2", ",", "v1"}], "}"}], "=", "var"}],
+         ";", "\[IndentingNewLine]", 
+        RowBox[{"infectionVars", "=", 
+         RowBox[{"{", 
+          RowBox[{"i1", ",", "i2"}], "}"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<Variables: \>\"", ",", "var"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<Infection variables: \>\"", ",", "infectionVars"}], 
+         "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Factor", " ", "infection", " ", "equations"}], "*)"}], 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"i1", "'"}], "=", 
+           RowBox[{"i1", "*", "M1"}]}], ",", 
+          RowBox[{
+           RowBox[{"i2", "'"}], "=", 
+           RowBox[{"i2", "*", "M2"}]}]}], "*)"}], 
+        RowBox[{"M1", "=", 
+         RowBox[{"Simplify", "[", 
+          RowBox[{
+           RowBox[{"RHS", "[", 
+            RowBox[{"[", "2", "]"}], "]"}], "/", "i1"}], "]"}]}], ";", 
+        RowBox[{"(*", 
+         RowBox[{"Coefficient", " ", "of", " ", "i1"}], "*)"}], 
+        RowBox[{"M2", "=", 
+         RowBox[{"Simplify", "[", 
+          RowBox[{
+           RowBox[{"RHS", "[", 
+            RowBox[{"[", "3", "]"}], "]"}], "/", "i2"}], "]"}]}], ";", 
+        RowBox[{"(*", 
+         RowBox[{"Coefficient", " ", "of", " ", "i2"}], "*)"}], 
+        RowBox[{"Print", "[", "\"\<Infection matrix diagonal:\>\"", "]"}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<M\:2081\:2081 = \>\"", ",", "M1"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<M\:2082\:2082 = \>\"", ",", "M2"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Non", "-", 
+          RowBox[{"infection", " ", "equations", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"s", "'"}], " ", "and", " ", 
+             RowBox[{"v1", "'"}]}], ")"}]}]}], "*)"}], 
+        RowBox[{"nonInfectionEqs", "=", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"RHS", "[", 
+            RowBox[{"[", "1", "]"}], "]"}], ",", 
+           RowBox[{"RHS", "[", 
+            RowBox[{"[", "4", "]"}], "]"}]}], "}"}]}], ";", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"s", "'"}], " ", "and", " ", 
+          RowBox[{"v1", "'"}]}], "*)"}], 
+        RowBox[{"Print", "[", 
+         RowBox[{
+         "\"\<Non-infection equations: \>\"", ",", "nonInfectionEqs"}], "]"}],
+         ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"CASE", " ", "1"}], ":", 
+          RowBox[{"DFE", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"i1", "=", "0"}], ",", 
+             RowBox[{"i2", "=", "0"}]}], ")"}]}]}], "*)"}], 
+        RowBox[{
+        "Print", "[", "\"\<\\n--- Disease-Free Equilibrium ---\>\"", "]"}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"dfeSol", "=", 
+         RowBox[{"Solve", "[", 
+          RowBox[{
+           RowBox[{"nonInfectionEqs", "/.", " ", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"i1", "->", "0"}], ",", 
+               RowBox[{"i2", "->", "0"}]}], "}"}], "==", "0"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"s", ",", "v1"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"dfeSol", "=", 
+         RowBox[{"Join", "[", 
+          RowBox[{
+           RowBox[{"dfeSol", "[", 
+            RowBox[{"[", "1", "]"}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"i1", "->", "0"}], ",", 
+             RowBox[{"i2", "->", "0"}]}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<DFE: \>\"", ",", "dfeSol"}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Check", " ", "DFE", " ", 
+          RowBox[{"stability", ":", 
+           RowBox[{"M1", " ", "and", " ", "M2", " ", "at", " ", "DFE"}]}]}], 
+         "*)"}], 
+        RowBox[{"Print", "[", "\"\<At DFE:\>\"", "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<M\:2081\:2081 = \>\"", ",", 
+          RowBox[{"M1", "/.", " ", "dfeSol"}], ",", 
+          "\"\< = \[Beta]\:2081\[CapitalLambda]/(\[Mu]+\[Rho]) - (\[Gamma]\
+\:2081+\[Mu])\>\""}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<M\:2082\:2082 = \>\"", ",", 
+          RowBox[{"M2", "/.", " ", "dfeSol"}], ",", 
+          "\"\< = [\[Beta]\:2082\[CapitalLambda]/(\[Mu]+\[Rho]) + \[Beta]\
+\:1d65\[CapitalLambda]\[Rho]/(\[Mu](\[Mu]+\[Rho]))] - \
+(\[Gamma]\:2082+\[Mu])\>\""}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<DFE stable if both < 0 (i.e., R\:2081 < 1 and R\:2082 < 1)\>\"",
+          "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"CASE", " ", "2"}], ":", 
+          RowBox[{"Boundary", " ", "equilibrium", " ", "1", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"i1", ">", "0"}], ",", 
+             RowBox[{"i2", "=", "0"}]}], ")"}]}]}], "*)"}], 
+        RowBox[{
+        "Print", "[", 
+         "\"\<\\n--- Boundary Equilibrium 1: Strain 1 only ---\>\"", "]"}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<Conditions: i\:2081 > 0, i\:2082 = 0, M\:2081\:2081 = 0\>\"", 
+         "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"boundary1", "=", 
+         RowBox[{"Solve", "[", 
+          RowBox[{
+           RowBox[{"Join", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"M1", "==", "0"}], "}"}], ",", 
+             RowBox[{"nonInfectionEqs", "/.", " ", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"i2", "->", "0"}], "}"}], "==", "0"}]}]}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"s", ",", "v1", ",", "i1"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Length", "[", "boundary1", "]"}], ">", "0"}], ",", 
+          RowBox[{
+           RowBox[{"boundary1", "=", 
+            RowBox[{"Join", "[", 
+             RowBox[{
+              RowBox[{"boundary1", "[", 
+               RowBox[{"[", "1", "]"}], "]"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"i2", "->", "0"}], "}"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Boundary 1: \>\"", ",", "boundary1"}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Check i\:2081 > 0: \>\"", ",", 
+             RowBox[{"i1", "/.", " ", "boundary1"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Check M\:2082\:2082 at this point: \>\"", ",", 
+             RowBox[{"M2", "/.", " ", "boundary1"}]}], "]"}], ";"}], ",", 
+          RowBox[{
+           RowBox[{
+           "Print", "[", "\"\<No boundary equilibrium for strain 1 only\>\"", 
+            "]"}], ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"CASE", " ", "3"}], ":", 
+          RowBox[{"Boundary", " ", "equilibrium", " ", "2", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"i1", "=", "0"}], ",", 
+             RowBox[{"i2", ">", "0"}]}], ")"}]}]}], "*)"}], 
+        RowBox[{
+        "Print", "[", 
+         "\"\<\\n--- Boundary Equilibrium 2: Strain 2 only ---\>\"", "]"}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<Conditions: i\:2081 = 0, i\:2082 > 0, M\:2082\:2082 = 0\>\"", 
+         "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"boundary2", "=", 
+         RowBox[{"Solve", "[", 
+          RowBox[{
+           RowBox[{"Join", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"M2", "==", "0"}], "}"}], ",", 
+             RowBox[{"nonInfectionEqs", "/.", " ", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"i1", "->", "0"}], "}"}], "==", "0"}]}]}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"s", ",", "v1", ",", "i2"}], "}"}]}], "]"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Length", "[", "boundary2", "]"}], ">", "0"}], ",", 
+          RowBox[{
+           RowBox[{"boundary2", "=", 
+            RowBox[{"Join", "[", 
+             RowBox[{
+              RowBox[{"boundary2", "[", 
+               RowBox[{"[", "1", "]"}], "]"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"i1", "->", "0"}], "}"}]}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Boundary 2: \>\"", ",", "boundary2"}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Check i\:2082 > 0: \>\"", ",", 
+             RowBox[{"i2", "/.", " ", "boundary2"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Check M\:2081\:2081 at this point: \>\"", ",", 
+             RowBox[{"M1", "/.", " ", "boundary2"}]}], "]"}], ";"}], ",", 
+          RowBox[{
+           RowBox[{
+           "Print", "[", "\"\<No boundary equilibrium for strain 2 only\>\"", 
+            "]"}], ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{
+          RowBox[{"CASE", " ", "4"}], ":", 
+          RowBox[{"Interior", " ", "equilibrium", " ", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"i1", ">", "0"}], ",", 
+             RowBox[{"i2", ">", "0"}]}], ")"}]}]}], "*)"}], 
+        RowBox[{
+        "Print", "[", "\"\<\\n--- Interior Equilibrium: Both strains ---\>\"",
+          "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<Conditions: i\:2081 > 0, i\:2082 > 0, M\:2081\:2081 = 0, \
+M\:2082\:2082 = 0\>\"", "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"interior", "=", 
+         RowBox[{"Solve", "[", 
+          RowBox[{
+           RowBox[{"Join", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"M1", "==", "0"}], ",", 
+               RowBox[{"M2", "==", "0"}]}], "}"}], ",", 
+             RowBox[{"nonInfectionEqs", "==", "0"}]}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"s", ",", "v1", ",", "i1", ",", "i2"}], "}"}]}], "]"}]}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{"If", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Length", "[", "interior", "]"}], ">", "0"}], ",", 
+          RowBox[{
+           RowBox[{"Print", "[", 
+            RowBox[{"\"\<Interior equilibria: \>\"", ",", "interior"}], "]"}],
+            ";", "\[IndentingNewLine]", 
+           RowBox[{
+           "Print", "[", 
+            "\"\<Check positivity of infections for each solution\>\"", "]"}],
+            ";"}], ",", 
+          RowBox[{
+           RowBox[{
+           "Print", "[", "\"\<No interior equilibrium found\>\"", "]"}], 
+           ";"}]}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", "Summary", "*)"}], 
+        RowBox[{
+        "Print", "[", "\"\<\\n=== BIOLOGICAL INTERPRETATION ===\>\"", "]"}], 
+        ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<M\:2081\:2081 = 0 \[DoubleLongLeftRightArrow] \
+R\:2081(s,v\:2081) = 1 (strain 1 reproduction number)\>\"", "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<M\:2082\:2082 = 0 \[DoubleLongLeftRightArrow] \
+R\:2082(s,v\:2081) = 1 (strain 2 reproduction number)\>\"", "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<Equilibria exist where reproduction numbers equal 1\>\"", "]"}],
+         ";", "\[IndentingNewLine]", 
+        RowBox[{"(*", 
+         RowBox[{"Return", " ", "results"}], "*)"}], 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"\"\<DFE\>\"", "->", "dfeSol"}], ",", 
+          RowBox[{"\"\<Boundary1\>\"", "->", "boundary1"}], ",", 
+          RowBox[{"\"\<Boundary2\>\"", "->", "boundary2"}], ",", 
+          RowBox[{"\"\<Interior\>\"", "->", "interior"}], ",", 
+          RowBox[{"\"\<InfectionMatrix\>\"", "->", 
+           RowBox[{"{", 
+            RowBox[{"M1", ",", "M2"}], "}"}]}]}], "}"}]}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"Run", " ", "the", " ", "analysis"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<Run: lcpResults = analyzeS2R[RHS, var, mSi];\>\"", 
+     "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "Compare", " ", "with", " ", "your", " ", "bdFp", " ", "results"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"compareLCPResults", "[", 
+      RowBox[{"lcpResults_", ",", "bdfpResults_"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", "}"}], ",", 
+       RowBox[{
+        RowBox[{
+        "Print", "[", "\"\<\\n=== COMPARISON WITH bdFp RESULTS ===\>\"", 
+         "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", "\"\<LCP systematic approach found:\>\"", "]"}],
+         ";", "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<- DFE: \>\"", ",", 
+          RowBox[{"lcpResults", "[", "\"\<DFE\>\"", "]"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<- Boundary equilibria: \>\"", ",", 
+          RowBox[{"Length", "[", 
+           RowBox[{"Select", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"lcpResults", "[", "\"\<Boundary1\>\"", "]"}], ",", 
+               RowBox[{"lcpResults", "[", "\"\<Boundary2\>\"", "]"}]}], "}"}],
+              ",", 
+             RowBox[{
+              RowBox[{"#", "=!=", 
+               RowBox[{"{", "}"}]}], "&"}]}], "]"}], "]"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<- Interior equilibria: \>\"", ",", 
+          RowBox[{"Length", "[", 
+           RowBox[{"lcpResults", "[", "\"\<Interior\>\"", "]"}], "]"}]}], 
+         "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", "\"\<\\nbdFp algebraic approach found:\>\"", "]"}], ";",
+         "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<- Rational solutions: \>\"", ",", 
+          RowBox[{"Length", "[", 
+           RowBox[{"Flatten", "[", 
+            RowBox[{
+             RowBox[{"bdfpResults", "[", 
+              RowBox[{"[", 
+               RowBox[{"All", ",", "1"}], "]"}], "]"}], ",", "1"}], "]"}], 
+           "]"}]}], "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{"Print", "[", 
+         RowBox[{"\"\<- Non-rational (scalar equations): \>\"", ",", 
+          RowBox[{"Count", "[", 
+           RowBox[{
+            RowBox[{"bdfpResults", "[", 
+             RowBox[{"[", 
+              RowBox[{"All", ",", "2"}], "]"}], "]"}], ",", 
+            RowBox[{"Except", "[", "None", "]"}]}], "]"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<\\nThe scalar equation from bdFp represents the polynomial \
+constraint\>\"", "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<that emerges when solving the complementarity conditions \
+algebraically.\>\"", "]"}], ";", "\[IndentingNewLine]", 
+        RowBox[{
+        "Print", "[", 
+         "\"\<LCP gives biological interpretation, bdFp gives complete \
+algebraic form.\>\"", "]"}], ";"}]}], "]"}]}], ";"}], "\n", 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Print", "[", "\"\<\\nUsage:\>\"", "]"}], ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<lcpResults = analyzeS2R[RHS, var, mSi];\>\"", "]"}], 
+    ";"}], "\n", 
+   RowBox[{
+    RowBox[{
+    "Print", "[", "\"\<compareLCPResults[lcpResults, bdfp];\>\"", "]"}], 
+    ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.9667367338647027`*^9, 
+  3.9667367338803606`*^9}},ExpressionUUID->"e213b97f-48a6-495b-bf5e-\
+3622006de401"]
+},
+WindowSize->{791.1428571428571, 371.57142857142856`},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"7b7b13d7-5824-4992-9e60-69e7db125dde"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 17954, 448, 1513, "Input",ExpressionUUID->"e213b97f-48a6-495b-bf5e-3622006de401"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

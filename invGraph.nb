@@ -1,0 +1,198 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      6839,        188]
+NotebookOptionsPosition[      6443,        174]
+NotebookOutlinePosition[      6885,        190]
+CellTagsIndexPosition[      6842,        187]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"General", " ", "invasion", " ", "graph"}], "-", "INCOMPLETE"}], 
+   "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{"invasionGraph", "[", 
+     RowBox[{"RHS_", ",", "var_", ",", "par_", ",", "mSi_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"communities", ",", "invasionRates", ",", "edges"}], "}"}], 
+      ",", 
+      RowBox[{"(*", 
+       RowBox[{
+       "1.", " ", "Identify", " ", "all", " ", "admissible", " ", 
+        "communities"}], "*)"}], 
+      RowBox[{
+       RowBox[{"communities", "=", 
+        RowBox[{"findAdmissibleCommunities", "[", 
+         RowBox[{"RHS", ",", "var", ",", "mSi"}], "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"2.", " ", "For", " ", "each", " ", "community"}], ",", 
+         RowBox[{"compute", " ", "invasion", " ", "rates"}]}], "*)"}], 
+       RowBox[{"invasionRates", "=", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"computeInvasionRates", "[", 
+           RowBox[{"RHS", ",", "var", ",", 
+            RowBox[{"communities", "[", 
+             RowBox[{"[", "i", "]"}], "]"}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "communities", "]"}]}], "}"}]}], "]"}]}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+        "3.", " ", "Construct", " ", "edges", " ", "based", " ", "on", " ", 
+         "invasion", " ", "success"}], "*)"}], 
+       RowBox[{"edges", "=", 
+        RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Do", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"invasiveSets", "=", 
+           RowBox[{"Position", "[", 
+            RowBox[{
+             RowBox[{"invasionRates", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], ",", 
+             RowBox[{"_", "?", "Positive"}]}], "]"}]}], ";", 
+          "\[IndentingNewLine]", 
+          RowBox[{"Do", "[", 
+           RowBox[{
+            RowBox[{"AppendTo", "[", 
+             RowBox[{"edges", ",", 
+              RowBox[{
+               RowBox[{"communities", "[", 
+                RowBox[{"[", "i", "]"}], "]"}], "->", 
+               RowBox[{"communities", "[", 
+                RowBox[{"[", "j", "]"}], "]"}]}]}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"j", ",", "invasiveSets"}], "}"}]}], "]"}], ";"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", 
+           RowBox[{"Length", "[", "communities", "]"}]}], "}"}]}], "]"}], ";",
+        "\[IndentingNewLine]", 
+       RowBox[{"{", 
+        RowBox[{"communities", ",", "invasionRates", ",", "edges"}], 
+        "}"}]}]}], "]"}]}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{"Rahman", " ", "model", " ", "specific"}], "-", "INCOMPLETE"}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"rahmanInvasionGraph", "[", 
+     RowBox[{"E1t_", ",", "E2t_", ",", "R0A_", ",", "E0_"}], "]"}], ":=", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "R01", ",", "R02", ",", "R12", ",", "R21", ",", "S1", ",", "S2", ",", 
+        "invasionMatrix"}], "}"}], ",", 
+      RowBox[{"(*", 
+       RowBox[{"Extract", " ", "basic", " ", "reproduction", " ", "numbers"}],
+        "*)"}], 
+      RowBox[{
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"R01", ",", "R02"}], "}"}], "=", 
+        RowBox[{"R0A", "/.", " ", "E0"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Extract", " ", "susceptible", " ", "levels"}], "-", 
+         RowBox[{"NEEDS", " ", "IMPLEMENTATION"}]}], "*)"}], 
+       RowBox[{"S1", "="}], 
+       RowBox[{"(*", 
+        RowBox[{"Extract", " ", "S", " ", "from", " ", "E1t"}], "*)"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"S2", "="}], 
+       RowBox[{"(*", 
+        RowBox[{"Extract", " ", "S", " ", "from", " ", "E2t"}], "*)"}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{"Compute", " ", "invasion", " ", "numbers"}], "*)"}], 
+       RowBox[{"R12", "=", 
+        RowBox[{
+         RowBox[{"R0A", "[", 
+          RowBox[{"[", "1", "]"}], "]"}], "/.", " ", "E2t"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"R21", "=", 
+        RowBox[{
+         RowBox[{"R0A", "[", 
+          RowBox[{"[", "2", "]"}], "]"}], "/.", " ", "E1t"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", 
+        RowBox[{"Construct", " ", "invasion", " ", "matrix"}], "*)"}], 
+       RowBox[{"invasionMatrix", "=", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"\"\<DFE\>\"", ",", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"R01", ">", "1"}], ",", "\"\<E1\>\"", ",", "\"\<\>\""}],
+              "]"}], ",", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"R02", ">", "1"}], ",", "\"\<E2\>\"", ",", "\"\<\>\""}],
+              "]"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"\"\<E1\>\"", ",", "\"\<\>\"", ",", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"R12", ">", "1"}], ",", "\"\<Coexistence\>\"", ",", 
+              "\"\<\>\""}], "]"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"\"\<E2\>\"", ",", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{"R21", ">", "1"}], ",", "\"\<Coexistence\>\"", ",", 
+              "\"\<\>\""}], "]"}], ",", "\"\<\>\""}], "}"}]}], "}"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"{", 
+        RowBox[{
+        "R01", ",", "R02", ",", "R12", ",", "R21", ",", "invasionMatrix"}], 
+        "}"}]}]}], "]"}]}]}]}]], "Input",
+ CellChangeTimes->{{3.968156131395929*^9, 
+  3.968156131395929*^9}},ExpressionUUID->"b71ed198-390d-41cc-8786-\
+0b57fd6e1543"]
+},
+WindowSize->{791.1428571428571, 371.57142857142856`},
+WindowMargins->{{Automatic, 3.428571428571445}, {-9, Automatic}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"48da78bc-d503-4225-9507-177afd0f1dfe"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 5881, 152, 485, "Input",ExpressionUUID->"b71ed198-390d-41cc-8786-0b57fd6e1543"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

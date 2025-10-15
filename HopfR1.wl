@@ -24,6 +24,7 @@ plotPhasePortrait::usage = "plotPhasePortrait[RHS_, var_, params_, xVar_, yVar_,
 quickBifurcationPlot::usage = "quickBifurcationPlot[curve_, hopfPoints_, opts___] creates a simple bifurcation plot from existing continuation data";
 fpHopf::usage = "pos=fpHopf[RHS, var, conPar] yields all positive solutions for conPar, and examines
 the eigenvalues of the first for possible closeness to Hopf";
+bdAnalG::usage="{ngm, Jx, Jy, mSi, R0, bdp, RHS, var, cp}= bdAnalG[RN, rts] yields the computation of the boundary fps"
 scanPar::usage = "regions = scanPar[RHS, var, coP, par, ranges, att] scans parameter space to classify stability regions."
 
 
@@ -1182,6 +1183,84 @@ scanPar[RHS_, var_, par_, coP_, plotInd_, plot_,
   
   overlayPlot
   ];
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  bdAnalG[RN_,rts_]:=Module[{spe,al,be,gam,Rv,RHS,def,var,cp,cv,ct,mS,mSi,inf,mod,ng,K,eig,R0A,R0,cDFE,RDFE,eq0,var0,E0,cE0,EA,cEi,RHSEi,eqEi,varEi,boundaryPoints,Jx,Jy,par,ngm,bdp},(*Extract reaction network information*){spe,al,be,gam,Rv,RHS,def}=extMat[RN];
+var=ToExpression[spe];
+RHS=gam . rts;
+par=Par[RHS,var];
+Print["RHS= ",RHS//MatrixForm," has var ",var," par",par];
+(*Define constraints*)cp=Thread[par>0];
+cv=Thread[var>=0];
+ct=Join[cp,cv];
+(*Get minimal siphons*)mS=minSiph[spe,asoRea[RN]];
+Print["minimal siphons ",mS," Check siphon=",isSiph[ToString/@var,asoRea[RN],#]&/@mS];
+(*Get infection species and NGM*)Print["Species names (spe): ",spe];
+Print["Variables (var): ",var];
+Print["Minimal siphons (mS): ",mS];
+mSi=Map[Flatten[Position[spe,#]&/@#]&,mS];
+inf=Union[Flatten[mSi]];
+Print["Infection species positions (mSi): ",mSi];
+Print["All infection positions (inf): ",inf];
+(*Debug:show which species correspond to which positions*)Do[Print["Siphon ",i," contains species: ",mS[[i]]," at positions: ",mSi[[i]]," corresponding to variables: ",var[[mSi[[i]]]]],{i,Length[mS]}];
+(*Compute DFE (Disease-Free Equilibrium)*)cDFE=Flatten[Thread[ToExpression[#]->0]&/@mS];
+RDFE=RHS/. cDFE;
+eq0=Thread[RDFE==0];
+var0=Complement[var,var[[inf]]];
+E0=Join[Solve[eq0,var0]//Flatten,Thread[var[[inf]]->0]];
+cE0=Select[Flatten[E0],(#[[2]]==0)&];
+Print["DFE solution E0: ",E0];
+(*Compute reproduction numbers*)mod={RHS,var,par};
+ng=NGM[mod,inf];
+Jx=ng[[1]]//FullSimplify/. Subscript[EpidCRN1`Private`k,n_]:>Subscript[k,n];
+Jy=ng[[5]]//FullSimplify/. Subscript[EpidCRN1`Private`k,n_]:>Subscript[k,n];
+K=ng[[4]]//FullSimplify/. Subscript[EpidCRN1`Private`k,n_]:>Subscript[k,n];
+ngm=K;(*NGM for output*)Print["NGM K= ",K//MatrixForm," =",(K/. cDFE/. cE0)//MatrixForm];
+eig=K//Eigenvalues//Simplify;
+R0A=DeleteCases[eig,0];(*Array of reproduction functions*)R0=Max[R0A/. cDFE/. cE0]//FullSimplify;(*Basic reproduction number*)Print["Reproduction functions R0A: ",R0A];
+Print["R0 at DFE: ",R0];
+(*Compute boundary equilibria-focus on boundary points where infection=0*)boundaryPoints={};
+(*For each minimal siphon,compute boundary equilibrium*)Do[Module[{cEi,RHSEi,eqEi,varEi,boundSol,validBoundaryPoint,infVarsToZero,nonInfVars,infPositions},(*Get infection variable positions for this siphon*)infPositions=mSi[[i]];
+(*Check if positions are valid*)If[Max[infPositions]<=Length[var]&&Min[infPositions]>=1,infVarsToZero=var[[infPositions]];
+nonInfVars=Complement[var,infVarsToZero];
+Print["Processing siphon ",i,": positions ",infPositions," setting variables ",infVarsToZero," to zero"];
+(*Set infection components to 0 for this boundary*)cEi=Thread[infVarsToZero->0];
+RHSEi=RHS/. cEi;
+eqEi=Thread[RHSEi==0];
+Print["Boundary equations: ",eqEi];
+Print["Variables to solve for: ",nonInfVars];
+(*Only solve if we have valid variables*)If[Length[nonInfVars]>0&&FreeQ[nonInfVars,_Integer],boundSol=Solve[eqEi,nonInfVars];
+Print["Found ",Length[boundSol]," solutions for boundary ",i];
+(*For each solution,create complete boundary point*)Do[If[Length[boundSol]>0&&j<=Length[boundSol],validBoundaryPoint=Join[boundSol[[j]],cEi];
+(*Check if solution is valid (no complex/undefined values)*)If[FreeQ[validBoundaryPoint,Complex|Undefined|Indeterminate|ComplexInfinity],Print["Adding boundary point: ",validBoundaryPoint];
+AppendTo[boundaryPoints,validBoundaryPoint]]],{j,Max[1,Length[boundSol]]}],Print["Skipping boundary ",i," due to invalid variables"]],Print["Skipping siphon ",i," due to invalid positions: ",infPositions]]],{i,Length[mSi]}];
+(*Also include the DFE as a boundary point if it's valid*)If[FreeQ[E0,Complex|Undefined|Indeterminate|ComplexInfinity],AppendTo[boundaryPoints,E0]];
+(*Remove duplicates and invalid points*)bdp=DeleteDuplicates[Select[boundaryPoints,Length[#]>0&&FreeQ[#,Complex|Undefined|Indeterminate|ComplexInfinity]&]];
+Print["Number of boundary points found: ",Length[bdp]];
+Print["Boundary points: "];
+Do[Print["Point ",i,": ",bdp[[i]]],{i,Length[bdp]}];
+(*Return the requested format:{ngm,Jx,Jy,mSi,R0,bdp,RHS,var,cp}*){ngm,Jx,Jy,mSi,R0,bdp,RHS,var,cp}]
+
 
 
 

@@ -88,12 +88,13 @@ DFE::usage = "{diseaseFreeeEquilibrium} = DFE[mod_,inf_] yields the DFE of the m
 extP::usage ="{extinctionProb} = extP[mod_,inf_] yields the Bacaer equation for approximate extinction probability";
 mRts::usage = "rts=mRts[RN,ks]creates mass action rates with names ks";
 (* Stability analysis *)
-bdAnal::usage = "{K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,E2,RHS,var,cp,R12,R21,coP}=bdAnal[RN,rts];works 
+bd2::usage = "{K,Jx,Jy,mSi,R0,R0A,E0,EA,E1,E2,RHS,var,cp,
+R12,R21,coP}=bd2[RN,rts];works 
 when both  non DFE boundary fixed point are explicit";
 bdAnalG::usage =" {ngm, Jx, Jy, mSi, R0, bdp, RHS, var, cp} = bdAnalG[RN, rts]; analyse the system and gives the 
 boundary points in the general case when they are explicit and either one of the infection classes is 0";
 bdAnalG0::usage="{ngm, Jx, Jy, mSi, R0, bdp, RHS, var, cp}= bdAnalG0[RN, rts]; gives all the boundary equilibria including the case when all infection classes are 0 at the same time";
-bdAnalC;
+bdAnalC;bdAnal;
 (* Add this to the usage declarations section of your package *)
 Stab::usage = "{stabilityResult} = Stab[mod_,cfp_,cn_:{}] analyzes stability at fixed point";
 ACM::usage = "A2 = ACM[A,k] yields additive compound matrix";
@@ -1714,12 +1715,18 @@ Replace[#,{_?Negative->0,e_:>Replace[Expand[e],
 t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
  remZ[li_]:=Select[li, # =!= 0 &];
 
-FposEx=With[{pos=First@SparseArray[#]["NonzeroPositions"]},SparseArray[{pos->Extract[#,pos]},Dimensions@#]]&;
+FposEx=With[{pos=First@SparseArray[#]["NonzeroPositions"]},
+SparseArray[{pos->Extract[#,pos]},Dimensions@#]]&;
  
  
 NGM[mod_,inf_:{}]:=Module[{dyn,X,infc,M,V,F,F1,V1,K,chp,Jy,Jx,Jxy,Jyx,Kd},dyn=mod[[1]];X=mod[[2]];infc=Complement[Range[Length[X]],inf];
-Jx=Grad[dyn[[inf]],X[[inf]]];Jy=Grad[dyn[[infc]],X[[infc]]];Jxy=Grad[dyn[[inf]],X[[infc]]];Jyx=Grad[dyn[[infc]],X[[inf]]];
-chpx=CharacteristicPolynomial[Jx,#]&;V1=-Jx/.Thread[X[[infc]]->0];F1=Jx+V1/.Thread[X[[inf]]->0];F=posM[F1];V=F-Jx;
+Jx=Grad[dyn[[inf]],X[[inf]]];Jy=Grad[dyn[[infc]],X[[infc]]];
+Jxy=Grad[dyn[[inf]],X[[infc]]];Jyx=Grad[dyn[[infc]],X[[inf]]];
+chpx=CharacteristicPolynomial[Jx,#]&;
+V1=-Jx/.Thread[X[[infc]]->0];
+F1=Jx+V1/.Thread[X[[inf]]->0];
+F=posM[F1];
+V=F-Jx;
 K=(F . Inverse[V])/.Thread[X[[inf]]->0]//FullSimplify;
 Kd=( Inverse[V] . F)/.Thread[X[[inf]]->0]//FullSimplify;
 {Jx,F,V,K,Jy,Jxy,Jyx,chpx,Kd}];
@@ -1809,7 +1816,7 @@ E1=Select[E1NonDFE,isRationalSolutionQ];
 (*Return with E1 (may be empty)*){RHS,var,par,cp,mSi,Jx,Jy,E0,ngm,R0A,EA,E1}];
 
 (*First function: bdAn - computes everything up to solution selection*)
-bdAn[RN_, rts_] := 
+bd2[RN_, rts_] := 
  Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, 
    mSi, inf, mod,  K, eig, R0A, R0, cDFE, RDFE, eq0, var0, E0, 
    cE0, EA, cEj, RHSEj, eqEj, varEj, E1t, E2t, Jx, Jy, elj, 
@@ -1966,10 +1973,10 @@ If[Length[E1t] > Length[E1tRational],
 If[Length[E2t] > Length[E2tRational],
  Print["E2t: ", Length[E2t] - Length[E2tRational], " irrational solutions suppressed"];
 ];
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0, R0A, EA, E1t, E2t}
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, ngm,  R0A, EA, E1t, E2t}
   ];
 
-(*Second function:invN-computes invasion numbers and 
+(*invNr-computes invasion numbers and 
 persistence condition*)
 invNr[E1t_,E2t_,R0A_,E0_,par_,cp_,in1_,in2_,fval_:{},ins_:{}]:=
 Module[{E1,E2,R12,R21,coP,parSec,csi,findInstanceResult},
@@ -1997,7 +2004,8 @@ Print["under coP: ",coP," invasion nrs are",{R12,R21}/. coP//N," repr nrs are",
 Print["END invNr OUTPUT"];
 {E1,E2,R12,R21,coP}];
 
-(* invN with rational constraint preprocessing - ORIGINAL VERSION + E2 CHECK*)
+(* invN with rational constraint preprocessing - 
+ORIGINAL VERSION + E2 CHECK*)
 invN[E1t_, E2t_, R0A_, E0_, par_, cp_, in1_, in2_, fval_: {}, ins_: {}] := 
 Module[{E1, E2, R12, R21, coP, parSec, csi, isRationalQ, 
   R12isRational, R21isRational, isRational, rationalConstraints, coT,
@@ -2658,8 +2666,6 @@ Deg[poly_, var_] := Exponent[poly, var];
 
 
 
-
-
 bdAnalG[RN_]:=Module[{rts,spe,al,be,var},{spe,al,be}=extMat[RN][[{1,2,3}]];
 var=ToExpression[spe];
 rts=Table[ToExpression["k["<>ToString[i]<>"]"]*Product[var[[j]]^al[[j,i]],{j,Length[var]}],{i,Length[RN]}];
@@ -2778,14 +2784,10 @@ Do[Print["Boundary point ",i,": ",Fps[[i]][[2]]],{i,Length[Fps]}]];
 
 
 
-
-
 Grobpol[dyn_,var_,par_,ind_,cn_:{}]:=Module[{eq,elim,pol},eq=Thread[dyn==0];
 elim=Complement[Range[Length[var]],ind];
 pol=Collect[GroebnerBasis[Numerator[Together[dyn/. cn]],Join[par,var[[ind]]],var[[elim]]],var[[ind]]];
 {pol}]
-
-
 End[];
 EndPackage[];
 $ContextPath=DeleteDuplicates[Append[$ContextPath,"model`Private`"]];
