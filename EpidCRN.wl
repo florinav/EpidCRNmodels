@@ -126,6 +126,18 @@ parseComplex::usage = "parseComplex[complex] parses a reaction complex (e.g., 2*
 edgIGMS::usage = "edgIGMS[RN, mSi] computes the directed edges i->j of the IGMS graph for reaction network RN with minimal siphons mSi.";
 
 IGMS::usage = "IGMS[RN, mSi] computes and visualizes the IGMS (Infection Graph of Minimal Siphons), returning an association with edges, graph, and cycle information.";
+findCores::usage = "findCores[RN, \"CandidateSets\" -> {list of candidate sets}]
+  findCores[RN, \"MaxSize\" -> k]  (* tests all subsets up to size k *)
+RETURNS: Association with keys:
+  \"cores\" - list of minimal autocatalytic cores
+  Each core contains:
+    \"T\" - the species set
+    \"intReacIdx\" - internal reaction indices
+    \"details\" - LP results including:
+      \"flux\" - reaction flux vector v
+      \"growth\" - growth vector A\[CenterDot]v (should be > 0 for true cores)
+      \"t\" - uniform lower bound on growth rates";
+
 (* Conv functions - Simple one-liner conversions *)
 toSum::usage="(Conv)toSum[expr] converts expression to sum format";
 toProd::usage="(Conv)toProd[expr] converts expression to product format";
@@ -219,4 +231,3 @@ Get[FileNameJoin[{root, "Extra.wl"}]];
 
 End[];
 EndPackage[];
-

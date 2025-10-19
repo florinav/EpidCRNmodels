@@ -114,428 +114,172 @@ siphons = minSiph[spe, reac];
 Print["Minimal siphons: ", siphons];*)
 
 
-(* Module to compute and visualize the IGMS (Infection Graph of Minimal Siphons) *)
+(* findCores: Find autocatalytic cores using EpidCRN functions *)
 
-(* Helper: Check if one reaction activates Sj from Si *)
-(* Si and Sj must be lists of strings *)
-canActRea[reaction_, Si_, Sj_] := Module[
-  {lhs, rhs, lhsComp, rhsComp, lhsSpecies, newSpecies, netProduction},
-  
-  (* Skip birth and death reactions *)
-  If[reaction === (0 -> _) || reaction === (_ -> 0), Return[False]];
-  
-  lhs = reaction[[1]];
-  rhs = reaction[[2]];
-  
-  (* Parse complexes - now returns lowercase from compToAsso *)
-  lhsComp = compToAsso[lhs];
-  rhsComp = compToAsso[rhs];
-  
-  (* Extract unique species as strings *)
-  lhsSpecies = Keys[lhsComp];
-  
-  (* Quick filter: skip if reaction doesn't involve infection species *)
-  If[Length[Intersection[lhsSpecies, Si]] == 0, Return[False]];
-  
-  (* Find species that need to be produced *)
-  newSpecies = Complement[Sj, Si];
-  If[Length[newSpecies] == 0, Return[False]];
-  
-  (* Check net production with stoichiometry *)
-  netProduction = Table[
-    Lookup[rhsComp, sp, 0] - Lookup[lhsComp, sp, 0],
-    {sp, newSpecies}
-  ];
-  
-  Max[netProduction] > 0
-];
+ClearAll[findInternalReactions, isAutocatalyticBlockLP, findCores];
 
-(* Compute edges of IGMS graph *)
-edgIGMS[RN_, mSi_] := Module[{n, igmsEdges, mSiStr},
-  n = Length[mSi];
-  igmsEdges = {};
-  
-  (* Convert mSi from symbols to strings, using SymbolName *)
-  mSiStr = Map[SymbolName /@ # &, mSi];
-  
-  Do[
-    Do[
-      If[i != j,
-        Do[
-          If[canActRea[reaction, mSiStr[[i]], mSiStr[[j]]],
-            AppendTo[igmsEdges, i -> j];
-            Break[]
-          ],
-          {reaction, RN}
-        ]
-      ],
-      {j, n}
-    ],
-    {i, n}
-  ];
-  
-  igmsEdges
-];
+findCores::usage = "findCores[RN, k] or findCores[RN, \"MaxSize\" -> k]
+  findCores[RN, \"CandidateSets\" -> {list of candidate sets}]
+  findCores[RN, \"MinimalOnly\" -> False]  (* return all cores, not just minimal ones *)
+RETURNS: Association with keys:
+  \"all\" - all cores found (isCore=True only)
+  \"cores\" - list of minimal cores (or all if MinimalOnly->False)
+  Each core contains:
+    \"T\" - the species set
+    \"intReacIdx\" - internal reaction indices
+    \"details\" - LP results including:
+      \"flux\" - reaction flux vector v
+      \"growth\" - growth vector A\[CenterDot]v (should be > 0 for true cores)
+      \"t\" - uniform lower bound on growth rates";
 
-(* Main IGMS function *)
-IGMS[RN_, mSi_] := Module[
-  {species, infSpecies, igmsEdges, igmsGraph, cycles, n},
-  
-  n = Length[mSi];
-  
-  (* Extract all species from reaction network *)
-  species = DeleteDuplicates[Flatten[Cases[RN, _String, Infinity]]];
-  
-  (* Flatten minimal siphons to get all infection species *)
-  infSpecies = DeleteDuplicates[Flatten[mSi]];
-  
-  Print["Minimal siphons: ", 
-    Table[Row[{Subscript["T", i], "=", mSi[[i]]}], {i, n}]];
-  
-  (* Compute IGMS edges *)
-  igmsEdges = edgIGMS[RN, mSi];
-  
-  (* Create graph *)
-  igmsGraph = Graph[
-    Range[n],
-    igmsEdges,
-    VertexLabels -> Table[
-      i -> Placed[
-        Row[{Subscript["T", i], "=", Row[mSi[[i]], ","]}],
-        Center
-      ],
-      {i, n}
-    ],
-    VertexSize -> 0.3,
-    VertexStyle -> LightBlue,
-    EdgeStyle -> Arrowheads[0.03],
-    VertexLabelStyle -> Directive[FontSize -> 10],
-    GraphLayout -> "SpringElectricalEmbedding",
-    ImageSize -> Medium
-  ];
-  
-  (* Find cycles *)
-  cycles = FindCycle[igmsGraph, Infinity, All];
-  
-  (* Print edges and cycles *)
-  Print["IGMS edges: ", igmsEdges];
-  If[Length[cycles] > 0,
-    Print["Cycles in IGMS (", Length[cycles], " found): "];
-    Do[Print["  Cycle ", i, ": ", cycles[[i]]], {i, Length[cycles]}],
-    Print["IGMS is acyclic (no cycles found)"]
-  ];
-  Print[igmsGraph];
-  
-  (* Return list: edges, cycles, graph *)
-  {igmsEdges, cycles, igmsGraph}
-];
-
-$DebugIGMS = False;
-
-
-(*=============================================================================
-  MAS Module for EpidCRN: Minimal Autocatalytic Subnetworks
-  
-  Main functions:
-  - isMAS[RN, T]  : Test if siphon T is self-replicable
-  - MAS[RN]       : Find all MAS in network RN
-  - testMAS[RN]   : Pretty-print MAS analysis
-=============================================================================*)
-
-(*-----------------------------------------------------------------------------
-  Helper: Find reactions whose ALL reactants lie in siphon T
------------------------------------------------------------------------------*)
-(* Robust findInternalReactions: accepts Symbol or String species; T may be symbols or strings *)
+(* Find internal reactions for candidate T *)
+(* A reaction is internal if: reactants \[SubsetEqual] T AND products \:2229 T \[NotEqual] \[EmptySet] *)
+(* This excludes pure outflow reactions like a\[RightArrow]0 *)
 findInternalReactions[RN_List, T_List] := Module[
-  {Tstr, reactants, reactantTerms, reactantSpe},
-  (* canonicalize T to strings *)
-  Tstr = ToString /@ T;
-  Table[
-    reactants = RN[[j, 1]];
-    (* parse reactant complex into a list of terms, then convert each term to a string species name *)
-    reactantSpe = If[reactants === 0,
-      {}, (* null complex *)
-      Module[{terms = If[Head[reactants] === Plus, List @@ reactants, {reactants}]},
-        DeleteDuplicates[
-          ToString /@ (terms /. {
-            (m_Integer)*s_ :> s, 
-            (m_?NumericQ)*s_ :> s,
-            s_ :> s
-          })
-        ]
-      ]
-    ];
-    (* choose reaction j if all reactants (as strings) are inside T (as strings) *)
-    If[SubsetQ[reactantSpe, Tstr], j, Nothing],
-    {j, Length[RN]}
+  {Tstr = ToLowerCase /@ (ToString /@ T)},
+  
+  Select[Range[Length[RN]], 
+    Module[{reactants = compToAsso[RN[[#, 1]]], products = compToAsso[RN[[#, 2]]]},
+      (* Reactants from T or empty (inflow) *)
+      (Keys[reactants] === {} || SubsetQ[Tstr, Keys[reactants]]) &&
+      (* At least one product in T (excludes outflows to 0) *)
+      Length[Intersection[Keys[products], Tstr]] > 0
+    ] &
   ]
 ];
 
-(*-----------------------------------------------------------------------------
-  isMAS[RN, T, eps]: Test if siphon T is self-replicable (an MAS)
------------------------------------------------------------------------------*)
-isMAS[RN_List, T_List, eps_ : 10^-6] := 
-  Module[{RND, spe, gamma, speIdx, intReacIdx, gammaT, nReac, fluxVars, constr, sol},
-   
-   (* Get stoichiometry from EpidCRN *)
-   RND = extMat[RN];
-   spe = RND[[1]];
-   gamma = RND[[4]];  (* rows=species, cols=reactions *)
-   
-   (* Species indices in T *)
-   speIdx = Flatten[Position[spe, #] & /@ T];
-   
-   (* Internal reactions *)
-   intReacIdx = findInternalReactions[RN, T];
-   
-   (* Early return if no internal reactions *)
-   If[Length[intReacIdx] == 0,
-    Return[<|"isMAS" -> False, 
-      "reason" -> "no internal reactions",
-      "siphon" -> T|>]
-   ];
-   
-   (* Extract submatrix: species in T \[Times] internal reactions *)
-   (* For single species, extract as list then wrap in list to make matrix *)
-   If[Length[speIdx] == 1,
-    gammaT = {gamma[[speIdx[[1]], intReacIdx]]};
-    ,
-    gammaT = gamma[[speIdx, intReacIdx]];
-   ];
-   
-   nReac = Length[intReacIdx];
-   
-   (* Verify gammaT is non-empty *)
-   If[gammaT === {} || gammaT === {{}},
-    Return[<|"isMAS" -> False, 
-      "reason" -> "empty submatrix",
-      "siphon" -> T, "speIdx" -> speIdx, "intReacIdx" -> intReacIdx|>]
-   ];
-   
-   (* Find v > eps with gammaT \[CenterDot] v > eps *)
-   fluxVars = Table[c[i], {i, nReac}];
-   constr = Flatten[{Thread[fluxVars >= eps], Thread[Flatten[gammaT . fluxVars] >= eps]}];
-   
-   sol = Quiet@FindInstance[constr, fluxVars, Reals, 1, WorkingPrecision -> 16];
-   
-   If[sol === {} || sol === {{}}, 
-    <|"isMAS" -> False, 
-      "reason" -> "no positive flux exists",
-      "siphon" -> T,
-      "intReac" -> intReacIdx,
-      "gammaT" -> gammaT|>,
-    <|"isMAS" -> True, 
-      "siphon" -> T,
-      "flux" -> (fluxVars /. First[sol]), 
-      "intReac" -> intReacIdx,
-      "netProd" -> Flatten[gammaT . (fluxVars /. First[sol])]|>]
-  ];
-
-(*-----------------------------------------------------------------------------
-  MAS[RN]: Find all MAS in reaction network RN
------------------------------------------------------------------------------*)
-MAS[RN_List] := 
-  Module[{RND, spe, gamma, minSiphQ, analysis, masQ},
-   
-   RND = extMat[RN];
-   spe = RND[[1]];
-   gamma = RND[[4]];
-   
-   (* Get minimal siphons *)
-   minSiphQ = Quiet@minSiph[spe, asoRea[RN]];
-   If[minSiphQ === $Failed || !ListQ[minSiphQ], minSiphQ = {}];
-   
-   (* Analyze each minimal siphon *)
-   analysis = Table[
-     Module[{T = minSiphQ[[k]], test},
-      test = isMAS[RN, T];
-      <|"siphon" -> T, 
-        "isMAS" -> test["isMAS"],
-        "drainable" -> isDrainable[RN, T],
-        "critical" -> isCritical[RN, T],
-        "details" -> test|>
-     ],
-     {k, Length[minSiphQ]}
-   ];
-   
-   (* Extract only the MAS *)
-   masQ = Select[minSiphQ, isMAS[RN, #]["isMAS"] &];
-   
-   <|"species" -> spe,
-     "gamma" -> gamma,
-     "minSiph" -> minSiphQ, 
-     "MAS" -> masQ,
-     "analysis" -> analysis|>
-  ];
-
-(*-----------------------------------------------------------------------------
-  testMAS[RN]: Essential MAS analysis output
------------------------------------------------------------------------------*)
-testMAS[RN_List] := Module[{res},
-  res = MAS[RN];
+(* LP test for autocatalytic core *)
+isAutocatalyticBlockLP[gamma_, speciesIdx_List, intReacIdx_List] := 
+  Module[{gammaT, gammaExt, m, n, c, bounds, sol, tsol, vsol, growth, eps = 10^-8, vmin = 0, vmax = 1},
   
-  Print["Species: ", res["species"]];
-  Print["Minimal siphons: ", res["minSiph"]];
-  Print["MAS: ", res["MAS"]];
+  If[Length[intReacIdx] == 0 || Length[speciesIdx] == 0, 
+    Return[<|"isCore" -> False, "reason" -> "empty"|>]];
   
-  (* Analysis of each minimal siphon *)
-  Do[
-    Module[{a = res["analysis"][[i]], T},
-      T = a["siphon"];
-      Print[T, ": MAS=", a["isMAS"], ", Drain=", a["drainable"], 
-        ", Crit=", a["critical"]];
-      
-      If[a["isMAS"],
-        Print["  flux=", a["details"]["flux"], ", net=", a["details"]["netProd"]];
-        ,
-        Print["  ", a["details"]["reason"]];
-      ];
-    ],
-    {i, Length[res["analysis"]]}
+  (* Extract submatrix for species in T and internal reactions *)
+  gammaT = If[Length[speciesIdx] == 1, 
+    {gamma[[speciesIdx[[1]], intReacIdx]]}, 
+    gamma[[speciesIdx, intReacIdx]]];
+  
+  m = Length[speciesIdx]; 
+  n = Length[intReacIdx];
+  
+  (* Extend gamma by appending column of -1's: [\[CapitalGamma]_T | -1] *)
+  gammaExt = Map[Append[#, -1] &, gammaT];
+  
+  (* Objective: minimize -t (i.e., maximize t) *)
+  c = Append[ConstantArray[0, n], -1];
+  
+  (* Bounds: v_i >= 0, at least one v_i > 0 enforced by requiring sum(v) >= eps *)
+  bounds = Join[ConstantArray[{vmin, vmax}, n], {{0, Infinity}}];
+  
+  (* Add constraint: sum of fluxes >= eps to ensure v \[NotEqual] 0 *)
+  gammaExtWithSum = Join[gammaExt, {Append[ConstantArray[1, n], 0]}];
+  rhsWithSum = Join[ConstantArray[0, m], {eps}];
+  
+  (* Solve LP: maximize t subject to [\[CapitalGamma]_T | -1]\[CenterDot][v; t] >= 0 and sum(v) >= eps *)
+  (* Suppress warnings about infeasible LPs *)
+  sol = Quiet[
+    LinearProgramming[c, gammaExtWithSum, rhsWithSum, bounds],
+    LinearProgramming::lpsnf
   ];
   
-  res
+  If[sol === $Failed || !ListQ[sol] || MemberQ[sol, Indeterminate],
+    Return[<|"isCore" -> False, "reason" -> "LP failed"|>]];
+  
+  tsol = sol[[n + 1]];
+  vsol = Take[sol, n];
+  
+  (* Compute actual growth: \[CapitalGamma]_T \[CenterDot] v *)
+  growth = gammaT . vsol;
+  
+  (* Check: t > eps means \[CapitalGamma]_T \[CenterDot] v >= t\[CenterDot]1 > 0 (strictly positive growth) *)
+  If[tsol > eps && AllTrue[growth, # > eps &],
+    <|"t" -> tsol, "flux" -> AssociationThread[intReacIdx -> vsol]|>,
+    <|"isCore" -> False, "reason" -> "growth not strictly positive", 
+      "t" -> tsol, "v" -> vsol, "growth" -> growth|>
+  ]
 ];
 
+(* Main function *)
+Options[findCores] = {"CandidateSets" -> Automatic, "MaxSize" -> 6, "MinimalOnly" -> True};
 
-isDrainable[RN_, speciesSet_List] := 
-  Module[{RND, spe, gamma, speciesIndices, coeffs, constraints, solution}, 
-   RND = extMat[RN];
-   spe = RND[[1]];
-   gamma = RND[[4]];
-   speciesIndices = Flatten[Position[spe, #] & /@ speciesSet];
-   
-   coeffs = Array[c, Dimensions[gamma][[2]]];
-   linearComb = coeffs . Transpose[gamma];
-   constraints = Join[Thread[coeffs >= 0], 
-     Thread[linearComb[[speciesIndices]] < 0], {Total[coeffs] > 0}];
-   solution = FindInstance[constraints, coeffs, Reals];
-   Length[solution] > 0];
+findCores[RN_List, maxSize_Integer] := findCores[RN, "MaxSize" -> maxSize];
 
-isSelfReplicable[RN_, speciesSet_List] := 
-  Module[{RND, spe, gamma, speciesIndices, coeffs, constraints, solution}, 
-   RND = extMat[RN];
-   spe = RND[[1]];
-   gamma = RND[[4]];
-   speciesIndices = Flatten[Position[spe, #] & /@ speciesSet];
- 
-   
-   coeffs = Array[c, Dimensions[gamma][[2]]];
-   linearComb = coeffs . Transpose[gamma];
-   constraints = Join[Thread[coeffs >= 0], 
-     Thread[linearComb[[speciesIndices]] > 0], {Total[coeffs] > 0}];
-   solution = FindInstance[constraints, coeffs, Reals];
-   Length[solution] > 0];
+findCores[RN_List, opts : OptionsPattern[]] := Module[
+  {RND, spe, gamma, candidateSets, maxSize, minimalOnly, speciesIdxMap, results, cores, minimal},
+  
+  RND = extMat[RN];
+  spe = RND[[1]];
+  gamma = RND[[4]];
+  
+  speciesIdxMap = AssociationThread[spe -> Range[Length[spe]]];
+  
+  candidateSets = OptionValue["CandidateSets"];
+  maxSize = OptionValue["MaxSize"];
+  minimalOnly = OptionValue["MinimalOnly"];
+  
+  If[candidateSets === Automatic,
+    candidateSets = Rest@Subsets[spe, {1, Min[maxSize, Length[spe]]}],
+    candidateSets = Map[ToLowerCase /@ (ToString /@ #) &, candidateSets]
+  ];
+  
+  results = Table[
+    Module[{T = candidateSets[[k]], intReacIdx, speciesIdx, lpres},
+      intReacIdx = findInternalReactions[RN, T];
+      
+      If[Length[intReacIdx] == 0, 
+        <|"T" -> T, "isCore" -> False, "reason" -> "no internal reactions"|>,
+        
+        speciesIdx = Lookup[speciesIdxMap, T, Nothing];
+        
+        If[Length[speciesIdx] != Length[T],
+          <|"T" -> T, "isCore" -> False, "reason" -> "species not found"|>,
+          
+          lpres = isAutocatalyticBlockLP[gamma, speciesIdx, intReacIdx];
+          If[KeyExistsQ[lpres, "isCore"] && lpres["isCore"] === False,
+            <|"T" -> T, "isCore" -> False, "reason" -> lpres["reason"]|>,
+            <|"T" -> T, "intReacIdx" -> intReacIdx, "details" -> lpres|>
+          ]
+        ]
+      ]
+    ],
+    {k, Length[candidateSets]}
+  ];
+  
+  cores = Select[results, !KeyExistsQ[#, "isCore"] || #["isCore"] === True &];
+  
+  minimal = If[minimalOnly,
+    Select[cores, Function[c,
+      Not[MemberQ[DeleteCases[cores, c], 
+        d_ /; SubsetQ[c["T"], d["T"]] && d["T"] =!= c["T"]]]
+    ]],
+    cores
+  ];
+  
+  <|"species" -> spe, "tested" -> Length[candidateSets], 
+    "all" -> cores, "cores" -> minimal|>
+];
 
-isCritical[RN_, speciesSet_List] := 
-  Module[{RND, spe, conservationLaws, speciesIndices}, 
-   RND = extMat[RN];
-   spe = RND[[1]];
-   speciesIndices = Flatten[Position[spe, #] & /@ speciesSet];
-   conservationLaws = cons[RND[[4]], {}];
-   
-   If[Length[conservationLaws] == 0, True, 
-    !AnyTrue[conservationLaws, 
-     Function[law, 
-      AllTrue[speciesIndices, law[[#]] >= 0 &] && 
-       AnyTrue[speciesIndices, law[[#]] > 0 &] && 
-       AllTrue[Complement[Range[Length[spe]], speciesIndices], law[[#]] == 0 &]]]]];
+(* TEST 
+RN1 = {0 -> "S", "S" -> 0, "S" + "I1" -> 2*"I1", "I1" -> 0};
+res1 = findCores[RN1, "CandidateSets" -> {{"s", "i1"}}];
+Print["Simple model - Cores: ", res1["cores"]];*)
 
-isSiph[species_List, reactions_List, siphon_List] := 
-  Module[{ns, sm, siphonSet, isSiphonQ, subIdx, prodIdx, substrates, products}, 
-   ns = Length[species];
-   sm = AssociationThread[species -> Range[ns]];
-   siphonSet = siphon;
-   isSiphonQ = True;
-   
-   Do[substrates = reaction["Substrates"];
-    products = reaction["Products"];
-    subIdx = If[substrates === {} || substrates === {""}, {}, 
-      Select[Lookup[sm, substrates, Nothing], IntegerQ]];
-    prodIdx = If[products === {} || products === {""}, {}, 
-      Select[Lookup[sm, products, Nothing], IntegerQ]];
-    
-    Do[If[MemberQ[siphonSet, species[[p]]], 
-      If[Length[subIdx] == 0, isSiphonQ = False; Break[], 
-       If[!AnyTrue[subIdx, MemberQ[siphonSet, species[[#]]] &], 
-        isSiphonQ = False; Break[]]]];, {p, prodIdx}];
-    If[!isSiphonQ, Break[]];, {reaction, reactions}];
-   isSiphonQ];
+(* Example with multiple independent cores *)
+(* Two independent infection chains: S+I1->2I1 and S+I2->2I2 
+RN3 = {0 -> "S", "S" -> 0, 
+       "S" + "I1" -> 2*"I1", "I1" -> 0,
+       "S" + "I2" -> 2*"I2", "I2" -> 0};
+res3 = findCores[RN3, 3];
+Print["\nMultiple cores example:"];
+Print["  All cores found: ", res3["all"]];
+Print["  Minimal cores: ", res3["cores"]];*)
 
-siphonAnalysis[reactions_, OptionsPattern[{"Verbose" -> False}]] := 
-  Module[{species, allSiphons, classification, verbose}, 
-   verbose = OptionValue["Verbose"];
-   species = extSpe[reactions];
-   
-   If[verbose, Print["Analyzing network with ", Length[species], " species: ", species]];
-   allSiphons = minSiph[species, asoRea[reactions]];
-   If[verbose, Print["Found ", Length[allSiphons], " siphons: ", allSiphons]];
-   
-   classification = Association[];
-   Do[Module[{siphon, drainableResult, selfReplicableResult, criticalResult, siphonType, significance}, 
-     siphon = allSiphons[[i]];
-     drainableResult = isDrainable[reactions, siphon];
-     selfReplicableResult = isSelfReplicable[reactions, siphon];
-     criticalResult = isCritical[reactions, siphon];
-     
-     siphonType = Which[
-       drainableResult && selfReplicableResult, "Competing (both drainable and self-replicable)", 
-       drainableResult && !selfReplicableResult, "Extinction risk (drainable only)", 
-       !drainableResult && selfReplicableResult, "Autocatalytic growth (self-replicable only)", 
-       True, "Neutral (neither drainable nor self-replicable)"];
-     
-     significance = Which[
-       !criticalResult, "Non-critical (protected by conservation)", 
-       drainableResult && !selfReplicableResult, "High extinction risk", 
-       drainableResult && selfReplicableResult, "Competition between growth and extinction", 
-       !drainableResult && selfReplicableResult, "Pure autocatalytic potential", 
-       True, "No direct persistence threat"];
-     
-     classification[siphon] = <|"IsDrainable" -> drainableResult, 
-       "IsSelfReplicable" -> selfReplicableResult, 
-       "IsCritical" -> criticalResult, 
-       "Type" -> siphonType, 
-       "Significance" -> significance, 
-       "IsMinimal" -> True|>;
-     
-     If[verbose, 
-      Print["Siphon ", siphon, ": ", siphonType];
-      Print["  Drainable: ", drainableResult, ", Self-replicable: ", selfReplicableResult, ", Critical: ", criticalResult];
-      Print["  Significance: ", significance];];], {i, Length[allSiphons]}];
-   classification];
-   
-   isCatalytic[RN_] := 
-  Module[{catalyticSets}, 
-   catalyticSets = findCatalyticSets[RN];
-   Length[catalyticSets] > 0];
-
-findCatalyticSets[RN_] := 
-  Module[{RND, spe, allSiphons, selfReplicableCriticalSiphons, reactionCatalysts, allCatalyticSets}, 
-   RND = extMat[RN];
-   spe = RND[[1]];
-   allSiphons = Quiet[minSiph[spe, asoRea[RN]]];
-   
-   If[allSiphons === $Failed || !ListQ[allSiphons], allSiphons = {}];
-   selfReplicableCriticalSiphons = Select[allSiphons, isSelfReplicable[RN, #] && isCritical[RN, #] &];
-   
-   reactionCatalysts = {};
-   Do[Module[{reactants, products, catalysts}, 
-     reactants = compToAsso[RN[[i, 1]]];
-     products = compToAsso[RN[[i, 2]]];
-     catalysts = Select[Keys[reactants], KeyExistsQ[products, #] && reactants[#] == products[#] &];
-     If[Length[catalysts] > 0, reactionCatalysts = Union[reactionCatalysts, {catalysts}]];], {i, Length[RN]}];
-   
-   Union[selfReplicableCriticalSiphons, reactionCatalysts]];
-
-findMinimalCriticalSiphons[RN_] := 
-  Module[{RND, spe, allSiphons, criticalSiphons}, 
-   RND = extMat[RN];
-   spe = RND[[1]];
-   allSiphons = minSiph[spe, asoRea[RN]];
-   criticalSiphons = Select[allSiphons, isCritical[RN, #] &];
-   criticalSiphons];
-
-
+(* SDAS 
+RN2 = {0 -> "S", "S" -> 0, "S" + "I1" -> 2*"I1", "I1" -> 0, 
+   "I1" + "I2" -> 2*"I2", "I2" -> 0, "I2" + "I3" -> 2*"I3", "I3" -> 0};
+res2 = findCores[RN2];
+Print["\nFull epidemic model - minimal cores: ", res2["cores"]];*)
 
 
 persistenceAnalysis[reactions_, OptionsPattern[{"Verbose" -> False}]] := 
@@ -713,3 +457,143 @@ invFace[reactions_, maxCodim_:10] :=
     Do[candidateSet = subsets[[i]];
      If[isInvariantFacet[candidateSet, reactions], AppendTo[invariantFacets, candidateSet]];, {i, Length[subsets]}];, {k, 1, Min[maxCodim, n]}];
    invariantFacets];
+
+
+(*=============================================================================
+  MAS Module for EpidCRN: Minimal Autocatalytic Subnetworks
+  
+  Main functions:
+  - isMAS[RN, T]  : Test if siphon T is self-replicable
+  - MAS[RN]       : Find all MAS in network RN
+  - testMAS[RN]   : Pretty-print MAS analysis
+=============================================================================*)
+
+(*-----------------------------------------------------------------------------
+  Helper: Find reactions whose ALL reactants lie in siphon T
+-----------------------------------------------------------------------------*)
+
+(*-----------------------------------------------------------------------------
+  isMAS[RN, T, eps]: Test if siphon T is self-replicable (an MAS)
+-----------------------------------------------------------------------------*)
+isMAS[RN_List, T_List, eps_ : 10^-6] := 
+  Module[{RND, spe, gamma, speIdx, intReacIdx, gammaT, nReac, fluxVars, constr, sol},
+   
+   (* Get stoichiometry from EpidCRN *)
+   RND = extMat[RN];
+   spe = RND[[1]];
+   gamma = RND[[4]];  (* rows=species, cols=reactions *)
+   
+   (* Species indices in T *)
+   speIdx = Flatten[Position[spe, #] & /@ T];
+   
+   (* Internal reactions *)
+   intReacIdx = findInternalReactions[RN, T];
+   
+   (* Early return if no internal reactions *)
+   If[Length[intReacIdx] == 0,
+    Return[<|"isMAS" -> False, 
+      "reason" -> "no internal reactions",
+      "siphon" -> T|>]
+   ];
+   
+   (* Extract submatrix: species in T \[Times] internal reactions *)
+   (* For single species, extract as list then wrap in list to make matrix *)
+   If[Length[speIdx] == 1,
+    gammaT = {gamma[[speIdx[[1]], intReacIdx]]};
+    ,
+    gammaT = gamma[[speIdx, intReacIdx]];
+   ];
+   
+   nReac = Length[intReacIdx];
+   
+   (* Verify gammaT is non-empty *)
+   If[gammaT === {} || gammaT === {{}},
+    Return[<|"isMAS" -> False, 
+      "reason" -> "empty submatrix",
+      "siphon" -> T, "speIdx" -> speIdx, "intReacIdx" -> intReacIdx|>]
+   ];
+   
+   (* Find v > eps with gammaT \[CenterDot] v > eps *)
+   fluxVars = Table[c[i], {i, nReac}];
+   constr = Flatten[{Thread[fluxVars >= eps], Thread[Flatten[gammaT . fluxVars] >= eps]}];
+   
+   sol = Quiet@FindInstance[constr, fluxVars, Reals, 1, WorkingPrecision -> 16];
+   
+   If[sol === {} || sol === {{}}, 
+    <|"isMAS" -> False, 
+      "reason" -> "no positive flux exists",
+      "siphon" -> T,
+      "intReac" -> intReacIdx,
+      "gammaT" -> gammaT|>,
+    <|"isMAS" -> True, 
+      "siphon" -> T,
+      "flux" -> (fluxVars /. First[sol]), 
+      "intReac" -> intReacIdx,
+      "netProd" -> Flatten[gammaT . (fluxVars /. First[sol])]|>]
+  ];
+
+(*-----------------------------------------------------------------------------
+  MAS[RN]: Find all MAS in reaction network RN
+-----------------------------------------------------------------------------*)
+MAS[RN_List] := 
+  Module[{RND, spe, gamma, minSiphQ, analysis, masQ},
+   
+   RND = extMat[RN];
+   spe = RND[[1]];
+   gamma = RND[[4]];
+   
+   (* Get minimal siphons *)
+   minSiphQ = Quiet@minSiph[spe, asoRea[RN]];
+   If[minSiphQ === $Failed || !ListQ[minSiphQ], minSiphQ = {}];
+   
+   (* Analyze each minimal siphon *)
+   analysis = Table[
+     Module[{T = minSiphQ[[k]], test},
+      test = isMAS[RN, T];
+      <|"siphon" -> T, 
+        "isMAS" -> test["isMAS"],
+        "drainable" -> isDrainable[RN, T],
+        "critical" -> isCritical[RN, T],
+        "details" -> test|>
+     ],
+     {k, Length[minSiphQ]}
+   ];
+   
+   (* Extract only the MAS *)
+   masQ = Select[minSiphQ, isMAS[RN, #]["isMAS"] &];
+   
+   <|"species" -> spe,
+     "gamma" -> gamma,
+     "minSiph" -> minSiphQ, 
+     "MAS" -> masQ,
+     "analysis" -> analysis|>
+  ];
+
+(*-----------------------------------------------------------------------------
+  testMAS[RN]: Essential MAS analysis output
+-----------------------------------------------------------------------------*)
+testMAS[RN_List] := Module[{res},
+  res = MAS[RN];
+  
+  Print["Species: ", res["species"]];
+  Print["Minimal siphons: ", res["minSiph"]];
+  Print["MAS: ", res["MAS"]];
+  
+  (* Analysis of each minimal siphon *)
+  Do[
+    Module[{a = res["analysis"][[i]], T},
+      T = a["siphon"];
+      Print[T, ": MAS=", a["isMAS"], ", Drain=", a["drainable"], 
+        ", Crit=", a["critical"]];
+      
+      If[a["isMAS"],
+        Print["  flux=", a["details"]["flux"], ", net=", a["details"]["netProd"]];
+        ,
+        Print["  ", a["details"]["reason"]];
+      ];
+    ],
+    {i, Length[res["analysis"]]}
+  ];
+  
+  res
+];
