@@ -15,11 +15,14 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
 \newtheorem{open}{Open Problem}
+\newtheorem{example}{Example}
 
 % COUNTER DEFINITIONS
+\newcounter{tabcounter}
 \newcounter{defcounter}
 \newcounter{opcounter}
 \newcounter{thmcounter}
+\newcounter{excounter}
 
 % UNIFIED GLOSSARY STYLE
 \newglossarystyle{unifiedstyle}{
@@ -30,33 +33,23 @@
 }
 
 \makeatletter
-\newcounter{tabcounter}
-
-% The macro now accepts only the Name as an optional argument.
-\newcommand{\betA}[1][]{%
+\newcommand{\beXa}[1][]{%
   \def\@temparg{#1}%
   \ifx\@temparg\@empty
-    % Case 1: No Name. Use standard table with common float placement options.
-    \begin{table}[htbp]%
+    \begin{example}%
   \else
-    % Case 2: Name is present.
-    \refstepcounter{tabcounter}%
-    \begin{table}[htbp]%
-
-    % The stable, numeric label key fixes the "p. ??" glossary error.
-    \label{A:\thetabcounter}%
-
-    \newglossaryentry{A\thetabcounter}{%
-      name={#1},% % Uses the Name for the glossary title
-      description={p.~\pageref{A:\thetabcounter}},%
-      user1={\thetabcounter},%
-      user2={Table}%
+    \refstepcounter{excounter}%  % Step the counter
+    \begin{example}[#1]%
+    \label{e:#1}%                 % Create a label (using 'e' for example)
+    \newglossaryentry{e\theexcounter}{%
+      name={#1},%
+      description={p.~\pageref{e:#1}},%  % Use pageref of the label
+      user1={\theexcounter},%
+      user2={Example}%              % Use 'Example' as the category
     }%
   \fi
 }
-
-\newcommand{\eetA}{\end{table}}
-\makeatother
+\newcommand{\eeXa}{\end{example}}
 
 \newcommand{\beD}[1][]{%
   \def\@temparg{#1}%
@@ -113,6 +106,31 @@
 }
 \newcommand{\eeO}{\end{open}}
 
+% The macro now accepts only the Name as an optional argument.
+\newcommand{\betA}[1][]{%
+  \def\@temparg{#1}%
+  \ifx\@temparg\@empty
+    % Case 1: No Name. Use standard table with common float placement options.
+    \begin{table}[htbp]%
+  \else
+    % Case 2: Name is present.
+    \refstepcounter{tabcounter}%
+    \begin{table}[htbp]%
+
+    % The stable, numeric label key fixes the "p. ??" glossary error.
+    \label{A:\thetabcounter}%
+
+    \newglossaryentry{A\thetabcounter}{%
+      name={#1},% % Uses the Name for the glossary title
+      description={p.~\pageref{A:\thetabcounter}},%
+      user1={\thetabcounter},%
+      user2={Table}%
+    }%
+  \fi
+}
+
+\newcommand{\eetA}{\end{table}}
+\makeatother
 % PRINT COMMAND
 \newcommand{\printboth}{%
   \glsaddall  % Add all entries to glossary
@@ -127,7 +145,6 @@
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
 \newtheorem{remark}{Remark}
-\newtheorem{example}{Example}
 \newtheorem{question}{Question}
 \newtheorem{assumption}{Assumption}
 \newtheorem{hypothesis}{Hypothesis}
@@ -138,7 +155,6 @@
 \def\beP{\begin{proposition}}\def\eeP{\end{proposition}}
 \def\beC{\begin{corollary}}\def\eeC{\end{corollary}}
 \def\beR{\begin{remark}}\def\eeR{\end{remark}}
-\def\beXa{\begin{example}}\def\eeXa{\end{example}}
 \def\beQ{\begin{question}}\def\eeQ{\end{question}}
 \def\beA{\begin{assumption}}\def\eeA{\end{assumption}}
 
@@ -331,16 +347,16 @@
 \def\dd{D_{0}}
 \def\vd{v_{0}}
 \def\zd{z_{0}}
-\def\se{\bar{s}}
+\def\se{\sE}
 
 %% ========================================
 %% SPECIAL VALUES & EQUILIBRIA
 %% ========================================
-\def\eE{\bar{\e}}
-\def\we{\bar{\w}}
-\def\se{\bar{\s}}
+\def\eE{\bar{e}}
+\def\wE{\bar{w}}
+\def\sE{s_{ee}}
 \def\Me{M_{ee}}
-\def\dw{D_w}
+
 
 
 %% ========================================

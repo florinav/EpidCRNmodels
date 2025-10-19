@@ -241,12 +241,7 @@ NGM[mod_, infVars_] := Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V
   
   V1 = -Jx /. Thread[X[[infc]] -> 0];
   F1 = (Jx + V1) /. Thread[X[[inf]] -> 0];
-  
-  
-  
   F = posM[F1];
-  
-  
   V = (F - Jx) /. Thread[X[[inf]] -> 0];
   
   detV = Det[V];

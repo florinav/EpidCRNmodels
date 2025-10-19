@@ -36,44 +36,39 @@ strToSymb[reactions_] := Module[{convertSide},
   ], reactions]
 ];
 
-(* Enhanced compToAsso function *)
-compToAsso[side_] := Module[{coeffs}, 
-  coeffs = <||>;
-  If[side === 0, Return[coeffs]];
-  
-  If[Head[side] === Plus, 
-   Do[
-    If[Head[term] === Times, 
-     Module[{parts, strings, nonStrings},
-      parts = List @@ term;
-      strings = Select[parts, StringQ];
-      nonStrings = Select[parts, !StringQ[#] &];
-      If[Length[strings] >= 1,
-       Do[
-        coeffs[str] = If[Length[nonStrings] == 0, 1, 
-                        If[Length[nonStrings] == 1, nonStrings[[1]], Times @@ nonStrings]];
-        , {str, strings}];,
-       If[StringQ[term], coeffs[term] = 1]
-       ]
-      ], 
-     If[StringQ[term], coeffs[term] = 1];
-    ], {term, List @@ side}], 
-   If[Head[side] === Times, 
-    Module[{parts, strings, nonStrings},
-     parts = List @@ side;
-     strings = Select[parts, StringQ];
-     nonStrings = Select[parts, !StringQ[#] &];
-     If[Length[strings] >= 1,
-      Do[
-       coeffs[str] = If[Length[nonStrings] == 0, 1, 
-                       If[Length[nonStrings] == 1, nonStrings[[1]], Times @@ nonStrings]];
-       , {str, strings}];,
-      If[StringQ[side], coeffs[side] = 1]
-      ]
-     ], 
-    If[StringQ[side], coeffs[side] = 1]]];
-  coeffs];
+(* Convert compound expression to association with lowercase species names *)
+compToAsso[expr_] := Module[{terms, result},
+  If[expr === 0 || expr === Null,
+    Association[], (* Empty association for zero or null *)
+    terms = If[Head[expr] === Plus, List @@ expr, {expr}];
+    result = Association[];
+    Do[
+      Which[
+        Head[term] === Times && Length[term] >= 2 && NumericQ[First[term]],
+        (* Handle cases like 2*A - convert to lowercase *)
+        result[ToLowerCase[ToString[Last[term]]]] = First[term],
+        Head[term] === Times,
+        (* Handle cases like A*B (coefficient 1) *)
+        result[ToLowerCase[ToString[term]]] = 1,
+        StringQ[term],
+        (* Handle string species - convert to lowercase *)
+        result[ToLowerCase[term]] = 1,
+        True,
+        (* Handle other cases - convert to lowercase *)
+        result[ToLowerCase[ToString[term]]] = 1
+      ];
+    , {term, terms}];
+    result
+  ]
+];
 
+(* Test 
+Print["=== Test compToAsso ==="];
+Print[compToAsso[0]];
+Print[compToAsso["S"]];
+Print[compToAsso["S" + "I1"]];
+Print[compToAsso[2*"I2"]];
+Print[compToAsso["S" + 2*"I1" + 3*"I2"]];*)
 
 
 cons[gamma_, cp_: {}] := Module[{
@@ -127,79 +122,36 @@ cons[{{-a, b, 0}, {0, -c, d}}, {a > 0, b > 0, c > 0, d > 0}]*)
 (* Returns {nullspace, constraints} for Reduce/Solve *)
 
 
-(* Main extMat function *)
+(* Fixed extSpe to return lowercase species names *)
+extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
+  allSpecies = {};
+  Do[
+   reactants = compToAsso[reactions[[i, 1]]];
+   products = compToAsso[reactions[[i, 2]]];
+   allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
+   , {i, Length[reactions]}];
+  ToLowerCase /@ DeleteDuplicates[allSpecies]
+];
+
+(* Main extMat function - simplified using extSpe *)
 extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
   numReactions, numSpecies, reactants, products, 
-  var, rv, tk, complexes, linkageClasses, deficiency,
-  defFormula, defTerms, defResult, Nc, l, s, leftSide, rightSide,
-  compToAssoLocal, expMLocal,mSi},
+  var, rv, tk, complexes, deficiency,
+  defFormula, defTerms, defResult, Nc, l, s, mSi, speOrig},
   
-  (* Local helper function to convert compound expressions to associations *)
-  compToAssoLocal = Function[{expr},
-    Module[{terms, result},
-      If[expr === 0 || expr === Null,
-        Association[], (* Empty association for zero or null *)
-        terms = If[Head[expr] === Plus, List @@ expr, {expr}];
-        result = Association[];
-        Do[
-          Which[
-            Head[term] === Times && Length[term] >= 2 && NumericQ[First[term]],
-            (* Handle cases like 2*A *)
-            result[Last[term]] = First[term],
-            Head[term] === Times,
-            (* Handle cases like A*B (coefficient 1) *)
-            result[term] = 1,
-            True,
-            (* Handle single species *)
-            result[term] = 1
-          ];
-        , {term, terms}];
-        result
-      ]
-    ]
-  ];
-  
-  (* Local helper function for exponential matrix *)
-  expMLocal = Function[{vars, matrix},
-    Module[{},
-      If[Length[vars] == 0 || Length[matrix] == 0,
-        ConstantArray[1, Length[matrix]],
-        (* Create the exponential terms *)
-        Table[
-          If[Length[vars] > 0 && Length[matrix[[j]]] > 0,
-            Product[
-              If[matrix[[j, i]] == 0, 1, vars[[i]]^matrix[[j, i]]], 
-              {i, Length[vars]}
-            ],
-            1
-          ],
-          {j, Length[matrix]}
-        ]
-      ]
-    ]
-  ];
-  
-  (* Extract species *)
-  spe = Module[{allSpecies = {}}, 
+  (* Get original species names for matching *)
+  speOrig = Module[{allSpecies = {}, reactants, products}, 
     Do[
-      (* Handle different input formats *)
-      {leftSide, rightSide} = Which[
-        Head[reactions[[i]]] === Rule, 
-        {reactions[[i, 1]], reactions[[i, 2]]},
-        Head[reactions[[i]]] === List && Length[reactions[[i]]] >= 2,
-        {reactions[[i, 1]], reactions[[i, 2]]},
-        True,
-        (Print["Warning: Unrecognized reaction format at position ", i]; 
-         Continue[])
-      ];
-      
-      reactants = compToAssoLocal[leftSide];
-      products = compToAssoLocal[rightSide];
-      allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
-    , {i, Length[reactions]}];
+     reactants = compToAsso[reactions[[i, 1]]];
+     products = compToAsso[reactions[[i, 2]]];
+     allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
+     , {i, Length[reactions]}];
     DeleteDuplicates[allSpecies]
   ];
+  
+  (* Extract species (now lowercase) *)
+  spe = extSpe[reactions];
   
   (* Check if species were found *)
   If[Length[spe] == 0,
@@ -214,95 +166,73 @@ extMat[reactions_] := Module[{
   al = ConstantArray[0, {numSpecies, numReactions}];
   be = ConstantArray[0, {numSpecies, numReactions}];
   
-  (* Build stoichiometric matrices *)
+  (* Build stoichiometric matrices using original species names *)
   Do[
-    (* Handle different input formats *)
-    {leftSide, rightSide} = Which[
-      Head[reactions[[j]]] === Rule,
-      {reactions[[j, 1]], reactions[[j, 2]]},
-      Head[reactions[[j]]] === List && Length[reactions[[j]]] >= 2,
-      {reactions[[j, 1]], reactions[[j, 2]]},
-      True,
-      (Print["Warning: Unrecognized reaction format at position ", j]; 
-       Continue[])
-    ];
+    reactants = compToAsso[reactions[[j, 1]]];
+    products = compToAsso[reactions[[j, 2]]];
     
-    reactants = compToAssoLocal[leftSide];
-    products = compToAssoLocal[rightSide];
-    
-    (* Fill in the matrices *)
+    (* Fill matrices - match original species *)
     Do[
-      If[KeyExistsQ[reactants, spe[[i]]], 
-        al[[i, j]] = reactants[spe[[i]]]];
-      If[KeyExistsQ[products, spe[[i]]], 
-        be[[i, j]] = products[spe[[i]]]];
+      If[KeyExistsQ[reactants, speOrig[[i]]], 
+        al[[i, j]] = reactants[speOrig[[i]]]];
+      If[KeyExistsQ[products, speOrig[[i]]], 
+        be[[i, j]] = products[speOrig[[i]]]];
     , {i, numSpecies}];
   , {j, numReactions}];
   
-  (* Calculate derived matrices and terms *)
+  (* Calculate derived matrices *)
   gamma = be - al;
   
-  (* Convert species to variables more safely *)
-  var = Table[ToExpression[ToString[spe[[i]]]], {i, Length[spe]}];
+  (* Convert lowercase species to variables *)
+  var = ToExpression /@ spe;
   
   (* Calculate reaction rates *)
-  rv = expMLocal[var, Transpose[al]];
+  rv = Table[
+    Product[
+      If[al[[i, j]] == 0, 1, var[[i]]^al[[i, j]]], 
+      {i, numSpecies}
+    ],
+    {j, numReactions}
+  ];
+  
+  (* Rate constants and RHS *)
   tk = Table[Symbol["k" <> ToString[j]], {j, numReactions}];
   Rv = tk*rv;
   RHS = gamma . Rv;
   
-  (* Calculate complexes for deficiency *)
-  complexes = Module[{complexList = {}},
-    Do[
-      {leftSide, rightSide} = Which[
-        Head[reactions[[i]]] === Rule,
-        {reactions[[i, 1]], reactions[[i, 2]]},
-        Head[reactions[[i]]] === List && Length[reactions[[i]]] >= 2,
-        {reactions[[i, 1]], reactions[[i, 2]]},
-        True,
-        Continue[]
-      ];
-      
-      If[!MemberQ[complexList, leftSide], 
-        AppendTo[complexList, leftSide]];
-      If[!MemberQ[complexList, rightSide], 
-        AppendTo[complexList, rightSide]];
-    , {i, Length[reactions]}];
-    complexList
+  (* Complexes for deficiency *)
+  complexes = DeleteDuplicates[
+    Flatten[Table[{reactions[[i, 1]], reactions[[i, 2]]}, {i, Length[reactions]}]]
   ];
   
-  (* Deficiency calculation *)
+  (* Deficiency *)
   Nc = Length[complexes];
-  l = 1; (* Simplified linkage class calculation *)
-  s = Which[
-    gamma === {}, 0,
-    AllTrue[Flatten[gamma], # == 0 &], 0,
-    True, MatrixRank[gamma]
-  ];
+  l = 1;
+  s = If[gamma === {} || AllTrue[Flatten[gamma], # == 0 &], 0, MatrixRank[gamma]];
   
-  (* Format deficiency results *)
   defFormula = "\[Delta] = Nc - \[ScriptL] - s";
   defTerms = "Nc = " <> ToString[Nc] <> " (complexes), " <>
              "\[ScriptL] = " <> ToString[l] <> " (linkage classes), " <> 
              "s = " <> ToString[s] <> " (stoich dimension)";
   defResult = "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <> 
               " - " <> ToString[s] <> " = " <> ToString[Nc - l - s];
+  
+  (* Minimal siphons *)
   mSi = minSiph[spe, asoRea[reactions]];
-  (* Return results *)
-  {spe, al, be, gamma, Rv, RHS, mSi, 
-  {defFormula, defTerms, defResult}}
+  
+  (* Return with lowercase species *)
+  {spe, al, be, gamma, Rv, RHS, mSi, {defFormula, defTerms, defResult}}
 ];
 
+(* Test 
+Print["=== Test with Capital Letters ==="];
+RN = {"S" + "I1" -> 2*"I1", "S" + "I2" -> 2*"I2", 
+      0 -> "S", "S" -> 0, "I1" -> 0, "I2" -> 0};
+result = extMat[RN];
+Print["Lowercase species: ", result[[1]]];
+Print["Gamma matrix:"];
+Print[MatrixForm[result[[4]], TableHeadings -> {result[[1]], Range[Length[RN]]}]];*)
 
-(* Other core functions *)
-extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
-  allSpecies = {};
-  Do[
-   reactants = compToAsso[reactions[[i, 1]]];
-   products = compToAsso[reactions[[i, 2]]];
-   allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
-   , {i, Length[reactions]}];
-  DeleteDuplicates[allSpecies]];
 
 arrow2pairReac[reactions_] := Module[{converted},
   If[Length[reactions] == 0, Return[{}]];
@@ -390,3 +320,161 @@ result=extMat[RN];
 Print["Species: ",result[[1]]];
 Print["Alpha matrix: ",result[[2]]//MatrixForm];
 Print["Gamma matrix: ",result[[4]]//MatrixForm];*)
+
+
+(* ---------------------------------------------------------------------
+   findCores[RN, opts] : find autocatalytic cores (minimal autocatalytic subnetworks)
+   Uses EpidCRN functions: extMat, compToAsso, extSpe
+   --------------------------------------------------------------------- *)
+
+ClearAll[findInternalReactions, isAutocatalyticBlockLP, findCores];
+
+(* Find internal reactions for candidate T using compToAsso *)
+findInternalReactions[RN_List, T_List] := Module[
+  {Tstr = ToLowerCase /@ (ToString /@ T), intReacIdx},
+  
+  intReacIdx = Table[
+    Module[{reactants, reactantSpe, isInternal},
+      reactants = compToAsso[RN[[j, 1]]];
+      reactantSpe = Keys[reactants];
+      
+      (* Reaction is internal if all reactants are in T (or no reactants) *)
+      isInternal = (reactantSpe === {} || SubsetQ[Tstr, reactantSpe]);
+      
+      If[$DebugCores, 
+        Print["Rxn ", j, ": ", RN[[j]], " -> reactants=", reactantSpe, 
+          ", T=", Tstr, ", internal=", isInternal]
+      ];
+      
+      If[isInternal, j, Nothing]
+    ],
+    {j, Length[RN]}
+  ];
+  
+  intReacIdx
+];
+
+(* LP-based test: check if T is autocatalytic *)
+isAutocatalyticBlockLP[gamma_, speciesIdx_List, intReacIdx_List, vmin_: 10^-9] := Module[
+  {gammaT, m, n, A, b, c, sol, tsol, vsol},
+  
+  If[Length[intReacIdx] == 0 || Length[speciesIdx] == 0, 
+    Return[<|"isCore" -> False, "reason" -> "empty block"|>]
+  ];
+  
+  (* Extract submatrix *)
+  gammaT = If[Length[speciesIdx] == 1, 
+    {gamma[[speciesIdx[[1]], intReacIdx]]}, 
+    gamma[[speciesIdx, intReacIdx]]
+  ];
+  
+  m = Length[speciesIdx]; 
+  n = Length[intReacIdx];
+  
+  (* LP: maximize t subject to gammaT\[CenterDot]v >= t\[CenterDot]1, v >= vmin, t >= 0 *)
+  A = Join[
+    Map[Join[#, {-1}] &, gammaT],
+    Table[Join[UnitVector[n, j], {0}], {j, n}],
+    {Join[ConstantArray[0, n], {1}]}
+  ];
+  
+  b = Join[ConstantArray[0, m], ConstantArray[vmin, n], {0}];
+  c = Join[ConstantArray[0, n], {-1}];
+  
+  sol = Quiet@LinearProgramming[Rationalize[c, 0], Rationalize[A, 0], Rationalize[b, 0]];
+  
+  If[sol === $Failed || sol === {} || !ListQ[sol] || Length[sol] != n + 1, 
+    Return[<|"isCore" -> False, "reason" -> "LP failed"|>]
+  ];
+  
+  tsol = N[sol[[n + 1]]];
+  vsol = N[Take[sol, n]];
+  
+  If[NumericQ[tsol] && tsol > 10^-12,
+    <|"isCore" -> True, "t" -> tsol, "flux" -> AssociationThread[intReacIdx -> vsol]|>,
+    <|"isCore" -> False, "reason" -> "t <= 0"|>
+  ]
+];"flux" -> AssociationThread[intReacIdx -> vsol], 
+      "gammaT" -> gammaT,
+      "netProd" -> gammaT . vsol|>,
+    <|"isCore" -> False, 
+      "reason" -> "max t <= 0", 
+      "t" -> tsol|>
+  ]
+];
+
+(* Main function *)
+Options[findCores] = {"CandidateSets" -> Automatic, "MaxSize" -> 6};
+
+findCores[RN_List, opts : OptionsPattern[]] := Module[
+  {RND, spe, gamma, nSpec, nReac, candidateSets, maxSize, 
+   speciesIdxMap, results, cores, minimal},
+  
+  (* Use EpidCRN extMat *)
+  RND = extMat[RN];
+  spe = RND[[1]];  (* lowercase species from extSpe *)
+  gamma = RND[[4]];
+  
+  nSpec = Length[spe]; 
+  nReac = Length[RN];
+  
+  (* Map species names to indices *)
+  speciesIdxMap = AssociationThread[spe -> Range[nSpec]];
+  
+  (* Determine candidate sets *)
+  candidateSets = OptionValue["CandidateSets"];
+  maxSize = OptionValue["MaxSize"];
+  
+  If[candidateSets === Automatic,
+    (* All nonempty subsets up to maxSize *)
+    candidateSets = Rest@Subsets[spe, {1, Min[maxSize, nSpec]}],
+    (* Convert candidates to lowercase strings *)
+    candidateSets = Map[ToLowerCase /@ (ToString /@ #) &, candidateSets]
+  ];
+  
+  (* Test each candidate *)
+  results = Table[
+    Module[{T = candidateSets[[k]], intReacIdx, speciesIdx, lpres},
+      
+      (* Find internal reactions *)
+      intReacIdx = findInternalReactions[RN, T];
+      
+      If[Length[intReacIdx] == 0, 
+        <|"T" -> T, "isCore" -> False, "reason" -> "no internal reactions"|>,
+        
+        (* Get species indices *)
+        speciesIdx = Lookup[speciesIdxMap, T, Nothing];
+        
+        If[Length[speciesIdx] != Length[T],
+          <|"T" -> T, "isCore" -> False, "reason" -> "species not found"|>,
+          
+          (* LP test *)
+          lpres = isAutocatalyticBlockLP[gamma, speciesIdx, intReacIdx];
+          <|"T" -> T, "isCore" -> lpres["isCore"], 
+            "intReacIdx" -> intReacIdx, "details" -> lpres|>
+        ]
+      ]
+    ],
+    {k, Length[candidateSets]}
+  ];
+  
+  (* Extract cores *)
+  cores = Select[results, #["isCore"] === True &];
+  
+  (* Find minimal cores (no proper subset is also a core) *)
+  minimal = Select[cores, Function[c,
+    Not[MemberQ[DeleteCases[cores, c], 
+      d_ /; SubsetQ[c["T"], d["T"]] && d["T"] =!= c["T"]]]
+  ]];
+  
+  <|"species" -> spe, 
+    "gamma" -> gamma,
+    "tested" -> Length[candidateSets],
+    "allResults" -> results, 
+    "cores" -> minimal|>
+];
+
+(* ==================== Test ==================== *)
+RN1 = {"a" -> "a" + "b", "b" -> "a" + "b", "a" -> 0, "b" -> 0};
+res1 = findCores[RN1, "CandidateSets" -> {{"a", "b"}}];
+res1["cores"]

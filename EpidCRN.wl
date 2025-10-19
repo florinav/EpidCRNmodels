@@ -95,13 +95,21 @@ Hopf tolerance hTol for bifurcation detection, step size delta for range mode, w
 making it suitable for broader classes of models beyond epidemic systems.";
 
 (* Siphon and persistence functions *)
-minSiph::usage="(Siphons)minSiph[species,reactions] finds minimal siphons in a reaction network";
+minSiph::usage = "(Siphons)minSiph[species, reactions] finds minimal siphons as lists of symbols. \
+minSiph[species, reactions, \"All\"] returns all siphons (not just minimal). \
+Species can be strings or symbols. Reactions can be in RN format (lhs->rhs) or association format.";
+
 isSiph::usage="(Siphons)isSiph[species,reactions,siphon] checks if a given set forms a siphon in the reaction network";
 isDrainable::usage="(Siphons)isDrainable[reactions, speciesSet] checks if speciesSet is drainable for the given reaction network. A set is drainable if there exists a reaction pathway that decreases all species in the set";
 isSelfReplicable::usage="(Siphons)isSelfReplicable[reactions, speciesSet] checks if speciesSet is self-replicable for the given reaction network. A set is self-replicable if there exists a reaction pathway that increases all species in the set";
 isCritical::usage="(Siphons)isCritical[reactions, speciesSet] checks if speciesSet is critical (no positive conservation law has support contained in the set)";
 siphonAnalysis::usage="(Siphons)siphonAnalysis[reactions] provides comprehensive siphon classification for a reaction network. Returns an association with each siphon classified as drainable, self-replicable, critical, and categorized by type";
-persistenceAnalysis::usage="(Siphons)persistenceAnalysis[reactions] analyzes network persistence based on drainable siphons. Returns detailed information about persistence, drainable siphons, and extinction threats. Networks without drainable siphons are persistent";
+(* Main user functions *)
+isMAS::usage = "(Siphons)isMAS[RN, T] tests if siphon T is a Minimal Autocatalytic Subnetwork: \[Exists] flux v>0 using only internal reactions with (\[Gamma]_T\[CenterDot]v)>0.";
+MAS::usage = "(Siphons)MAS[RN] finds all Minimal Autocatalytic Subnetworks (self-replicable minimal siphons) in reaction network RN.";
+testMAS::usage = "(Siphons)testMAS[RN] performs and prints formatted MAS analysis identifying strains as critical non-drainable MAS.";
+(* Helper function *)
+findInternalReactions::usage = "findInternalReactions[RN, T] returns indices of reactions whose reactants are all contained in siphon T.";persistenceAnalysis::usage="(Siphons)persistenceAnalysis[reactions] analyzes network persistence based on drainable siphons. Returns detailed information about persistence, drainable siphons, and extinction threats. Networks without drainable siphons are persistent";
 catalysisAnalysis::usage="(Siphons)catalysisAnalysis[reactions] identifies autocatalytic behavior in reaction networks by finding self-replicable critical siphons. Returns information about catalytic sets and autocatalytic potential";
 autocatalysisReport::usage="(Siphons)autocatalysisReport[reactions] provides comprehensive analysis of autocatalytic behavior and persistence properties. Returns detailed association with network info, persistence analysis, catalysis analysis, and theoretical insights";
 checkPersistence::usage="(Siphons)checkPersistence[RN] determines persistence status of reaction network RN. Returns {status, analysis} where status is 'Persistent', 'Unknown', or 'Non-persistent'";
@@ -211,6 +219,4 @@ Get[FileNameJoin[{root, "Extra.wl"}]];
 
 End[];
 EndPackage[];
-
-
 
