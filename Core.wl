@@ -133,6 +133,8 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
   ToLowerCase /@ DeleteDuplicates[allSpecies]
 ];
 
+
+
 (* Main extMat function - simplified using extSpe *)
 extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
@@ -217,21 +219,12 @@ extMat[reactions_] := Module[{
   defResult = "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <> 
               " - " <> ToString[s] <> " = " <> ToString[Nc - l - s];
   
-  (* Minimal siphons *)
-  mSi = minSiph[spe, asoRea[reactions]];
+  (* Minimal siphons - pass lowercase species and original reactions *)
+  mSi = minSiph[spe, reactions][[1]];(*only the minimal*)
   
   (* Return with lowercase species *)
   {spe, al, be, gamma, Rv, RHS, mSi, {defFormula, defTerms, defResult}}
 ];
-
-(* Test 
-Print["=== Test with Capital Letters ==="];
-RN = {"S" + "I1" -> 2*"I1", "S" + "I2" -> 2*"I2", 
-      0 -> "S", "S" -> 0, "I1" -> 0, "I2" -> 0};
-result = extMat[RN];
-Print["Lowercase species: ", result[[1]]];
-Print["Gamma matrix:"];
-Print[MatrixForm[result[[4]], TableHeadings -> {result[[1]], Range[Length[RN]]}]];*)
 
 
 arrow2pairReac[reactions_] := Module[{converted},

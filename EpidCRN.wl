@@ -95,11 +95,11 @@ Hopf tolerance hTol for bifurcation detection, step size delta for range mode, w
 making it suitable for broader classes of models beyond epidemic systems.";
 
 (* Siphon and persistence functions *)
-minSiph::usage = "(Siphons)minSiph[species, reactions] finds minimal siphons as lists of symbols. \
-minSiph[species, reactions, \"All\"] returns all siphons (not just minimal). \
-Species can be strings or symbols. Reactions can be in RN format (lhs->rhs) or association format.";
+isSiph::usage = "isSiph[W, alpha, beta] tests if W is a siphon using Gagrani's definition";
+isAutoC::usage = "isAutoC[W, R, alpha, beta] tests if W with reactions R is autocatalytic (P1 and P2)";
+minSiph::usage = "minSiph[RN] finds minimal siphons (automatically filters inflows/outflows)";
+findCores::usage = "findCores[RN, maxSize] finds autocatalytic cores (automatically filters inflows/outflows). Returns {minimal, nonMinimal}";
 
-isSiph::usage="(Siphons)isSiph[species,reactions,siphon] checks if a given set forms a siphon in the reaction network";
 isDrainable::usage="(Siphons)isDrainable[reactions, speciesSet] checks if speciesSet is drainable for the given reaction network. A set is drainable if there exists a reaction pathway that decreases all species in the set";
 isSelfReplicable::usage="(Siphons)isSelfReplicable[reactions, speciesSet] checks if speciesSet is self-replicable for the given reaction network. A set is self-replicable if there exists a reaction pathway that increases all species in the set";
 isCritical::usage="(Siphons)isCritical[reactions, speciesSet] checks if speciesSet is critical (no positive conservation law has support contained in the set)";
@@ -109,34 +109,24 @@ isMAS::usage = "(Siphons)isMAS[RN, T] tests if siphon T is a Minimal Autocatalyt
 MAS::usage = "(Siphons)MAS[RN] finds all Minimal Autocatalytic Subnetworks (self-replicable minimal siphons) in reaction network RN.";
 testMAS::usage = "(Siphons)testMAS[RN] performs and prints formatted MAS analysis identifying strains as critical non-drainable MAS.";
 (* Helper function *)
-findInternalReactions::usage = "findInternalReactions[RN, T] returns indices of reactions whose reactants are all contained in siphon T.";persistenceAnalysis::usage="(Siphons)persistenceAnalysis[reactions] analyzes network persistence based on drainable siphons. Returns detailed information about persistence, drainable siphons, and extinction threats. Networks without drainable siphons are persistent";
+findInternalReactions::usage = "findInternalReactions[RN] returns indices of 
+reactions whose reactants are all contained in siphon T.";
+
+persistenceAnalysis::usage="(Siphons)persistenceAnalysis[reactions] analyzes network persistence based on drainable siphons. Returns detailed information about persistence, drainable siphons, and extinction threats. Networks without drainable siphons are persistent";
 catalysisAnalysis::usage="(Siphons)catalysisAnalysis[reactions] identifies autocatalytic behavior in reaction networks by finding self-replicable critical siphons. Returns information about catalytic sets and autocatalytic potential";
 autocatalysisReport::usage="(Siphons)autocatalysisReport[reactions] provides comprehensive analysis of autocatalytic behavior and persistence properties. Returns detailed association with network info, persistence analysis, catalysis analysis, and theoretical insights";
 checkPersistence::usage="(Siphons)checkPersistence[RN] determines persistence status of reaction network RN. Returns {status, analysis} where status is 'Persistent', 'Unknown', or 'Non-persistent'";
 persistenceReport::usage="(Siphons)persistenceReport[RN] provides comprehensive persistence analysis of reaction network RN with detailed output";
-isCatalytic::usage="(Siphons)isCatalytic[RN] checks if the reaction network contains catalytic sets";
+
 findCatalyticSets::usage="(Siphons)findCatalyticSets[RN] identifies all catalytic sets in the reaction network";
 findMinimalCriticalSiphons::usage="(Siphons)findMinimalCriticalSiphons[reactions] finds all minimal critical siphons in a reaction network. These are the siphons that pose potential threats to persistence according to the theory";
 invFace::usage="(Siphons)invF = invFace[reactions,maxCodim] finds invariant facets of the positive orthant for reaction networks up to specified codimension";
 isInvariantFacet::usage="(Siphons)isInvariantFacet[facetSet,reactions] checks if a given set of species forms an invariant facet";
 (* Usage statements for IGMS-related functions *)
 
-canActRea::usage = "canActRea[reaction, Si, Sj] returns True if reaction allows siphon Si to activate siphon Sj.";
-parseComplex::usage = "parseComplex[complex] parses a reaction complex (e.g., 2*\"I2\" or \"I1\"+\"I2\") and returns an association with stoichiometry.";
-edgIGMS::usage = "edgIGMS[RN, mSi] computes the directed edges i->j of the IGMS graph for reaction network RN with minimal siphons mSi.";
-
-IGMS::usage = "IGMS[RN, mSi] computes and visualizes the IGMS (Infection Graph of Minimal Siphons), returning an association with edges, graph, and cycle information.";
-findCores::usage = "findCores[RN, \"CandidateSets\" -> {list of candidate sets}]
-  findCores[RN, \"MaxSize\" -> k]  (* tests all subsets up to size k *)
-RETURNS: Association with keys:
-  \"cores\" - list of minimal autocatalytic cores
-  Each core contains:
-    \"T\" - the species set
-    \"intReacIdx\" - internal reaction indices
-    \"details\" - LP results including:
-      \"flux\" - reaction flux vector v
-      \"growth\" - growth vector A\[CenterDot]v (should be > 0 for true cores)
-      \"t\" - uniform lower bound on growth rates";
+canActRea::usage = "(Siphons)canActRea[reaction, Si, Sj] returns True if reaction allows siphon Si to activate siphon Sj.";
+edgIGMS::usage = "(Siphons)edgIGMS[RN, mSi] computes the directed edges i->j of the IGMS graph for reaction network RN with minimal siphons mSi.";
+IGMS::usage = "(Siphons)IGMS[RN, mSi] computes and visualizes the IGMS (Infection Graph of Minimal Siphons), returning an association with edges, graph, and cycle information.";
 
 (* Conv functions - Simple one-liner conversions *)
 toSum::usage="(Conv)toSum[expr] converts expression to sum format";

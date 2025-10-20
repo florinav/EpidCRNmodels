@@ -153,7 +153,7 @@ R0A=Select[eigenvals,
 
 
 (* Then return: *)
-{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infVars,gam, ngm}
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infVars,al, be,gam, ngm}
 ];
 
 
@@ -493,5 +493,5 @@ bdCo[RN_, rts_] := Module[{
     AppendTo[ElTRat, nonDFESolutions];
     , {j, Length[mSi]}];
   
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV,gam, ElTRat}
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV,al, be,gam, ElTRat}
 ];

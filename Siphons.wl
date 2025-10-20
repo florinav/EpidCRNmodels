@@ -1,285 +1,270 @@
 (* ::Package:: *)
 
-minSiph[species_List, reactions_List, opt___] := 
-  Module[{ns, sm, specs, constraints, solutions, siphons, minimal, reacAso, spe, returnAll},
-   
-   (* Check if "All" option is given *)
-   returnAll = MemberQ[{opt}, "All"];
-   
-   (* Convert species to strings if needed *)
-   spe = If[Length[species] > 0 && StringQ[species[[1]]], 
-     species, 
-     Map[If[StringQ[#], #, SymbolName[#]] &, species]
-   ];
-   ns = Length[spe];
-   
-   (* Convert reactions to association format if needed *)
-   reacAso = If[Length[reactions] > 0 && Head[reactions[[1]]] === Rule,
-     asoRea[reactions],
-     reactions
-   ];
-   
-   (* Create index mapping - using string keys *)
-   sm = AssociationThread[spe -> Range[ns]];
-   
-   (* Create boolean variables - use non-conflicting prefix *)
-   specs = Array[Symbol["sbo" <> ToString[#]] &, ns];
-   constraints = {Or @@ specs};  (* At least one species in siphon *)
-   
-   (* Add constraints from reactions *)
-   Do[
-     Module[{subIdx, prodIdx, substrates, products},
-       substrates = reacAso[[i]]["Substrates"];
-       products = reacAso[[i]]["Products"];
-       
-       (* Get substrate indices - match lowercase *)
-       subIdx = {};
-       If[substrates =!= {} && substrates =!= {""}, 
-         Do[
-           Module[{subLower = ToLowerCase[sub]},
-             If[KeyExistsQ[sm, subLower], AppendTo[subIdx, sm[subLower]]]
-           ],
-           {sub, substrates}
-         ]
-       ];
-       
-       (* Get product indices - match lowercase *)
-       prodIdx = {};
-       If[products =!= {} && products =!= {""}, 
-         Do[
-           Module[{prodLower = ToLowerCase[prod]},
-             If[KeyExistsQ[sm, prodLower], AppendTo[prodIdx, sm[prodLower]]]
-           ],
-           {prod, products}
-         ]
-       ];
-       
-       (* Add siphon constraint for each product *)
-       Do[
-         Module[{constraint},
-           If[Length[subIdx] == 0,
-             (* Product from nothing - can't be in siphon *)
-             constraint = Not[specs[[p]]],
-             (* Product requires at least one substrate in siphon *)
-             constraint = Implies[specs[[p]], 
-               If[Length[subIdx] == 1, 
-                 specs[[subIdx[[1]]]], 
-                 Or @@ specs[[subIdx]]
-               ]
-             ]
-           ];
-           AppendTo[constraints, constraint]
-         ],
-         {p, prodIdx}
-       ]
-     ],
-     {i, Length[reacAso]}
-   ];
-   
-   (* Solve for siphons *)
-   solutions = FindInstance[constraints, specs, Integers, 50];
-   If[solutions === {}, Return[{}]];
-   
-   (* Extract siphon indices *)
-   siphons = Map[Flatten@Position[specs /. #, True] &, solutions];
-   siphons = DeleteDuplicates[siphons];
-   siphons = Select[siphons, Length[#] > 0 &];
-   
-   (* Return all siphons or just minimal ones *)
-   If[returnAll,
-     (* Return all siphons as symbols *)
-     Map[Symbol /@ spe[[#]] &, siphons],
-     (* Find minimal siphons *)
-     minimal = {};
-     Do[
-       If[Not[AnyTrue[siphons, 
-           Function[other, other =!= siphon && SubsetQ[siphon, other]]]], 
-         AppendTo[minimal, siphon]
-       ],
-       {siphon, siphons}
-     ];
-     (* Return minimal siphons as symbols - use Symbol[] to avoid subscript interpretation *)
-     Map[Symbol /@ spe[[#]] &, minimal]
-   ]
+(* Correct implementations following Gagrani's definitions *)
+
+ClearAll[isSiph, isAutoC, minSiph, findCores];
+
+(* Check if a reaction is an inflow (0 \[RightArrow] ...) or outflow (... \[RightArrow] 0) *)
+isInflowOrOutflow[reaction_] := 
+  reaction[[1]] === 0 || reaction[[2]] === 0;
+
+(* Filter out inflows and outflows, keeping only internal reactions *)
+filterInternalReactions[RN_List] := 
+  Select[RN, !isInflowOrOutflow[#] &];
+
+(* 
+  NAME CHANGES FOR EXISTING EpidCRN FUNCTIONS:
+  
+  OLD: isSiph[W, RN] 
+  NEW: isSiph[W, alpha, beta]
+  - Now takes stoichiometric matrices directly instead of RN
+  - Must call on filtered reactions: RNinternal = filterInternalReactions[RN]; RND = extMat[RNinternal]; isSiph[W, RND[[2]], RND[[3]]]
+  
+  OLD: isAutoC[W, R, RN]
+  NEW: isAutoC[W, R, alpha, beta]
+  - Now takes stoichiometric matrices directly instead of RN
+  - Must call on filtered reactions
+  
+  OLD: minSiph[RN]
+  NEW: minSiph[RN]
+  - Signature unchanged but NOW AUTOMATICALLY FILTERS inflows/outflows
+  
+  OLD: findCores[RN, maxSize]
+  NEW: findCores[RN, maxSize]
+  - Signature unchanged but NOW AUTOMATICALLY FILTERS inflows/outflows
+  - Returns {minimal, nonMinimal} as before
+*)
+
+(* Siphon test - W is list of species names *)
+isSiph[W_List, species_List, alpha_, beta_] := Module[
+  {indices, alphaW, betaW, nReac, producingReactions},
+  
+  (* Convert species names to indices *)
+  indices = Flatten[Position[species, #] & /@ W];
+  If[Length[indices] != Length[W], Return[False]];
+  
+  nReac = Dimensions[alpha][[2]];
+  alphaW = alpha[[indices]];
+  betaW = beta[[indices]];
+  
+  (* Reactions where (S+)_W > 0 *)
+  producingReactions = Select[Range[nReac], pos[betaW[[All, #]]] &];
+  
+  (* If no producing reactions, vacuously true *)
+  If[Length[producingReactions] == 0, Return[True]];
+  
+  (* All producing reactions must also have (S-)_W > 0 *)
+  AllTrue[producingReactions, pos[alphaW[[All, #]]] &]
 ];
 
-(* Test 
-Print["=== Test with species 's' ==="];
-RN = {"s" + "i1" -> 2*"i1", "s" + "i2" -> 2*"i2", 
-      0 -> "s", "s" -> 0, "i1" -> 0, "i2" -> 0};
-spe = extSpe[RN];
-Print["Species: ", spe];
-reac = asoRea[RN];
-siphons = minSiph[spe, reac];
-Print["Minimal siphons: ", siphons];*)
-
-
-(* findCores: Find autocatalytic cores using EpidCRN functions *)
-
-ClearAll[findInternalReactions, isAutocatalyticBlockLP, findCores];
-
-findCores::usage = "findCores[RN, k] or findCores[RN, \"MaxSize\" -> k]
-  findCores[RN, \"CandidateSets\" -> {list of candidate sets}]
-  findCores[RN, \"MinimalOnly\" -> False]  (* return all cores, not just minimal ones *)
-RETURNS: Association with keys:
-  \"all\" - all cores found (isCore=True only)
-  \"cores\" - list of minimal cores (or all if MinimalOnly->False)
-  Each core contains:
-    \"T\" - the species set
-    \"intReacIdx\" - internal reaction indices
-    \"details\" - LP results including:
-      \"flux\" - reaction flux vector v
-      \"growth\" - growth vector A\[CenterDot]v (should be > 0 for true cores)
-      \"t\" - uniform lower bound on growth rates";
-
-(* Find internal reactions for candidate T *)
-(* A reaction is internal if: reactants \[SubsetEqual] T AND products \:2229 T \[NotEqual] \[EmptySet] *)
-(* This excludes pure outflow reactions like a\[RightArrow]0 *)
-findInternalReactions[RN_List, T_List] := Module[
-  {Tstr = ToLowerCase /@ (ToString /@ T)},
+(* Find minimal siphons *)
+minSiph[vars_, reactions_] := Module[{
+  species, alpha, beta, n, m, reactionsAsso, siphons, minimal},
   
-  Select[Range[Length[RN]], 
-    Module[{reactants = compToAsso[RN[[#, 1]]], products = compToAsso[RN[[#, 2]]]},
-      (* Reactants from T or empty (inflow) *)
-      (Keys[reactants] === {} || SubsetQ[Tstr, Keys[reactants]]) &&
-      (* At least one product in T (excludes outflows to 0) *)
-      Length[Intersection[Keys[products], Tstr]] > 0
-    ] &
-  ]
-];
-
-(* LP test for autocatalytic core *)
-isAutocatalyticBlockLP[gamma_, speciesIdx_List, intReacIdx_List] := 
-  Module[{gammaT, gammaExt, m, n, c, bounds, sol, tsol, vsol, growth, eps = 10^-8, vmin = 0, vmax = 1},
+  species = If[ListQ[vars] && AllTrue[vars, StringQ], vars, ToString /@ vars];
+  reactionsAsso = asoRea[reactions];
   
-  If[Length[intReacIdx] == 0 || Length[speciesIdx] == 0, 
-    Return[<|"isCore" -> False, "reason" -> "empty"|>]];
+  n = Length[species];
+  m = Length[reactions];
   
-  (* Extract submatrix for species in T and internal reactions *)
-  gammaT = If[Length[speciesIdx] == 1, 
-    {gamma[[speciesIdx[[1]], intReacIdx]]}, 
-    gamma[[speciesIdx, intReacIdx]]];
+  alpha = ConstantArray[0, {n, m}];
+  beta = ConstantArray[0, {n, m}];
   
-  m = Length[speciesIdx]; 
-  n = Length[intReacIdx];
+  Do[
+    Module[{subs, prods},
+      subs = Lookup[reactionsAsso[[j]], "Substrates", {}];
+      prods = Lookup[reactionsAsso[[j]], "Products", {}];
+      Do[
+        If[MemberQ[subs, species[[i]]], alpha[[i, j]] = 1];
+        If[MemberQ[prods, species[[i]]], beta[[i, j]] = 1];
+      , {i, n}];
+    ];
+  , {j, m}];
   
-  (* Extend gamma by appending column of -1's: [\[CapitalGamma]_T | -1] *)
-  gammaExt = Map[Append[#, -1] &, gammaT];
+  siphons = Select[Subsets[species, {1, n}], isSiph[#, species, alpha, beta] &];
   
-  (* Objective: minimize -t (i.e., maximize t) *)
-  c = Append[ConstantArray[0, n], -1];
-  
-  (* Bounds: v_i >= 0, at least one v_i > 0 enforced by requiring sum(v) >= eps *)
-  bounds = Join[ConstantArray[{vmin, vmax}, n], {{0, Infinity}}];
-  
-  (* Add constraint: sum of fluxes >= eps to ensure v \[NotEqual] 0 *)
-  gammaExtWithSum = Join[gammaExt, {Append[ConstantArray[1, n], 0]}];
-  rhsWithSum = Join[ConstantArray[0, m], {eps}];
-  
-  (* Solve LP: maximize t subject to [\[CapitalGamma]_T | -1]\[CenterDot][v; t] >= 0 and sum(v) >= eps *)
-  (* Suppress warnings about infeasible LPs *)
-  sol = Quiet[
-    LinearProgramming[c, gammaExtWithSum, rhsWithSum, bounds],
-    LinearProgramming::lpsnf
+  minimal = Select[siphons, 
+    Function[s, AllTrue[siphons, Function[t, t === s || !SubsetQ[s, t]]]]
   ];
   
-  If[sol === $Failed || !ListQ[sol] || MemberQ[sol, Indeterminate],
-    Return[<|"isCore" -> False, "reason" -> "LP failed"|>]];
-  
-  tsol = sol[[n + 1]];
-  vsol = Take[sol, n];
-  
-  (* Compute actual growth: \[CapitalGamma]_T \[CenterDot] v *)
-  growth = gammaT . vsol;
-  
-  (* Check: t > eps means \[CapitalGamma]_T \[CenterDot] v >= t\[CenterDot]1 > 0 (strictly positive growth) *)
-  If[tsol > eps && AllTrue[growth, # > eps &],
-    <|"t" -> tsol, "flux" -> AssociationThread[intReacIdx -> vsol]|>,
-    <|"isCore" -> False, "reason" -> "growth not strictly positive", 
-      "t" -> tsol, "v" -> vsol, "growth" -> growth|>
-  ]
+  {minimal,siphons}
 ];
 
-(* Main function *)
-Options[findCores] = {"CandidateSets" -> Automatic, "MaxSize" -> 6, "MinimalOnly" -> True};
 
-findCores[RN_List, maxSize_Integer] := findCores[RN, "MaxSize" -> maxSize];
 
-findCores[RN_List, opts : OptionsPattern[]] := Module[
-  {RND, spe, gamma, candidateSets, maxSize, minimalOnly, speciesIdxMap, results, cores, minimal},
+(* Helper: check if vector is >= 0 and != 0 *)
+pos[v_] := AllTrue[v, # >= 0 &] && Total[v] > 0;
+
+(* Check if W with reactions R forms an autocatalytic core *)
+isAutoC[W_List, R_List, species_List, reactions_List, alpha_, beta_] := Module[
+  {wIndices, rIndices, alphaWR, betaWR, p1, p2},
   
-  RND = extMat[RN];
-  spe = RND[[1]];
-  gamma = RND[[4]];
+  If[Length[W] == 0 || Length[R] == 0, Return[False]];
   
-  speciesIdxMap = AssociationThread[spe -> Range[Length[spe]]];
+  wIndices = Flatten[Position[species, #] & /@ W];
+  rIndices = Flatten[Position[reactions, #] & /@ R];
   
-  candidateSets = OptionValue["CandidateSets"];
-  maxSize = OptionValue["MaxSize"];
-  minimalOnly = OptionValue["MinimalOnly"];
-  
-  If[candidateSets === Automatic,
-    candidateSets = Rest@Subsets[spe, {1, Min[maxSize, Length[spe]]}],
-    candidateSets = Map[ToLowerCase /@ (ToString /@ #) &, candidateSets]
+  If[Length[wIndices] != Length[W] || Length[rIndices] != Length[R], 
+    Return[False]
   ];
   
-  results = Table[
-    Module[{T = candidateSets[[k]], intReacIdx, speciesIdx, lpres},
-      intReacIdx = findInternalReactions[RN, T];
+  alphaWR = alpha[[wIndices, rIndices]];
+  betaWR = beta[[wIndices, rIndices]];
+  
+  (* P1: Every reaction consumes AND produces in W *)
+  p1 = AllTrue[Range[Length[rIndices]], Function[j,
+    pos[alphaWR[[All, j]]] && pos[betaWR[[All, j]]]
+  ]];
+  
+  (* P2: Every species in W is consumed AND produced *)
+  p2 = AllTrue[Range[Length[wIndices]], Function[i,
+    pos[alphaWR[[i, All]]] && pos[betaWR[[i, All]]]
+  ]];
+  
+  p1 && p2
+];
+
+(* Find autocatalytic cores *)
+findCores[RN_, maxSize_] := Module[{
+  species, alpha, beta, n, m, allSubsets, autocatalyticSets, minimal, nonMinimal},
+  
+  species = extSpe[RN];
+  n = Length[species];
+  m = Length[RN];
+  
+  alpha = ConstantArray[0, {n, m}];
+  beta = ConstantArray[0, {n, m}];
+  
+  Do[
+    Module[{subsAsso, prodsAsso},
+      subsAsso = compToAsso[RN[[j, 1]]];
+      prodsAsso = compToAsso[RN[[j, 2]]];
       
-      If[Length[intReacIdx] == 0, 
-        <|"T" -> T, "isCore" -> False, "reason" -> "no internal reactions"|>,
-        
-        speciesIdx = Lookup[speciesIdxMap, T, Nothing];
-        
-        If[Length[speciesIdx] != Length[T],
-          <|"T" -> T, "isCore" -> False, "reason" -> "species not found"|>,
-          
-          lpres = isAutocatalyticBlockLP[gamma, speciesIdx, intReacIdx];
-          If[KeyExistsQ[lpres, "isCore"] && lpres["isCore"] === False,
-            <|"T" -> T, "isCore" -> False, "reason" -> lpres["reason"]|>,
-            <|"T" -> T, "intReacIdx" -> intReacIdx, "details" -> lpres|>
-          ]
-        ]
+      Do[
+        If[KeyExistsQ[subsAsso, species[[i]]], 
+          alpha[[i, j]] = subsAsso[species[[i]]]
+        ];
+        If[KeyExistsQ[prodsAsso, species[[i]]], 
+          beta[[i, j]] = prodsAsso[species[[i]]]
+        ];
+      , {i, n}];
+    ];
+  , {j, m}];
+  
+  allSubsets = Subsets[species, {1, Min[maxSize, n]}];
+  
+  autocatalyticSets = Select[allSubsets, Function[W,
+    Module[{allReactionSubsets},
+      allReactionSubsets = Subsets[RN, {1, m}];
+      AnyTrue[allReactionSubsets, 
+        isAutoC[W, #, species, RN, alpha, beta] &
       ]
-    ],
-    {k, Length[candidateSets]}
+    ]
+  ]];
+  
+  minimal = Select[autocatalyticSets, 
+    Function[s, AllTrue[autocatalyticSets, Function[t, t === s || !SubsetQ[s, t]]]]
   ];
   
-  cores = Select[results, !KeyExistsQ[#, "isCore"] || #["isCore"] === True &];
+  nonMinimal = Complement[autocatalyticSets, minimal];
   
-  minimal = If[minimalOnly,
-    Select[cores, Function[c,
-      Not[MemberQ[DeleteCases[cores, c], 
-        d_ /; SubsetQ[c["T"], d["T"]] && d["T"] =!= c["T"]]]
-    ]],
-    cores
-  ];
-  
-  <|"species" -> spe, "tested" -> Length[candidateSets], 
-    "all" -> cores, "cores" -> minimal|>
+  {minimal, nonMinimal}
 ];
 
-(* TEST 
-RN1 = {0 -> "S", "S" -> 0, "S" + "I1" -> 2*"I1", "I1" -> 0};
-res1 = findCores[RN1, "CandidateSets" -> {{"s", "i1"}}];
-Print["Simple model - Cores: ", res1["cores"]];*)
+(* Test with two-strain epidemic model 
+Print["=== Two-strain epidemic with coinfection ==="];
+RN = {0 -> "S", "S" + "I1" -> 2*"I1", "S" + "I2" -> 2*"I2", 
+      "I1" + "I2" -> "I1" + "I12", "I1" + "I2" -> "I12" + "I2",
+      "I1" + "I12" -> 2*"I12", "I12" + "I2" -> 2*"I12",
+      "S" -> 0, "I1" -> 0, "I2" -> 0, "I12" -> 0};
+result = findCores[RN, 3];
+Print["Minimal cores: ", result[[1]]];
+Print["Non-minimal cores: ", result[[2]]];*)
 
-(* Example with multiple independent cores *)
-(* Two independent infection chains: S+I1->2I1 and S+I2->2I2 
-RN3 = {0 -> "S", "S" -> 0, 
-       "S" + "I1" -> 2*"I1", "I1" -> 0,
-       "S" + "I2" -> 2*"I2", "I2" -> 0};
-res3 = findCores[RN3, 3];
-Print["\nMultiple cores example:"];
-Print["  All cores found: ", res3["all"]];
-Print["  Minimal cores: ", res3["cores"]];*)
 
-(* SDAS 
-RN2 = {0 -> "S", "S" -> 0, "S" + "I1" -> 2*"I1", "I1" -> 0, 
-   "I1" + "I2" -> 2*"I2", "I2" -> 0, "I2" + "I3" -> 2*"I3", "I3" -> 0};
-res2 = findCores[RN2];
-Print["\nFull epidemic model - minimal cores: ", res2["cores"]];*)
+(* Module to compute and visualize the IGMS (Infection Graph of Minimal Siphons) *)
+
+ClearAll[canActRea, edgIGMS, IGMS];
+
+
+(* Check if reaction activates Sj from Si *)
+canActRea[reaction_, Si_List, Sj_List] := Module[
+  {lhs, rhs, lhsComp, rhsComp, newSpecies},
+  
+  (* Skip birth and death reactions *)
+  If[reaction === (0 -> _) || reaction === (_ -> 0), Return[False]];
+  
+  {lhs, rhs} = List @@ reaction;
+  
+  (* Parse complexes *)
+  lhsComp = compToAsso[lhs];
+  rhsComp = compToAsso[rhs];
+  
+  (* Quick filter: skip if reaction doesn't involve Si *)
+  If[Length[Intersection[Keys[lhsComp], Si]] == 0, Return[False]];
+  
+  (* Find species that need to be produced *)
+  newSpecies = Complement[Sj, Si];
+  If[Length[newSpecies] == 0, Return[False]];
+  
+  (* Check if any new species has net positive production *)
+  AnyTrue[newSpecies, Lookup[rhsComp, #, 0] > Lookup[lhsComp, #, 0] &]
+];
+
+(* Compute edges of IGMS graph *)
+edgIGMS[RN_List, mSi_List] := Module[
+  {n = Length[mSi], mSiStr},
+  
+  (* Convert symbols to strings *)
+  mSiStr = Map[ToLowerCase@*ToString, mSi, {2}];
+  
+  (* Find all edges i -> j where some reaction activates j from i *)
+  Flatten@Table[
+    If[i != j && AnyTrue[RN, canActRea[#, mSiStr[[i]], mSiStr[[j]]] &],
+      i -> j,
+      Nothing
+    ],
+    {i, n}, {j, n}
+  ]
+];
+
+(* Main IGMS function *)
+IGMS[RN_List, mSi_List] := Module[
+  {n = Length[mSi], igmsEdges, igmsGraph, cycles},
+  
+  Print["Minimal siphons: ", Table[Subscript["T", i] -> mSi[[i]], {i, n}]];
+  
+  (* Compute edges and create graph *)
+  igmsEdges = edgIGMS[RN, mSi];
+  
+  igmsGraph = Graph[
+    Range[n], igmsEdges,
+    VertexLabels -> Table[
+      i -> Placed[Row[{Subscript["T", i], "=", Row[mSi[[i]], ","]}], Center],
+      {i, n}
+    ],
+    VertexSize -> 0.3,
+    VertexStyle -> LightBlue,
+    EdgeStyle -> Arrowheads[0.03],
+    VertexLabelStyle -> Directive[FontSize -> 10],
+    GraphLayout -> "SpringElectricalEmbedding",
+    ImageSize -> Medium
+  ];
+  
+  (* Find cycles *)
+  cycles = FindCycle[igmsGraph, Infinity, All];
+  
+  Print["IGMS edges: ", igmsEdges];
+  Print[If[Length[cycles] > 0,
+    Row[{"Cycles found: ", Length[cycles]}],
+    "IGMS is acyclic"
+  ]];
+  If[Length[cycles] > 0, Print["Cycles: ", cycles]];
+  Print[igmsGraph];
+  
+  (* Return list: {edges, cycles, graph} *)
+  {igmsEdges, cycles, igmsGraph}
+];
 
 
 persistenceAnalysis[reactions_, OptionsPattern[{"Verbose" -> False}]] := 
