@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Simple algebraic transformations *)
 toSum = (# /. Times -> Plus) &;
 (* toSum[a*b*c] returns a + b + c *)
@@ -41,4 +43,7 @@ Map@CoefficientArrays //
    ReplaceAll[sa_SparseArray :> sa["NonzeroValues"]] // Flatten //
    AllTrue[#, NonNegative] &;
 (* onlyP[x + y + z] returns True, onlyP[x - y + z] returns False *)
+
+
+
 

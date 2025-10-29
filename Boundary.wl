@@ -111,11 +111,11 @@ bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps},
 ]
 
 
-bdAn[RN_, rts_] := Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod, 
-K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs, 
-nonzeroIndices, relevantEigenvals, ngm, infVars},
+bdAn[RN_, rts_] := Module[{
+  spe, alMat, beMat, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod, 
+  K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, ngm, infVars},
   
-  {spe, al, be, gam, Rv, RHS, mSi, def} = extMat[RN];
+  {spe, alMat, beMat, gam, Rv, RHS, mSi, def} = extMat[RN];
   var = ToExpression[spe];
   RHS = gam . rts;
   par = Par[RHS, var];
@@ -123,37 +123,45 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   cv = Thread[var >= 0];
   ct = Join[cp, cv];
     
-  (* infVars is union of all siphon variables *)
-  infVars = Union[Flatten[mSi]];
+  (* normalize possible string species in mSi to Symbols for infVars only *)
+toSym[x_] := Which[
+  Head[x] === Symbol, x,
+  StringQ[x],           Symbol[x],
+  True,                 ToExpression@ToString[x]
+];
+
+mSiSym  = Map[toSym, mSi, {2}];
+infVars = Union[Flatten[mSiSym]];
+
   
   cDFE = Thread[infVars -> 0];
-  RDFE = RHS /. cDFE;
+  RDFE = RHS /. cDFE(*;
+  Print["infV=",infVars,"RHS=",RHS,"RDFE=",RDFE]*);
   eq0 = Thread[RDFE == 0];
-  var0 = Complement[var, infVars];
-  E0 = Join[Solve[eq0, var0] // Flatten, cDFE];
+  var0 = Complement[var, infVars]
+  (*Print["eq0=",eq0,"v0=", var0];*);
+  E0 = Solve[eq0, var0][[1]];
+  
+  Jx = Outer[D, RHS, var];
   
   mod = {RHS, var, par};
-  ngm = NGM[mod, infVars];
-  Jx = ngm[[1]];
-  Jy = ngm[[4]];
- K = Chop[ngm[[7]]];
-K = K;  (* Force re-evaluation *)
+  ngm = Quiet[Check[NGM[mod, infVars], $Failed], 
+    {Power::infy, Infinity::indet, Solve::ratnz}]
+  (*Print["ngm = ", ngm];*);
+  If[ngm === $Failed,
+    {K, R0A, Jy} = {Undefined, {}, Undefined};,
+    K = Quiet[Chop[ngm[[7]]], Power::infy];
+    Jy = ngm[[4]];
+    R0A = Quiet[
+      Select[Eigenvalues[K],
+        # =!= 0 && !Internal`SyntacticNegativeQ[#] && FreeQ[#, -Power[_, 1/2]] &
+      ],
+      {Power::infy, Eigenvalues::eivn0}
+    ];
+  ];
   
-  eigenvals = Eigenvalues[K];
-  (*R0A = Select[eigenvals, # =!= 0 &];
-  R0A = Select[eigenvals, 
-  # =!= 0 && !MatchQ[#, -_] && FreeQ[#, Plus[_, Times[-1, Power[_, 1/2]]]] &
-];*)
-R0A=Select[eigenvals,
-  # =!= 0 && 
-  !Internal`SyntacticNegativeQ[#] && 
-  FreeQ[#, -Power[_, 1/2]] &
-];
-  
-
-
-(* Then return: *)
-{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infVars,al, be,gam, ngm}
+  {RHS, var, par, cp, mSi, Jx, Jy,cDFE, E0, K, R0A, infVars, alMat, 
+  beMat, gam, ngm}
 ];
 
 
@@ -459,39 +467,60 @@ Print["END invNr OUTPUT"];
 
 bdCo[RN_, rts_] := Module[{
     RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,
-    EA, ElTRat, siphonVars, cEj, RHSEj, eqEj, varEj, solutions, completeSolutions,ngm,infV,
-    allInfectionVars,nonDFESolutions
+    EA, ElTRat, siphonVars, cEj, RHSEj, eqEj, varEj, solutions, completeSolutions,
+    ngm, infV, alp, bet, gam, cDFE,
+    nonDFESolutions, mSiSymbols
   },
   
-  (* First call bdAn to get basic analysis *)
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,infV,gam,ngm} 
-   = bdAn[RN, rts];
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infV, alp, 
+   bet, gam, ngm} = bdAn[RN, rts];
   
+  (* Normalize mSi to always be symbols *)
+  mSiSymbols = Map[
+    Which[
+      StringQ[#], ToExpression[#],
+      Head[#] === Symbol, #,
+      True, ToExpression[ToString[#]]
+    ] &,
+    mSi,
+    {2}
+  ];
   
-  (* Compute boundary equilibria for each siphon *)
   EA = {};
   ElTRat = {};
   
   Do[
-    (* Set variables in siphon j to 0 *)
-    siphonVars = var[[Flatten[Position[var, #] & /@ mSi[[j]]]]];
+    siphonVars = mSiSymbols[[j]];
     cEj = Thread[siphonVars -> 0];
     RHSEj = RHS /. cEj;
     eqEj = Thread[RHSEj == 0];
     varEj = Complement[var, siphonVars];
+    
     AppendTo[EA, {eqEj, varEj}];
     
-    (* Solve for non-siphon variables *)
-    solutions = Solve[eqEj, varEj];
-    completeSolutions = Table[Join[sol, cEj], {sol, solutions}];
+    solutions = TimeConstrained[
+      Solve[Join[eqEj, cp], varEj],
+      10, 
+      {}
+    ];
     
-    (* Filter out DFE-like solutions (where all infection variables are zero) *)
-    allInfectionVars = var[[Union[Flatten[Flatten[Position[var, #] & /@ #] & /@ mSi]]]];
+    (* Remove conditional expressions *)
+    solutions = solutions /. ConditionalExpression[expr_, _] :> expr;
+    
+    If[solutions === {},
+      completeSolutions = {};,
+      completeSolutions = Table[Join[sol, cEj], {sol, solutions}];
+    ];
+    
+    (* Filter out DFE-like solutions *)
     nonDFESolutions = Select[completeSolutions, 
-      Function[sol, !And @@ ((# === 0) & /@ (allInfectionVars /. sol))]];
+      Function[sol, !And @@ ((# === 0) & /@ (infV /. sol))]];
     
-    AppendTo[ElTRat, nonDFESolutions];
+    (* Only append if there are actual non-DFE solutions *)
+    If[nonDFESolutions =!= {},
+      AppendTo[ElTRat, nonDFESolutions];
+    ];
     , {j, Length[mSi]}];
   
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV,al, be,gam, ElTRat}
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV, alp, bet, gam, ElTRat}
 ];

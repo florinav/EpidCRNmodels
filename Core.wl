@@ -6,6 +6,38 @@ Begin["`Private`"];
 (* ========================================================================= *)
 (* CORE IMPLEMENTATION *)
 (* ========================================================================= *)
+(* ========================================================================== *)
+(* SYMBOL TO STRING CONVERSION *)
+(* ========================================================================== *)
+
+symbToStr[complex_] := 
+  Module[{}, 
+   Which[complex === 0, "0", Head[complex] === Plus, 
+    StringJoin[
+     Riffle[Map[
+       Which[Head[#] === Times, 
+         Module[{parts, strings, nonStrings}, parts = List @@ #;
+          strings = Select[parts, StringQ];
+          nonStrings = Select[parts, ! StringQ[#] &];
+          
+          If[Length[nonStrings] == 1 && nonStrings[[1]] == 1, 
+           strings[[1]], 
+           ToString[nonStrings[[1]]] <> "*" <> strings[[1]]]], 
+         StringQ[#], #, True, ToString[#]] &, List @@ complex], 
+      " + "]], Head[complex] === Times, 
+    Module[{parts, strings, nonStrings}, parts = List @@ complex;
+     strings = Select[parts, StringQ];
+     nonStrings = Select[parts, ! StringQ[#] &];
+     If[Length[nonStrings] == 1 && nonStrings[[1]] == 1, strings[[1]],
+       ToString[nonStrings[[1]]] <> "*" <> strings[[1]]]], 
+    StringQ[complex], complex, True, ToString[complex]]];
+
+(* Test symbToStr *)
+(*
+symbToStr[2*"X" + 3*"Y"]  (* Should return "2*X + 3*Y" *)
+symbToStr["X"*"Y"]        (* Should return "X*Y" *)
+symbToStr["X"]            (* Should return "X" *)
+*)
 
 (* Enhanced string to symbolic conversion *)
 strToSymb[reactions_] := Module[{convertSide},
@@ -36,39 +68,6 @@ strToSymb[reactions_] := Module[{convertSide},
   ], reactions]
 ];
 
-(* Convert compound expression to association with lowercase species names *)
-compToAsso[expr_] := Module[{terms, result},
-  If[expr === 0 || expr === Null,
-    Association[], (* Empty association for zero or null *)
-    terms = If[Head[expr] === Plus, List @@ expr, {expr}];
-    result = Association[];
-    Do[
-      Which[
-        Head[term] === Times && Length[term] >= 2 && NumericQ[First[term]],
-        (* Handle cases like 2*A - convert to lowercase *)
-        result[ToLowerCase[ToString[Last[term]]]] = First[term],
-        Head[term] === Times,
-        (* Handle cases like A*B (coefficient 1) *)
-        result[ToLowerCase[ToString[term]]] = 1,
-        StringQ[term],
-        (* Handle string species - convert to lowercase *)
-        result[ToLowerCase[term]] = 1,
-        True,
-        (* Handle other cases - convert to lowercase *)
-        result[ToLowerCase[ToString[term]]] = 1
-      ];
-    , {term, terms}];
-    result
-  ]
-];
-
-(* Test 
-Print["=== Test compToAsso ==="];
-Print[compToAsso[0]];
-Print[compToAsso["S"]];
-Print[compToAsso["S" + "I1"]];
-Print[compToAsso[2*"I2"]];
-Print[compToAsso["S" + 2*"I1" + 3*"I2"]];*)
 
 
 cons[gamma_, cp_: {}] := Module[{
@@ -126,8 +125,8 @@ cons[{{-a, b, 0}, {0, -c, d}}, {a > 0, b > 0, c > 0, d > 0}]*)
 extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
   allSpecies = {};
   Do[
-   reactants = compToAsso[reactions[[i, 1]]];
-   products = compToAsso[reactions[[i, 2]]];
+   reactants = comp2Asso[reactions[[i, 1]]];
+   products = comp2Asso[reactions[[i, 2]]];
    allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
    , {i, Length[reactions]}];
   ToLowerCase /@ DeleteDuplicates[allSpecies]
@@ -135,24 +134,14 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
 
 
 
-(* Main extMat function - simplified using extSpe *)
+(* Main extMat function - now handles symbolic stoichiometry *)
 extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
   numReactions, numSpecies, reactants, products, 
-  var, rv, tk, complexes, deficiency,
-  defFormula, defTerms, defResult, Nc, l, s, mSi, speOrig},
+  var, rv, tk, complexes,
+  defFormula, defTerms, defResult, Nc, l, s, mSi},
   
-  (* Get original species names for matching *)
-  speOrig = Module[{allSpecies = {}, reactants, products}, 
-    Do[
-     reactants = compToAsso[reactions[[i, 1]]];
-     products = compToAsso[reactions[[i, 2]]];
-     allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
-     , {i, Length[reactions]}];
-    DeleteDuplicates[allSpecies]
-  ];
-  
-  (* Extract species (now lowercase) *)
+  (* Extract species (lowercase) *)
   spe = extSpe[reactions];
   
   (* Check if species were found *)
@@ -164,21 +153,21 @@ extMat[reactions_] := Module[{
   numSpecies = Length[spe];
   numReactions = Length[reactions];
   
-  (* Initialize stoichiometric matrices *)
+  (* Initialize stoichiometric matrices - can contain symbolic entries *)
   al = ConstantArray[0, {numSpecies, numReactions}];
   be = ConstantArray[0, {numSpecies, numReactions}];
   
-  (* Build stoichiometric matrices using original species names *)
+  (* Build stoichiometric matrices *)
   Do[
-    reactants = compToAsso[reactions[[j, 1]]];
-    products = compToAsso[reactions[[j, 2]]];
+    reactants = comp2Asso[reactions[[j, 1]]];
+    products = comp2Asso[reactions[[j, 2]]];
     
-    (* Fill matrices - match original species *)
+    (* Fill matrices - match lowercase species *)
     Do[
-      If[KeyExistsQ[reactants, speOrig[[i]]], 
-        al[[i, j]] = reactants[speOrig[[i]]]];
-      If[KeyExistsQ[products, speOrig[[i]]], 
-        be[[i, j]] = products[speOrig[[i]]]];
+      If[KeyExistsQ[reactants, spe[[i]]], 
+        al[[i, j]] = reactants[spe[[i]]]];
+      If[KeyExistsQ[products, spe[[i]]], 
+        be[[i, j]] = products[spe[[i]]]];
     , {i, numSpecies}];
   , {j, numReactions}];
   
@@ -191,7 +180,14 @@ extMat[reactions_] := Module[{
   (* Calculate reaction rates *)
   rv = Table[
     Product[
-      If[al[[i, j]] == 0, 1, var[[i]]^al[[i, j]]], 
+      If[al[[i, j]] == 0, 
+        1, 
+        (* Handle symbolic exponents *)
+        If[NumericQ[al[[i, j]]], 
+          var[[i]]^al[[i, j]],
+          Power[var[[i]], al[[i, j]]]
+        ]
+      ], 
       {i, numSpecies}
     ],
     {j, numReactions}
@@ -207,22 +203,31 @@ extMat[reactions_] := Module[{
     Flatten[Table[{reactions[[i, 1]], reactions[[i, 2]]}, {i, Length[reactions]}]]
   ];
   
-  (* Deficiency *)
+  (* Deficiency - for symbolic matrices, may need numeric substitution *)
   Nc = Length[complexes];
   l = 1;
-  s = If[gamma === {} || AllTrue[Flatten[gamma], # == 0 &], 0, MatrixRank[gamma]];
+  s = If[gamma === {} || AllTrue[Flatten[gamma], # == 0 &], 
+    0, 
+    If[AllTrue[Flatten[gamma], NumericQ],
+      MatrixRank[gamma],
+      "symbolic"
+    ]
+  ];
   
   defFormula = "\[Delta] = Nc - \[ScriptL] - s";
   defTerms = "Nc = " <> ToString[Nc] <> " (complexes), " <>
              "\[ScriptL] = " <> ToString[l] <> " (linkage classes), " <> 
              "s = " <> ToString[s] <> " (stoich dimension)";
-  defResult = "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <> 
-              " - " <> ToString[s] <> " = " <> ToString[Nc - l - s];
+  defResult = If[s === "symbolic",
+    "\[Delta] = symbolic (requires numeric parameter values)",
+    "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <> 
+      " - " <> ToString[s] <> " = " <> ToString[Nc - l - s]
+  ];
   
-  (* Minimal siphons - pass lowercase species and original reactions *)
-  mSi = minSiph[spe, reactions][[1]];(*only the minimal*)
+  (* Minimal siphons *)
+  mSi = minSiph[spe, reactions][[1]];
   
-  (* Return with lowercase species *)
+  (* Return *)
   {spe, al, be, gamma, Rv, RHS, mSi, {defFormula, defTerms, defResult}}
 ];
 
@@ -273,8 +278,8 @@ stoichiometricMatrices[reactions_] := Module[{
       leftSide = reactions[[j, 1]];
       rightSide = reactions[[j, 2]]
     ];
-    reactants = compToAsso[leftSide];
-    products = compToAsso[rightSide];
+    reactants = comp2Asso[leftSide];
+    products = comp2Asso[rightSide];
     Do[
       If[KeyExistsQ[reactants, species[[i]]], 
         alpha[[i, j]] = reactants[species[[i]]]];

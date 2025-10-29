@@ -1,7 +1,7 @@
-(* ::Package::*)
+(* ::Package:: *)
 
+(*Print["Load CRNT"]; *)
 (* Extract complexes and edges from reaction network *)
-Print["Load CRNT"]; 
 
 getComE[RN_List] := Module[{complexes, edges},
   complexes = {};

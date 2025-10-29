@@ -222,18 +222,11 @@ Print["Minimal cores: ", result[[1]]];
 Print["Non-minimal cores: ", result[[2]]];*)
 
 
-(* =================================================================== *)
-(* IGMS with visible edge labels ABOVE edges (noninvasive to comp2Asso) *)
-(* =================================================================== *)
 
-ClearAll[safeLowerKeys, canActRea, edgIGMS, IGMS];
 
-(* Map association keys to lowercase strings, preserving values *)
-safeLowerKeys[asso_Association] := Association @ KeyValueMap[ToLowerCase[ToString[#1]] -> #2 &, asso];
+ClearAll[canActRea];
 
-(* reaction: a Rule lhs->rhs (your RN format)
-   Si, Sj: lists of species names (strings) \[LongDash] can be mixed case.
-   Uses your original comp2Asso (do NOT modify it elsewhere). *)
+
 canActRea[reaction_, Si_List, Sj_List] := Module[
   {lhs, rhs, lhsComp, rhsComp, lhsL, rhsL, SiL, SjL, newSj},
 
@@ -260,108 +253,137 @@ canActRea[reaction_, Si_List, Sj_List] := Module[
   AnyTrue[newSj, (Lookup[rhsL, #, 0] - Lookup[lhsL, #, 0]) > 0 &]
 ];
 
-(* Build directed IGMS edges + aligned label rules for EdgeLabels *)
+
+
+(* ====================== KEEP PUBLIC API/STABLE NAMES ====================== *)
+(* Do NOT modify/clear canActRea; other code uses it *)
+
+ClearAll[reacToString, edgIGMS, IGMS];
+
+(* Reaction (lhs -> rhs) to compact RN-style string *)
+reacToString[r_Rule] := ToString[r, InputForm];
+
+(* ------------------------------------------------------------------------- *)
+(* edgIGMS: EXACT behavior as before (returns only {i -> j, ...})           *)
+(* ------------------------------------------------------------------------- *)
 edgIGMS[RN_List, mSi_List] := Module[
-  {n = Length[mSi], edges = {}, firstLabels = {}, allLabels = <||>, SiL, SjL, hits},
-  Do[
-    If[i =!= j,
-      SiL = ToLowerCase /@ ToString /@ mSi[[i]];
-      SjL = ToLowerCase /@ ToString /@ mSi[[j]];
-      hits = Select[RN, canActRea[#, SiL, SjL] &];
-      If[hits =!= {},
-        AppendTo[edges, i \[DirectedEdge] j];
-        AppendTo[firstLabels, ToString[First[hits], InputForm]];
-        allLabels[i \[DirectedEdge] j] = ToString[#, InputForm] & /@ hits;
-      ];
+  {n = Length[mSi], mSiStr},
+  (* Convert species in minimal siphons to lower-case strings (as in your code) *)
+  mSiStr = Map[ToLowerCase@*ToString, mSi, {2}];
+  Flatten@Table[
+    If[i != j && AnyTrue[RN, canActRea[#, mSiStr[[i]], mSiStr[[j]]] &],
+      i -> j,
+      Nothing
     ],
     {i, n}, {j, n}
-  ];
-  <|
-    "Edges" -> edges,
-    "EdgeLabelRules" -> MapThread[#1 -> Placed[Style[#2, Small], Above] &, {edges, firstLabels}],
-    "EdgeAllLabels" -> allLabels
-  |>
+  ]
 ];
 
-(* Draw graph; show nothing when empty *)
+(* ------------------------------------------------------------------------- *)
+(* IGMS: first 3 outputs/printing stay the SAME, plus a 4th labeled graph    *)
+(*          {edges, cycles, g, gLab}                                         *)
+(*  - prints minimal siphons                                                 *)
+(*  - prints edges                                                           *)
+(*  - DISPLAYS g inside (as before)                                          *)
+(*  - prints cycles                                                          *)
+(*  - RETURNS gLab (with edge labels); NOT displayed here                    *)
+(* ------------------------------------------------------------------------- *)
 IGMS[RN_List, mSi_List] := Module[
-  {n = Length[mSi], edata, edges, elabs, g, cycles, pairs, mSiStr, labText,gr,
-  embedding ,
-scaledEmbedding},
+  {n = Length[mSi], igmsEdges, igmsGraph, cycles,
+   mSiStr, edgesDir, labText, labRules, gLab},
+
+  (* Print minimal siphons (unchanged) *)
   Print["Minimal siphons: ", Table[Subscript["T", i] -> mSi[[i]], {i, n}]];
-  edata = edgIGMS[RN, mSi];
-  edges = edata["Edges"];  elabs = edata["EdgeLabelRules"];
 
-  If[edges === {},
-    Print["IGMS edges: {}"];
+  (* Compute edges (unchanged) *)
+  igmsEdges = edgIGMS[RN, mSi];
+
+  (* Print edges (unchanged) *)
+  Print["IGMS edges: ", igmsEdges];
+
+  (* If no edges: same behavior \[LongDash] show an empty graph and return *)
+  If[Length[igmsEdges] == 0,
     Print["empty graph"];
-    Return[{{}, {}, {}, None}]
-  ];
-
-  Print["IGMS edges: ", edges];
-
-  (* build label text explicitly as in IGMSL *)
-  pairs = (List @@ #) & /@ edges;
-  mSiStr = Map[ToLowerCase@*ToString, mSi, {2}];
-  labText = Table[
-    Module[{i = pairs[[k, 1]], j = pairs[[k, 2]], hits},
-      hits = Select[RN, canActRea[#, mSiStr[[i]], mSiStr[[j]]] &];
-      If[hits === {}, "", ToString[First[hits], InputForm]]
-    ],
-    {k, Length[pairs]}
-  ];
-  elabs = MapThread[#1 -> Placed[Style[#2, Blue, Bold, FontSize -> 12], 1/2] &, {edges, labText}];
-
-  
-  (* Build your initial graph to get the embedding *)
-g = Graph[
-    Range[n], edges,
-    DirectedEdges -> True,
-    EdgeLabels -> elabs,
-    VertexLabels -> Table[
-      i -> Placed[
-        Row[{Subscript["T", i], " = ", Row[mSi[[i]], ","]}],
-        Center
+    igmsGraph = Graph[
+      Range[n], {},
+      VertexLabels -> Table[
+        i -> Placed[Row[{Subscript["T", i], "=", Row[mSi[[i]], ","]}], Center],
+        {i, n}
       ],
+      VertexSize -> 0.3,
+      VertexStyle -> LightBlue,
+      GraphLayout -> "SpringElectricalEmbedding",
+      ImageSize -> Medium
+    ];
+    Print[igmsGraph];
+    Return[{igmsEdges, {}, igmsGraph, igmsGraph}, Module];  (* gLab placeholder = g *)
+  ];
+
+  (* Build and DISPLAY g (unchanged) *)
+  igmsGraph = Graph[
+    Range[n], igmsEdges,
+    VertexLabels -> Table[
+      i -> Placed[Row[{Subscript["T", i], "=", Row[mSi[[i]], ","]}], Center],
       {i, n}
     ],
-    VertexSize -> .4,
-    VertexStyle -> LightBlue, EdgeStyle -> Black,
-    VertexLabelStyle -> Directive[FontSize -> 12],
+    VertexSize -> 0.3,
+    VertexStyle -> LightBlue,
+    EdgeStyle -> Arrowheads[0.03],
+    VertexLabelStyle -> Directive[FontSize -> 10],
     GraphLayout -> "SpringElectricalEmbedding",
     ImageSize -> Medium
-];
+  ];
+  Print[igmsGraph];  (* <- same as before *)
 
-(* Obtain and scale the embedding *)
-embedding = GraphEmbedding[g];
-scaledEmbedding = 4 embedding; (* scale by factor, e.g., 3 *)
+  (* Cycles (unchanged) *)
+  cycles = FindCycle[igmsGraph, Infinity, All];
+  Print[If[Length[cycles] > 0,
+    Row[{"Cycles found: ", Length[cycles]}],
+    "IGMS is acyclic"
+  ]];
+  If[Length[cycles] > 0, Print["Cycles: ", cycles]];
 
-(* Now define the graph using only VertexCoordinates *)
-gr=Graph[
-    Range[n], edges,
+  (* ---------- NEW: construct gLab (labeled) WITHOUT displaying ---------- *)
+  (* Rebuild the lower-cased siphons the same way edgIGMS does *)
+  mSiStr = Map[ToLowerCase@*ToString, mSi, {2}];
+
+  (* Directed edges corresponding to igmsEdges *)
+  edgesDir = Map[DirectedEdge[#[[1]], #[[2]]] &, igmsEdges];
+
+  (* For each edge i->j, pick the FIRST RN reaction that triggers it *)
+  labText = Table[
+    Module[{i = igmsEdges[[k, 1]], j = igmsEdges[[k, 2]],
+            hits},
+      hits = Select[RN, canActRea[#, mSiStr[[i]], mSiStr[[j]]] &];
+      If[hits === {}, "", reacToString[First[hits]]]
+    ],
+    {k, Length[igmsEdges]}
+  ];
+
+  (* Label rules: DirectedEdge[i,j] -> Placed["A"+"B"->"C", Above] *)
+  labRules = MapThread[
+    #1 -> Placed[Style[#2, Small], Above] &,
+    {edgesDir, labText}
+  ];
+
+  gLab = Graph[
+    Range[n], edgesDir,
     DirectedEdges -> True,
-    EdgeLabels -> elabs,
+    EdgeLabels -> labRules,
     VertexLabels -> Table[
-      i -> Placed[
-        Row[{Subscript["T", i], " = ", Row[mSi[[i]], ","]}],
-        Center
-      ],
+      i -> Placed[Row[{Subscript["T", i], "=", Row[mSi[[i]], ","]}], Center],
       {i, n}
     ],
-    VertexSize -> .4,
-    VertexStyle -> LightBlue, EdgeStyle -> Black,
-    VertexLabelStyle -> Directive[FontSize -> 12],
-    VertexCoordinates -> scaledEmbedding,
+    VertexSize -> 0.3,
+    VertexStyle -> LightBlue,
+    EdgeStyle -> Arrowheads[0.03],
+    VertexLabelStyle -> Directive[FontSize -> 10],
+    GraphLayout -> "SpringElectricalEmbedding",
     ImageSize -> Medium
-];
+  ];
+  (* DO NOT Print[gLab] here *)
 
-
-  cycles = FindCycle[g, Infinity, All];
-  Print[If[cycles === {}, "IGMS is acyclic", Row[{"Cycles found: ", Length[cycles]}]]];
-  If[cycles =!= {}, Print["Cycles: ", cycles]];
-
-  Print[gr];
-  {edges, elabs, cycles, gr}
+  {igmsEdges, cycles, igmsGraph, gLab}
 ];
 
 
@@ -541,106 +563,6 @@ invFace[reactions_, maxCodim_:10] :=
     Do[candidateSet = subsets[[i]];
      If[isInvariantFacet[candidateSet, reactions], AppendTo[invariantFacets, candidateSet]];, {i, Length[subsets]}];, {k, 1, Min[maxCodim, n]}];
    invariantFacets];
-
-
-(*(* =================================================================== *)
-(* IGMS with visible edge labels (exact RN reaction) shown ABOVE edges *)
-(* =================================================================== *)
-
-ClearAll[reacToString, edgIGMS, IGMS];
-
-(* Convert a reaction (lhs -> rhs) to a compact RN-style string *)
-reacToString[r_Rule] := ToString[r, InputForm];
-
-(* Build directed IGMS edges and a label association for EdgeLabels *)
-edgIGMS[RN_List, mSi_List] := Module[
-  {n = Length[mSi], mSiStr, edgeLabelAssoc, edgeAllLabels, edges},
-
-  (* Your canActRea expects lower-case species strings *)
-  mSiStr = Map[ToLowerCase @* ToString, mSi, {2}];
-
-  edgeLabelAssoc = <||>;              (* edge -> first label (string) *)
-  edgeAllLabels  = <||>;              (* edge -> list of all labels  *)
-
-  Do[
-    If[i =!= j,
-      Module[{hitRxns, e, lbls},
-        hitRxns = Select[RN, canActRea[#, mSiStr[[i]], mSiStr[[j]]] &];
-        If[hitRxns =!= {},
-          e = i \[DirectedEdge] j;
-          lbls = reacToString /@ hitRxns;
-          If[! KeyExistsQ[edgeLabelAssoc, e], edgeLabelAssoc[e] = First[lbls]];
-          edgeAllLabels[e] = lbls;  (* keeps all labels; useful for tooltips *)
-        ];
-      ]
-    ],
-    {i, n}, {j, n}
-  ];
-
-  edges = Keys[edgeLabelAssoc];
-
-  <|"Edges" -> edges,
-    "EdgeLabelAssoc" -> AssociationMap[Placed[Style[edgeLabelAssoc[#], Small], Above] &, edges],
-    "EdgeAllLabels" -> edgeAllLabels|>
-];
-
-(* Main IGMS: draws graph with edge labels ABOVE; prints "empty graph" if none *)
-IGMS[RN_List, mSi_List] := Module[
-  {n = Length[mSi], edata, edges, elabs, g, cycles},
-
-  Print["Minimal siphons: ",
-    Table[Subscript["T", i] -> mSi[[i]], {i, n}]
-  ];
-
-  edata = edgIGMS[RN, mSi];
-  edges = edata["Edges"];
-  elabs = edata["EdgeLabelAssoc"];
-
-  If[edges === {},
-    Print["IGMS edges: {}"];
-    Print["empty graph"];
-    Return[{{}, {}, None}, Module]
-  ];
-
-  Print["IGMS edges: ", edges];
-
-  g = Graph[
-    Range[n],
-    edges,
-    DirectedEdges -> True,
-    EdgeLabels -> elabs,                     (* <- label shown ABOVE each edge *)
-    VertexLabels -> Table[
-      i -> Placed[Row[{Subscript["T", i], " = ", Row[mSi[[i]], ","]}], Center],
-      {i, n}
-    ],
-    VertexSize -> 0.3,
-    VertexStyle -> LightBlue,
-    EdgeStyle -> Arrowheads[0.03],
-    VertexLabelStyle -> Directive[FontSize -> 10],
-    GraphLayout -> "SpringElectricalEmbedding",
-    ImageSize -> Medium
-  ];
-
-  cycles = FindCycle[g, Infinity, All];
-  Print[If[cycles === {}, "IGMS is acyclic", Row[{"Cycles found: ", Length[cycles]}]]];
-  If[cycles =!= {}, Print["Cycles: ", cycles]];
-
-  Print[g];
-
-  {edges, cycles, g}
-];
-
-(* -------------------------------------------------------------------
-Notes:
-- Edge labels now appear because:
-  (1) Edges are DirectedEdge[i,j], and
-  (2) EdgeLabels is given an association mapping each edge to
-      Placed["exact RN reaction", Above].
-- If you want tooltips listing all reactions per edge, you can add an
-  EdgeShapeFunction which wraps the default shape in a Tooltip using
-  edata["EdgeAllLabels"][edge].
-------------------------------------------------------------------- *)
-*)
 
 
 (* Convert compound expression to association with lowercase species names *)

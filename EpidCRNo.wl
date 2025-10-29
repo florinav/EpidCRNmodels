@@ -109,7 +109,7 @@ Grobpol::usage = "Grobpol[RHS,var,par,ind,cn_:{}] it computes a reduced polynomi
 (* Bifurcation and phase analysis *)
 Bifp::usage = "{bifurcationPlot} = Bifp[mod_,cN_,indX_,bifv_,pl0_:0,pL_:10,y0_:-1, yM_:10,cR0_:0] gives the bifurcation plot of the dynamics wrt to one parameter";
 fix::usage = "{fixedPoints} = fix[mod_,cn_:{}] finds fixed points of the model with conditions cn";
-phasePl2::usage = "{phasePlot} = phasePl2[mod_,plc_:{},cn_:{}] plots a 2dim phase-plot of mod, for the components not excluded in plc";
+phase2::usage = "{phasePlot} = phase2[mod_,plc_:{},cn_:{}] plots a 2dim phase-plot of mod, for the components not excluded in plc";
 
 (* ========================================================================= *)
 (* STRUCTURAL ANALYSIS - Conservation, siphons, invariant facets *)
@@ -1678,7 +1678,7 @@ DFE[mod_,inf_:{},cn_:{}]:=Module[{dyn,X},dyn=mod[[1]]/.cn;X=mod[[2]];Quiet[Solve
 fix[mod_,cn_:{}]:=Module[{dyn,X,fp,Xp},dyn=mod[[1]]//.cn;X=mod[[2]];fp=X/.Quiet[Solve[Thread[(dyn)==0],X]];
 If[cn!={},Xp=Cases[_?(AllTrue[NonNegative]@#&)]@fp;fp=SortBy[Xp,{ #[[1]]&,#[[2]]&}]];fp];
    
-phasePl2[mod_,cn_:{},plc_:{},in_:1]:=Module[{dyn,X,pl,fp,jac,jacE,Xp,Xs,sp,Gp,cP,xM,yM,r1,r2},
+phase2[mod_,cn_:{},plc_:{},in_:1]:=Module[{dyn,X,pl,fp,jac,jacE,Xp,Xs,sp,Gp,cP,xM,yM,r1,r2},
 dyn=mod[[1]]//.cn;X=mod[[2]];pl=Complement[Range[Length[X]],plc];fp=X/.Quiet[NSolve[Thread[(dyn)==0],X]];
 jac=Grad[dyn,X]; jacE=jac/.{Thread[X->fp[[1]]]};Xp=Cases[_?(AllTrue[NonNegative]@#&)]@fp;xM=Max/@Transpose[Xp];
 Xs=SortBy[Xp,{ #[[1]]&,#[[2]]&}];r1={X[[pl[[1]]]],-xM[[pl[[1]]]]-.5,xM[[pl[[1]]]]+.5};r2={X[[pl[[2]]]],-xM[[pl[[2]]]]-.5,xM[[pl[[2]]]]+.5};

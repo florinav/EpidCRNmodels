@@ -1,35 +1,135 @@
-(* ========================================================================== *)
-(* SYMBOL TO STRING CONVERSION *)
-(* ========================================================================== *)
+(* ::Package:: *)
 
-symbToStr[complex_] := 
-  Module[{}, 
-   Which[complex === 0, "0", Head[complex] === Plus, 
-    StringJoin[
-     Riffle[Map[
-       Which[Head[#] === Times, 
-         Module[{parts, strings, nonStrings}, parts = List @@ #;
-          strings = Select[parts, StringQ];
-          nonStrings = Select[parts, ! StringQ[#] &];
-          
-          If[Length[nonStrings] == 1 && nonStrings[[1]] == 1, 
-           strings[[1]], 
-           ToString[nonStrings[[1]]] <> "*" <> strings[[1]]]], 
-         StringQ[#], #, True, ToString[#]] &, List @@ complex], 
-      " + "]], Head[complex] === Times, 
-    Module[{parts, strings, nonStrings}, parts = List @@ complex;
-     strings = Select[parts, StringQ];
-     nonStrings = Select[parts, ! StringQ[#] &];
-     If[Length[nonStrings] == 1 && nonStrings[[1]] == 1, strings[[1]],
-       ToString[nonStrings[[1]]] <> "*" <> strings[[1]]]], 
-    StringQ[complex], complex, True, ToString[complex]]];
-
-(* Test symbToStr *)
-(*
-symbToStr[2*"X" + 3*"Y"]  (* Should return "2*X + 3*Y" *)
-symbToStr["X"*"Y"]        (* Should return "X*Y" *)
-symbToStr["X"]            (* Should return "X" *)
-*)
+phase2[RHS_, var_, cN_:{}, tMax_:50, nTraj_:15] := Module[{
+  dyn, cFP, fp, jac, eigVals, stabilities, Xp, Xs, saddles, 
+  xM, r1, r2, plotFP, plotStream, Gp, cP1, cP2},
+  
+  (* Apply parameter substitutions *)
+  dyn = If[Length[cN] > 0, RHS /. cN, RHS];
+  Print["dyn=", dyn];
+  
+  (* Find fixed points as conditions (rules) *)
+  cFP = Quiet[NSolve[And @@ Thread[dyn == 0], var, Reals]];
+  Print["cFP (conditions)=", cFP];
+  
+  (* Extract coordinate values from conditions *)
+  fp = var /. cFP;
+  Print["fp (all fixed points)=", fp];
+  
+  (* Check if any fixed points found *)
+  If[Length[fp] == 0,
+    Print["Warning: No fixed points found"];
+    Return[{{}, {}, {}, {}, Graphics[], Graphics[]}]
+  ];
+  
+  (* Jacobian *)
+  jac = Outer[D, dyn, var];
+  
+  (* Analyze each fixed point *)
+  eigVals = Table[
+    Eigenvalues[jac /. Thread[var -> fp[[i]]]],
+    {i, Length[fp]}
+  ];
+  
+  stabilities = Table[
+    Which[
+      AllTrue[Re[eigVals[[i]]], # < 0 &], "Stable",
+      AllTrue[Re[eigVals[[i]]], # > 0 &], "Unstable",
+      True, "Saddle"
+    ],
+    {i, Length[fp]}
+  ];
+  
+  Print["stabilities=", stabilities];
+  
+  (* Filter positive fixed points *)
+  Xp = Select[fp, AllTrue[#, NonNegative] &];
+  Print["Xp (positive fixed points)=", Xp];
+  
+  (* Identify saddle points among positive fps *)
+  saddles = If[Length[Xp] > 0,
+    Module[{indices},
+      indices = Flatten[Position[fp, #] & /@ Xp];
+      Select[
+        MapThread[{#1, #2, #3} &, 
+          {Xp, eigVals[[indices]], stabilities[[indices]]}],
+        #[[3]] == "Saddle" &
+      ]
+    ],
+    {}
+  ];
+  
+  Print["saddles=", saddles];
+  
+  (* Sort fixed points *)
+  Xs = If[Length[Xp] > 0, SortBy[Xp, Identity], {}];
+  xM = If[Length[Xp] > 0, Max /@ Transpose[Xp], {1, 1}];
+  
+  (* Plotting ranges *)
+  r1 = {var[[1]], -0.05, xM[[1]] + 0.3};
+  r2 = {var[[2]], -0.05, xM[[2]] + 0.3};
+  
+  Print["Plot ranges: r1=", r1, ", r2=", r2];
+  
+  (* Fixed points with color coding *)
+  Gp = If[Length[Xp] > 0,
+    Module[{indices},
+      indices = Flatten[Position[fp, #] & /@ Xp];
+      Print["Plotting fixed points at: ", Xp];
+      Graphics[{
+        PointSize[0.05],
+        EdgeForm[Directive[Black, Thick]],
+        MapThread[
+          {Switch[#2, "Stable", Green, "Unstable", Red, "Saddle", Orange, _, Black],
+           Disk[#1, 0.03]} &,
+          {Xp, stabilities[[indices]]}
+        ]
+      }]
+    ],
+    Graphics[]
+  ];
+  
+  (* First nullcline - dx1/dt = 0 in Blue *)
+  cP1 = ContourPlot[
+    dyn[[1]],
+    r1, r2,
+    Contours -> {0},
+    ContourStyle -> Directive[Blue, Thick],
+    ContourShading -> None,
+    Frame -> True,
+    FrameLabel -> {ToString[var[[1]]], ToString[var[[2]]]}
+  ];
+  
+  (* Second nullcline - dx2/dt = 0 in Red *)
+  cP2 = ContourPlot[
+    dyn[[2]],
+    r1, r2,
+    Contours -> {0},
+    ContourStyle -> Directive[Red, Thick],
+    ContourShading -> None,
+    Frame -> True,
+    FrameLabel -> {ToString[var[[1]]], ToString[var[[2]]]}
+  ];
+  
+  (* Plot 1: Fixed points + both nullclines *)
+  plotFP = Show[cP1, cP2, Gp, 
+    PlotLabel -> Style["Nullclines and Fixed Points", Medium]];
+  
+  (* Plot 2: StreamPlot *)
+  plotStream = StreamPlot[
+    {dyn[[1]], dyn[[2]]},
+    r1, r2,
+    StreamStyle -> Arrowheads[0.02],
+    ColorFunction -> "Rainbow",
+    StreamPoints -> Fine,
+    Frame -> True,
+    FrameLabel -> {ToString[var[[1]]], ToString[var[[2]]]},
+    PlotLabel -> Style["Stream Plot", Medium]
+  ];
+  
+  (* Return results *)
+  {Xs, eigVals, stabilities, saddles, plotFP, plotStream}
+];
 
 
 (* ========================================================================== *)
@@ -121,7 +221,7 @@ EucFHJ[reactions_, opts___] :=
    productOnlyComplexes = Complement[complexes, reactantComplexes];
    
    coords = <||>;
-   Do[Module[{prodAssoc, coord}, prodAssoc = compToAsso[complex];
+   Do[Module[{prodAssoc, coord}, prodAssoc = comp2Asso[complex];
      coord = 
       Table[If[KeyExistsQ[prodAssoc, species[[j]]], 
         prodAssoc[species[[j]]], 0], {j, 2}];
@@ -176,7 +276,7 @@ EucFHJ[{"X" -> "Y", "Y" -> "X"}]  (* Should return a 2D reaction graph *)
 (* ========================================================================== *)
 
 complexToVector[complex_, speciesList_] := 
-  Module[{parsed, vector}, parsed = compToAsso[complex];
+  Module[{parsed, vector}, parsed = comp2Asso[complex];
    vector = 
     Table[If[KeyExistsQ[parsed, speciesList[[i]]], 
       parsed[speciesList[[i]]], 0], {i, Length[speciesList]}];

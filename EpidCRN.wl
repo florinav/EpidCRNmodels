@@ -8,15 +8,15 @@ Global`ome;
 (* Core functions *)
 cons::usage = "{conservationVectors} = cons[mat,cp_:{}] parametrizes positively the left kernel of mat, using also conditions cp; cp is not necessary if mat is numeric";
 extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
-compToAsso::usage = "(Core)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
+comp2Asso::usage = "(Core)comp2Asso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: comp2Asso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "(Core)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
 asoRea::usage = "(Core)asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys.";
 arrow2pairReac::usage = "(Core)arrow2pairReac[reactions] converts arrow format reactions {A->B, C->D} to pair format {{A,B}, {C,D}}. Returns input unchanged if already in pair format.";
-strToSymb::usage = "(Core)strToSymb[reactions] converts string format reactions to symbolic format for internal processing.";
-symbToStr::usage = "(Core)symbToStr[complex] converts symbolic expressions to string format for visualization and internal processing.";
-convertReactionFormat::usage = "(Core)convertReactionFormat[reactions] converts between different reaction network formats";
+strToSymb::usage = "(Core)strToSymb[reactions] converts string format reactions to symbolic format.";
+symbToStr::usage = "(Core)symbToStr[complex] converts symbolic expressions to string format.";
 str2Sym::usage = "(Core)str2Sym[string] converts string expressions to symbolic format";
 sym2Str::usage = "(Core)sym2Str[symbolic] converts symbolic expressions to string format";
+convertReactionFormat::usage = "(Core)convertReactionFormat[reactions] converts between different reaction network formats";
 stoichiometricMatrices::usage = "(Core){alpha, beta, gamma, species} = stoichiometricMatrices[reactions] creates stoichiometric matrices for a reaction network.";
 reaToRHS::usage = "(Core){RHS, species, Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics.";
 expM::usage = "(Core)expM[var,expo] gives the vector var at power in matrix expo using 
@@ -127,6 +127,7 @@ isInvariantFacet::usage="(Siphons)isInvariantFacet[facetSet,reactions] checks if
 canActRea::usage = "(Siphons)canActRea[reaction, Si, Sj] returns True if reaction allows siphon Si to activate siphon Sj.";
 edgIGMS::usage = "(Siphons)edgIGMS[RN, mSi] computes the directed edges i->j of the IGMS graph for reaction network RN with minimal siphons mSi.";
 IGMS::usage = "(Siphons)IGMS[RN, mSi] computes and visualizes the IGMS (Infection Graph of Minimal Siphons), returning an association with edges, graph, and cycle information.";
+IGMSL::usage = "";
 
 (* Conv functions - Simple one-liner conversions *)
 toSum::usage="(Conv)toSum[expr] converts expression to sum format";
@@ -199,7 +200,8 @@ FHJ::usage="(Visualization)FHJ[comp,edges,rates,ver,groups] generates the Feinbe
 endo::usage="(Visualization)endo[reactions] analyzes a reaction network for endotactic properties. Options: \"ShowPlot\" -> True/False/Automatic (default: Automatic), \"Verbose\" -> True/False (default: False)";
 isEndotactic::usage="(Visualization)isEndotactic[reactions, speciesList] checks if network is endotactic";
 isStronglyEndotactic::usage="(Visualization)isStronglyEndotactic[reactions, speciesList] checks if network is strongly endotactic";
-phasePl2::usage="(Visualization)phasePl2[RHS,var,par,p0val,opts] creates 2D phase plane plots for dynamical systems";
+phase2::usage="(Visualization)phase2[RHS,var,par,p0val,opts] 
+creates 2D phase plane plots for dynamical systems";
 
 Begin["`Private`"];
 
