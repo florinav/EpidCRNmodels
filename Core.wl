@@ -74,6 +74,9 @@ compToAsso[side_] := Module[{coeffs},
     If[StringQ[side], coeffs[side] = 1]]];
   coeffs];
 
+(* Backward compatibility alias *)
+comp2Asso = compToAsso;
+
 (* Main extMat function *)
 extMat[reactions_] := Module[{
   spe, al, be, gamma, Rv, RHS, 
@@ -249,11 +252,18 @@ extMat[reactions_] := Module[{
 
 
 (* Other core functions *)
-extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
+extSpe[reactions_] := Module[{allSpecies, reactants, products, leftSide, rightSide},
   allSpecies = {};
   Do[
-   reactants = compToAsso[reactions[[i, 1]]];
-   products = compToAsso[reactions[[i, 2]]];
+   (* Handle both Rule and List formats *)
+   If[Head[reactions[[i]]] === Rule,
+     leftSide = First[reactions[[i]]];
+     rightSide = Last[reactions[[i]]],
+     leftSide = reactions[[i, 1]];
+     rightSide = reactions[[i, 2]]
+   ];
+   reactants = compToAsso[leftSide];
+   products = compToAsso[rightSide];
    allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
    , {i, Length[reactions]}];
   DeleteDuplicates[allSpecies]];
