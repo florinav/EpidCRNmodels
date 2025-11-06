@@ -694,9 +694,221 @@ Print[comp2Asso["S" + 2*"I1" + 3*"I2"]];         (* <|"s" -> 1, "i1" -> 2, "i2" 
 Print[comp2Asso[(1 + a)*"x1" + (1 + b)*"x2"]];  (* <|"x1" -> 1+a, "x2" -> 1+b|> *)*)
 
 
+(* ========================================================================= *)
+(* PHASE 2: INVASION GRAPH FRAMEWORK *)
+(* ========================================================================= *)
+
+(* findAdmissibleCommunities: Identifies admissible communities from siphon decomposition
+   RHS: right-hand side of ODE system
+   var: list of variables (symbols)
+   mSi: list of minimal siphons (as variable names/strings)
+
+   Returns: List of admissible communities, each represented as a list of siphon indices
+*)
+findAdmissibleCommunities[RHS_, var_, mSi_] := Module[{
+  n, communities, singletons, pairs, triples, quadruples,
+  allCommunities, admissible, testAdmissibility},
+
+  n = Length[mSi];
+
+  (* Helper function to test if a community is admissible *)
+  (* A community is admissible if it corresponds to a valid boundary equilibrium *)
+  testAdmissibility[communityIndices_] := Module[{
+    activeSiphons, inactiveSiphons, activeVars, inactiveVars,
+    constraints, feasible},
+
+    (* Siphons in the community are active (non-zero) *)
+    activeSiphons = mSi[[communityIndices]];
+    (* Siphons not in the community are inactive (zero) *)
+    inactiveSiphons = Delete[mSi, List /@ communityIndices];
+
+    (* Variables corresponding to active and inactive siphons *)
+    activeVars = Union[Flatten[ToExpression /@ activeSiphons]];
+    inactiveVars = Union[Flatten[ToExpression /@ inactiveSiphons]];
+
+    (* Check if there exists a positive steady state with inactive vars = 0 *)
+    constraints = Join[
+      Thread[inactiveVars -> 0],
+      Thread[RHS /. Thread[inactiveVars -> 0] == 0]
+    ];
+
+    (* Try to find if such an equilibrium exists *)
+    feasible = TimeConstrained[
+      FindInstance[constraints, activeVars, Reals, 1],
+      2,
+      {}
+    ];
+
+    feasible =!= {}
+  ];
+
+  (* Generate all possible communities *)
+  singletons = Table[{i}, {i, n}];
+
+  (* Pairs *)
+  pairs = If[n >= 2, Subsets[Range[n], {2}], {}];
+
+  (* Triples *)
+  triples = If[n >= 3, Subsets[Range[n], {3}], {}];
+
+  (* Quadruples (for larger systems) *)
+  quadruples = If[n >= 4, Subsets[Range[n], {4}], {}];
+
+  allCommunities = Join[singletons, pairs, triples, quadruples];
+
+  (* Filter to admissible communities *)
+  admissible = Select[allCommunities, testAdmissibility];
+
+  Print["Found ", Length[admissible], " admissible communities out of ", Length[allCommunities], " candidates"];
+
+  admissible
+];
+
+(* computeInvasionRates: Computes invasion reproduction numbers for communities
+   RHS: right-hand side of ODE system
+   var: list of variables
+   community: list of siphon indices representing resident community
+   bdfpT: boundary fixed points from bdFp analysis
+
+   Returns: Association mapping invading community -> invasion reproduction number
+*)
+computeInvasionRates[RHS_, var_, community_, bdfpT_] := Module[{
+  residentSiphons, residentEquilibria, invasionRates, invader,
+  residentEq, modAtResident, ngmResult, invadingVar, invasionR0},
+
+  (* Get equilibria for resident community *)
+  (* community is a list of siphon indices *)
+  residentEquilibria = If[Length[community] > 0 && Length[bdfpT] >= Max[community],
+    Flatten[bdfpT[[community]], 1],
+    {}
+  ];
+
+  If[residentEquilibria === {} || residentEquilibria === {"froze"},
+    Print["No valid resident equilibria for community ", community];
+    Return[<||>];
+  ];
+
+  invasionRates = <||>;
+
+  (* For each potential invader *)
+  Do[
+    If[!MemberQ[community, invader],
+      (* This is a potential invading community *)
+      Do[
+        residentEq = eq;
+
+        (* Evaluate system at resident equilibrium *)
+        modAtResident = RHS /. residentEq;
+
+        (* Compute NGM for invading strain *)
+        ngmResult = Quiet[
+          Check[NGM[{modAtResident, var}, var], $Failed],
+          {Power::infy, Infinity::indet}
+        ];
+
+        If[ngmResult =!= $Failed,
+          invadingVar = ngmResult[[7]]; (* K matrix *)
+          If[MatrixQ[invadingVar],
+            invasionR0 = Max[Eigenvalues[invadingVar]];
+            invasionRates[invader] = invasionR0;
+          ];
+        ];
+      , {eq, residentEquilibria}];
+    ];
+  , {invader, Length[bdfpT]}];
+
+  invasionRates
+];
+
+(* rahmanInvasionGraph: Complete invasion graph construction following Rahman et al framework
+   RHS: right-hand side of ODE system
+   var: list of variables
+   mSi: minimal siphons
+   bdfpT: boundary fixed points
+
+   Returns: Association with "Communities", "Edges", "InvasionNumbers", "Graph"
+*)
+rahmanInvasionGraph[RHS_, var_, mSi_, bdfpT_] := Module[{
+  communities, edges, invasionNumbers, graph, vertices, edgeList,
+  residentIdx, invaderIdx, invasionRate},
+
+  Print["=== Rahman Invasion Graph Construction ==="];
+
+  (* Step 1: Find admissible communities *)
+  communities = findAdmissibleCommunities[RHS, var, mSi];
+
+  If[communities === {},
+    Print["No admissible communities found"];
+    Return[<|"Communities" -> {}, "Edges" -> {}, "Graph" -> None|>];
+  ];
+
+  (* Step 2: Compute invasion rates between communities *)
+  invasionNumbers = <||>;
+  edges = {};
+
+  Do[
+    invasionRate = computeInvasionRates[RHS, var, communities[[residentIdx]], bdfpT];
+
+    (* Create edges for successful invasions (R > 1) *)
+    Do[
+      If[KeyExistsQ[invasionRate, invaderIdx] && invasionRate[invaderIdx] > 1,
+        AppendTo[edges, residentIdx -> invaderIdx];
+        invasionNumbers[{residentIdx, invaderIdx}] = invasionRate[invaderIdx];
+      ];
+    , {invaderIdx, Length[communities]}];
+
+  , {residentIdx, Length[communities]}];
+
+  Print["Constructed invasion graph with ", Length[edges], " edges"];
+
+  (* Step 3: Create graph visualization *)
+  vertices = Range[Length[communities]];
+  edgeList = DirectedEdge @@@ edges;
+
+  graph = If[edgeList =!= {},
+    Graph[vertices, edgeList,
+      VertexLabels -> Table[
+        i -> Placed[
+          Row[{"C", i, ": ", Row[communities[[i]], ","]}],
+          Center
+        ],
+        {i, Length[communities]}
+      ],
+      EdgeLabels -> Table[
+        edge -> Placed[
+          If[KeyExistsQ[invasionNumbers, List @@ edge],
+            Style["R=" <> ToString[N[invasionNumbers[List @@ edge], 2]], Small],
+            ""
+          ],
+          Above
+        ],
+        {edge, edgeList}
+      ],
+      VertexSize -> 0.3,
+      VertexStyle -> LightGreen,
+      EdgeStyle -> Directive[Black, Arrowheads[0.02]],
+      GraphLayout -> "LayeredDigraphEmbedding",
+      ImageSize -> Large
+    ],
+    Print["Empty invasion graph"];
+    None
+  ];
+
+  <|
+    "Communities" -> communities,
+    "Edges" -> edges,
+    "InvasionNumbers" -> invasionNumbers,
+    "Graph" -> graph
+  |>
+];
+
+(* ========================================================================= *)
+(* END PHASE 2: INVASION GRAPH FRAMEWORK *)
+(* ========================================================================= *)
+
 (*=============================================================================
   MAS Module for EpidCRN: Minimal Autocatalytic Subnetworks
-  
+
   Main functions:
   - isMAS[RN, T]  : Test if siphon T is self-replicable
   - MAS[RN]       : Find all MAS in network RN

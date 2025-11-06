@@ -59,6 +59,23 @@ bdFp::usage = "bdFp[RHS, var, mSi] computes boundary fixed points on siphon face
 sta::usage = "sta[pol] analyzes polynomial stability by 
 factoring pol and examining linear and quadratic factors separately. Assumes all parameters are positive. For linear factors (au + b), stability requires b > 0. For quadratic factors (au\.b2 + bu + c), stability requires both b > 0 and c > 0 (Routh-Hurwitz criteria). Returns {lSta, qSta, hDeg} where lSta contains linear stability conditions, qSta contains quadratic stability conditions, and hDeg contains higher-degree factors (degree \[GreaterEqual] 3) requiring manual stability analysis. Polynomial variable should be u.";
 
+(* Performance and caching functions - Phase 1 *)
+clearEpidCRNCache::usage = "(Performance)clearEpidCRNCache[] clears all internal caches (minSiph, NGM, bdFp) to free memory. Useful when working with multiple large models or experiencing memory issues.";
+
+(* Invasion Graph Framework - Phase 2 *)
+findAdmissibleCommunities::usage = "(InvasionGraph)findAdmissibleCommunities[RHS, var, mSi] identifies admissible communities from siphon decomposition. RHS is the system dynamics, var is the variable list, and mSi contains minimal siphons. Returns list of admissible communities as siphon index lists. Used for invasion graph construction following Rahman et al framework.";
+
+computeInvasionRates::usage = "(InvasionGraph)computeInvasionRates[RHS, var, community, bdfpT] computes invasion reproduction numbers for specified resident community. RHS is system dynamics, var is variable list, community is list of siphon indices, bdfpT contains boundary fixed points from bdFp. Returns association mapping invader indices to invasion R0 values. Essential for determining invasion success in multi-strain models.";
+
+rahmanInvasionGraph::usage = "(InvasionGraph)rahmanInvasionGraph[RHS, var, mSi, bdfpT] constructs complete invasion graph following Rahman et al framework. Automatically identifies admissible communities, computes invasion rates between them, and visualizes the invasion graph. Returns association with Communities, Edges, InvasionNumbers, and Graph visualization. Provides unified approach to multi-strain coexistence analysis.";
+
+(* Validation and Diagnostic Tools - Phase 3 *)
+validateNetwork::usage = "(Validation)validateNetwork[RN, rts] validates reaction network format and rate consistency before analysis. RN is the reaction network, rts are optional rates. Returns association with Valid status, Issues list, Warnings, and network statistics. Checks for proper reaction format, string species names (critical!), positive coefficients, and rate-reaction matching. Always run this before expensive symbolic computations.";
+
+estimateComplexity::usage = "(Diagnostics)estimateComplexity[RN] predicts computational complexity and expected runtime before analysis. Returns association with Complexity level (Low/Medium/High/Very High), estimated time, and specific recommendations for analysis approach. Use this to decide between bd2 (complete) vs bdAn (fast preliminary) analysis. Helps avoid unexpected timeouts on large models.";
+
+explainTimeout::usage = "(Diagnostics)explainTimeout[bdfpT, RN] analyzes timeout patterns from bdFp results and suggests model simplifications. bdfpT is the boundary fixed point output, RN is optional reaction network. Returns diagnostic information including frozen facet ratio and specific suggestions for resolving timeouts. Essential tool when encountering 'froze' messages in boundary analysis.";
+
 (* Bifurcation analysis functions *)
 fpHopf::usage="(Bifurcation)fpHopf[RHS,var,par,p0val] finds positive fixed points and analyzes for Hopf bifurcations. Returns {posSols,complexEigs,angle,eigs} where angle is ArcTan[Re/Im]*180/Pi of complex eigenvalues";
 simpleOptHopf::usage="(Bifurcation)simpleOptHopf[RHS,var,par,coP,optInd,numTries] simple optimization to maximize angle (find Hopf bifurcations) by varying parameters at optInd positions. Returns {bestAngle,bestValues,finalP0Val}";
