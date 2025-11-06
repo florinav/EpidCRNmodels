@@ -1,0 +1,99 @@
+\section{Development Plan for EpidCRN Package Enhancement}
+
+Based on comprehensive analysis of the package architecture and current capabilities, we propose a focused three-phase improvement strategy targeting performance, completeness, and usability.
+
+\subsection{Phase 1: Performance Optimization (Core \& Boundary subpackages)}
+
+\textbf{Objective:} Address computational bottlenecks in symbolic boundary analysis.
+
+\textbf{Rationale:} Current implementation experiences timeouts (10s for Solve, 3s for elimination) and slow performance for high-dimensional systems, as documented in Section 5.11-5.12.
+
+\textbf{Improvements:}
+\begin{enumerate}
+\item \textbf{Caching Strategy}: Implement memoization for repeated \texttt{minSiph} and \texttt{NGM} computations
+\begin{itemize}
+\item Cache siphon analysis results indexed by reaction network structure
+\item Store NGM eigenvalues/eigenvectors for parametric families
+\end{itemize}
+
+\item \textbf{Symbolic Simplification Pipeline}: Add preprocessing layer in \texttt{bdFp}
+\begin{itemize}
+\item Early detection of rational vs. algebraic cases before calling Solve
+\item Gr\"obner basis preprocessing for polynomial systems
+\item Automatic variable elimination ordering optimization
+\end{itemize}
+
+\item \textbf{Numerical-Symbolic Hybrid}: For complex systems exceeding timeout
+\begin{itemize}
+\item Numerical homotopy continuation as fallback for \texttt{"froze"} cases
+\item Symbolic-numeric validation workflow
+\end{itemize}
+\end{enumerate}
+
+\textbf{Success Metrics:} Reduce average computation time by 40\%, eliminate 80\% of timeout occurrences.
+
+\subsection{Phase 2: Complete Invasion Graph Framework (Siphons \& new InvasionGraph subpackage)}
+
+\textbf{Objective:} Implement and validate the invasion graph theory outlined in Section 6.
+
+\textbf{Rationale:} Section 6 presents theoretical foundation but lacks complete implementation (\texttt{findAdmissibleCommunities} and \texttt{computeInvasionRates} are referenced but not defined). This framework unifies multi-strain dynamics analysis.
+
+\textbf{Improvements:}
+\begin{enumerate}
+\item \textbf{Core Implementation}:
+\begin{itemize}
+\item Implement \texttt{findAdmissibleCommunities[RHS, var, mSi]} using siphon decomposition
+\item Implement \texttt{computeInvasionRates[RHS, var, community, bdfpT]} connecting to boundary fixed points
+\item Complete \texttt{rahmanInvasionGraph} with automatic susceptible level extraction
+\end{itemize}
+
+\item \textbf{Visualization Integration}:
+\begin{itemize}
+\item Create \texttt{plotInvasionGraph[communities, edges]} in Visualization subpackage
+\item Add R0-annotated directed graphs showing invasion thresholds
+\end{itemize}
+
+\item \textbf{Validation Suite}:
+\begin{itemize}
+\item Test against classical models (2-strain SIS, competing strains, vaccine models)
+\item Cross-validate with Lotka-Volterra equivalence theorem (Section 6.3)
+\end{itemize}
+\end{enumerate}
+
+\textbf{Success Metrics:} Complete API with 5+ validated examples, integrate with existing \texttt{bd2} workflow.
+
+\subsection{Phase 3: Enhanced User Experience (Utils \& Documentation)}
+
+\textbf{Objective:} Improve package accessibility and error diagnostics.
+
+\textbf{Rationale:} Critical usage notes (Section 8) suggest common pitfalls; timeout handling returns cryptic \texttt{"froze"} messages.
+
+\textbf{Improvements:}
+\begin{enumerate}
+\item \textbf{Input Validation Layer}:
+\begin{itemize}
+\item Add \texttt{validateNetwork[RN, rts]} checking reaction-rate consistency
+\item Validate siphon structure before expensive computations
+\item Type checking for string vs. symbol usage (addresses critical note in Section 8)
+\end{itemize}
+
+\item \textbf{Diagnostic Tools}:
+\begin{itemize}
+\item \texttt{estimateComplexity[RN]} predicting computation time before analysis
+\item \texttt{explainTimeout[bdfpT]} suggesting model simplifications when timeouts occur
+\item Progress indicators for long-running \texttt{scan} and \texttt{scanPar} operations
+\end{itemize}
+
+\item \textbf{Interactive Examples}:
+\begin{itemize}
+\item Create \texttt{Examples/} directory with notebook tutorials
+\item Document complete workflows for common model types (SIS, SIR, SEIR variants)
+\item Add quickstart guide referencing Section 9 workflow
+\end{itemize}
+\end{enumerate}
+
+\textbf{Success Metrics:} Reduce user-reported errors by 50\%, achieve 90\% successful first-run rate for documented examples.
+
+\subsection{Implementation Priority}
+
+We recommend sequential execution: Phase 1 $\rightarrow$ Phase 2 $\rightarrow$ Phase 3, as performance improvements enable broader testing in Phase 2, and both inform better user guidance in Phase 3. Estimated timeline: 6-8 weeks total (2.5 weeks per phase).

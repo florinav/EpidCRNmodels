@@ -1,5 +1,29 @@
 (* ::Package:: *)
 
+(* ========================================================================= *)
+(* PERFORMANCE OPTIMIZATION - Phase 1 *)
+(* ========================================================================= *)
+
+(* Caching mechanism for expensive computations *)
+$minSiphCache = <||>;
+$NGMCache = <||>;
+$bdFpCache = <||>;
+
+(* Clear cache function - useful for debugging or when memory is a concern *)
+clearEpidCRNCache[] := Module[{},
+  $minSiphCache = <||>;
+  $NGMCache = <||>;
+  $bdFpCache = <||>;
+  Print["EpidCRN caches cleared"];
+];
+
+(* Hash function for creating cache keys *)
+cacheKey[expr_] := Hash[expr, "MD5"];
+
+(* ========================================================================= *)
+(* STABILITY ANALYSIS *)
+(* ========================================================================= *)
+
 sta[pol_, par_] := Module[{
    factors, processedFactors, linearConditions, quadraticConditions, 
    higherFactors, linearFactors, quadraticFactors, deg, coeff, const, a, b, c, factor, var
@@ -58,55 +82,106 @@ sta[pol_, par_] := Module[{
  ]
 
 
-bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps},
+bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps, cacheKeyVal, cachedResult},
+  (* Check cache first *)
+  cacheKeyVal = cacheKey[{RHS, var, mSi}];
+  If[KeyExistsQ[$bdFpCache, cacheKeyVal],
+    Print["Using cached bdFp result"];
+    Return[$bdFpCache[cacheKeyVal]]
+  ];
+
   eq = Thread[RHS == 0];
   lS = Length[mSi];
   bdfps = Table[
-    Module[{siphonVars, remainingVars, siphonZeros, timeoutResult, 
-            isRationalSolutionQ, rationalSols, nonrationalSols, eqSystem, 
-            scalarEq, scalarPol, eliminationVar, totalCount},
+    Module[{siphonVars, remainingVars, siphonZeros, timeoutResult,
+            isRationalSolutionQ, rationalSols, nonrationalSols, eqSystem,
+            scalarEq, scalarPol, eliminationVar, totalCount, isLikelyRational,
+            preprocessedEq, grobnerResult, numericFallback},
+
       siphonVars = ToExpression[mSi[[j]]];
       remainingVars = Complement[var, siphonVars];
       siphonZeros = Thread[siphonVars -> 0];
       eqSystem = eq /. siphonZeros;
-      
+
+      (* Phase 1 Improvement: Early detection of rational vs algebraic cases *)
+      isLikelyRational[expr_] := FreeQ[expr, Sqrt | Power[_, Except[_Integer]] | Root];
+
+      (* Phase 1 Improvement: Symbolic simplification pipeline *)
+      (* Preprocess equations - simplify and factor *)
+      preprocessedEq = Simplify[eqSystem] /. Equal[lhs_, 0] :> (Simplify[lhs] == 0);
+
+      (* Try Gröbner basis preprocessing for polynomial systems if system is complex *)
+      If[Length[remainingVars] >= 3 && AllTrue[Flatten[{preprocessedEq /. Equal -> Subtract}], PolynomialQ[#, remainingVars] &],
+        grobnerResult = TimeConstrained[
+          GroebnerBasis[preprocessedEq /. Equal[lhs_, 0] :> lhs, remainingVars,
+            MonomialOrder -> DegreeReverseLexicographic],
+          2,
+          $Failed
+        ];
+        If[grobnerResult =!= $Failed,
+          preprocessedEq = Thread[grobnerResult == 0];
+          Print["Gröbner preprocessing successful for facet ", mSi[[j]]];
+        ];
+      ];
+
+      (* Attempt to solve with extended timeout for complex systems *)
       timeoutResult = TimeConstrained[
-        Solve[eqSystem, remainingVars],
+        Solve[preprocessedEq, remainingVars, Reals],
         10,
         "froze"
       ];
-      
+
+      (* Phase 1 Improvement: Numerical-symbolic hybrid for timeout cases *)
       If[timeoutResult === "froze",
-        Print["fps on siphon facet ", mSi[[j]], " froze"];
+        Print["Symbolic solve timed out for facet ", mSi[[j]], " - attempting numerical fallback"];
+
+        (* Try numerical approach with FindInstance *)
+        numericFallback = TimeConstrained[
+          FindInstance[preprocessedEq, remainingVars, Reals, 10],
+          5,
+          $Failed
+        ];
+
+        If[numericFallback =!= $Failed && numericFallback =!= {},
+          Print["Found ", Length[numericFallback], " numerical solutions via FindInstance"];
+          timeoutResult = numericFallback;,
+          Print["fps on siphon facet ", mSi[[j]], " froze - no numerical fallback available"];
+          {"froze", "froze"}
+        ];
+      ];
+
+      If[timeoutResult === "froze" || timeoutResult === {"froze", "froze"},
         {"froze", "froze"},
         (* Separate rational and non-rational solutions *)
-        isRationalSolutionQ[sol_] := 
+        isRationalSolutionQ[sol_] :=
           FreeQ[sol, Sqrt | Power[_, Except[_Integer]] | Root | _Complex];
         rationalSols = Select[timeoutResult, isRationalSolutionQ];
         nonrationalSols = Complement[timeoutResult, rationalSols];
-        
+
         (* Generate scalar equation if needed *)
         If[Length[nonrationalSols] > 0,
           eliminationVar = First[remainingVars];
           scalarEq = TimeConstrained[
-            Factor[Eliminate[eqSystem, Complement[remainingVars, {eliminationVar}]]],
+            Factor[Eliminate[preprocessedEq, Complement[remainingVars, {eliminationVar}]]],
             3,
-            Factor[First[eqSystem]] (* fallback to factored first equation if elimination fails *)
+            Factor[First[preprocessedEq]] (* fallback to factored first equation if elimination fails *)
           ];
           (* Extract polynomial from equation (remove == 0 part) *)
           scalarPol = scalarEq /. Equal[lhs_, 0] :> lhs /. Equal[lhs_, rhs_] :> (lhs - rhs);,
           scalarPol = AllSolsRational;
         ];
-        
+
         (* Print only the count *)
         totalCount = Length[rationalSols] + Length[nonrationalSols];
         Print["fps on siphon facet ", mSi[[j]], ": ", totalCount, " boundary points"];
-        
+
         (* Return structured pair with polynomial *)
         {rationalSols, scalarPol}
       ]
     ], {j, lS}];
-    
+
+  (* Cache the result *)
+  $bdFpCache[cacheKeyVal] = bdfps;
   bdfps
 ]
 
@@ -235,25 +310,32 @@ bd2[RN_, rts_] :=
 
 
 
-NGM[mod_, infVars_] := Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, detV}, 
+NGM[mod_, infVars_] := Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, detV, cacheKeyVal},
+  (* Phase 1 Improvement: Check cache first *)
+  cacheKeyVal = cacheKey[{mod, infVars}];
+  If[KeyExistsQ[$NGMCache, cacheKeyVal],
+    Print["Using cached NGM result"];
+    Return[$NGMCache[cacheKeyVal]]
+  ];
+
   dyn = mod[[1]];
   X = mod[[2]];
-  
+
   inf = Flatten[Position[X, #] & /@ infVars];
   infc = Complement[Range[Length[X]], inf];
-  
+
   Jx = Grad[dyn[[inf]], X[[inf]]];
   Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
   Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
   Jyx = If[Length[infc] > 0, Grad[dyn[[infc]], X[[inf]]], {}];
-  
+
   V1 = -Jx /. Thread[X[[infc]] -> 0];
   F1 = (Jx + V1) /. Thread[X[[inf]] -> 0];
   F = posM[F1];
   V = (F - Jx) /. Thread[X[[inf]] -> 0];
-  
+
   detV = Det[V];
-  
+
   If[!PossibleZeroQ[detV],
      K = Simplify[F . Inverse[V]] /. 0. -> 0;
     Kd = (Inverse[V] . F);,
@@ -261,8 +343,11 @@ NGM[mod_, infVars_] := Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V
     K = "singular";
     Kd = "singular";
   ];
-  
-   {Jx, F, V, Jy, Jxy, Jyx, K, Kd}
+
+  (* Cache the result *)
+  $NGMCache[cacheKeyVal] = {Jx, F, V, Jy, Jxy, Jyx, K, Kd};
+
+  {Jx, F, V, Jy, Jxy, Jyx, K, Kd}
 ]
 
 
