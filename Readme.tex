@@ -470,20 +470,6 @@ fullResults = bd2[RN, rts];
 \item Factorization improves readability but adds computational cost
 \item Consider using \texttt{bdAn} alone for preliminary analysis if speed is critical
 \end{enumerate}
-\subsubsection{With bd2 (Complete Analysis)}
-\begin{lstlisting}
-fullResults = bd2[RN, rts];
-{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = fullResults;
-(* bdfpT already computed by bd2 *)
-\end{lstlisting}
-
-\subsection{Performance Notes}
-\begin{enumerate}
-\item Runtime scales with system complexity and siphon count
-\item Elimination step may be slow for high-dimensional systems
-\item Factorization improves readability but adds computational cost
-\item Consider using \texttt{bdAn} alone for preliminary analysis if speed is critical
-\end{enumerate}
 
 
 
@@ -727,6 +713,9 @@ EpidCRN/
 \item The invasion graph framework provides a unified approach to understanding multi-strain dynamics
 \item Function compatibility and variable handling rules must be strictly followed
 \end{enumerate}
+
+\input{plan}
+
 %\input{LCP}
 %\input{FIST}
 \end{document}
