@@ -714,6 +714,144 @@ EpidCRN/
 \item Function compatibility and variable handling rules must be strictly followed
 \end{enumerate}
 
+\section{Antigenic Variation Models}
+
+\subsection{Trypanosoma Model (TrypN.nb)}
+
+\subsubsection{typAnt[RN, rts] - Trypanosoma Antigenic Variation Analysis}
+
+\textbf{Purpose:} Analyzes two-strain Trypanosoma brucei models with antigenic variation through Variant Surface Glycoprotein (VSG) switching.
+
+\textbf{Model Structure:}
+\begin{itemize}
+\item \textbf{s}: Susceptible host population
+\item \textbf{i1, i2}: Infected with VSG variant 1 or 2
+\item \textbf{r1, r2}: Recovered from variant 1 or 2
+\item Includes recruitment, infection, recovery, death, and waning immunity
+\end{itemize}
+
+\textbf{Usage:}
+\begin{lstlisting}
+<< EpidCRN`;
+(* Define reaction network and rates as in TrypN.nb *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = typAnt[RN, rts];
+\end{lstlisting}
+
+\textbf{Returns:}
+\begin{enumerate}
+\item \textbf{RHS}: Right-hand side of ODE system
+\item \textbf{var}: Variable list \{s, i1, i2, r1, r2\}
+\item \textbf{par}: Parameter list
+\item \textbf{cp}: Parameter constraints (all positive)
+\item \textbf{mSi}: Minimal siphons (infection compartments)
+\item \textbf{Jx, Jy}: Jacobian blocks
+\item \textbf{E0}: Disease-free equilibrium
+\item \textbf{K}: Next generation matrix
+\item \textbf{R0A}: Basic reproduction numbers for each variant
+\end{enumerate}
+
+\textbf{Key Features:}
+\begin{itemize}
+\item Strain-specific reproduction numbers $R_{01}, R_{02}$
+\item Automatic detection of minimal siphons
+\item NGM analysis for multi-strain dynamics
+\item Foundation for invasion graph analysis
+\end{itemize}
+
+\subsection{Recker Model (ReckerN.nb)}
+
+\subsubsection{recAnt[RN, rts] - Recker Antigenic Variation Analysis}
+
+\textbf{Purpose:} Analyzes multi-strain pathogen models with antigenic variation following Recker et al. framework for malaria and other pathogens with antigenic diversity.
+
+\textbf{Model Structure:}
+\begin{itemize}
+\item \textbf{s}: Susceptible population
+\item \textbf{i1, i2, i3}: Infected with antigenic variant 1, 2, or 3
+\item \textbf{r1, r2, r3}: Recovered with variant-specific immunity
+\item Cross-immunity between variants (implicit in structure)
+\item Waning immunity allowing reinfection
+\end{itemize}
+
+\textbf{Usage:}
+\begin{lstlisting}
+<< EpidCRN`;
+(* Define 3-strain reaction network and rates as in ReckerN.nb *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = recAnt[RN, rts];
+\end{lstlisting}
+
+\textbf{Returns:} Same as \texttt{bd2} output (complete boundary analysis):
+\begin{enumerate}
+\item \textbf{RHS}: ODE system right-hand side
+\item \textbf{var}: Variables \{s, i1, i2, i3, r1, r2, r3\}
+\item \textbf{par}: Parameters
+\item \textbf{cp}: Parameter constraints
+\item \textbf{mSi}: Minimal siphons (infection states)
+\item \textbf{Jx, Jy}: Jacobian blocks
+\item \textbf{E0}: Disease-free equilibrium
+\item \textbf{ngm}: Full NGM structure
+\item \textbf{R0A}: Basic reproduction numbers for variants
+\item \textbf{EA}: Endemic equilibria structure
+\item \textbf{bdfpT}: Boundary fixed points with rational solutions and scalar equations
+\end{enumerate}
+
+\textbf{Key Features:}
+\begin{itemize}
+\item Three antigenic variants with full CRNT analysis
+\item Boundary fixed points on siphon facets
+\item Rational and algebraic solution separation
+\item Supports invasion number computation for multi-strain coexistence
+\item Compatible with parameter scanning and bifurcation analysis
+\end{itemize}
+
+\subsection{Comparison: typAnt vs recAnt}
+
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Feature} & \textbf{typAnt} & \textbf{recAnt} \\
+\hline
+Application & Trypanosoma (VSG) & General antigenic variation \\
+Number of strains & 2 & 3 (extensible) \\
+Function call & Direct implementation & Wrapper for bd2 \\
+Boundary points & No (uses bdAn logic) & Yes (full bd2 output) \\
+Computation time & Faster & Slower (includes bdFp) \\
+Use case & Quick R0 analysis & Complete equilibrium analysis \\
+\hline
+\end{tabular}
+
+\subsection{Antigenic Variation Analysis Workflow}
+
+\begin{lstlisting}
+(* 1. Load package *)
+<< EpidCRN`;
+
+(* 2. Define model - use TrypN.nb or ReckerN.nb as template *)
+RN = {...};  (* reaction network *)
+rts = {...}; (* rate expressions *)
+
+(* 3. For quick analysis: use typAnt *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = typAnt[RN, rts];
+Print["R0 values: ", R0A /. E0];
+
+(* 4. For complete analysis: use recAnt *)
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = recAnt[RN, rts];
+Print["Boundary equilibria: ", bdfpT];
+
+(* 5. Invasion numbers for coexistence analysis *)
+(* Extract boundary equilibria and compute invasion conditions *)
+\end{lstlisting}
+
+\subsection{Implementation Notes}
+
+\begin{enumerate}
+\item Both functions follow EpidCRN naming convention: short abbreviations returning lists
+\item \texttt{typAnt} = "Trypanosoma Antigenic variation"
+\item \texttt{recAnt} = "Recker Antigenic variation"
+\item All outputs are lists (not associations) for consistency
+\item Functions are fully documented in respective notebook files
+\item Compatible with existing EpidCRN workflow (NGM, scanning, bifurcation)
+\end{enumerate}
+
 \input{plan}
 
 %\input{LCP}

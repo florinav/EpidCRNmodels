@@ -1,0 +1,371 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Claude Code' *)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Trypanosoma Antigenic Variation Model", "Title",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell["Two-strain antigenic variation model for Trypanosoma brucei", "Subtitle",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Load EpidCRN Package", "Section",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"<<", "EpidCRN`"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}]
+
+}, Open]],
+
+Cell[CellGroupData[{
+
+Cell["Model Definition", "Section",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell["\<\
+Trypanosoma model with two VSG (Variant Surface Glycoprotein) variants.
+Variables: s (susceptible), i1 (infected variant 1), i2 (infected variant 2),
+r1 (recovered from variant 1), r2 (recovered from variant 2)\
+\>", "Text",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"RN", "=",
+   RowBox[{"{", "\n", "  ",
+    RowBox[{
+     RowBox[{"0", "->", "\"\<s\>\""}], ",", " ",
+     RowBox[{"(*", " ", "recruitment", " ", "*)"}], "\n", "  ",
+     RowBox[{
+      RowBox[{"\"\<s\>\"", "+", "\"\<i1\>\""}], "->",
+      RowBox[{"2", "*", "\"\<i1\>\""}]}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"infection", " ", "variant", " ", "1"}], " ", "*)"}], "\n",
+     "  ",
+     RowBox[{
+      RowBox[{"\"\<s\>\"", "+", "\"\<i2\>\""}], "->",
+      RowBox[{"2", "*", "\"\<i2\>\""}]}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"infection", " ", "variant", " ", "2"}], " ", "*)"}], "\n",
+     "  ",
+     RowBox[{"\"\<i1\>\"", "->", "\"\<r1\>\""}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"recovery", " ", "from", " ", "variant", " ", "1"}], " ",
+      "*)"}], "\n", "  ",
+     RowBox[{"\"\<i2\>\"", "->", "\"\<r2\>\""}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"recovery", " ", "from", " ", "variant", " ", "2"}], " ",
+      "*)"}], "\n", "  ",
+     RowBox[{"\"\<s\>\"", "->", "0"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "susceptible"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\"\<i1\>\"", "->", "0"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "infected", " ", "1"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\"\<i2\>\"", "->", "0"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "infected", " ", "2"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\"\<r1\>\"", "->", "0"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "recovered", " ", "1"}], " ", "*)"}], "\n",
+     "  ",
+     RowBox[{"\"\<r2\>\"", "->", "0"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "recovered", " ", "2"}], " ", "*)"}], "\n",
+     "  ",
+     RowBox[{"\"\<r1\>\"", "->", "\"\<s\>\""}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"waning", " ", "immunity", " ", "1"}], " ", "*)"}], "\n",
+     "  ",
+     RowBox[{"\"\<r2\>\"", "->", "\"\<s\>\""}], " ",
+     RowBox[{"(*", " ",
+      RowBox[{"waning", " ", "immunity", " ", "2"}], " ", "*)"}], "\n",
+     "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rts", "=",
+   RowBox[{"{", "\n", "  ",
+    RowBox[{
+    "\[CapitalLambda]", ",", " ",
+     RowBox[{"(*", " ", "recruitment", " ", "*)"}], "\n", "  ",
+     RowBox[{"\[Beta]1", "*", "s", "*", "i1"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"infection", " ", "rate", " ", "1"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\[Beta]2", "*", "s", "*", "i2"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"infection", " ", "rate", " ", "2"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\[Gamma]1", "*", "i1"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"recovery", " ", "rate", " ", "1"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\[Gamma]2", "*", "i2"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"recovery", " ", "rate", " ", "2"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\[Mu]", "*", "s"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "rate", " ", "susceptible"}], " ", "*)"}], "\n",
+     "  ",
+     RowBox[{"\[Mu]", "*", "i1"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "rate", " ", "infected", " ", "1"}], " ", "*)"}],
+      "\n", "  ",
+     RowBox[{"\[Mu]", "*", "i2"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "rate", " ", "infected", " ", "2"}], " ", "*)"}],
+      "\n", "  ",
+     RowBox[{"\[Mu]", "*", "r1"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "rate", " ", "recovered", " ", "1"}], " ",
+      "*)"}], "\n", "  ",
+     RowBox[{"\[Mu]", "*", "r2"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"death", " ", "rate", " ", "recovered", " ", "2"}], " ",
+      "*)"}], "\n", "  ",
+     RowBox[{"\[Rho]1", "*", "r1"}], ",", " ",
+     RowBox[{"(*", " ",
+      RowBox[{"waning", " ", "immunity", " ", "rate", " ", "1"}], " ",
+      "*)"}], "\n", "  ",
+     RowBox[{"\[Rho]2", "*", "r2"}], " ",
+     RowBox[{"(*", " ",
+      RowBox[{"waning", " ", "immunity", " ", "rate", " ", "2"}], " ",
+      "*)"}], "\n", "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}]
+
+}, Open]],
+
+Cell[CellGroupData[{
+
+Cell["Core Analysis - typAnt function", "Section",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell["\<\
+typAnt[RN,rts] - Abbreviated function for Trypanosoma Antigenic variation analysis.
+Returns list: {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A}\
+\>", "Text",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"typAnt", "[",
+    RowBox[{"RN_", ",", "rts_"}], "]"}], ":=",
+   RowBox[{"Module", "[",
+    RowBox[{
+     RowBox[{"{",
+      RowBox[{
+      "spe", ",", "al", ",", "be", ",", "gam", ",", "Rv", ",", "RHS", ",",
+       "def", ",", "var", ",", "par", ",", "cp", ",", "cv", ",", "ct", ",",
+       "\n", "    ", "mSi", ",", "mSiIndices", ",", "inf", ",", "mod", ",",
+       "K", ",", "R0A", ",", "cDFE", ",", "RDFE", ",", "eq0", ",", "var0",
+       ",", "E0", ",", "\n", "    ", "Jx", ",", "Jy", ",", "eigenSystem",
+       ",", "eigenvals", ",", "eigenvecs", ",", "nonzeroIndices", ",", "\n",
+       "    ", "relevantEigenvals", ",", "strainAssociation", ",",
+       "sortedPairs", ",", "mSiNGM", ",", "ngm"}], "}"}], ",", "\n", "\n",
+     "    ",
+     RowBox[{
+      RowBox[{
+       RowBox[{"{",
+        RowBox[{
+        "spe", ",", "al", ",", "be", ",", "gam", ",", "Rv", ",", "RHS", ",",
+         "def"}], "}"}], "=",
+       RowBox[{"extMat", "[", "RN", "]"}]}], ";", "\n", "    ",
+      RowBox[{"var", "=",
+       RowBox[{"ToExpression", "[", "spe", "]"}]}], ";", "\n", "    ",
+      RowBox[{"RHS", "=",
+       RowBox[{"gam", ".", "rts"}]}], ";", "\n", "    ",
+      RowBox[{"par", "=",
+       RowBox[{"Par", "[",
+        RowBox[{"RHS", ",", "var"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"cp", "=",
+       RowBox[{"Thread", "[",
+        RowBox[{"par", ">", "0"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"cv", "=",
+       RowBox[{"Thread", "[",
+        RowBox[{"var", ">=", "0"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"ct", "=",
+       RowBox[{"Join", "[",
+        RowBox[{"cp", ",", "cv"}], "]"}]}], ";", "\n", "\n", "    ",
+      RowBox[{"mSi", "=",
+       RowBox[{"minSiph", "[",
+        RowBox[{"spe", ",",
+         RowBox[{"asoRea", "[", "RN", "]"}]}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"mSiIndices", "=",
+       RowBox[{"Map", "[",
+        RowBox[{
+         RowBox[{
+          RowBox[{"Flatten", "[",
+           RowBox[{
+            RowBox[{
+             RowBox[{
+              RowBox[{"Position", "[",
+               RowBox[{"spe", ",", "#"}], "]"}], "&"}], "/@", "#"}], "&"}],
+           "]"}], "&"}], ",", "mSi"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"inf", "=",
+       RowBox[{"Union", "[",
+        RowBox[{"Flatten", "[", "mSiIndices", "]"}], "]"}]}], ";", "\n",
+      "\n", "    ",
+      RowBox[{"cDFE", "=",
+       RowBox[{"Flatten", "[",
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"Thread", "[",
+            RowBox[{
+             RowBox[{"ToExpression", "[", "#", "]"}], "->", "0"}], "]"}],
+           "&"}], "/@", "mSi"}], "&"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"RDFE", "=",
+       RowBox[{"RHS", "/.", "cDFE"}]}], ";", "\n", "    ",
+      RowBox[{"eq0", "=",
+       RowBox[{"Thread", "[",
+        RowBox[{"RDFE", "==", "0"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"var0", "=",
+       RowBox[{"Complement", "[",
+        RowBox[{"var", ",",
+         RowBox[{"var", "[",
+          RowBox[{"[", "inf", "]"}], "]"}]}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"E0", "=",
+       RowBox[{"Join", "[",
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"Solve", "[",
+            RowBox[{"eq0", ",", "var0"}], "]"}], "//", "Flatten"}], "&"}],
+         ",",
+         RowBox[{"Thread", "[",
+          RowBox[{
+           RowBox[{"var", "[",
+            RowBox[{"[", "inf", "]"}], "]"}], "->", "0"}], "]"}]}], "]"}]}],
+      ";", "\n", "\n", "    ",
+      RowBox[{"mod", "=",
+       RowBox[{"{",
+        RowBox[{"RHS", ",", "var", ",", "par"}], "}"}]}], ";", "\n", "    ",
+      RowBox[{"ngm", "=",
+       RowBox[{"NGM", "[",
+        RowBox[{"mod", ",", "inf"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"Jx", "=",
+       RowBox[{
+        RowBox[{"ngm", "[",
+         RowBox[{"[", "1", "]"}], "]"}], "//", "FullSimplify"}]}], ";", "\n",
+       "    ",
+      RowBox[{"Jy", "=",
+       RowBox[{
+        RowBox[{"ngm", "[",
+         RowBox[{"[", "5", "]"}], "]"}], "//", "FullSimplify"}]}], ";", "\n",
+       "    ",
+      RowBox[{"K", "=",
+       RowBox[{
+        RowBox[{"ngm", "[",
+         RowBox[{"[", "4", "]"}], "]"}], "//", "FullSimplify"}]}], ";", "\n",
+       "\n", "    ",
+      RowBox[{"eigenSystem", "=",
+       RowBox[{"Eigensystem", "[", "K", "]"}]}], ";", "\n", "    ",
+      RowBox[{"eigenvals", "=",
+       RowBox[{"eigenSystem", "[",
+        RowBox[{"[", "1", "]"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"eigenvecs", "=",
+       RowBox[{"eigenSystem", "[",
+        RowBox[{"[", "2", "]"}], "]"}]}], ";", "\n", "    ",
+      RowBox[{"nonzeroIndices", "=",
+       RowBox[{"{", "}"}]}], ";", "\n", "    ",
+      RowBox[{"Do", "[",
+       RowBox[{
+        RowBox[{"If", "[",
+         RowBox[{
+          RowBox[{
+           RowBox[{"eigenvals", "[",
+            RowBox[{"[", "i", "]"}], "]"}], "=!=", "0"}], ",",
+          RowBox[{"AppendTo", "[",
+           RowBox[{"nonzeroIndices", ",", "i"}], "]"}]}], "]"}], ",", "\n",
+        "      ",
+        RowBox[{"{",
+         RowBox[{"i", ",",
+          RowBox[{"Length", "[", "eigenvals", "]"}]}], "}"}]}], "]"}], ";",
+      "\n", "\n", "    ",
+      RowBox[{"If", "[",
+       RowBox[{
+        RowBox[{
+         RowBox[{"Length", "[", "nonzeroIndices", "]"}], ">", "0"}], ",",
+        "\n", "      ",
+        RowBox[{
+         RowBox[{"relevantEigenvals", "=",
+          RowBox[{"eigenvals", "[",
+           RowBox[{"[", "nonzeroIndices", "]"}], "]"}]}], ";", "\n",
+         "      ",
+         RowBox[{"mSiNGM", "=",
+          RowBox[{"Table", "[",
+           RowBox[{
+            RowBox[{"Flatten", "[",
+             RowBox[{"Table", "[",
+              RowBox[{
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Position", "[",
+                  RowBox[{"inf", ",",
+                   RowBox[{"mSiIndices", "[",
+                    RowBox[{"[",
+                    RowBox[{"i", ",", "j"}], "]"}], "]"}]}], "]"}], "[",
+                 RowBox[{"[",
+                  RowBox[{"1", ",", "1"}], "]"}], "]"}], "&"}], ",", "\n",
+               "                  ",
+               RowBox[{"{",
+                RowBox[{"j", ",",
+                 RowBox[{"Length", "[",
+                  RowBox[{"mSiIndices", "[",
+                   RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "}"}]}], "]"}],
+             "]"}], ",",
+            RowBox[{"{",
+             RowBox[{"i", ",",
+              RowBox[{"Length", "[", "mSiIndices", "]"}]}], "}"}]}], "]"}]}],
+          ";", "\n", "      ",
+         RowBox[{"R0A", "=", "relevantEigenvals"}], ";"}], ",", "\n",
+        "      ",
+        RowBox[{"R0A", "=",
+         RowBox[{"{", "}"}]}]}], "]"}], ";", "\n", "\n", "    ",
+      RowBox[{"{",
+       RowBox[{
+       "RHS", ",", "var", ",", "par", ",", "cp", ",", "mSi", ",", "Jx", ",",
+        "Jy", ",", "E0", ",", "K", ",", "R0A"}], "}"}]}]}], "\n", "  ",
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"results", "=",
+   RowBox[{"typAnt", "[",
+    RowBox[{"RN", ",", "rts"}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"{",
+   RowBox[{
+   "RHS", ",", "var", ",", "par", ",", "cp", ",", "mSi", ",", "Jx", ",",
+    "Jy", ",", "E0", ",", "K", ",", "R0A"}], "}"}], "=", "results"}]], \
+"Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Print", "[",
+  RowBox[{"\"\<Minimal Siphons: \>\"", ",", "mSi"}], "]"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Print", "[",
+  RowBox[{"\"\<R0 values: \>\"", ",", "R0A"}], "]"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}]
+
+}, Open]]
+
+}, Open]]
+}]
+(* End of Notebook Content *)
