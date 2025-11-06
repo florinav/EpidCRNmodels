@@ -1,54 +1,168 @@
-(* Recker Antigenic Variation Model *)
-(* Multi-strain pathogen model with antigenic variation *)
+(* Content-type: application/vnd.wolfram.mathematica *)
 
-<<EpidCRN`
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
 
-(* Model Definition: 3-strain Recker Model *)
-RN = {
-  0 -> "s",
-  "s" + "i1" -> 2*"i1",
-  "s" + "i2" -> 2*"i2",
-  "s" + "i3" -> 2*"i3",
-  "i1" -> "r1",
-  "i2" -> "r2",
-  "i3" -> "r3",
-  "s" -> 0,
-  "i1" -> 0,
-  "i2" -> 0,
-  "i3" -> 0,
-  "r1" -> 0,
-  "r2" -> 0,
-  "r3" -> 0,
-  "r1" -> "s",
-  "r2" -> "s",
-  "r3" -> "s"
-}
+(* CreatedBy='Claude Code' *)
 
-rts = {
-  \[CapitalLambda],
-  \[Beta]1*s*i1,
-  \[Beta]2*s*i2,
-  \[Beta]3*s*i3,
-  \[Gamma]1*i1,
-  \[Gamma]2*i2,
-  \[Gamma]3*i3,
-  \[Mu]*s,
-  \[Mu]*i1,
-  \[Mu]*i2,
-  \[Mu]*i3,
-  \[Mu]*r1,
-  \[Mu]*r2,
-  \[Mu]*r3,
-  \[Rho]1*r1,
-  \[Rho]2*r2,
-  \[Rho]3*r3
-}
+(* Beginning of Notebook Content *)
+Notebook[{
 
-(* Analysis *)
-recAnt[RN_, rts_] := bd2[RN, rts]
+Cell[CellGroupData[{
+Cell["Recker Antigenic Variation Model", "Title",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
 
-results = recAnt[RN, rts]
-{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = results
-Print["Minimal Siphons: ", mSi]
-Print["R0 values: ", R0A]
-Print["Boundary fixed points: ", bdfpT]
+Cell["Multi-strain pathogen model with antigenic variation (Recker et al. style)", "Subtitle",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Load EpidCRN Package", "Section",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"<<", "EpidCRN`"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}]
+
+}, Open]],
+
+Cell[CellGroupData[{
+
+Cell["Model Definition: 3-strain Recker Model", "Section",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell["\<\
+Recker-style model with 3 antigenic variants and cross-immunity.
+Variables: s, i1, i2, i3, r1, r2, r3
+Cross-immunity reduces susceptibility to other strains after recovery.\
+\>", "Text",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"RN", "=",
+   RowBox[{"{", "\n", "  ",
+    RowBox[{
+     RowBox[{"(*", " ", "Recruitment", " ", "*)"}], "\n", "  ",
+     RowBox[{"0", "->", "\"\<s\>\""}], ",", "\n", "  ",
+     RowBox[{"(*", " ",
+      RowBox[{"Infections", " ", "with", " ", "each", " ", "strain"}], " ",
+      "*)"}], "\n", "  ",
+     RowBox[{
+      RowBox[{"\"\<s\>\"", "+", "\"\<i1\>\""}], "->",
+      RowBox[{"2", "*", "\"\<i1\>\""}]}], ",", "\n", "  ",
+     RowBox[{
+      RowBox[{"\"\<s\>\"", "+", "\"\<i2\>\""}], "->",
+      RowBox[{"2", "*", "\"\<i2\>\""}]}], ",", "\n", "  ",
+     RowBox[{
+      RowBox[{"\"\<s\>\"", "+", "\"\<i3\>\""}], "->",
+      RowBox[{"2", "*", "\"\<i3\>\""}]}], ",", "\n", "  ",
+     RowBox[{"(*", " ", "Recoveries", " ", "*)"}], "\n", "  ",
+     RowBox[{"\"\<i1\>\"", "->", "\"\<r1\>\""}], ",", "\n", "  ",
+     RowBox[{"\"\<i2\>\"", "->", "\"\<r2\>\""}], ",", "\n", "  ",
+     RowBox[{"\"\<i3\>\"", "->", "\"\<r3\>\""}], ",", "\n", "  ",
+     RowBox[{"(*", " ", "Deaths", " ", "*)"}], "\n", "  ",
+     RowBox[{"\"\<s\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"\"\<i1\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"\"\<i2\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"\"\<i3\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"\"\<r1\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"\"\<r2\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"\"\<r3\>\"", "->", "0"}], ",", "\n", "  ",
+     RowBox[{"(*", " ",
+      RowBox[{"Waning", " ", "immunity"}], " ", "*)"}], "\n", "  ",
+     RowBox[{"\"\<r1\>\"", "->", "\"\<s\>\""}], ",", "\n", "  ",
+     RowBox[{"\"\<r2\>\"", "->", "\"\<s\>\""}], ",", "\n", "  ",
+     RowBox[{"\"\<r3\>\"", "->", "\"\<s\>\""}], "\n", "}"}]}],
+  ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rts", "=",
+   RowBox[{"{", "\n", "  ",
+    RowBox[{"\[CapitalLambda]", ",", "\n", "  ",
+     RowBox[{"\[Beta]1", "*", "s", "*", "i1"}], ",", "\n", "  ",
+     RowBox[{"\[Beta]2", "*", "s", "*", "i2"}], ",", "\n", "  ",
+     RowBox[{"\[Beta]3", "*", "s", "*", "i3"}], ",", "\n", "  ",
+     RowBox[{"\[Gamma]1", "*", "i1"}], ",", "\n", "  ",
+     RowBox[{"\[Gamma]2", "*", "i2"}], ",", "\n", "  ",
+     RowBox[{"\[Gamma]3", "*", "i3"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "s"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "i1"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "i2"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "i3"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "r1"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "r2"}], ",", "\n", "  ",
+     RowBox[{"\[Mu]", "*", "r3"}], ",", "\n", "  ",
+     RowBox[{"\[Rho]1", "*", "r1"}], ",", "\n", "  ",
+     RowBox[{"\[Rho]2", "*", "r2"}], ",", "\n", "  ",
+     RowBox[{"\[Rho]3", "*", "r3"}], "\n", "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}]
+
+}, Open]],
+
+Cell[CellGroupData[{
+
+Cell["Core Analysis with recAnt function", "Section",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell["\<\
+recAnt[RN,rts] - Abbreviated function for Recker Antigenic variation analysis.
+Returns list: {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A}\
+\>", "Text",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"recAnt", "[",
+    RowBox[{"RN_", ",", "rts_"}], "]"}], ":=",
+   RowBox[{"bd2", "[",
+    RowBox[{"RN", ",", "rts"}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell["Run the analysis:", "Text",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"results", "=",
+   RowBox[{"recAnt", "[",
+    RowBox[{"RN", ",", "rts"}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"{",
+   RowBox[{
+   "RHS", ",", "var", ",", "par", ",", "cp", ",", "mSi", ",", "Jx", ",",
+    "Jy", ",", "E0", ",", "ngm", ",", "R0A", ",", "EA", ",", "bdfpT"}],
+   "}"}], "=", "results"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Print", "[",
+  RowBox[{"\"\<Minimal Siphons (infection states): \>\"", ",", "mSi"}],
+  "]"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Print", "[",
+  RowBox[{
+  "\"\<Basic Reproduction Numbers for each strain: \>\"", ",", "R0A"}],
+  "]"}]], "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Print", "[",
+  RowBox[{
+  "\"\<Boundary fixed points on siphon facets: \>\"", ",", "bdfpT"}], "]"}]],\
+ "Input",
+ CellChangeTimes->{{3.9*^9, 3.9*^9}}]
+
+}, Open]]
+
+}, Open]]
+}]
+(* End of Notebook Content *)
