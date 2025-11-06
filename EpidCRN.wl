@@ -1,27 +1,26 @@
 (* ::Package:: *)
 
-(* EpidCRN Main Package - Loader for all subpackages *)
-BeginPackage["EpidCRN`"];
+(* EpidCRN1 Main Package - Loader for all subpackages *)
+BeginPackage["EpidCRN1`"];
 (* Global variables *)
 Global`ome;
 
-(* Core functions *)
-cons::usage = "{conservationVectors} = cons[mat,cp_:{}] parametrizes positively the left kernel of mat, using also conditions cp; cp is not necessary if mat is numeric";
-extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
-comp2Asso::usage = "(Core)comp2Asso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: comp2Asso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
-extSpe::usage = "(Core)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
-asoRea::usage = "(Core)asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys.";
-arrow2pairReac::usage = "(Core)arrow2pairReac[reactions] converts arrow format reactions {A->B, C->D} to pair format {{A,B}, {C,D}}. Returns input unchanged if already in pair format.";
-strToSymb::usage = "(Core)strToSymb[reactions] converts string format reactions to symbolic format.";
-symbToStr::usage = "(Core)symbToStr[complex] converts symbolic expressions to string format.";
-str2Sym::usage = "(Core)str2Sym[string] converts string expressions to symbolic format";
-sym2Str::usage = "(Core)sym2Str[symbolic] converts symbolic expressions to string format";
-convertReactionFormat::usage = "(Core)convertReactionFormat[reactions] converts between different reaction network formats";
-stoichiometricMatrices::usage = "(Core){alpha, beta, gamma, species} = stoichiometricMatrices[reactions] creates stoichiometric matrices for a reaction network.";
-reaToRHS::usage = "(Core){RHS, species, Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics.";
-expM::usage = "(Core)expM[var,expo] gives the vector var at power in matrix expo using 
+(* Core1 functions *)
+extMat::usage = "(Core1){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
+compToAsso::usage = "(Core1)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
+extSpe::usage = "(Core1)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
+asoRea::usage = "(Core1)asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys.";
+arrow2pairReac::usage = "(Core1)arrow2pairReac[reactions] converts arrow format reactions {A->B, C->D} to pair format {{A,B}, {C,D}}. Returns input unchanged if already in pair format.";
+strToSymb::usage = "(Core1)strToSymb[reactions] converts string format reactions to symbolic format for internal processing.";
+symbToStr::usage = "(Core1)symbToStr[complex] converts symbolic expressions to string format for visualization and internal processing.";
+convertReactionFormat::usage = "(Core1)convertReactionFormat[reactions] converts between different reaction network formats";
+str2Sym::usage = "(Core1)str2Sym[string] converts string expressions to symbolic format";
+sym2Str::usage = "(Core1)sym2Str[symbolic] converts symbolic expressions to string format";
+stoichiometricMatrices::usage = "(Core1){alpha, beta, gamma, species} = stoichiometricMatrices[reactions] creates stoichiometric matrices for a reaction network.";
+reaToRHS::usage = "(Core1){RHS, species, Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics.";
+expM::usage = "(Core1)expM[var,expo] gives the vector var at power in matrix expo using 
 Inner[OperatorApplied[Power],#2,#1,Times]&";
-Par::usage="(Core)Par[RHS,var] extracts parameters from dynamics";
+Par::usage="(Core1)Par[RHS,var] extracts parameters from dynamics";
 
 (* CRNT functions *)
 IaFHJ::usage="(CRNT)IaFHJ[vert,edg] analyzes Feinberg-Horn-Jackson graph structure, returns {incidenceMatrix, tableForm}";
@@ -30,7 +29,7 @@ SpeComInc::usage="(CRNT)SpeComInc[comp,spec] creates species-complex incidence m
 getComE::usage="(CRNT)getComE[RN] extracts complexes and edges from reaction network, returns {complexes, edges}";
 lapK::usage="(CRNT)lapK[RN, rates] computes Laplacian matrix of reaction network";
 
-(* Boundary analysis functions *)
+(* Boundary1 analysis functions *)
 NGM::usage = "NGM[mod, inf] computes the Next Generation Matrix for epidemic models. mod = {RHS, var, par} contains the system dynamics, variables, and parameters. inf is a list of indices specifying infection compartments in the variable list. Returns {Jx, F, V, K, Jy, Jxy, Jyx, chp, Kd} where K is the next generation matrix, F is the transmission matrix, V is the transition matrix, 
 Jx/Jy are Jacobian blocks, and chp is the 
 characteristic polynomial function. 
@@ -38,43 +37,26 @@ The dominant eigenvalue of K gives the basic reproduction
 number R\:2080.";
 
 getInfectionIndices::usage = "getInfectionIndices[variables, siphonExpressions] extracts infection compartment indices from minimal siphons. variables is the list of system variables, siphonExpressions is the list of minimal siphon expressions. Returns a list of integer indices corresponding to infection compartments. Used to automatically compute the inf parameter for NGM analysis from siphon structure.";
-DFE::usage="(Boundary)DFE[mod,inf] yields the disease-free equilibrium of the model";
-mRts::usage="(Boundary)mRts[RN,ks] creates mass action rates with names ks";
-JR0::usage="(Boundary){R0,co} = JR0[pol,u] computes basic reproduction number from polynomial";
-extHD::usage="(Boundary){hd,li} = extHD[pol,u] factors polynomial, extracts high degree and linear factors";
-bd1::usage="(Boundary)bd1[RN,rts] boundary analysis for single strain: expects DFE and one endemic equilibrium. Returns {RHS,var,par,cp,mSi,Jx,Jy,E0,ngm,R0A,EA,E1}";
-bd2::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,E0,ngm,R0A,EA,E1t,E2t}=bd2[RN,rts] 
+DFE::usage="(Boundary1)DFE[mod,inf] yields the disease-free equilibrium of the model";
+mRts::usage="(Boundary1)mRts[RN,ks] creates mass action rates with names ks";
+JR0::usage="(Boundary1){R0,co} = JR0[pol,u] computes basic reproduction number from polynomial";
+extHD::usage="(Boundary1){hd,li} = extHD[pol,u] factors polynomial, extracts high degree and linear factors";
+bd1::usage="(Boundary1)bd1[RN,rts] boundary analysis for single strain: expects DFE and one endemic equilibrium. Returns {RHS,var,par,cp,mSi,Jx,Jy,E0,ngm,R0A,EA,E1}";
+bd2::usage="(Boundary1){RHS,var,par,cp,mSi,Jx,Jy,E0,ngm,R0A,EA,E1t,E2t}=bd2[RN,rts] 
 boundary analysis for two strains (assuming DFE, 
 two boundary points, and one coexistence equilibrium).";
-invN2::usage = "(Boundary)invNr[E1t,E2t,R0A,E0,par,cp,in1,in2,fval,ins] computes invasion numbers 
+invN2::usage = "(Boundary1)invNr[E1t,E2t,R0A,E0,par,cp,in1,in2,fval,ins] computes invasion numbers 
 and persistence conditions for two-strain models. Takes lists of boundary equilibria E1t, E2t, basic reproduction numbers R0A, disease-free equilibrium E0, parameters par with constraints cp, solution indices in1,in2 to select specific equilibria, optional parameter values fval and indices ins for parameter fixing. Returns {E1,E2,R12,R21,coP} where E1,E2 are selected equilibria, R12,R21 are invasion numbers, 
 and coP are parameter conditions ensuring both invasion numbers >1 for coexistence.";
 invN::usage = "invN[E1t, E2t, R0A, E0, par, cp, in1, in2, fval, ins] computes invasion numbers and persistence conditions for multi-strain epidemic models. E1t and E2t are lists of boundary fixed points for strains 1 and 2. R0A contains basic reproduction numbers. E0 is the disease-free equilibrium. par and cp are model parameters and constraints. in1 and in2 are indices selecting equilibria from E1t and E2t (use -1 for irrational equilibria). Optional: fval gives values for fixed parameters, ins specifies which parameters to fix. Returns {E1, E2, R12, R21, coP} where R12, R21 are invasion numbers and coP contains coexistence parameter values. For irrational equilibria, returns 'nonRat' 
-for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1t, E2t}=
+for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary1){RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1t, E2t}=
 bdCo[RN,rts] boundary analysis for two strains with nondisjoint minSiph";
-bdAn::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,E0,K,R0A}=
+bdAn::usage="(Boundary1){RHS,var,par,cp,mSi,Jx,Jy,E0,K,R0A}=
 bdAn[RN,rts] boundary analysis for possibly nonrational bdFp";
 bdFp::usage = "bdFp[RHS, var, mSi] computes boundary fixed points on siphon facets for epidemic models. RHS is the right-hand side vector of the ODE system, var is the list of all variables as symbols, and mSi is the list of minimal siphons as variable names (strings). Returns a list of pairs {{rationalSols, scalarEq}, ...}, one for each siphon facet, where rationalSols contains explicit rational solutions as replacement rules and scalarEq is either None (if all solutions are rational), a factored polynomial equation 
 (for non-rational solutions), or \"froze\" (if computation timed out).";
 sta::usage = "sta[pol] analyzes polynomial stability by 
 factoring pol and examining linear and quadratic factors separately. Assumes all parameters are positive. For linear factors (au + b), stability requires b > 0. For quadratic factors (au\.b2 + bu + c), stability requires both b > 0 and c > 0 (Routh-Hurwitz criteria). Returns {lSta, qSta, hDeg} where lSta contains linear stability conditions, qSta contains quadratic stability conditions, and hDeg contains higher-degree factors (degree \[GreaterEqual] 3) requiring manual stability analysis. Polynomial variable should be u.";
-
-(* Performance and caching functions - Phase 1 *)
-clearEpidCRNCache::usage = "(Performance)clearEpidCRNCache[] clears all internal caches (minSiph, NGM, bdFp) to free memory. Useful when working with multiple large models or experiencing memory issues.";
-
-(* Invasion Graph Framework - Phase 2 *)
-findAdmissibleCommunities::usage = "(InvasionGraph)findAdmissibleCommunities[RHS, var, mSi] identifies admissible communities from siphon decomposition. RHS is the system dynamics, var is the variable list, and mSi contains minimal siphons. Returns list of admissible communities as siphon index lists. Used for invasion graph construction following Rahman et al framework.";
-
-computeInvasionRates::usage = "(InvasionGraph)computeInvasionRates[RHS, var, community, bdfpT] computes invasion reproduction numbers for specified resident community. RHS is system dynamics, var is variable list, community is list of siphon indices, bdfpT contains boundary fixed points from bdFp. Returns association mapping invader indices to invasion R0 values. Essential for determining invasion success in multi-strain models.";
-
-rahmanInvasionGraph::usage = "(InvasionGraph)rahmanInvasionGraph[RHS, var, mSi, bdfpT] constructs complete invasion graph following Rahman et al framework. Automatically identifies admissible communities, computes invasion rates between them, and visualizes the invasion graph. Returns association with Communities, Edges, InvasionNumbers, and Graph visualization. Provides unified approach to multi-strain coexistence analysis.";
-
-(* Validation and Diagnostic Tools - Phase 3 *)
-validateNetwork::usage = "(Validation)validateNetwork[RN, rts] validates reaction network format and rate consistency before analysis. RN is the reaction network, rts are optional rates. Returns association with Valid status, Issues list, Warnings, and network statistics. Checks for proper reaction format, string species names (critical!), positive coefficients, and rate-reaction matching. Always run this before expensive symbolic computations.";
-
-estimateComplexity::usage = "(Diagnostics)estimateComplexity[RN] predicts computational complexity and expected runtime before analysis. Returns association with Complexity level (Low/Medium/High/Very High), estimated time, and specific recommendations for analysis approach. Use this to decide between bd2 (complete) vs bdAn (fast preliminary) analysis. Helps avoid unexpected timeouts on large models.";
-
-explainTimeout::usage = "(Diagnostics)explainTimeout[bdfpT, RN] analyzes timeout patterns from bdFp results and suggests model simplifications. bdfpT is the boundary fixed point output, RN is optional reaction network. Returns diagnostic information including frozen facet ratio and specific suggestions for resolving timeouts. Essential tool when encountering 'froze' messages in boundary analysis.";
 
 (* Bifurcation analysis functions *)
 fpHopf::usage="(Bifurcation)fpHopf[RHS,var,par,p0val] finds positive fixed points and analyzes for Hopf bifurcations. Returns {posSols,complexEigs,angle,eigs} where angle is ArcTan[Re/Im]*180/Pi of complex eigenvalues";
@@ -112,39 +94,22 @@ Hopf tolerance hTol for bifurcation detection, step size delta for range mode, w
 making it suitable for broader classes of models beyond epidemic systems.";
 
 (* Siphon and persistence functions *)
-isSiph::usage = "isSiph[W, alpha, beta] tests if W is a siphon using Gagrani's definition";
-isAutoC::usage = "isAutoC[W, R, alpha, beta] tests if W with reactions R is autocatalytic (P1 and P2)";
-minSiph::usage = "minSiph[RN] finds minimal siphons (automatically filters inflows/outflows)";
-findCores::usage = "findCores[RN, maxSize] finds autocatalytic cores (automatically filters inflows/outflows). Returns {minimal, nonMinimal}";
-
+minSiph::usage="(Siphons)minSiph[species,reactions] finds minimal siphons in a reaction network";
+isSiph::usage="(Siphons)isSiph[species,reactions,siphon] checks if a given set forms a siphon in the reaction network";
 isDrainable::usage="(Siphons)isDrainable[reactions, speciesSet] checks if speciesSet is drainable for the given reaction network. A set is drainable if there exists a reaction pathway that decreases all species in the set";
 isSelfReplicable::usage="(Siphons)isSelfReplicable[reactions, speciesSet] checks if speciesSet is self-replicable for the given reaction network. A set is self-replicable if there exists a reaction pathway that increases all species in the set";
 isCritical::usage="(Siphons)isCritical[reactions, speciesSet] checks if speciesSet is critical (no positive conservation law has support contained in the set)";
 siphonAnalysis::usage="(Siphons)siphonAnalysis[reactions] provides comprehensive siphon classification for a reaction network. Returns an association with each siphon classified as drainable, self-replicable, critical, and categorized by type";
-(* Main user functions *)
-isMAS::usage = "(Siphons)isMAS[RN, T] tests if siphon T is a Minimal Autocatalytic Subnetwork: \[Exists] flux v>0 using only internal reactions with (\[Gamma]_T\[CenterDot]v)>0.";
-MAS::usage = "(Siphons)MAS[RN] finds all Minimal Autocatalytic Subnetworks (self-replicable minimal siphons) in reaction network RN.";
-testMAS::usage = "(Siphons)testMAS[RN] performs and prints formatted MAS analysis identifying strains as critical non-drainable MAS.";
-(* Helper function *)
-findInternalReactions::usage = "findInternalReactions[RN] returns indices of 
-reactions whose reactants are all contained in siphon T.";
-
 persistenceAnalysis::usage="(Siphons)persistenceAnalysis[reactions] analyzes network persistence based on drainable siphons. Returns detailed information about persistence, drainable siphons, and extinction threats. Networks without drainable siphons are persistent";
 catalysisAnalysis::usage="(Siphons)catalysisAnalysis[reactions] identifies autocatalytic behavior in reaction networks by finding self-replicable critical siphons. Returns information about catalytic sets and autocatalytic potential";
 autocatalysisReport::usage="(Siphons)autocatalysisReport[reactions] provides comprehensive analysis of autocatalytic behavior and persistence properties. Returns detailed association with network info, persistence analysis, catalysis analysis, and theoretical insights";
 checkPersistence::usage="(Siphons)checkPersistence[RN] determines persistence status of reaction network RN. Returns {status, analysis} where status is 'Persistent', 'Unknown', or 'Non-persistent'";
 persistenceReport::usage="(Siphons)persistenceReport[RN] provides comprehensive persistence analysis of reaction network RN with detailed output";
-
+isCatalytic::usage="(Siphons)isCatalytic[RN] checks if the reaction network contains catalytic sets";
 findCatalyticSets::usage="(Siphons)findCatalyticSets[RN] identifies all catalytic sets in the reaction network";
 findMinimalCriticalSiphons::usage="(Siphons)findMinimalCriticalSiphons[reactions] finds all minimal critical siphons in a reaction network. These are the siphons that pose potential threats to persistence according to the theory";
 invFace::usage="(Siphons)invF = invFace[reactions,maxCodim] finds invariant facets of the positive orthant for reaction networks up to specified codimension";
 isInvariantFacet::usage="(Siphons)isInvariantFacet[facetSet,reactions] checks if a given set of species forms an invariant facet";
-(* Usage statements for IGMS-related functions *)
-
-canActRea::usage = "(Siphons)canActRea[reaction, Si, Sj] returns True if reaction allows siphon Si to activate siphon Sj.";
-edgIGMS::usage = "(Siphons)edgIGMS[RN, mSi] computes the directed edges i->j of the IGMS graph for reaction network RN with minimal siphons mSi.";
-IGMS::usage = "(Siphons)IGMS[RN, mSi] computes and visualizes the IGMS (Infection Graph of Minimal Siphons), returning an association with edges, graph, and cycle information.";
-IGMSL::usage = "";
 
 (* Conv functions - Simple one-liner conversions *)
 toSum::usage="(Conv)toSum[expr] converts expression to sum format";
@@ -161,7 +126,7 @@ rtS::usage="(Conv)rtS[RHS] extracts reaction terms from RHS";
 
 (* Extra functions - Complex utilities *)
 WhereIs::usage="(Extra)WhereIs[functionName] identifies which subpackage contains a function. Works with strings or symbols.";
-ListFunctionsByPackage::usage="(Extra)ListFunctionsByPackage[] organizes all EpidCRN functions by their source subpackage.";
+ListFunctionsByPackage::usage="(Extra)ListFunctionsByPackage[] organizes all EpidCRN1 functions by their source subpackage.";
 chRN::usage="(Extra)chRN[reactionList] validates reaction network format. Returns True if all reactions are properly formatted with string species names and positive coefficients, False otherwise.";
 mat2Matl::usage="(Extra)mat2Matl[matrix] converts Mathematica matrix to MATLAB format string";
 matl2Mat::usage="(Extra)matl2Mat[string] converts MATLAB format string to Mathematica matrix";
@@ -194,12 +159,11 @@ GBH::usage="(Utils)GBH[pol,var,sc,cn] performs Gr\[ODoubleDot]bner basis analysi
 L1Planar::usage="(Utils)L1Planar[fg,eq] performs L1 planar analysis";
 DerEq::usage="(Utils)DerEq[fg,eq] computes derivative equations";
 Stodola::usage="(Utils)Stodola[pol,var] implements Stodola method for polynomial analysis";
-
+red::usage="(Utils)red[re,cond:{}] erases from the output of a Reduce all the conditions in cond";
 reCL::usage="(Utils)reCL[re] erases from the output of a Reduce all the conditions in cond";
 onePR::usage="(Utils)onePR[cof,cp] outputs conditions that the first and last coefs of a list have different signs";
 expon::usage="(Utils)expon computes the maximum power of an expanded form";
 posM::usage="(Utils) posM[matrix] keeps all syntactically positive terms.";
-posL::usage="(Utils) posL[list] keeps all syntactically positive terms.";
 whenP::usage="(Utils) whenP[list] reduces inequalities ensuring positivity of all components of the list.";
 FposEx::usage="(Utils)FposEx[matrix] extracts first syntactically positive term in a nonnegative matrix";
 GetVec::usage="(Utils)GetVec[A,om] extracts vectors, used in L13,L23";
@@ -217,8 +181,7 @@ FHJ::usage="(Visualization)FHJ[comp,edges,rates,ver,groups] generates the Feinbe
 endo::usage="(Visualization)endo[reactions] analyzes a reaction network for endotactic properties. Options: \"ShowPlot\" -> True/False/Automatic (default: Automatic), \"Verbose\" -> True/False (default: False)";
 isEndotactic::usage="(Visualization)isEndotactic[reactions, speciesList] checks if network is endotactic";
 isStronglyEndotactic::usage="(Visualization)isStronglyEndotactic[reactions, speciesList] checks if network is strongly endotactic";
-phase2::usage="(Visualization)phase2[RHS,var,par,p0val,opts] 
-creates 2D phase plane plots for dynamical systems";
+phasePl2::usage="(Visualization)phasePl2[RHS,var,par,p0val,opts] creates 2D phase plane plots for dynamical systems";
 
 Begin["`Private`"];
 
@@ -228,9 +191,9 @@ root=If[StringQ[$InputFileName] && $InputFileName =!= "",
 ];
 
 (* Load in proper order - simple to complex *)
-Get[FileNameJoin[{root, "Core.wl"}]];
+Get[FileNameJoin[{root, "Core1.wl"}]];
 Get[FileNameJoin[{root, "Siphons.wl"}]];
-Get[FileNameJoin[{root, "Boundary.wl"}]];
+Get[FileNameJoin[{root, "Boundary1.wl"}]];
 Get[FileNameJoin[{root, "Bifurcation.wl"}]];
 Get[FileNameJoin[{root, "Conv.wl"}]];
 Get[FileNameJoin[{root, "Utils.wl"}]];
@@ -240,3 +203,5 @@ Get[FileNameJoin[{root, "Extra.wl"}]];
 
 End[];
 EndPackage[];
+
+
