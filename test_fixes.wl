@@ -62,4 +62,30 @@ Print["\nSolving system..."];
 cDFE = Solve[eqD, var4];
 Print["Solution: ", cDFE];
 
+(* Test 6: DFE with minimal siphons (showing the bug and fix) *)
+Print["\n=== Test 6: DFE with minimal siphons ==="];
+
+(* Simulate finding minimal siphons *)
+mSi = {{"v1", "v2", "v3"}, {}};  (* minSiph returns {minimal, nonMinimal} *)
+Print["mSi (minimal siphons): ", mSi];
+
+(* WRONG WAY - This creates string rules that won't substitute into RHS *)
+Print["\nWRONG: Using strings directly"];
+cInfWrong = Thread[Union[mSi//Flatten]->0];
+Print["cInfWrong: ", cInfWrong];
+eqDWrong = Thread[(RHS /. cInfWrong) == 0];
+Print["eqDWrong still contains v1, v2, v3 (substitution failed): ", Take[eqDWrong, 3]];
+
+(* CORRECT WAY - Convert strings to symbols first *)
+Print["\nCORRECT: Converting strings to symbols with ToExpression"];
+cInfCorrect = Thread[ToExpression[Union[mSi//Flatten]]->0];
+Print["cInfCorrect: ", cInfCorrect];
+eqDCorrect = Thread[(RHS /. cInfCorrect) == 0];
+Print["eqDCorrect has v1, v2, v3 substituted to 0: ", Take[eqDCorrect, 3]];
+
+(* Solve the correct system *)
+cDFEcorrect = Solve[eqDCorrect, var4];
+Print["\nNumber of DFE solutions: ", Length[cDFEcorrect]];
+Print["First solution: ", First[cDFEcorrect]];
+
 Print["\n=== All tests completed ==="];
