@@ -111,10 +111,10 @@ bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps},
 ]
 
 
-bdAn[RN_, rts_] := Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod, 
-K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs, 
+bdAn[RN_, rts_] := Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod,
+K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs,
 nonzeroIndices, relevantEigenvals, ngm, infVars},
-  
+
   {spe, al, be, gam, Rv, RHS, def} = extMat[RN];
   var = ToExpression[spe];
   RHS = gam . rts;
@@ -124,22 +124,22 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   ct = Join[cp, cv];
   mS = minSiph[spe, asoRea[RN]];
   mSi = mS;
-  
+
   (* infVars is union of all siphon variables *)
   infVars = Union[Flatten[mSi]];
-  
+
   cDFE = Thread[infVars -> 0];
   RDFE = RHS /. cDFE;
   eq0 = Thread[RDFE == 0];
   var0 = Complement[var, infVars];
   E0 = Join[Solve[eq0, var0] // Flatten, cDFE];
-  
+
   mod = {RHS, var, par};
   ngm = NGM[mod, infVars];
   Jx = ngm[[1]] // FullSimplify;
   Jy = ngm[[5]] // FullSimplify;
   K = ngm[[4]] // FullSimplify;
-  
+
   eigenvals = Eigenvalues[K];
   R0A = Select[eigenvals, # =!= 0 &];
   (*eigenSystem = Eigensystem[K];
@@ -147,8 +147,8 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   nonzeroIndices = Flatten[Position[eigenvals, _?(# =!= 0 &)]];
   relevantEigenvals = eigenvals[[nonzeroIndices]];
   R0A = relevantEigenvals;*)
-  
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infVars,ngm}
+
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, al, be, gam, ngm}
 ];
 (* Key change explanation:
    The critical fix is in the line:
