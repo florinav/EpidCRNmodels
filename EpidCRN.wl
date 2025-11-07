@@ -6,7 +6,7 @@ BeginPackage["EpidCRN1`"];
 Global`ome;
 
 (* Core1 functions *)
-extMat::usage = "(Core1){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
+extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, mSi, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, minimal siphons, and deficiency as {formula, terms, result}.";
 compToAsso::usage = "(Core1)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "(Core1)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
 asoRea::usage = "(Core1)asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys.";
@@ -191,8 +191,8 @@ root=If[StringQ[$InputFileName] && $InputFileName =!= "",
 ];
 
 (* Load in proper order - simple to complex *)
-Get[FileNameJoin[{root, "Core.wl"}]];
 Get[FileNameJoin[{root, "Siphons.wl"}]];
+Get[FileNameJoin[{root, "Core.wl"}]];
 Get[FileNameJoin[{root, "Boundary.wl"}]];
 Get[FileNameJoin[{root, "Bifurcation.wl"}]];
 Get[FileNameJoin[{root, "Conv.wl"}]];
