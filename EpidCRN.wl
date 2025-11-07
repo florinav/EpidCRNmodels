@@ -191,9 +191,9 @@ root=If[StringQ[$InputFileName] && $InputFileName =!= "",
 ];
 
 (* Load in proper order - simple to complex *)
-Get[FileNameJoin[{root, "Core1.wl"}]];
+Get[FileNameJoin[{root, "Core.wl"}]];
 Get[FileNameJoin[{root, "Siphons.wl"}]];
-Get[FileNameJoin[{root, "Boundary1.wl"}]];
+Get[FileNameJoin[{root, "Boundary.wl"}]];
 Get[FileNameJoin[{root, "Bifurcation.wl"}]];
 Get[FileNameJoin[{root, "Conv.wl"}]];
 Get[FileNameJoin[{root, "Utils.wl"}]];

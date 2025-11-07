@@ -1,0 +1,1532 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     66725,       1524]
+NotebookOptionsPosition[     61901,       1455]
+NotebookOutlinePosition[     62344,       1472]
+CellTagsIndexPosition[     62301,       1469]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["\<\
+ClearAll[\"Global`*\"]
+SetOptions[EvaluationNotebook[], 
+  AutoCompletion -> True, 
+  InputAutoReplacements -> Automatic
+]
+SetDirectory[NotebookDirectory[]]; SetOptions[$FrontEndSession, \
+NotebookAutoSave -> True];
+NotebookSave[];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, \"Dropbox\", \
+\"EpidCRNmodels\"}]];
+<< EpidCRN`;
+
+
+(* ========= Recker-type model with ecological homeostasis ========= *)
+(* user chooses number of variants *)
+n = 3;  (* example *)
+
+(* symbolic variables for algebra *)
+varV = Array[v, n];      (* {v1,v2,...} *)
+varX = Array[x, n];      (* {x1,x2,...} *)
+z    = z;                (* plain symbol *)
+var  = Join[varV, varX, {z}];
+
+(* Reaction network (RN) with string species *)
+RN = Join[
+  (* v dynamics *)
+  Table[\"v\"<>ToString[i] -> 2*\"v\"<>ToString[i], {i, n}],
+  Table[\"v\"<>ToString[i] + \"x\"<>ToString[i] -> \"x\"<>ToString[i], {i, n}],
+  Table[\"v\"<>ToString[i] + \"z\" -> \"z\", {i, n}],
+  
+  (* x_i homeostasis + production *)
+  Table[0 -> \"x\"<>ToString[i], {i, n}],
+  Table[\"x\"<>ToString[i] -> 0, {i, n}],
+  Table[\"v\"<>ToString[i] -> \"v\"<>ToString[i] + \"x\"<>ToString[i], {i, n}],
+  
+  (* z homeostasis + infection-driven production *)
+  {0 -> \"z\", \"z\" -> 0},
+  Table[\"v\"<>ToString[i] -> \"v\"<>ToString[i] + \"z\", {i, n}]
+];
+
+(* Corresponding rate expressions (symbols, lowercase parameters) *)
+rts = Join[
+  Table[phi*varV[[i]], {i, n}],
+  Table[al*varV[[i]]*varX[[i]], {i, n}],
+  Table[alp*varV[[i]]*z, {i, n}],
+  
+  Table[lamx, {i, n}],
+  Table[mu*varX[[i]], {i, n}],
+  Table[be*varV[[i]], {i, n}],
+  
+  {lamz, mup*z},
+  Table[bep*varV[[i]], {i, n}]
+];
+
+Print[\"reactions and transitions: \",Transpose[{RN,rts}]//MatrixForm];
+{spe, alpha, beta, gamma, Rv, RHS, mSi, {defFormula, defTerms, \
+defResult}}=extMat[RN];
+Print[\"mSi=\", mSi];
+var=ToExpression[spe];
+cInf = Thread[ToExpression[Union[mSi//Flatten]] -> 0];
+eqD = Thread[(RHS/.cInf) == 0];
+cDFE=Solve[eqD,var]    \
+\>", "Input",
+ CellChangeTimes->{{3.9714311745706306`*^9, 3.9714312025540037`*^9}, 
+   3.9714312925765133`*^9, {3.971431325616049*^9, 3.971431326006401*^9}, {
+   3.9714318882460976`*^9, 3.971431914146093*^9}, {3.9714319888357563`*^9, 
+   3.971432169886716*^9}, 3.971432542195774*^9, {3.9714326659819517`*^9, 
+   3.9714326873858366`*^9}, {3.9714328320174847`*^9, 3.971432839215805*^9}, {
+   3.971433212365469*^9, 3.9714334557266874`*^9}, {3.9714364770973096`*^9, 
+   3.9714365828547945`*^9}, 3.97143669934017*^9, {3.9714368120470233`*^9, 
+   3.971436870164733*^9}, {3.9714404262220793`*^9, 3.9714404269009137`*^9}, 
+   3.9714404911563797`*^9, 3.9714412468728046`*^9, {3.971441424932808*^9, 
+   3.971441433173114*^9}, {3.971441502386015*^9, 3.9714415580901604`*^9}, {
+   3.971445712701269*^9, 3.9714457135437665`*^9}, {3.971484328404109*^9, 
+   3.971484331231886*^9}, {3.9714889529153786`*^9, 3.9714889532996817`*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"cd8aba99-7e55-43b6-a9ff-c790d8798a3e"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"reactions and transitions: \"\>", "\[InvisibleSpace]", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        RowBox[{"\<\"v1\"\>", "\[Rule]", 
+         RowBox[{"2", " ", "\<\"v1\"\>"}]}], 
+        RowBox[{"phi", " ", 
+         RowBox[{"v", "[", "1", "]"}]}]},
+       {
+        RowBox[{"\<\"v2\"\>", "\[Rule]", 
+         RowBox[{"2", " ", "\<\"v2\"\>"}]}], 
+        RowBox[{"phi", " ", 
+         RowBox[{"v", "[", "2", "]"}]}]},
+       {
+        RowBox[{"\<\"v3\"\>", "\[Rule]", 
+         RowBox[{"2", " ", "\<\"v3\"\>"}]}], 
+        RowBox[{"phi", " ", 
+         RowBox[{"v", "[", "3", "]"}]}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"v1\"\>", "+", "\<\"x1\"\>"}], "\[Rule]", "\<\"x1\"\>"}], 
+        RowBox[{"al", " ", 
+         RowBox[{"v", "[", "1", "]"}], " ", 
+         RowBox[{"x", "[", "1", "]"}]}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"v2\"\>", "+", "\<\"x2\"\>"}], "\[Rule]", "\<\"x2\"\>"}], 
+        RowBox[{"al", " ", 
+         RowBox[{"v", "[", "2", "]"}], " ", 
+         RowBox[{"x", "[", "2", "]"}]}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"v3\"\>", "+", "\<\"x3\"\>"}], "\[Rule]", "\<\"x3\"\>"}], 
+        RowBox[{"al", " ", 
+         RowBox[{"v", "[", "3", "]"}], " ", 
+         RowBox[{"x", "[", "3", "]"}]}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"v1\"\>", "+", "\<\"z\"\>"}], "\[Rule]", "\<\"z\"\>"}], 
+        RowBox[{"alp", " ", "z", " ", 
+         RowBox[{"v", "[", "1", "]"}]}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"v2\"\>", "+", "\<\"z\"\>"}], "\[Rule]", "\<\"z\"\>"}], 
+        RowBox[{"alp", " ", "z", " ", 
+         RowBox[{"v", "[", "2", "]"}]}]},
+       {
+        RowBox[{
+         RowBox[{"\<\"v3\"\>", "+", "\<\"z\"\>"}], "\[Rule]", "\<\"z\"\>"}], 
+        RowBox[{"alp", " ", "z", " ", 
+         RowBox[{"v", "[", "3", "]"}]}]},
+       {
+        RowBox[{"0", "\[Rule]", "\<\"x1\"\>"}], "lamx"},
+       {
+        RowBox[{"0", "\[Rule]", "\<\"x2\"\>"}], "lamx"},
+       {
+        RowBox[{"0", "\[Rule]", "\<\"x3\"\>"}], "lamx"},
+       {
+        RowBox[{"\<\"x1\"\>", "\[Rule]", "0"}], 
+        RowBox[{"mu", " ", 
+         RowBox[{"x", "[", "1", "]"}]}]},
+       {
+        RowBox[{"\<\"x2\"\>", "\[Rule]", "0"}], 
+        RowBox[{"mu", " ", 
+         RowBox[{"x", "[", "2", "]"}]}]},
+       {
+        RowBox[{"\<\"x3\"\>", "\[Rule]", "0"}], 
+        RowBox[{"mu", " ", 
+         RowBox[{"x", "[", "3", "]"}]}]},
+       {
+        RowBox[{"\<\"v1\"\>", "\[Rule]", 
+         RowBox[{"\<\"v1\"\>", "+", "\<\"x1\"\>"}]}], 
+        RowBox[{"be", " ", 
+         RowBox[{"v", "[", "1", "]"}]}]},
+       {
+        RowBox[{"\<\"v2\"\>", "\[Rule]", 
+         RowBox[{"\<\"v2\"\>", "+", "\<\"x2\"\>"}]}], 
+        RowBox[{"be", " ", 
+         RowBox[{"v", "[", "2", "]"}]}]},
+       {
+        RowBox[{"\<\"v3\"\>", "\[Rule]", 
+         RowBox[{"\<\"v3\"\>", "+", "\<\"x3\"\>"}]}], 
+        RowBox[{"be", " ", 
+         RowBox[{"v", "[", "3", "]"}]}]},
+       {
+        RowBox[{"0", "\[Rule]", "\<\"z\"\>"}], "lamz"},
+       {
+        RowBox[{"\<\"z\"\>", "\[Rule]", "0"}], 
+        RowBox[{"mup", " ", "z"}]},
+       {
+        RowBox[{"\<\"v1\"\>", "\[Rule]", 
+         RowBox[{"\<\"v1\"\>", "+", "\<\"z\"\>"}]}], 
+        RowBox[{"bep", " ", 
+         RowBox[{"v", "[", "1", "]"}]}]},
+       {
+        RowBox[{"\<\"v2\"\>", "\[Rule]", 
+         RowBox[{"\<\"v2\"\>", "+", "\<\"z\"\>"}]}], 
+        RowBox[{"bep", " ", 
+         RowBox[{"v", "[", "2", "]"}]}]},
+       {
+        RowBox[{"\<\"v3\"\>", "\[Rule]", 
+         RowBox[{"\<\"v3\"\>", "+", "\<\"z\"\>"}]}], 
+        RowBox[{"bep", " ", 
+         RowBox[{"v", "[", "3", "]"}]}]}
+      },
+      GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}],
+  SequenceForm["reactions and transitions: ", 
+   MatrixForm[{{"v1" -> 2 "v1", $CellContext`phi $CellContext`v[1]}, {
+     "v2" -> 2 "v2", $CellContext`phi $CellContext`v[2]}, {
+     "v3" -> 2 "v3", $CellContext`phi $CellContext`v[3]}, {
+     "v1" + "x1" -> 
+      "x1", $CellContext`al $CellContext`v[1] $CellContext`x[1]}, {
+     "v2" + "x2" -> 
+      "x2", $CellContext`al $CellContext`v[2] $CellContext`x[2]}, {
+     "v3" + "x3" -> 
+      "x3", $CellContext`al $CellContext`v[3] $CellContext`x[3]}, {
+     "v1" + "z" -> "z", $CellContext`alp $CellContext`z $CellContext`v[1]}, {
+     "v2" + "z" -> "z", $CellContext`alp $CellContext`z $CellContext`v[2]}, {
+     "v3" + "z" -> "z", $CellContext`alp $CellContext`z $CellContext`v[3]}, {
+     0 -> "x1", $CellContext`lamx}, {0 -> "x2", $CellContext`lamx}, {
+     0 -> "x3", $CellContext`lamx}, {
+     "x1" -> 0, $CellContext`mu $CellContext`x[1]}, {
+     "x2" -> 0, $CellContext`mu $CellContext`x[2]}, {
+     "x3" -> 0, $CellContext`mu $CellContext`x[3]}, {
+     "v1" -> "v1" + "x1", $CellContext`be $CellContext`v[1]}, {
+     "v2" -> "v2" + "x2", $CellContext`be $CellContext`v[2]}, {
+     "v3" -> "v3" + "x3", $CellContext`be $CellContext`v[3]}, {
+     0 -> "z", $CellContext`lamz}, {
+     "z" -> 0, $CellContext`mup $CellContext`z}, {
+     "v1" -> "v1" + "z", $CellContext`bep $CellContext`v[1]}, {
+     "v2" -> "v2" + "z", $CellContext`bep $CellContext`v[2]}, {
+     "v3" -> "v3" + "z", $CellContext`bep $CellContext`v[3]}}]],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9714415619600325`*^9, 3.9714418543001986`*^9, 3.9714457171657887`*^9, 
+   3.97144882068118*^9, 3.971484245764642*^9, {3.971484310678234*^9, 
+   3.9714843332694874`*^9}, {3.9714851273461757`*^9, 3.9714851447410135`*^9}, 
+   3.971485731241466*^9, 3.9714864983803787`*^9, 3.971488923963992*^9, 
+   3.971488974919791*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"38ead451-8b99-4466-bcd7-49b4afc6420b"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Set", "shape", 
+   "\"Lists \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"spe\\\", \\\",\\\", \
+\\\"alpha\\\", \\\",\\\", \\\"beta\\\", \\\",\\\", \\\"gamma\\\", \\\",\\\", \
+\\\"Rv\\\", \\\",\\\", \\\"RHS\\\", \\\",\\\", \\\"mSi\\\", \\\",\\\", \
+RowBox[{\\\"{\\\", RowBox[{\\\"defFormula\\\", \\\",\\\", \\\"defTerms\\\", \
+\\\",\\\", \\\"defResult\\\"}], \\\"}\\\"}]}], \\\"}\\\"}]\\) and \
+\\!\\(\\*RowBox[{\\\"\[LeftSkeleton]\\\", \\\"1\\\", \
+\\\"\[RightSkeleton]\\\"}]\\) are not the same shape.\"", 2, 26, 1, 
+   24873892291704430631, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.9714457175369406`*^9, 3.9714488210456257`*^9, 3.9714842461919346`*^9, {
+   3.9714843112094927`*^9, 3.97148433343757*^9}, {3.9714851257332144`*^9, 
+   3.971485144942452*^9}, 3.9714857314516325`*^9, 3.971486498592572*^9, 
+   3.9714889240195274`*^9, 3.971488974989482*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"fdd7a700-7227-49d2-86a3-92f314f9d902"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"mSi=\"\>", "\[InvisibleSpace]", "mSi"}],
+  SequenceForm["mSi=", $CellContext`mSi],
+  Editable->False]], "Print",
+ CellChangeTimes->{
+  3.9714415619600325`*^9, 3.9714418543001986`*^9, 3.9714457171657887`*^9, 
+   3.97144882068118*^9, 3.971484245764642*^9, {3.971484310678234*^9, 
+   3.9714843332694874`*^9}, {3.9714851273461757`*^9, 3.9714851447410135`*^9}, 
+   3.971485731241466*^9, 3.9714864983803787`*^9, 3.971488923963992*^9, 
+   3.9714889750785675`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"2528d311-c247-417c-84f1-78cb29e0a7bc"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Flatten", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Flatten\\\", \
+\\\"[\\\", \\\"mSi\\\", \\\"]\\\"}]\\).\"", 2, 29, 2, 24873892291704430631, 
+   "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.9714457175369406`*^9, 3.9714488210456257`*^9, 3.9714842461919346`*^9, {
+   3.9714843112094927`*^9, 3.97148433343757*^9}, {3.9714851257332144`*^9, 
+   3.971485144942452*^9}, 3.9714857314516325`*^9, 3.971486498592572*^9, 
+   3.9714889240195274`*^9, 3.9714889751419487`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"1e464451-ba57-46c4-83ec-5a9d2b8598c2"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "ToExpression", "notstrbox", 
+   "\"\\!\\(\\*RowBox[{\\\"Flatten\\\", \\\"[\\\", \\\"mSi\\\", \
+\\\"]\\\"}]\\) is not a string or a box. ToExpression can only interpret \
+strings or boxes as Wolfram Language input.\"", 2, 29, 3, 
+   24873892291704430631, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{
+  3.9714457175369406`*^9, 3.9714488210456257`*^9, 3.9714842461919346`*^9, {
+   3.9714843112094927`*^9, 3.97148433343757*^9}, {3.9714851257332144`*^9, 
+   3.971485144942452*^9}, 3.9714857314516325`*^9, 3.971486498592572*^9, 
+   3.9714889240195274`*^9, 3.9714889752215204`*^9},
+ CellLabel->
+  "During evaluation of \
+In[1]:=",ExpressionUUID->"fe9222ab-1c54-4995-99cd-bb1ce7c25c64"],
+
+Cell[BoxData[
+ RowBox[{"{", "}"}]], "Output",
+ CellChangeTimes->{
+  3.9714457173081913`*^9, 3.9714488208105927`*^9, 3.971484245972289*^9, {
+   3.971484310897015*^9, 3.971484333371498*^9}, {3.9714851275363536`*^9, 
+   3.9714851448587503`*^9}, 3.9714857313659477`*^9, 3.971486498511285*^9, 
+   3.9714889243538723`*^9, 3.971488975299364*^9},
+ CellLabel->"Out[31]=",ExpressionUUID->"85047fa4-0d7a-4292-9fe4-6bdb2c77c7ab"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+{RHS, var, par, cp, mSi, Jx, Jy,cDFE, E0, K, R0A, infVars, alMat, 
+  beMat, gam, ngm}=bdAn[RN,rts];\
+\>", "Input",
+ CellChangeTimes->{{3.9714311745706306`*^9, 3.9714312025540037`*^9}, 
+   3.9714312925765133`*^9, {3.971431325616049*^9, 3.971431326006401*^9}, {
+   3.9714318882460976`*^9, 3.971431914146093*^9}, {3.9714319888357563`*^9, 
+   3.971432169886716*^9}, 3.971432619915448*^9, {3.971448832223771*^9, 
+   3.971448832940611*^9}, {3.971448900566963*^9, 3.971448913530963*^9}, {
+   3.97148427744236*^9, 3.971484283765239*^9}, 3.9714843550415597`*^9, {
+   3.971485838702721*^9, 3.971485839996478*^9}, {3.9714865069080143`*^9, 
+   3.971486511408245*^9}},
+ CellLabel->"In[34]:=",ExpressionUUID->"ae7caa33-d62c-4871-ac13-ba664999ad35"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Set", "shape", 
+   "\"Lists \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"RHS\\\", \\\",\\\", \
+\\\"var\\\", \\\",\\\", \\\"par\\\", \\\",\\\", \\\"cp\\\", \\\",\\\", \
+\\\"mSi\\\", \\\",\\\", \\\"Jx\\\", \\\",\\\", \\\"Jy\\\", \\\",\\\", \
+\\\"cDFE\\\", \\\",\\\", \\\"E0\\\", \\\",\\\", \\\"K\\\", \\\",\\\", \
+RowBox[{\\\"\[LeftSkeleton]\\\", \\\"6\\\", \\\"\[RightSkeleton]\\\"}]}], \
+\\\"}\\\"}]\\) and \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{RowBox[{\\\"{\\\", \
+RowBox[{RowBox[{RowBox[{\\\"phi\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \
+\\\"1\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\"alp\\\", \\\" \\\", \
+\\\"z\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\"}]}], \
+\\\"-\\\", RowBox[{\\\"al\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\
+\\\", \\\"]\\\"}], \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"1\\\", \
+\\\"]\\\"}]}]}], \\\",\\\", RowBox[{RowBox[{\\\"phi\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\
+\"alp\\\", \\\" \\\", \\\"z\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \
+\\\"2\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\"al\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}], \\\" \\\", \
+RowBox[{\\\"x\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}]}], \\\",\\\", \
+RowBox[{RowBox[{\\\"phi\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\
+\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\"alp\\\", \\\" \\\", \\\"z\\\", \\\" \
+\\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\", \\\"]\\\"}]}], \\\"-\\\", \
+RowBox[{\\\"al\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\", \\\"]\
+\\\"}], \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"3\\\", \\\"]\\\"}]}]}], \
+\\\",\\\", RowBox[{\\\"lamx\\\", \\\"+\\\", RowBox[{\\\"be\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\
+\"mu\\\", \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"1\\\", \
+\\\"]\\\"}]}]}], \\\",\\\", RowBox[{\\\"lamx\\\", \\\"+\\\", RowBox[{\\\"be\\\
+\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}], \
+\\\"-\\\", RowBox[{\\\"mu\\\", \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"2\
+\\\", \\\"]\\\"}]}]}], \\\",\\\", RowBox[{\\\"lamx\\\", \\\"+\\\", RowBox[{\\\
+\"be\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\", \\\"]\\\"}]}], \
+\\\"-\\\", RowBox[{\\\"mu\\\", \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"3\
+\\\", \\\"]\\\"}]}]}], \\\",\\\", RowBox[{\\\"lamz\\\", \\\"-\\\", RowBox[{\\\
+\"mup\\\", \\\" \\\", \\\"z\\\"}], \\\"+\\\", RowBox[{\\\"bep\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\"}]}], \\\"+\\\", RowBox[{\\\
+\"bep\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}], \
+\\\"+\\\", RowBox[{\\\"bep\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \
+\\\"3\\\", \\\"]\\\"}]}]}]}], \\\"}\\\"}], \\\",\\\", RowBox[{\\\"{\\\", \
+RowBox[{\\\"v1\\\", \\\",\\\", \\\"v2\\\", \\\",\\\", \\\"v3\\\", \\\",\\\", \
+\\\"x1\\\", \\\",\\\", \\\"x2\\\", \\\",\\\", \\\"x3\\\", \\\",\\\", \
+\\\"z\\\"}], \\\"}\\\"}], \\\",\\\", RowBox[{\\\"{\\\", RowBox[{\\\"al\\\", \
+\\\",\\\", \\\"alp\\\", \\\",\\\", \\\"be\\\", \\\",\\\", \\\"bep\\\", \
+\\\",\\\", \\\"lamx\\\", \\\",\\\", \\\"lamz\\\", \\\",\\\", \\\"mu\\\", \
+\\\",\\\", \\\"mup\\\", \\\",\\\", \\\"phi\\\", \\\",\\\", RowBox[{\\\"v\\\", \
+\\\"[\\\", \\\"1\\\", \\\"]\\\"}], \\\",\\\", \
+RowBox[{\\\"\[LeftSkeleton]\\\", \\\"5\\\", \\\"\[RightSkeleton]\\\"}]}], \
+\\\"}\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"5\\\", \\\"\
+\[RightSkeleton]\\\"}], \\\",\\\", RowBox[{\\\"0\\\", \\\".\\\", \
+RowBox[{\\\"Inverse\\\", \\\"[\\\", RowBox[{\\\"-\\\", \
+TemplateBox[List[RowBox[List[\\\"{\\\", \\\"}\\\"]], RowBox[List[\\\"{\\\", \
+\\\"}\\\"]]], \\\"Grad\\\", Rule[SyntaxForm, Del]]}], \\\"]\\\"}]}], \
+\\\",\\\", RowBox[{\\\"Eigenvalues\\\", \\\"[\\\", RowBox[{\\\"0\\\", \\\".\\\
+\", RowBox[{\\\"Inverse\\\", \\\"[\\\", RowBox[{\\\"-\\\", \
+TemplateBox[List[RowBox[List[\\\"{\\\", \\\"}\\\"]], RowBox[List[\\\"{\\\", \
+\\\"}\\\"]]], \\\"Grad\\\", Rule[SyntaxForm, Del]]}], \\\"]\\\"}]}], \
+\\\"]\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"2\\\", \\\"\
+\[RightSkeleton]\\\"}]}], \\\"}\\\"}]\\) are not the same shape.\"", 2, 34, 2,
+    24873876058626858490, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714843571992493`*^9, 3.971485153147809*^9, 
+  3.9714857412120647`*^9, 3.971485844014524*^9, 3.9714865133901253`*^9},
+ CellLabel->
+  "During evaluation of \
+In[34]:=",ExpressionUUID->"40678fee-c981-4951-b6c4-b40a0d5d988e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Print[\"RHS=\",RHS,\"E0 is\",E0,\" K=\", K//MatrixForm,\" infV=\",infV,\" the \
+\",R0A//Length,\"repr fns=\",R0A]\
+\>", "Input",
+ CellChangeTimes->{{3.9714311745706306`*^9, 3.9714312025540037`*^9}, 
+   3.9714312925765133`*^9, {3.971431325616049*^9, 3.971431326006401*^9}, {
+   3.9714318882460976`*^9, 3.971431914146093*^9}, {3.9714319888357563`*^9, 
+   3.971432169886716*^9}, 3.971432619915448*^9, {3.971448832223771*^9, 
+   3.971448832940611*^9}, {3.971448900566963*^9, 3.971448913530963*^9}, {
+   3.97148427744236*^9, 3.971484283765239*^9}},
+ CellLabel->"In[68]:=",ExpressionUUID->"8c75d6b2-4c75-4165-83a2-76e5511ac196"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Set", "shape", 
+   "\"Lists \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"RHS\\\", \\\",\\\", \
+\\\"var\\\", \\\",\\\", \\\"par\\\", \\\",\\\", \\\"cp\\\", \\\",\\\", \
+\\\"mSi\\\", \\\",\\\", \\\"Jx\\\", \\\",\\\", \\\"Jy\\\", \\\",\\\", \
+\\\"cDFE\\\", \\\",\\\", \\\"E0\\\", \\\",\\\", \\\"K\\\", \\\",\\\", \
+RowBox[{\\\"\[LeftSkeleton]\\\", \\\"6\\\", \\\"\[RightSkeleton]\\\"}]}], \
+\\\"}\\\"}]\\) and \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{RowBox[{\\\"{\\\", \
+RowBox[{RowBox[{RowBox[{\\\"phi\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \
+\\\"1\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\"alp\\\", \\\" \\\", \
+\\\"z\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\"}]}], \
+\\\"-\\\", RowBox[{\\\"al\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\
+\\\", \\\"]\\\"}], \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"1\\\", \
+\\\"]\\\"}]}]}], \\\",\\\", RowBox[{RowBox[{\\\"phi\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\
+\"alp\\\", \\\" \\\", \\\"z\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \
+\\\"2\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\"al\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}], \\\" \\\", \
+RowBox[{\\\"x\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}]}], \\\",\\\", \
+RowBox[{RowBox[{\\\"phi\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\
+\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\"alp\\\", \\\" \\\", \\\"z\\\", \\\" \
+\\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\", \\\"]\\\"}]}], \\\"-\\\", \
+RowBox[{\\\"al\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\", \\\"]\
+\\\"}], \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"3\\\", \\\"]\\\"}]}]}], \
+\\\",\\\", RowBox[{\\\"lamx\\\", \\\"+\\\", RowBox[{\\\"be\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\"}]}], \\\"-\\\", RowBox[{\\\
+\"mu\\\", \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"1\\\", \
+\\\"]\\\"}]}]}], \\\",\\\", RowBox[{\\\"lamx\\\", \\\"+\\\", RowBox[{\\\"be\\\
+\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}], \
+\\\"-\\\", RowBox[{\\\"mu\\\", \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"2\
+\\\", \\\"]\\\"}]}]}], \\\",\\\", RowBox[{\\\"lamx\\\", \\\"+\\\", RowBox[{\\\
+\"be\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"3\\\", \\\"]\\\"}]}], \
+\\\"-\\\", RowBox[{\\\"mu\\\", \\\" \\\", RowBox[{\\\"x\\\", \\\"[\\\", \\\"3\
+\\\", \\\"]\\\"}]}]}], \\\",\\\", RowBox[{\\\"lamz\\\", \\\"-\\\", RowBox[{\\\
+\"mup\\\", \\\" \\\", \\\"z\\\"}], \\\"+\\\", RowBox[{\\\"bep\\\", \\\" \\\", \
+RowBox[{\\\"v\\\", \\\"[\\\", \\\"1\\\", \\\"]\\\"}]}], \\\"+\\\", RowBox[{\\\
+\"bep\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \\\"2\\\", \\\"]\\\"}]}], \
+\\\"+\\\", RowBox[{\\\"bep\\\", \\\" \\\", RowBox[{\\\"v\\\", \\\"[\\\", \
+\\\"3\\\", \\\"]\\\"}]}]}]}], \\\"}\\\"}], \\\",\\\", RowBox[{\\\"{\\\", \
+RowBox[{\\\"v1\\\", \\\",\\\", \\\"v2\\\", \\\",\\\", \\\"v3\\\", \\\",\\\", \
+\\\"x1\\\", \\\",\\\", \\\"x2\\\", \\\",\\\", \\\"x3\\\", \\\",\\\", \
+\\\"z\\\"}], \\\"}\\\"}], \\\",\\\", RowBox[{\\\"{\\\", RowBox[{\\\"al\\\", \
+\\\",\\\", \\\"alp\\\", \\\",\\\", \\\"be\\\", \\\",\\\", \\\"bep\\\", \
+\\\",\\\", \\\"lamx\\\", \\\",\\\", \\\"lamz\\\", \\\",\\\", \\\"mu\\\", \
+\\\",\\\", \\\"mup\\\", \\\",\\\", \\\"phi\\\", \\\",\\\", RowBox[{\\\"v\\\", \
+\\\"[\\\", \\\"1\\\", \\\"]\\\"}], \\\",\\\", \
+RowBox[{\\\"\[LeftSkeleton]\\\", \\\"5\\\", \\\"\[RightSkeleton]\\\"}]}], \
+\\\"}\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"5\\\", \\\"\
+\[RightSkeleton]\\\"}], \\\",\\\", RowBox[{\\\"0\\\", \\\".\\\", \
+RowBox[{\\\"Inverse\\\", \\\"[\\\", RowBox[{\\\"-\\\", \
+TemplateBox[List[RowBox[List[\\\"{\\\", \\\"}\\\"]], RowBox[List[\\\"{\\\", \
+\\\"}\\\"]]], \\\"Grad\\\", Rule[SyntaxForm, Del]]}], \\\"]\\\"}]}], \
+\\\",\\\", RowBox[{\\\"Eigenvalues\\\", \\\"[\\\", RowBox[{\\\"0\\\", \\\".\\\
+\", RowBox[{\\\"Inverse\\\", \\\"[\\\", RowBox[{\\\"-\\\", \
+TemplateBox[List[RowBox[List[\\\"{\\\", \\\"}\\\"]], RowBox[List[\\\"{\\\", \
+\\\"}\\\"]]], \\\"Grad\\\", Rule[SyntaxForm, Del]]}], \\\"]\\\"}]}], \
+\\\"]\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"2\\\", \\\"\
+\[RightSkeleton]\\\"}]}], \\\"}\\\"}]\\) are not the same shape.\"", 2, 68, 3,
+    24873861666182038256, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971484344622255*^9},
+ CellLabel->
+  "During evaluation of \
+In[68]:=",ExpressionUUID->"8b259c6a-f410-487e-b020-e65fe87792b0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"RHS=\"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"k1", " ", "v1"}], "-", 
+      RowBox[{"k4", " ", "v1", " ", "x1"}], "-", 
+      RowBox[{"k7", " ", "v1", " ", "z"}]}], ",", 
+     RowBox[{
+      RowBox[{"k2", " ", "v2"}], "-", 
+      RowBox[{"k5", " ", "v2", " ", "x2"}], "-", 
+      RowBox[{"k8", " ", "v2", " ", "z"}]}], ",", 
+     RowBox[{
+      RowBox[{"k3", " ", "v3"}], "-", 
+      RowBox[{"k6", " ", "v3", " ", "x3"}], "-", 
+      RowBox[{"k9", " ", "v3", " ", "z"}]}], ",", 
+     RowBox[{"k10", "+", 
+      RowBox[{"k16", " ", "v1"}], "-", 
+      RowBox[{"k13", " ", "x1"}]}], ",", 
+     RowBox[{"k11", "+", 
+      RowBox[{"k17", " ", "v2"}], "-", 
+      RowBox[{"k14", " ", "x2"}]}], ",", 
+     RowBox[{"k12", "+", 
+      RowBox[{"k18", " ", "v3"}], "-", 
+      RowBox[{"k15", " ", "x3"}]}], ",", 
+     RowBox[{"k19", "+", 
+      RowBox[{"k21", " ", "v1"}], "+", 
+      RowBox[{"k22", " ", "v2"}], "+", 
+      RowBox[{"k23", " ", "v3"}], "-", 
+      RowBox[{"k20", " ", "z"}]}]}], "}"}], 
+   "\[InvisibleSpace]", "\<\"E0 is\"\>", "\[InvisibleSpace]", "E0", 
+   "\[InvisibleSpace]", "\<\" K=\"\>", "\[InvisibleSpace]", 
+   TagBox["K",
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]], "\[InvisibleSpace]", "\<\" infV=\"\>", 
+   "\[InvisibleSpace]", "infV", "\[InvisibleSpace]", "\<\" the \"\>", 
+   "\[InvisibleSpace]", "0", "\[InvisibleSpace]", "\<\"repr fns=\"\>", 
+   "\[InvisibleSpace]", "R0A"}],
+  SequenceForm[
+  "RHS=", {$CellContext`k1 $CellContext`v1 - ($CellContext`k4 \
+$CellContext`v1) $CellContext`x1 - ($CellContext`k7 $CellContext`v1) \
+$CellContext`z, $CellContext`k2 $CellContext`v2 - ($CellContext`k5 \
+$CellContext`v2) $CellContext`x2 - ($CellContext`k8 $CellContext`v2) \
+$CellContext`z, $CellContext`k3 $CellContext`v3 - ($CellContext`k6 \
+$CellContext`v3) $CellContext`x3 - ($CellContext`k9 $CellContext`v3) \
+$CellContext`z, $CellContext`k10 + $CellContext`k16 $CellContext`v1 - \
+$CellContext`k13 $CellContext`x1, $CellContext`k11 + $CellContext`k17 \
+$CellContext`v2 - $CellContext`k14 $CellContext`x2, $CellContext`k12 + \
+$CellContext`k18 $CellContext`v3 - $CellContext`k15 $CellContext`x3, \
+$CellContext`k19 + $CellContext`k21 $CellContext`v1 + $CellContext`k22 \
+$CellContext`v2 + $CellContext`k23 $CellContext`v3 - $CellContext`k20 \
+$CellContext`z}, "E0 is", $CellContext`E0, " K=", 
+   MatrixForm[K], " infV=", $CellContext`infV, " the ", 0, 
+   "repr fns=", $CellContext`R0A],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.9714312973841815`*^9, 3.9714314679358416`*^9, 
+  3.9714321360429535`*^9, 3.9714321715463696`*^9, 3.9714326223669295`*^9, 
+  3.971445739730505*^9, 3.9714489167288733`*^9, 3.971484255883917*^9, 
+  3.971484344681366*^9},
+ CellLabel->
+  "During evaluation of \
+In[68]:=",ExpressionUUID->"9edb3e60-1419-42a6-9627-9f9b38e4a30d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+(* Analysis *)
+recAnt[RN_, rts_] := bd2[RN, rts]
+
+results = recAnt[RN, rts]
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = results
+Print[\"Minimal Siphons: \", mSi]
+Print[\"R0 values: \", R0A]
+Print[\"Boundary fixed points: \", bdfpT]
+\
+\>", "Input",
+ CellChangeTimes->{{3.9714311745706306`*^9, 
+  3.9714311977782774`*^9}},ExpressionUUID->"0454152e-3474-44e4-8cfd-\
+89eaf82d53a2"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"0", "\[Rule]", "\<\"s\"\>"}], ",", 
+   RowBox[{
+    RowBox[{"\<\"i1\"\>", "+", "\<\"s\"\>"}], "\[Rule]", 
+    RowBox[{"2", " ", "\<\"i1\"\>"}]}], ",", 
+   RowBox[{
+    RowBox[{"\<\"i2\"\>", "+", "\<\"s\"\>"}], "\[Rule]", 
+    RowBox[{"2", " ", "\<\"i2\"\>"}]}], ",", 
+   RowBox[{
+    RowBox[{"\<\"i3\"\>", "+", "\<\"s\"\>"}], "\[Rule]", 
+    RowBox[{"2", " ", "\<\"i3\"\>"}]}], ",", 
+   RowBox[{"\<\"i1\"\>", "\[Rule]", "\<\"r1\"\>"}], ",", 
+   RowBox[{"\<\"i2\"\>", "\[Rule]", "\<\"r2\"\>"}], ",", 
+   RowBox[{"\<\"i3\"\>", "\[Rule]", "\<\"r3\"\>"}], ",", 
+   RowBox[{"\<\"s\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"i1\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"i2\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"i3\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"r1\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"r2\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"r3\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"r1\"\>", "\[Rule]", "\<\"s\"\>"}], ",", 
+   RowBox[{"\<\"r2\"\>", "\[Rule]", "\<\"s\"\>"}], ",", 
+   RowBox[{"\<\"r3\"\>", "\[Rule]", "\<\"s\"\>"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.9714304230861893`*^9},
+ CellLabel->
+  "Out[163]=",ExpressionUUID->"3b80bea2-9a29-4099-bdac-4bbcfb3c66c8"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\[CapitalLambda]", ",", 
+   RowBox[{
+    SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+   RowBox[{
+    SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+   RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+   RowBox[{
+    SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+   RowBox[{
+    SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+   RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+   RowBox[{"s", " ", "\[Mu]"}], ",", 
+   RowBox[{
+    SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+   RowBox[{
+    SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+   RowBox[{"i3", " ", "\[Mu]"}], ",", 
+   RowBox[{
+    SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+   RowBox[{
+    SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+   RowBox[{"r3", " ", "\[Mu]"}], ",", 
+   RowBox[{
+    SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+   RowBox[{
+    SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+   RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.9714304231100163`*^9},
+ CellLabel->
+  "Out[165]=",ExpressionUUID->"6b255bbb-4123-4e88-a3c5-65ebe93adbd5"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Set", "shape", 
+   "\"Lists \\!\\(\\*RowBox[{\\\"{\\\", \
+RowBox[{\\\"EpidCRN`Private`spe$8453\\\", \\\",\\\", \
+\\\"EpidCRN`Private`al$8453\\\", \\\",\\\", \\\"EpidCRN`Private`be$8453\\\", \
+\\\",\\\", \\\"EpidCRN`Private`gam$8453\\\", \\\",\\\", \
+\\\"EpidCRN`Private`Rv$8453\\\", \\\",\\\", \\\"EpidCRN`Private`RHS$8453\\\", \
+\\\",\\\", \\\"EpidCRN`Private`def$8453\\\"}], \\\"}\\\"}]\\) and \
+\\!\\(\\*RowBox[{\\\"{\\\", RowBox[{RowBox[{\\\"{\\\", \
+RowBox[{\\\"\\\\\\\"s\\\\\\\"\\\", \\\",\\\", \\\"\\\\\\\"i1\\\\\\\"\\\", \
+\\\",\\\", \\\"\\\\\\\"i2\\\\\\\"\\\", \\\",\\\", \\\"\\\\\\\"i3\\\\\\\"\\\", \
+\\\",\\\", \\\"\\\\\\\"r1\\\\\\\"\\\", \\\",\\\", \\\"\\\\\\\"r2\\\\\\\"\\\", \
+\\\",\\\", \\\"\\\\\\\"r3\\\\\\\"\\\"}], \\\"}\\\"}], \\\",\\\", RowBox[{\\\"\
+\[LeftSkeleton]\\\", \\\"6\\\", \\\"\[RightSkeleton]\\\"}], \\\",\\\", \
+RowBox[{\\\"{\\\", RowBox[{\\\"\\\\\\\"\[Delta] = Nc - \[ScriptL] - s\\\\\\\"\
+\\\", \\\",\\\", \\\"\\\\\\\"Nc = 14 (complexes), \[ScriptL] = 1 (linkage \
+classes), s = 7 (stoich dimension)\\\\\\\"\\\", \\\",\\\", \\\"\\\\\\\"\
+\[Delta] = 14 - 1 - 7 = 6\\\\\\\"\\\"}], \\\"}\\\"}]}], \\\"}\\\"}]\\) are \
+not the same shape.\"", 2, 170, 25, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304231571884`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"a18c4c84-dbd9-4f93-9a7e-792b719bfdaa"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Complement", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"2\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Complement\\\", \\\"[\
+\\\", RowBox[{RowBox[{\\\"{\\\", RowBox[{\\\"EpidCRN`Private`gam$8453\\\", \\\
+\".\\\", RowBox[{\\\"{\\\", RowBox[{\\\"\[CapitalLambda]\\\", \\\",\\\", \
+RowBox[{SubscriptBox[\\\"i\\\", \\\"1\\\"], \\\" \\\", \\\"s\\\", \\\" \\\", \
+\\\"\[Beta]1\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"2\\\"], \\\
+\" \\\", \\\"s\\\", \\\" \\\", \\\"\[Beta]2\\\"}], \\\",\\\", \
+RowBox[{\\\"i3\\\", \\\" \\\", \\\"s\\\", \\\" \\\", \\\"\[Beta]3\\\"}], \
+\\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"1\\\"], \\\" \\\", \
+\\\"\[Gamma]1\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"2\\\"], \
+\\\" \\\", \\\"\[Gamma]2\\\"}], \\\",\\\", RowBox[{\\\"i3\\\", \\\" \\\", \
+\\\"\[Gamma]3\\\"}], \\\",\\\", RowBox[{\\\"s\\\", \\\" \\\", \
+\\\"\[Mu]\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"1\\\"], \\\" \
+\\\", \\\"\[Mu]\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"2\\\"], \
+\\\" \\\", \\\"\[Mu]\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"7\
+\\\", \\\"\[RightSkeleton]\\\"}]}], \\\"}\\\"}]}], \\\"}\\\"}], \\\",\\\", \\\
+\"EpidCRN`Private`spe$8453\\\"}], \\\"]\\\"}]\\).\"", 2, 170, 26, 
+   24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.97143042325613*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"e85b83ff-10b4-4bdf-9225-df016ac16110"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Join", "heads", 
+   "\"Heads \\!\\(\\*RowBox[{\\\"Greater\\\"}]\\) and \
+\\!\\(\\*RowBox[{\\\"GreaterEqual\\\"}]\\) at positions \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) and \\!\\(\\*RowBox[{\\\"2\\\"}]\\) are \
+expected to be the same.\"", 2, 170, 27, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304233264008`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"c4737083-4ec7-424a-895f-0a7c55bcc33e"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Subsets", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Subsets\\\", \
+\\\"[\\\", RowBox[{\\\"EpidCRN`Private`spe$8453\\\", \\\",\\\", RowBox[{\\\"{\
+\\\", RowBox[{\\\"1\\\", \\\",\\\", \\\"0\\\"}], \\\"}\\\"}]}], \
+\\\"]\\\"}]\\).\"", 2, 170, 28, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430423376322*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"385de1d3-1009-4429-939c-e429d31f84d6"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Subsets", "argb", 
+   "\"\\!\\(\\*RowBox[{\\\"Subsets\\\"}]\\) called with \
+\\!\\(\\*RowBox[{\\\"0\\\"}]\\) arguments; between \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) and \\!\\(\\*RowBox[{\\\"3\\\"}]\\) arguments \
+are expected.\"", 2, 170, 29, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304234263124`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"3947fb76-fe06-4278-b216-8ac2ee4278aa"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Subsets", "argb", 
+   "\"\\!\\(\\*RowBox[{\\\"Subsets\\\"}]\\) called with \
+\\!\\(\\*RowBox[{\\\"0\\\"}]\\) arguments; between \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) and \\!\\(\\*RowBox[{\\\"3\\\"}]\\) arguments \
+are expected.\"", 2, 170, 30, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430423484632*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"d7860a96-3f5e-43b7-8ead-8417b0d6bf31"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Subsets", "argb", 
+   "\"\\!\\(\\*RowBox[{\\\"Subsets\\\"}]\\) called with \
+\\!\\(\\*RowBox[{\\\"0\\\"}]\\) arguments; between \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) and \\!\\(\\*RowBox[{\\\"3\\\"}]\\) arguments \
+are expected.\"", 2, 170, 31, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304235261106`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"3eb7ca1f-708b-4e90-9e92-30931200ea8c"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General", "stop", 
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"Subsets\\\", \
+\\\"::\\\", \\\"argb\\\"}], \\\"MessageName\\\"]\\) will be suppressed during \
+this calculation.\"", 2, 170, 32, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430423576064*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"6f1c212f-b6ef-443b-b819-eee7f2ea1dc5"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "ToExpression", "notstrbox", 
+   "\"\\!\\(\\*RowBox[{\\\"Subsets\\\", \\\"[\\\", \\\"]\\\"}]\\) is not a \
+string or a box. ToExpression can only interpret strings or boxes as Wolfram \
+Language input.\"", 2, 170, 33, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304236441603`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"b3e078a0-1dae-485d-b016-b49b27aab6cc"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "ToExpression", "notstrbox", 
+   "\"\\!\\(\\*RowBox[{\\\"Subsets\\\", \\\"[\\\", \\\"]\\\"}]\\) is not a \
+string or a box. ToExpression can only interpret strings or boxes as Wolfram \
+Language input.\"", 2, 170, 34, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304236861553`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"b9010a2a-5841-4bf9-a118-38ba5652c8f9"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Part", "pkspec1", 
+   "\"The expression \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"Subsets\\\", \
+\\\"[\\\", \\\"]\\\"}], \\\"}\\\"}]\\) cannot be used as a part \
+specification.\"", 2, 170, 35, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430423746254*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"4d13b9e6-fb37-4ef7-8c5d-ba268ad71fce"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Complement", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Complement\\\", \\\"[\
+\\\", RowBox[{\\\"EpidCRN`Private`spe$8453\\\", \\\",\\\", \
+RowBox[{\\\"EpidCRN`Private`spe$8453\\\", \\\"\[LeftDoubleBracket]\\\", \
+RowBox[{\\\"{\\\", RowBox[{\\\"Subsets\\\", \\\"[\\\", \\\"]\\\"}], \
+\\\"}\\\"}], \\\"\[RightDoubleBracket]\\\"}]}], \\\"]\\\"}]\\).\"", 2, 170, 
+   36, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304237898536`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"3f78b0d1-48b4-48b2-a982-4514fcd8d16f"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Part", "pkspec1", 
+   "\"The expression \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"Subsets\\\", \
+\\\"[\\\", \\\"]\\\"}], \\\"}\\\"}]\\) cannot be used as a part \
+specification.\"", 2, 170, 37, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304238461123`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"b0e809b9-28ac-432c-abb3-ef6f574a304f"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Join", "heads", 
+   "\"Heads \\!\\(\\*RowBox[{\\\"List\\\"}]\\) and \
+\\!\\(\\*RowBox[{\\\"Rule\\\"}]\\) at positions \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) and \\!\\(\\*RowBox[{\\\"2\\\"}]\\) are \
+expected to be the same.\"", 2, 170, 38, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430423895792*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"1db24e48-53db-4faf-82cb-0cb94dbf5d0c"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Symbol", "argx", 
+   "\"\\!\\(\\*RowBox[{\\\"Symbol\\\"}]\\) called with \\!\\(\\*RowBox[{\\\"0\
+\\\"}]\\) arguments; 1 argument is expected.\"", 2, 170, 39, 
+   24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430428030118*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"1e9fd2b6-b825-48d1-aca7-3172638ca820"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Symbol", "argx", 
+   "\"\\!\\(\\*RowBox[{\\\"Symbol\\\"}]\\) called with \\!\\(\\*RowBox[{\\\"0\
+\\\"}]\\) arguments; 1 argument is expected.\"", 2, 170, 40, 
+   24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304281963177`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"19dbad63-4610-4327-b179-0cdda7a63c85"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Symbol", "argx", 
+   "\"\\!\\(\\*RowBox[{\\\"Symbol\\\"}]\\) called with \\!\\(\\*RowBox[{\\\"0\
+\\\"}]\\) arguments; 1 argument is expected.\"", 2, 170, 41, 
+   24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304282376103`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"bb6115c8-7dac-4632-a689-fa85d33115d8"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General", "stop", 
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"Symbol\\\", \\\"::\\\", \
+\\\"argx\\\"}], \\\"MessageName\\\"]\\) will be suppressed during this \
+calculation.\"", 2, 170, 42, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430428278549*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"67d09eaf-9613-4b22-8a1c-08d357e371ad"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Eigensystem", "matsq", 
+   "\"Argument \\!\\(\\*RowBox[{\\\"{\\\", \\\"}\\\"}]\\) at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) is not a non-empty square matrix.\"", 2, 170, 
+   43, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304283297167`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"54d2a659-362e-4e77-986d-6bc6225b8a02"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Part", "partw", 
+   "\"Part \\!\\(\\*RowBox[{\\\"2\\\"}]\\) of \
+\\!\\(\\*RowBox[{\\\"Eigensystem\\\", \\\"[\\\", RowBox[{\\\"{\\\", \
+\\\"}\\\"}], \\\"]\\\"}]\\) does not exist.\"", 2, 170, 44, 
+   24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430428386668*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"36428de2-d2bb-43fc-a4ae-ac311d64ee03"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Part", "pkspec1", 
+   "\"The expression \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"Subsets\\\", \
+\\\"[\\\", \\\"]\\\"}], \\\"}\\\"}]\\) cannot be used as a part \
+specification.\"", 2, 170, 45, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430428437376*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"1b2424e3-ee24-404a-bb4e-3cc44f73f10a"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General", "stop", 
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"Part\\\", \\\"::\\\", \
+\\\"pkspec1\\\"}], \\\"MessageName\\\"]\\) will be suppressed during this \
+calculation.\"", 2, 170, 46, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.971430428494499*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"72de6962-cf62-4b2a-b0ec-d5be0ae2ed65"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Complement", "normal", 
+   "\"Nonatomic expression expected at position \
+\\!\\(\\*RowBox[{\\\"1\\\"}]\\) in \\!\\(\\*RowBox[{\\\"Complement\\\", \\\"[\
+\\\", RowBox[{\\\"EpidCRN`Private`spe$8453\\\", \\\",\\\", \
+RowBox[{\\\"EpidCRN`Private`spe$8453\\\", \\\"\[LeftDoubleBracket]\\\", \
+RowBox[{\\\"{\\\", RowBox[{\\\"Subsets\\\", \\\"[\\\", \\\"]\\\"}], \
+\\\"}\\\"}], \\\"\[RightDoubleBracket]\\\"}]}], \\\"]\\\"}]\\).\"", 2, 170, 
+   47, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304285502234`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"3bfca7e4-590b-4cc1-8d92-1813e6e2a152"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "General", "stop", 
+   "\"Further output of \\!\\(\\*StyleBox[RowBox[{\\\"Complement\\\", \
+\\\"::\\\", \\\"normal\\\"}], \\\"MessageName\\\"]\\) will be suppressed \
+during this calculation.\"", 2, 170, 48, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304286003127`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"be39cf72-8c96-4657-a7e3-20291be200d3"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"EpidCRN`Private`gam$8453", ".", 
+    RowBox[{"{", 
+     RowBox[{"\[CapitalLambda]", ",", 
+      RowBox[{
+       SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+      RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+      RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+      RowBox[{"s", " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+      RowBox[{"i3", " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+      RowBox[{"r3", " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+      RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], ",", 
+   "EpidCRN`Private`spe$8453", ",", 
+   RowBox[{"Complement", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"EpidCRN`Private`gam$8453", ".", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalLambda]", ",", 
+         RowBox[{
+          SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+         RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+         RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+         RowBox[{"s", " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+         RowBox[{"i3", " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+         RowBox[{"r3", " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+         RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "}"}], ",", 
+     "EpidCRN`Private`spe$8453"}], "]"}], ",", 
+   RowBox[{
+    RowBox[{"Complement", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"EpidCRN`Private`gam$8453", ".", 
+        RowBox[{"{", 
+         RowBox[{"\[CapitalLambda]", ",", 
+          RowBox[{
+           SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+          RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+          RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+          RowBox[{"s", " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+          RowBox[{"i3", " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+          RowBox[{"r3", " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+          RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "}"}], ",", 
+      "EpidCRN`Private`spe$8453"}], "]"}], ">", "0"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Subsets", "[", "]"}], ",", 
+     RowBox[{"Subsets", "[", "]"}]}], "}"}], ",", 
+   TemplateBox[{
+     RowBox[{"Dot", "[", "]"}], 
+     RowBox[{"Symbol", "[", "]"}]},
+    "Grad"], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"Join", "[", 
+    RowBox[{
+     RowBox[{"{", "}"}], ",", 
+     RowBox[{
+      RowBox[{"EpidCRN`Private`spe$8453", "\[LeftDoubleBracket]", 
+       RowBox[{"{", 
+        RowBox[{"Subsets", "[", "]"}], "}"}], "\[RightDoubleBracket]"}], 
+      "\[Rule]", "0"}]}], "]"}], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"EpidCRN`Private`gam$8453", ".", 
+         RowBox[{"{", 
+          RowBox[{"\[CapitalLambda]", ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+           RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+           RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+           RowBox[{"s", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"i3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"r3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+           RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "\[Equal]", "0"}], ",", 
+       RowBox[{"Complement", "[", 
+        RowBox[{"EpidCRN`Private`spe$8453", ",", 
+         RowBox[{"EpidCRN`Private`spe$8453", "\[LeftDoubleBracket]", 
+          RowBox[{"{", 
+           RowBox[{"Subsets", "[", "]"}], "}"}], "\[RightDoubleBracket]"}]}], 
+        "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"EpidCRN`Private`gam$8453", ".", 
+         RowBox[{"{", 
+          RowBox[{"\[CapitalLambda]", ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+           RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+           RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+           RowBox[{"s", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"i3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"r3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+           RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "\[Equal]", "0"}], ",", 
+       RowBox[{"Complement", "[", 
+        RowBox[{"EpidCRN`Private`spe$8453", ",", 
+         RowBox[{"EpidCRN`Private`spe$8453", "\[LeftDoubleBracket]", 
+          RowBox[{"{", 
+           RowBox[{"Subsets", "[", "]"}], "}"}], "\[RightDoubleBracket]"}]}], 
+        "]"}]}], "}"}]}], "}"}], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"{", "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.971430428656266*^9},
+ CellLabel->
+  "Out[170]=",ExpressionUUID->"3402f894-18c7-4001-b402-5bff485d97b9"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "Set", "shape", 
+   "\"Lists \\!\\(\\*RowBox[{\\\"{\\\", RowBox[{\\\"RHS\\\", \\\",\\\", \
+\\\"var\\\", \\\",\\\", \\\"par\\\", \\\",\\\", \\\"cp\\\", \\\",\\\", \
+\\\"mSi\\\", \\\",\\\", \\\"Jx\\\", \\\",\\\", \\\"Jy\\\", \\\",\\\", \
+\\\"E0\\\", \\\",\\\", \\\"ngm\\\", \\\",\\\", \\\"R0A\\\", \\\",\\\", \
+RowBox[{\\\"\[LeftSkeleton]\\\", \\\"2\\\", \\\"\[RightSkeleton]\\\"}]}], \
+\\\"}\\\"}]\\) and \\!\\(\\*RowBox[{\\\"{\\\", \
+RowBox[{RowBox[{\\\"EpidCRN`Private`gam$8453\\\", \\\".\\\", \
+RowBox[{\\\"{\\\", RowBox[{\\\"\[CapitalLambda]\\\", \\\",\\\", \
+RowBox[{SubscriptBox[\\\"i\\\", \\\"1\\\"], \\\" \\\", \\\"s\\\", \\\" \\\", \
+\\\"\[Beta]1\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"2\\\"], \\\
+\" \\\", \\\"s\\\", \\\" \\\", \\\"\[Beta]2\\\"}], \\\",\\\", \
+RowBox[{\\\"i3\\\", \\\" \\\", \\\"s\\\", \\\" \\\", \\\"\[Beta]3\\\"}], \
+\\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"1\\\"], \\\" \\\", \
+\\\"\[Gamma]1\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"2\\\"], \
+\\\" \\\", \\\"\[Gamma]2\\\"}], \\\",\\\", RowBox[{\\\"i3\\\", \\\" \\\", \
+\\\"\[Gamma]3\\\"}], \\\",\\\", RowBox[{\\\"s\\\", \\\" \\\", \
+\\\"\[Mu]\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"1\\\"], \\\" \
+\\\", \\\"\[Mu]\\\"}], \\\",\\\", RowBox[{SubscriptBox[\\\"i\\\", \\\"2\\\"], \
+\\\" \\\", \\\"\[Mu]\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"7\
+\\\", \\\"\[RightSkeleton]\\\"}]}], \\\"}\\\"}]}], \\\",\\\", \
+\\\"EpidCRN`Private`spe$8453\\\", \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \
+\\\"7\\\", \\\"\[RightSkeleton]\\\"}], \\\",\\\", RowBox[{\\\"{\\\", \
+\\\"}\\\"}], \\\",\\\", RowBox[{\\\"\[LeftSkeleton]\\\", \\\"3\\\", \\\"\
+\[RightSkeleton]\\\"}]}], \\\"}\\\"}]\\) are not the same shape.\"", 2, 171, 
+   49, 24873470135028051592, "Local"},
+  "MessageTemplate"]], "Message", "MSG",
+ CellChangeTimes->{3.9714304286997375`*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"3f7e3d22-57f5-487d-9ca9-b2740a4d2871"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"EpidCRN`Private`gam$8453", ".", 
+    RowBox[{"{", 
+     RowBox[{"\[CapitalLambda]", ",", 
+      RowBox[{
+       SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+      RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+      RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+      RowBox[{"s", " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+      RowBox[{"i3", " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+      RowBox[{"r3", " ", "\[Mu]"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+      RowBox[{
+       SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+      RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], ",", 
+   "EpidCRN`Private`spe$8453", ",", 
+   RowBox[{"Complement", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"EpidCRN`Private`gam$8453", ".", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalLambda]", ",", 
+         RowBox[{
+          SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+         RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+         RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+         RowBox[{"s", " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+         RowBox[{"i3", " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+         RowBox[{"r3", " ", "\[Mu]"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+         RowBox[{
+          SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+         RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "}"}], ",", 
+     "EpidCRN`Private`spe$8453"}], "]"}], ",", 
+   RowBox[{
+    RowBox[{"Complement", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"EpidCRN`Private`gam$8453", ".", 
+        RowBox[{"{", 
+         RowBox[{"\[CapitalLambda]", ",", 
+          RowBox[{
+           SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+          RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+          RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+          RowBox[{"s", " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+          RowBox[{"i3", " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+          RowBox[{"r3", " ", "\[Mu]"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+          RowBox[{
+           SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+          RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "}"}], ",", 
+      "EpidCRN`Private`spe$8453"}], "]"}], ">", "0"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Subsets", "[", "]"}], ",", 
+     RowBox[{"Subsets", "[", "]"}]}], "}"}], ",", 
+   TemplateBox[{
+     RowBox[{"Dot", "[", "]"}], 
+     RowBox[{"Symbol", "[", "]"}]},
+    "Grad"], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"Join", "[", 
+    RowBox[{
+     RowBox[{"{", "}"}], ",", 
+     RowBox[{
+      RowBox[{"EpidCRN`Private`spe$8453", "\[LeftDoubleBracket]", 
+       RowBox[{"{", 
+        RowBox[{"Subsets", "[", "]"}], "}"}], "\[RightDoubleBracket]"}], 
+      "\[Rule]", "0"}]}], "]"}], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"EpidCRN`Private`gam$8453", ".", 
+         RowBox[{"{", 
+          RowBox[{"\[CapitalLambda]", ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+           RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+           RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+           RowBox[{"s", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"i3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"r3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+           RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "\[Equal]", "0"}], ",", 
+       RowBox[{"Complement", "[", 
+        RowBox[{"EpidCRN`Private`spe$8453", ",", 
+         RowBox[{"EpidCRN`Private`spe$8453", "\[LeftDoubleBracket]", 
+          RowBox[{"{", 
+           RowBox[{"Subsets", "[", "]"}], "}"}], "\[RightDoubleBracket]"}]}], 
+        "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"EpidCRN`Private`gam$8453", ".", 
+         RowBox[{"{", 
+          RowBox[{"\[CapitalLambda]", ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "s", " ", "\[Beta]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "s", " ", "\[Beta]2"}], ",", 
+           RowBox[{"i3", " ", "s", " ", "\[Beta]3"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Gamma]1"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Gamma]2"}], ",", 
+           RowBox[{"i3", " ", "\[Gamma]3"}], ",", 
+           RowBox[{"s", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["i", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"i3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Mu]"}], ",", 
+           RowBox[{"r3", " ", "\[Mu]"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "1"], " ", "\[Rho]1"}], ",", 
+           RowBox[{
+            SubscriptBox["r", "2"], " ", "\[Rho]2"}], ",", 
+           RowBox[{"r3", " ", "\[Rho]3"}]}], "}"}]}], "\[Equal]", "0"}], ",", 
+       RowBox[{"Complement", "[", 
+        RowBox[{"EpidCRN`Private`spe$8453", ",", 
+         RowBox[{"EpidCRN`Private`spe$8453", "\[LeftDoubleBracket]", 
+          RowBox[{"{", 
+           RowBox[{"Subsets", "[", "]"}], "}"}], "\[RightDoubleBracket]"}]}], 
+        "]"}]}], "}"}]}], "}"}], ",", 
+   RowBox[{"{", "}"}], ",", 
+   RowBox[{"{", "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.971430428766921*^9},
+ CellLabel->
+  "Out[171]=",ExpressionUUID->"90b25f88-e8b5-4fcd-8e67-21b7a3d6056d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Minimal Siphons: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", "\<\"v1\"\>", "}"}], ",", 
+     RowBox[{"{", "\<\"v2\"\>", "}"}]}], "}"}]}],
+  SequenceForm["Minimal Siphons: ", {{"v1"}, {"v2"}}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.971430428811166*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"b9556fac-8abc-410a-ba88-cd076e4c5c31"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"R0 values: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", "}"}]}],
+  SequenceForm["R0 values: ", {}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.97143042886316*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"7b97aaa9-d8e9-45b9-bda1-a2661a24c2c1"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"Boundary fixed points: \"\>", "\[InvisibleSpace]", "bdfpT"}],
+  SequenceForm["Boundary fixed points: ", $CellContext`bdfpT],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.971430428962221*^9},
+ CellLabel->
+  "During evaluation of \
+In[157]:=",ExpressionUUID->"12165c9d-1c23-4f24-9a49-44a8849778e3"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{812.5714285714286, 306},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+InputAutoReplacements->Automatic,
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"60a48e45-d656-4820-92fe-068024aa7726"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 2944, 76, 1015, "Input",ExpressionUUID->"cd8aba99-7e55-43b6-a9ff-c790d8798a3e"],
+Cell[3527, 100, 6032, 152, 362, "Print",ExpressionUUID->"38ead451-8b99-4466-bcd7-49b4afc6420b"],
+Cell[9562, 254, 1017, 19, 28, "Message",ExpressionUUID->"fdd7a700-7227-49d2-86a3-92f314f9d902"],
+Cell[10582, 275, 609, 13, 22, "Print",ExpressionUUID->"2528d311-c247-417c-84f1-78cb29e0a7bc"],
+Cell[11194, 290, 704, 15, 28, "Message",ExpressionUUID->"1e464451-ba57-46c4-83ec-5a9d2b8598c2"],
+Cell[11901, 307, 736, 15, 28, "Message",ExpressionUUID->"fe9222ab-1c54-4995-99cd-bb1ce7c25c64"],
+Cell[12640, 324, 417, 7, 32, "Output",ExpressionUUID->"85047fa4-0d7a-4292-9fe4-6bdb2c77c7ab"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13094, 336, 744, 12, 46, "Input",ExpressionUUID->"ae7caa33-d62c-4871-ac13-ba664999ad35"],
+Cell[13841, 350, 4544, 65, 104, "Message",ExpressionUUID->"40678fee-c981-4951-b6c4-b40a0d5d988e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18422, 420, 632, 10, 70, "Input",ExpressionUUID->"8c75d6b2-4c75-4165-83a2-76e5511ac196"],
+Cell[19057, 432, 4447, 64, 70, "Message",ExpressionUUID->"8b259c6a-f410-487e-b020-e65fe87792b0"],
+Cell[23507, 498, 2890, 62, 70, "Print",ExpressionUUID->"9edb3e60-1419-42a6-9627-9f9b38e4a30d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[26434, 565, 403, 13, 70, "Input",ExpressionUUID->"0454152e-3474-44e4-8cfd-89eaf82d53a2"],
+Cell[26840, 580, 1263, 28, 70, "Output",ExpressionUUID->"3b80bea2-9a29-4099-bdac-4bbcfb3c66c8"],
+Cell[28106, 610, 1115, 31, 70, "Output",ExpressionUUID->"6b255bbb-4123-4e88-a3c5-65ebe93adbd5"],
+Cell[29224, 643, 1438, 24, 70, "Message",ExpressionUUID->"a18c4c84-dbd9-4f93-9a7e-792b719bfdaa"],
+Cell[30665, 669, 1528, 25, 70, "Message",ExpressionUUID->"e85b83ff-10b4-4bdf-9225-df016ac16110"],
+Cell[32196, 696, 500, 11, 70, "Message",ExpressionUUID->"c4737083-4ec7-424a-895f-0a7c55bcc33e"],
+Cell[32699, 709, 571, 12, 70, "Message",ExpressionUUID->"385de1d3-1009-4429-939c-e429d31f84d6"],
+Cell[33273, 723, 494, 11, 70, "Message",ExpressionUUID->"3947fb76-fe06-4278-b216-8ac2ee4278aa"],
+Cell[33770, 736, 492, 11, 70, "Message",ExpressionUUID->"d7860a96-3f5e-43b7-8ead-8417b0d6bf31"],
+Cell[34265, 749, 494, 11, 70, "Message",ExpressionUUID->"3eb7ca1f-708b-4e90-9e92-30931200ea8c"],
+Cell[34762, 762, 454, 10, 70, "Message",ExpressionUUID->"6f1c212f-b6ef-443b-b819-eee7f2ea1dc5"],
+Cell[35219, 774, 471, 10, 70, "Message",ExpressionUUID->"b3e078a0-1dae-485d-b016-b49b27aab6cc"],
+Cell[35693, 786, 471, 10, 70, "Message",ExpressionUUID->"b9010a2a-5841-4bf9-a118-38ba5652c8f9"],
+Cell[36167, 798, 444, 10, 70, "Message",ExpressionUUID->"4d13b9e6-fb37-4ef7-8c5d-ba268ad71fce"],
+Cell[36614, 810, 696, 14, 70, "Message",ExpressionUUID->"3f78b0d1-48b4-48b2-a982-4514fcd8d16f"],
+Cell[37313, 826, 446, 10, 70, "Message",ExpressionUUID->"b0e809b9-28ac-432c-abb3-ef6f574a304f"],
+Cell[37762, 838, 487, 11, 70, "Message",ExpressionUUID->"1db24e48-53db-4faf-82cb-0cb94dbf5d0c"],
+Cell[38252, 851, 414, 10, 70, "Message",ExpressionUUID->"1e9fd2b6-b825-48d1-aca7-3172638ca820"],
+Cell[38669, 863, 416, 10, 70, "Message",ExpressionUUID->"19dbad63-4610-4327-b179-0cdda7a63c85"],
+Cell[39088, 875, 416, 10, 70, "Message",ExpressionUUID->"bb6115c8-7dac-4632-a689-fa85d33115d8"],
+Cell[39507, 887, 453, 10, 70, "Message",ExpressionUUID->"67d09eaf-9613-4b22-8a1c-08d357e371ad"],
+Cell[39963, 899, 436, 10, 70, "Message",ExpressionUUID->"54d2a659-362e-4e77-986d-6bc6225b8a02"],
+Cell[40402, 911, 451, 11, 70, "Message",ExpressionUUID->"36428de2-d2bb-43fc-a4ae-ac311d64ee03"],
+Cell[40856, 924, 444, 10, 70, "Message",ExpressionUUID->"1b2424e3-ee24-404a-bb4e-3cc44f73f10a"],
+Cell[41303, 936, 454, 10, 70, "Message",ExpressionUUID->"72de6962-cf62-4b2a-b0ec-d5be0ae2ed65"],
+Cell[41760, 948, 696, 14, 70, "Message",ExpressionUUID->"3bfca7e4-590b-4cc1-8d92-1813e6e2a152"],
+Cell[42459, 964, 461, 10, 70, "Message",ExpressionUUID->"be39cf72-8c96-4657-a7e3-20291be200d3"],
+Cell[42923, 976, 7887, 201, 70, "Output",ExpressionUUID->"3402f894-18c7-4001-b402-5bff485d97b9"],
+Cell[50813, 1179, 2011, 32, 70, "Message",ExpressionUUID->"3f7e3d22-57f5-487d-9ca9-b2740a4d2871"],
+Cell[52827, 1213, 7887, 201, 70, "Output",ExpressionUUID->"90b25f88-e8b5-4fcd-8e67-21b7a3d6056d"],
+Cell[CellGroupData[{
+Cell[60739, 1418, 452, 12, 70, "Print",ExpressionUUID->"b9556fac-8abc-410a-ba88-cd076e4c5c31"],
+Cell[61194, 1432, 325, 9, 70, "Print",ExpressionUUID->"7b97aaa9-d8e9-45b9-bda1-a2661a24c2c1"],
+Cell[61522, 1443, 351, 8, 70, "Print",ExpressionUUID->"12165c9d-1c23-4f24-9a49-44a8849778e3"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

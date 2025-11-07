@@ -1,0 +1,76 @@
+(* Trypanosoma Antigenic Variation Model *)
+(* Two-strain antigenic variation model for Trypanosoma brucei *)
+
+<<EpidCRN`
+
+(* Model Definition *)
+RN = {
+  0 -> "s",
+  "s" + "i1" -> 2*"i1",
+  "s" + "i2" -> 2*"i2",
+  "i1" -> "r1",
+  "i2" -> "r2",
+  "s" -> 0,
+  "i1" -> 0,
+  "i2" -> 0,
+  "r1" -> 0,
+  "r2" -> 0,
+  "r1" -> "s",
+  "r2" -> "s"
+}
+
+rts = {
+  \[CapitalLambda],
+  \[Beta]1*s*i1,
+  \[Beta]2*s*i2,
+  \[Gamma]1*i1,
+  \[Gamma]2*i2,
+  \[Mu]*s,
+  \[Mu]*i1,
+  \[Mu]*i2,
+  \[Mu]*r1,
+  \[Mu]*r2,
+  \[Rho]1*r1,
+  \[Rho]2*r2
+}
+
+(* Analysis *)
+typAnt[RN_, rts_] := Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mSi, mSiIndices, inf, mod, K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs, nonzeroIndices, relevantEigenvals, strainAssociation, sortedPairs, mSiNGM, ngm},
+  {spe, al, be, gam, Rv, RHS, def} = extMat[RN];
+  var = ToExpression[spe];
+  RHS = gam.rts;
+  par = Par[RHS, var];
+  cp = Thread[par > 0];
+  cv = Thread[var >= 0];
+  ct = Join[cp, cv];
+  mSi = minSiph[spe, asoRea[RN]];
+  mSiIndices = Map[Flatten[Map[Position[spe, #] &, #] &] &, mSi];
+  inf = Union[Flatten[mSiIndices]];
+  cDFE = Flatten[Map[Thread[ToExpression[#] -> 0] &, mSi] &];
+  RDFE = RHS /. cDFE;
+  eq0 = Thread[RDFE == 0];
+  var0 = Complement[var, var[[inf]]];
+  E0 = Join[Solve[eq0, var0] // Flatten &, Thread[var[[inf]] -> 0]];
+  mod = {RHS, var, par};
+  ngm = NGM[mod, inf];
+  Jx = ngm[[1]] // FullSimplify;
+  Jy = ngm[[5]] // FullSimplify;
+  K = ngm[[4]] // FullSimplify;
+  eigenSystem = Eigensystem[K];
+  eigenvals = eigenSystem[[1]];
+  eigenvecs = eigenSystem[[2]];
+  nonzeroIndices = {};
+  Do[If[eigenvals[[i]] =!= 0, AppendTo[nonzeroIndices, i]], {i, Length[eigenvals]}];
+  If[Length[nonzeroIndices] > 0,
+    relevantEigenvals = eigenvals[[nonzeroIndices]];
+    mSiNGM = Table[Flatten[Table[Position[inf, mSiIndices[[i, j]]][[1, 1]] &, {j, Length[mSiIndices[[i]]]}]], {i, Length[mSiIndices]}];
+    R0A = relevantEigenvals,
+    R0A = {}
+  ];
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A}
+]
+
+results = typAnt[RN, rts]
+{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = results
+Print["Minimal Siphons: ", mSi]
+Print["R0 values: ", R0A]
