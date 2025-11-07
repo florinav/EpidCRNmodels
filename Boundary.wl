@@ -1,29 +1,5 @@
 (* ::Package:: *)
 
-(* ========================================================================= *)
-(* PERFORMANCE OPTIMIZATION - Phase 1 *)
-(* ========================================================================= *)
-
-(* Caching mechanism for expensive computations *)
-$minSiphCache = <||>;
-$NGMCache = <||>;
-$bdFpCache = <||>;
-
-(* Clear cache function - useful for debugging or when memory is a concern *)
-clearEpidCRNCache[] := Module[{},
-  $minSiphCache = <||>;
-  $NGMCache = <||>;
-  $bdFpCache = <||>;
-  Print["EpidCRN caches cleared"];
-];
-
-(* Hash function for creating cache keys *)
-cacheKey[expr_] := Hash[expr, "MD5"];
-
-(* ========================================================================= *)
-(* STABILITY ANALYSIS *)
-(* ========================================================================= *)
-
 sta[pol_, par_] := Module[{
    factors, processedFactors, linearConditions, quadraticConditions, 
    higherFactors, linearFactors, quadraticFactors, deg, coeff, const, a, b, c, factor, var
@@ -82,162 +58,108 @@ sta[pol_, par_] := Module[{
  ]
 
 
-bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps, cacheKeyVal, cachedResult},
-  (* Check cache first *)
-  cacheKeyVal = cacheKey[{RHS, var, mSi}];
-  If[KeyExistsQ[$bdFpCache, cacheKeyVal],
-    Print["Using cached bdFp result"];
-    Return[$bdFpCache[cacheKeyVal]]
-  ];
-
+bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps},
   eq = Thread[RHS == 0];
   lS = Length[mSi];
   bdfps = Table[
-    Module[{siphonVars, remainingVars, siphonZeros, timeoutResult,
-            isRationalSolutionQ, rationalSols, nonrationalSols, eqSystem,
-            scalarEq, scalarPol, eliminationVar, totalCount, isLikelyRational,
-            preprocessedEq, grobnerResult, numericFallback},
-
+    Module[{siphonVars, remainingVars, siphonZeros, timeoutResult, 
+            isRationalSolutionQ, rationalSols, nonrationalSols, eqSystem, 
+            scalarEq, scalarPol, eliminationVar, totalCount},
       siphonVars = ToExpression[mSi[[j]]];
       remainingVars = Complement[var, siphonVars];
       siphonZeros = Thread[siphonVars -> 0];
       eqSystem = eq /. siphonZeros;
-
-      (* Phase 1 Improvement: Early detection of rational vs algebraic cases *)
-      isLikelyRational[expr_] := FreeQ[expr, Sqrt | Power[_, Except[_Integer]] | Root];
-
-      (* Phase 1 Improvement: Symbolic simplification pipeline *)
-      (* Preprocess equations - simplify and factor *)
-      preprocessedEq = Simplify[eqSystem] /. Equal[lhs_, 0] :> (Simplify[lhs] == 0);
-
-      (* Try Gröbner basis preprocessing for polynomial systems if system is complex *)
-      If[Length[remainingVars] >= 3 && AllTrue[Flatten[{preprocessedEq /. Equal -> Subtract}], PolynomialQ[#, remainingVars] &],
-        grobnerResult = TimeConstrained[
-          GroebnerBasis[preprocessedEq /. Equal[lhs_, 0] :> lhs, remainingVars,
-            MonomialOrder -> DegreeReverseLexicographic],
-          2,
-          $Failed
-        ];
-        If[grobnerResult =!= $Failed,
-          preprocessedEq = Thread[grobnerResult == 0];
-          Print["Gröbner preprocessing successful for facet ", mSi[[j]]];
-        ];
-      ];
-
-      (* Attempt to solve with extended timeout for complex systems *)
+      
       timeoutResult = TimeConstrained[
-        Solve[preprocessedEq, remainingVars, Reals],
+        Solve[eqSystem, remainingVars],
         10,
         "froze"
       ];
-
-      (* Phase 1 Improvement: Numerical-symbolic hybrid for timeout cases *)
+      
       If[timeoutResult === "froze",
-        Print["Symbolic solve timed out for facet ", mSi[[j]], " - attempting numerical fallback"];
-
-        (* Try numerical approach with FindInstance *)
-        numericFallback = TimeConstrained[
-          FindInstance[preprocessedEq, remainingVars, Reals, 10],
-          5,
-          $Failed
-        ];
-
-        If[numericFallback =!= $Failed && numericFallback =!= {},
-          Print["Found ", Length[numericFallback], " numerical solutions via FindInstance"];
-          timeoutResult = numericFallback;,
-          Print["fps on siphon facet ", mSi[[j]], " froze - no numerical fallback available"];
-          {"froze", "froze"}
-        ];
-      ];
-
-      If[timeoutResult === "froze" || timeoutResult === {"froze", "froze"},
+        Print["fps on siphon facet ", mSi[[j]], " froze"];
         {"froze", "froze"},
         (* Separate rational and non-rational solutions *)
-        isRationalSolutionQ[sol_] :=
+        isRationalSolutionQ[sol_] := 
           FreeQ[sol, Sqrt | Power[_, Except[_Integer]] | Root | _Complex];
         rationalSols = Select[timeoutResult, isRationalSolutionQ];
         nonrationalSols = Complement[timeoutResult, rationalSols];
-
+        
         (* Generate scalar equation if needed *)
         If[Length[nonrationalSols] > 0,
           eliminationVar = First[remainingVars];
           scalarEq = TimeConstrained[
-            Factor[Eliminate[preprocessedEq, Complement[remainingVars, {eliminationVar}]]],
+            Factor[Eliminate[eqSystem, Complement[remainingVars, {eliminationVar}]]],
             3,
-            Factor[First[preprocessedEq]] (* fallback to factored first equation if elimination fails *)
+            Factor[First[eqSystem]] (* fallback to factored first equation if elimination fails *)
           ];
           (* Extract polynomial from equation (remove == 0 part) *)
           scalarPol = scalarEq /. Equal[lhs_, 0] :> lhs /. Equal[lhs_, rhs_] :> (lhs - rhs);,
           scalarPol = AllSolsRational;
         ];
-
+        
         (* Print only the count *)
         totalCount = Length[rationalSols] + Length[nonrationalSols];
         Print["fps on siphon facet ", mSi[[j]], ": ", totalCount, " boundary points"];
-
+        
         (* Return structured pair with polynomial *)
         {rationalSols, scalarPol}
       ]
     ], {j, lS}];
-
-  (* Cache the result *)
-  $bdFpCache[cacheKeyVal] = bdfps;
+    
   bdfps
 ]
 
 
-bdAn[RN_, rts_] := Module[{
-  spe, alMat, beMat, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod, 
-  K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, ngm, infVars},
+bdAn[RN_, rts_] := Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod, 
+K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs, 
+nonzeroIndices, relevantEigenvals, ngm, infVars},
   
-  {spe, alMat, beMat, gam, Rv, RHS, mSi, def} = extMat[RN];
+  {spe, al, be, gam, Rv, RHS, def} = extMat[RN];
   var = ToExpression[spe];
   RHS = gam . rts;
   par = Par[RHS, var];
   cp = Thread[par > 0];
   cv = Thread[var >= 0];
   ct = Join[cp, cv];
-    
-  (* normalize possible string species in mSi to Symbols for infVars only *)
-toSym[x_] := Which[
-  Head[x] === Symbol, x,
-  StringQ[x],           Symbol[x],
-  True,                 ToExpression@ToString[x]
-];
-
-mSiSym  = Map[toSym, mSi, {2}];
-infVars = Union[Flatten[mSiSym]];
-
+  mS = minSiph[spe, asoRea[RN]];
+  mSi = mS;
+  
+  (* infVars is union of all siphon variables *)
+  infVars = Union[Flatten[mSi]];
   
   cDFE = Thread[infVars -> 0];
-  RDFE = RHS /. cDFE(*;
-  Print["infV=",infVars,"RHS=",RHS,"RDFE=",RDFE]*);
+  RDFE = RHS /. cDFE;
   eq0 = Thread[RDFE == 0];
-  var0 = Complement[var, infVars]
-  (*Print["eq0=",eq0,"v0=", var0];*);
-  E0 = Solve[eq0, var0][[1]];
-  
-  Jx = Outer[D, RHS, var];
+  var0 = Complement[var, infVars];
+  E0 = Join[Solve[eq0, var0] // Flatten, cDFE];
   
   mod = {RHS, var, par};
-  ngm = Quiet[Check[NGM[mod, infVars], $Failed], 
-    {Power::infy, Infinity::indet, Solve::ratnz}]
-  (*Print["ngm = ", ngm];*);
-  If[ngm === $Failed,
-    {K, R0A, Jy} = {Undefined, {}, Undefined};,
-    K = Quiet[Chop[ngm[[7]]], Power::infy];
-    Jy = ngm[[4]];
-    R0A = Quiet[
-      Select[Eigenvalues[K],
-        # =!= 0 && !Internal`SyntacticNegativeQ[#] && FreeQ[#, -Power[_, 1/2]] &
-      ],
-      {Power::infy, Eigenvalues::eivn0}
-    ];
-  ];
+  ngm = NGM[mod, infVars];
+  Jx = ngm[[1]] // FullSimplify;
+  Jy = ngm[[5]] // FullSimplify;
+  K = ngm[[4]] // FullSimplify;
   
-  {RHS, var, par, cp, mSi, Jx, Jy,cDFE, E0, K, R0A, infVars, alMat, 
-  beMat, gam, ngm}
+  eigenvals = Eigenvalues[K];
+  R0A = Select[eigenvals, # =!= 0 &];
+  (*eigenSystem = Eigensystem[K];
+  eigenvals = eigenSystem[[1]];
+  nonzeroIndices = Flatten[Position[eigenvals, _?(# =!= 0 &)]];
+  relevantEigenvals = eigenvals[[nonzeroIndices]];
+  R0A = relevantEigenvals;*)
+  
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infVars,ngm}
 ];
+(* Key change explanation:
+   The critical fix is in the line:
+   mSiIndices = Map[Flatten[Position[var, #] & /@ #] &, mS];
+   
+   This now searches for expressions in var (which contains expressions like Subscript[i,1])
+   instead of searching for expressions in spe (which contains strings like "i1").
+   
+   Since mS now contains expressions from the updated minSiph function,
+   we search directly in var which also contains expressions.
+*)
 
 
 bd2[RN_, rts_] := 
@@ -310,45 +232,35 @@ bd2[RN_, rts_] :=
 
 
 
-NGM[mod_, infVars_] := Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, detV, cacheKeyVal},
-  (* Phase 1 Improvement: Check cache first *)
-  cacheKeyVal = cacheKey[{mod, infVars}];
-  If[KeyExistsQ[$NGMCache, cacheKeyVal],
-    Print["Using cached NGM result"];
-    Return[$NGMCache[cacheKeyVal]]
-  ];
-
-  dyn = mod[[1]];
-  X = mod[[2]];
-
-  inf = Flatten[Position[X, #] & /@ infVars];
-  infc = Complement[Range[Length[X]], inf];
-
-  Jx = Grad[dyn[[inf]], X[[inf]]];
-  Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
-  Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
-  Jyx = If[Length[infc] > 0, Grad[dyn[[infc]], X[[inf]]], {}];
-
-  V1 = -Jx /. Thread[X[[infc]] -> 0];
-  F1 = (Jx + V1) /. Thread[X[[inf]] -> 0];
-  F = posM[F1];
-  V = (F - Jx) /. Thread[X[[inf]] -> 0];
-
-  detV = Det[V];
-
-  If[!PossibleZeroQ[detV],
-     K = Simplify[F . Inverse[V]] /. 0. -> 0;
-    Kd = (Inverse[V] . F);,
-    Print["Singular case"];
-    K = "singular";
-    Kd = "singular";
-  ];
-
-  (* Cache the result *)
-  $NGMCache[cacheKeyVal] = {Jx, F, V, Jy, Jxy, Jyx, K, Kd};
-
-  {Jx, F, V, Jy, Jxy, Jyx, K, Kd}
-]
+NGM[mod_, infVars_] := 
+  Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, chpx, Kd}, 
+   dyn = mod[[1]];
+   X = mod[[2]];
+   
+   (* Convert infVars to positions in X *)
+   inf = Flatten[Position[X, #] & /@ infVars];
+   
+   infc = Complement[Range[Length[X]], inf];
+   
+   (* Compute Jacobian blocks *)
+   Jx = Grad[dyn[[inf]], X[[inf]]];
+   Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
+   Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
+   Jyx = If[Length[infc] > 0, Grad[dyn[[infc]], X[[inf]]], {}];
+   
+   chpx = CharacteristicPolynomial[Jx, #] &;
+   
+   (* NGM computation at DFE (all infection variables = 0) *)
+   V1 = -Jx /. Thread[X[[infc]] -> 0];
+   F1 = Jx + V1 /. Thread[X[[inf]] -> 0];
+   F = posM[F1];
+   V = F - Jx;
+   
+   K = (F . Inverse[V]) /. Thread[X[[inf]] -> 0] // FullSimplify;
+   Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // FullSimplify;
+   
+   {Jx, F, V, K, Jy, Jxy, Jyx,  Kd}
+  ]
 
 
 (* Helper function to compute infection indices directly from variable names *)
@@ -404,6 +316,10 @@ extHD[poly_, var_] :=
    Print["Linear factors with possibly negative constant terms: ", linear];
    {highDegree, linear}];
 
+(*bd1*)
+
+
+
 bd1[RN_, rts_] := 
   Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, 
     mSi, inf, mod, K, Jx, Jy, R0, R0A, E0, EA, E1, ngm, fps, 
@@ -416,20 +332,23 @@ bd1[RN_, rts_] :=
    cv = Thread[var >= 0];
    ct = Join[cp, cv];
    mS = minSiph[spe, asoRea[RN]];
-   mSi = Map[Flatten[Position[spe, #] & /@ #] &, mS];
-   inf = Union[Flatten[mSi]];
+
+mSi=Map[Flatten[Position[var, #] & /@ #] &, mS]; 
+inf=Union[Flatten[mSi]];
    
-   (* Compute DFE *)
+           
+(* Compute DFE *)
    cDFE = Flatten[Thread[ToExpression[#] -> 0] & /@ mS];
    RDFE = RHS /. cDFE;
    eq0 = Thread[RDFE == 0];
    var0 = Complement[var, var[[inf]]];
    so0 = Solve[eq0, var0];
-   E0 = Table[
-     v -> If[MemberQ[var[[inf]], v], 0, v /. Flatten[so0]], 
-     {v, var}
-   ];
+   E0 = Join[so0 // Flatten, Thread[var[[inf]] -> 0]];
    
+  
+   mSi=mS;(*simplest and safest*)
+inf=Union[Flatten[mSi]];
+
    (* Compute NGM *)
    mod = {RHS, var, par};
    ngm = NGM[mod, inf];
@@ -449,6 +368,11 @@ bd1[RN_, rts_] :=
    (* Solve for fixed points *)
    fps = Solve[EA[[1]][[1]], EA[[1]][[2]]];
    
+    mS = minSiph[spe, asoRea[RN]];
+
+mSi=Map[Flatten[Position[var, #] & /@ #] &, mS]; 
+inf=Union[Flatten[mSi]];
+
    (* Helper functions *)
    isRationalSolutionQ[sol_] := FreeQ[sol, Sqrt | Power[_, Except[_Integer]] | Root];
    isDFEQ[sol_] := Module[{infectionVars, vals}, 
@@ -461,7 +385,7 @@ bd1[RN_, rts_] :=
    E1 = Select[E1NonDFE, isRationalSolutionQ];
    {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, EA, E1}];
    
- 
+   
 
 
 invN[E1_, E2_, R0A_, E0_, par_, cp_, fval_: {}, ins_: {}] := 
@@ -551,61 +475,39 @@ Print["END invNr OUTPUT"];
 
 
 bdCo[RN_, rts_] := Module[{
-    RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,
-    EA, ElTRat, siphonVars, cEj, RHSEj, eqEj, varEj, solutions, completeSolutions,
-    ngm, infV, alp, bet, gam, cDFE,
-    nonDFESolutions, mSiSymbols
+    bdAnResult, RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,
+    EA, ElTRat, siphonVars, cEj, RHSEj, eqEj, varEj, solutions, completeSolutions,ngm,infV,
+    allInfectionVars,nonDFESolutions
   },
   
-  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infV, alp, 
-   bet, gam, ngm} = bdAn[RN, rts];
+  (* First call bdAn to get basic analysis *)
+  bdAnResult = bdAn[RN, rts];
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,ngm,infV} = bdAnResult;
   
-  (* Normalize mSi to always be symbols *)
-  mSiSymbols = Map[
-    Which[
-      StringQ[#], ToExpression[#],
-      Head[#] === Symbol, #,
-      True, ToExpression[ToString[#]]
-    ] &,
-    mSi,
-    {2}
-  ];
-  
+  (* Compute boundary equilibria for each siphon *)
   EA = {};
   ElTRat = {};
   
   Do[
-    siphonVars = mSiSymbols[[j]];
+    (* Set variables in siphon j to 0 *)
+    siphonVars = var[[Flatten[Position[var, #] & /@ mSi[[j]]]]];
     cEj = Thread[siphonVars -> 0];
     RHSEj = RHS /. cEj;
     eqEj = Thread[RHSEj == 0];
     varEj = Complement[var, siphonVars];
-    
     AppendTo[EA, {eqEj, varEj}];
     
-    solutions = TimeConstrained[
-      Solve[Join[eqEj, cp], varEj],
-      10, 
-      {}
-    ];
+    (* Solve for non-siphon variables *)
+    solutions = Solve[eqEj, varEj];
+    completeSolutions = Table[Join[sol, cEj], {sol, solutions}];
     
-    (* Remove conditional expressions *)
-    solutions = solutions /. ConditionalExpression[expr_, _] :> expr;
-    
-    If[solutions === {},
-      completeSolutions = {};,
-      completeSolutions = Table[Join[sol, cEj], {sol, solutions}];
-    ];
-    
-    (* Filter out DFE-like solutions *)
+    (* Filter out DFE-like solutions (where all infection variables are zero) *)
+    allInfectionVars = var[[Union[Flatten[Flatten[Position[var, #] & /@ #] & /@ mSi]]]];
     nonDFESolutions = Select[completeSolutions, 
-      Function[sol, !And @@ ((# === 0) & /@ (infV /. sol))]];
+      Function[sol, !And @@ ((# === 0) & /@ (allInfectionVars /. sol))]];
     
-    (* Only append if there are actual non-DFE solutions *)
-    If[nonDFESolutions =!= {},
-      AppendTo[ElTRat, nonDFESolutions];
-    ];
+    AppendTo[ElTRat, nonDFESolutions];
     , {j, Length[mSi]}];
   
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV, alp, bet, gam, ElTRat}
+  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV, ElTRat}
 ];
