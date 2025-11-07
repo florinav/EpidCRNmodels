@@ -148,7 +148,7 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   relevantEigenvals = eigenvals[[nonzeroIndices]];
   R0A = relevantEigenvals;*)
   
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infVars,ngm}
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, al, be, gam, ngm}
 ];
 (* Key change explanation:
    The critical fix is in the line:
