@@ -1,12 +1,12 @@
 (* ::Package:: *)
 
 (* EpidCRN1 Main Package - Loader for all subpackages *)
-BeginPackage["EpidCRN1`"];
+BeginPackage["EpidCRN`"];
 (* Global variables *)
 Global`ome;
 
 (* Core1 functions *)
-extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, mSi, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, minimal siphons, and deficiency as {formula, terms, result}.";
+extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
 compToAsso::usage = "(Core1)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "(Core1)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
 asoRea::usage = "(Core1)asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys.";
@@ -18,9 +18,14 @@ str2Sym::usage = "(Core1)str2Sym[string] converts string expressions to symbolic
 sym2Str::usage = "(Core1)sym2Str[symbolic] converts symbolic expressions to string format";
 stoichiometricMatrices::usage = "(Core1){alpha, beta, gamma, species} = stoichiometricMatrices[reactions] creates stoichiometric matrices for a reaction network.";
 reaToRHS::usage = "(Core1){RHS, species, Rv} = reaToRHS[reactions] generates the right-hand side of the ODE system for a reaction network using mass action kinetics.";
-expM::usage = "(Core1)expM[var,expo] gives the vector var at power in matrix expo using 
+expM::usage = "(Core1)expM[var,expo] gives the vector var at power in matrix expo using
 Inner[OperatorApplied[Power],#2,#1,Times]&";
 Par::usage="(Core1)Par[RHS,var] extracts parameters from dynamics";
+allT::usage="(Core1)allT[expr] extracts all terms from expanded polynomial as list";
+isN::usage="(Core1)isN[term] returns True if term has negative sign, False otherwise";
+ODE2RN::usage="(Core){RN,rts,spe,alp,bet,gam}=ODE2RN[RHS,var] converts ODE system to reaction network. RHS is list of expressions, var is list of variables. Returns reaction network RN, rates vector rts, species list spe, reactant matrix alp (alpha), product matrix bet (beta), and net stoichiometric matrix gam (gamma). Algorithm: identifies monomials, uses negative terms to define rates, constructs stoichiometric matrices where sources use alpha=0, then beta=gamma+alpha. Inverse operation to extMat";
+ODE2WY::usage="(Core){W,Y}=ODE2WY[RHS,var] converts ODE system to W,Y matrix format for wr0RealODE. W is coefficient matrix, Y is exponent matrix. Satisfies RHS==W.x^Y.";
+ab2RN::usage="(Core)RN=ab2RN[alp,bet,spe] converts alpha/beta matrices to reaction network format. alp is reactant matrix, bet is product matrix, spe is species list.";
 
 (* CRNT functions *)
 IaFHJ::usage="(CRNT)IaFHJ[vert,edg] analyzes Feinberg-Horn-Jackson graph structure, returns {incidenceMatrix, tableForm}";
@@ -30,11 +35,7 @@ getComE::usage="(CRNT)getComE[RN] extracts complexes and edges from reaction net
 lapK::usage="(CRNT)lapK[RN, rates] computes Laplacian matrix of reaction network";
 
 (* Boundary1 analysis functions *)
-NGM::usage = "NGM[mod, inf] computes the Next Generation Matrix for epidemic models. mod = {RHS, var, par} contains the system dynamics, variables, and parameters. inf is a list of indices specifying infection compartments in the variable list. Returns {Jx, F, V, K, Jy, Jxy, Jyx, chp, Kd} where K is the next generation matrix, F is the transmission matrix, V is the transition matrix, 
-Jx/Jy are Jacobian blocks, and chp is the 
-characteristic polynomial function. 
-The dominant eigenvalue of K gives the basic reproduction 
-number R\:2080.";
+NGM::usage = "NGM[mod, infVars, F] computes Next Generation Matrix. mod={RHS,var,par}. If F provided, validates Inverse[V] all positive under par>0. If not or invalid, uses posM. Returns {Jx,F,V,K,Jy,Jxy,Jyx,Kd}.";
 
 getInfectionIndices::usage = "getInfectionIndices[variables, siphonExpressions] extracts infection compartment indices from minimal siphons. variables is the list of system variables, siphonExpressions is the list of minimal siphon expressions. Returns a list of integer indices corresponding to infection compartments. Used to automatically compute the inf parameter for NGM analysis from siphon structure.";
 DFE::usage="(Boundary1)DFE[mod,inf] yields the disease-free equilibrium of the model";
@@ -117,6 +118,7 @@ toProd::usage="(Conv)toProd[expr] converts expression to product format";
 l2L::usage="(Conv)l2L[list] converts lowercase list format to uppercase format";
 m2toM::usage="(Conv)m2toM[expr] converts m2 expressions to M format";
 remZ::usage="(Conv)remZ[li] removes zeroes from list";
+isNNe::usage="(Utils)isNNe[expr] checks if expression is nonnegative (no negative terms and nonzero)";
 selZR::usage="(Conv)selZR[con] selects zero rules from conditions";
 seZF::usage="(Conv)seZF[so] removes in a list of lists those with a 0";
 strEdg::usage="(Conv)strEdg[edges] processes edge structures for graph operations";
@@ -191,8 +193,8 @@ root=If[StringQ[$InputFileName] && $InputFileName =!= "",
 ];
 
 (* Load in proper order - simple to complex *)
-Get[FileNameJoin[{root, "Siphons.wl"}]];
 Get[FileNameJoin[{root, "Core.wl"}]];
+Get[FileNameJoin[{root, "Siphons.wl"}]];
 Get[FileNameJoin[{root, "Boundary.wl"}]];
 Get[FileNameJoin[{root, "Bifurcation.wl"}]];
 Get[FileNameJoin[{root, "Conv.wl"}]];
@@ -203,5 +205,8 @@ Get[FileNameJoin[{root, "Extra.wl"}]];
 
 End[];
 EndPackage[];
+
+
+
 
 

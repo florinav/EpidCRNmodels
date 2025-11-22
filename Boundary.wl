@@ -122,11 +122,10 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   cp = Thread[par > 0];
   cv = Thread[var >= 0];
   ct = Join[cp, cv];
-  mS = minSiph[spe, asoRea[RN]];
-  mSi = mS;
-
-  (* infVars is union of all siphon variables *)
-  infVars = Union[Flatten[mSi]];
+  mSi = minSiph[spe, RN][[1]];
+  
+ (* infVars is union of all siphon variables - convert strings to symbols *)
+  infVars = ToExpression[Union[Flatten[mSi]]];
 
   cDFE = Thread[infVars -> 0];
   RDFE = RHS /. cDFE;
@@ -232,34 +231,84 @@ bd2[RN_, rts_] :=
 
 
 
-NGM[mod_, infVars_] := 
-  Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, chpx, Kd}, 
+(* Old NGM - commented out, replaced by new version with optional F parameter
+NGM[mod_, infVars_] :=
+  Module[{dyn, X, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, chpx, Kd},
    dyn = mod[[1]];
    X = mod[[2]];
-   
+
    (* Convert infVars to positions in X *)
    inf = Flatten[Position[X, #] & /@ infVars];
-   
+
    infc = Complement[Range[Length[X]], inf];
-   
+
    (* Compute Jacobian blocks *)
    Jx = Grad[dyn[[inf]], X[[inf]]];
    Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
    Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
    Jyx = If[Length[infc] > 0, Grad[dyn[[infc]], X[[inf]]], {}];
-   
+
    chpx = CharacteristicPolynomial[Jx, #] &;
-   
+
    (* NGM computation at DFE (all infection variables = 0) *)
    V1 = -Jx /. Thread[X[[infc]] -> 0];
    F1 = Jx + V1 /. Thread[X[[inf]] -> 0];
    F = posM[F1];
    V = F - Jx;
-   
+
    K = (F . Inverse[V]) /. Thread[X[[inf]] -> 0] // FullSimplify;
    Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // FullSimplify;
-   
+
    {Jx, F, V, K, Jy, Jxy, Jyx,  Kd}
+  ]
+*)
+
+NGM[mod_, infVars_, Fuser_: {}] :=
+  Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, Vinv, allPos},
+   dyn = mod[[1]];
+   X = mod[[2]];
+   par = If[Length[mod] >= 3, mod[[3]], {}];
+
+   (* Convert infVars to positions in X *)
+   inf = Flatten[Position[X, #] & /@ infVars];
+   infc = Complement[Range[Length[X]], inf];
+
+   (* Compute Jacobian blocks *)
+   Jx = Grad[dyn[[inf]], X[[inf]]];
+   Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
+   Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
+   Jyx = If[Length[infc] > 0, Grad[dyn[[infc]], X[[inf]]], {}];
+
+   (* NGM computation at DFE *)
+   V1 = -Jx /. Thread[X[[infc]] -> 0];
+   F1 = Jx + V1 /. Thread[X[[inf]] -> 0];
+
+   (* Check if user provided F *)
+   If[Fuser === {},
+     (* No user F, use automatic posM extraction *)
+     F = posM[F1];
+     V = F - Jx;,
+
+     (* User provided F - validate it *)
+     V = Fuser - Jx;
+     Vinv = Inverse[V] /. Thread[X[[inf]] -> 0];
+
+     (* Check if all entries of Vinv are nonnegative using isNNe *)
+     allPos = AllTrue[Flatten[Vinv], isNNe];
+
+     If[allPos,
+       F = Fuser;
+       Print["NGM: user F accepted (Inverse[V] all positive)"],
+       Print["NGM: user F rejected (Inverse[V] not all positive), using posM"];
+       F = posM[F1];
+       V = F - Jx;
+     ];
+   ];
+
+   K = (F . Inverse[V]) /. Thread[X[[inf]] -> 0] // FullSimplify;
+   Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // FullSimplify;
+
+   {Jx, F, V, K, Jy, Jxy, Jyx, Kd}
   ]
 
 
@@ -511,3 +560,27 @@ bdCo[RN_, rts_] := Module[{
   
   {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV, ElTRat}
 ];
+
+(* Tests for NGM 
+
+RN = {"s" -> "i", "i" -> "s"};
+rts = {be*s*i, ga*i};
+{spe, alp, bet, gam, Rv, RHS, def} = extMat[RN];
+var = ToExpression[spe];
+RHS = gam . rts;
+par = Par[RHS, var];
+mod = {RHS, var, par};
+infVars = {i};
+ngm1 = NGM[mod, infVars];
+Print["Test 1 - NGM without user F: K=", ngm1[[4]]];
+
+Fuser = {{be*s}};
+ngm2 = NGM[mod, infVars, Fuser];
+Print["Test 2 - NGM with valid F: K=", ngm2[[4]]];
+
+Finvalid = {{-be*s}};
+ngm3 = NGM[mod, infVars, Finvalid];
+Print["Test 3 - NGM with invalid F: K=", ngm3[[4]]];*)
+
+
+

@@ -15,7 +15,12 @@ t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
 
 reCL[re_] :=DeleteCases[re, _Symbol > 0 | Subscript[_, __] > 0, Infinity];
 
- remZ[li_]:=Select[li, # =!= 0 &];
+remZ[li_]:=Select[li, # =!= 0 &];
+
+isNNe[m_] := m // Together // NumeratorDenominator //
+  Map@CoefficientArrays //
+  ReplaceAll[sa_SparseArray :> sa["NonzeroValues"]] // Flatten //
+  AllTrue[#, NonNegative] &;
 
 whenP=Function[exprs,
   Module[{params,reducedConditions},
@@ -61,11 +66,24 @@ BadModule[] := Module[{mat = {{x + y, x - y}, {x, y}}},
 *)
 
 Grobpol[RHS_, var_, par_, ind_, cn_ : {}] := Module[{dyn, X, eq, elim, pol, ratsub},
-  dyn = RHS; 
-  X = var; 
-  eq = Thread[dyn == 0]; 
+  dyn = RHS;
+  X = var;
+  eq = Thread[dyn == 0];
   elim = Complement[Range[Length[X]], ind];
-  pol = Collect[GroebnerBasis[Numerator[Together[dyn /. cn]], 
+  pol = Collect[GroebnerBasis[Numerator[Together[dyn /. cn]],
     Join[par, X[[ind]]], X[[elim]]], X[[ind]]];
   { pol}
 ]
+
+(* Tests for isNNe 
+
+isNNe[a + b]
+isNNe[1/(a*b)]
+isNNe[-a]
+isNNe[a - b]
+isNNe[0]
+*)
+
+
+
+

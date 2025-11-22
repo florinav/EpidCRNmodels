@@ -31,9 +31,14 @@
 
 \section{Package Overview}
 
-\textbf{EpidCRN} is a Mathematica package for epidemiological models (ME), which uses Chemical Reaction Network Theory (CRNT) methods. It aims to analyze models with unique disease-free boundary fixed point (DFE), possibly multi-strain (ie. with other boundary fixed points besides the DFE), and with unique positive fixed point (endemic).
+\textbf{EpidCRN} is a Mathematica package for epidemiological models (ME) (whose definition assumes the existence of a unique disease-free boundary fixed point =DFE), which aims to use also Chemical Reaction Network Theory (CRNT) methods.
+Models are entered as a pair formed by the  reactions "RN", (which do not depend on the form of the rates), and their rates "rts". The first could be viewed as a definition/standardization of the model, and the second as a secondary feature, which may be chosen as polynomial (mass-action), or  fractional, at the convenience of the author, and depending
+on the availability of data.
 
-Our object of study are models with possibly several boundary fixed points (or minimal siphons, in CRN terminology), which we call multi-strain, the focus of our package is somewhat different than that of other similar packages; in particular, a major concern is the flexibility of operating symbolically whenever this is possible (this is a major concern in ME).
+
+The main object of study are models with possibly several boundary fixed points 
+besides the DFE (or minimal siphons, in CRN terminology), which we call multi-strain.  The focus of our package is somewhat different than that of other similar packages, a major concern being  the flexibility of operating symbolically whenever this is possible (this is a major concern in ME).Once the model is input,   anything should be achievable, at the usual cost. For example,  rational computations of $R_0$ are achieved instantaneously (for multi-strains, this is the max of individual $R_i$ for each strain), but small non-rational $R_0$ may require further effort.  Also, invasion numbers, which appear in stability conditions for the non DFE  boundary fixed points, are instantaneous if rational, but  may require work from the user, if the "siphon"  boundary fixed points are not rational.  Numeric stability scans are also available, in cases where stability is not symbolic, but the user needs to adjust various tolerances, to make this work. In summary, the package aims to provide trivial computations and also less trivial ones, but the latter are at the cost of extra user's time.
+
 
 \section{Package Structure}
 
@@ -851,6 +856,233 @@ Print["Boundary equilibria: ", bdfpT];
 \item Functions are fully documented in respective notebook files
 \item Compatible with existing EpidCRN workflow (NGM, scanning, bifurcation)
 \end{enumerate}
+
+\section{Reaction Network Formats and Converters}
+
+The EpidCRN package uses three formats for reaction networks:
+
+\subsection{Format 1: Symbolic Format}
+\textbf{Used by:} Internal computations
+
+\textbf{Format:} Reactions use symbolic variables
+\begin{lstlisting}
+RN = {0 -> s, i+s -> 2*i, s -> 0, i -> 0}
+\end{lstlisting}
+
+\textbf{Characteristics:}
+\begin{itemize}
+\item Species are Mathematica symbols (s, i, r, etc.)
+\item Sum of species: i+s (symbolic Plus)
+\item Suitable for direct mathematical operations
+\item Can be converted using symbToStr
+\end{itemize}
+
+\subsection{Format 2: String-Plus Format}
+\textbf{Used by:} bdAn, NGM, most package functions
+
+\textbf{Format:} String species with Plus for sums
+\begin{lstlisting}
+RN = {"0" -> "s", "i" + "s" -> "2i", "s" -> "0"}
+\end{lstlisting}
+
+\textbf{Characteristics:}
+\begin{itemize}
+\item Species are strings ("s", "i", "r", etc.)
+\item Sum of species: "i" + "s" (Plus of strings)
+\item Required format for bdAn, NGM, and analysis functions
+\item Standard format throughout most of the package
+\end{itemize}
+
+\subsection{Format 3: Concatenated String Format}
+\textbf{Used by:} Display/printing only (not functional)
+
+\textbf{Format:} Single concatenated strings
+\begin{lstlisting}
+RN = {0 -> s, s+i -> 2i, s -> 0}
+\end{lstlisting}
+
+\textbf{Characteristics:}
+\begin{itemize}
+\item Species sums as single strings: "s+i" (not "s"+"i")
+\item Not accepted by bdAn or other package functions
+\item Only for display purposes
+\item Must be converted to Format 2 for use
+\end{itemize}
+
+\subsection{Format Converters}
+
+\subsubsection{symbToStr - Convert Symbolic to String Format}
+\textbf{Purpose:} Converts symbolic RN (from ODE2RN) to string format for use with bdAn, NGM
+
+\textbf{Usage:}
+\begin{lstlisting}
+(* Get symbolic RN from ODE2RN *)
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+
+(* Convert to string format for bdAn/NGM *)
+RNstr = symbToStr /@ RN;
+
+(* Now can use with bdAn *)
+{RHSback, speBack, Rv} = bdAn[RNstr, rts];
+\end{lstlisting}
+
+\subsubsection{strToSymb - Convert String to Symbolic Format}
+\textbf{Purpose:} Converts string-based RN to symbolic format
+
+\textbf{Usage:}
+\begin{lstlisting}
+(* String format RN *)
+RNstr = {"0" -> "s", "s" -> "0"};
+
+(* Convert to symbolic *)
+RNsym = strToSymb[RNstr];
+\end{lstlisting}
+
+\subsection{Workflow: ODE2RN to NGM}
+
+To use ODE2RN output with NGM and other package functions:
+
+\begin{lstlisting}
+(* Step 1: Convert ODE to RN *)
+RHS = {La - be*i*s - mu*s, be*i*s - (ga + mu)*i};
+var = {s, i};
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+(* RN is already in string format, ready to use *)
+
+(* Step 2: Use with bdAn to get model structure *)
+{RHSback, speBack, Rv} = bdAn[RN, rts];
+mod = {RHSback, var, parameters};
+
+(* Step 3: Use with NGM *)
+infVars = {2};  (* Index of infection variable *)
+ngmResult = NGM[mod, infVars];
+\end{lstlisting}
+
+\textbf{Note:} ODE2RN now outputs RN in string format directly, so no conversion is needed.
+
+\section{ODE to Reaction Network Conversion}
+
+\subsection{ODE2RN - Convert ODE System to Reaction Network}
+
+\textbf{Purpose:} Converts an ODE system to a chemical reaction network representation by identifying monomials and reconstructing the stoichiometric structure.
+
+\subsubsection{Algorithm}
+
+Given an ODE system $\frac{dx_i}{dt} = f_i(x)$, the algorithm uses helper functions \texttt{allT} (extract all terms) and \texttt{isN} (detect negative sign):
+
+\begin{enumerate}
+\item \textbf{Extract all terms:} Use \texttt{allT[RHS[[i]]]} to expand each equation and extract all terms (monomials with coefficients)
+\item \textbf{Separate by sign:} Use \texttt{isN[term]} to classify terms:
+  \begin{itemize}
+  \item Sources: positive terms (where \texttt{isN[term]=False})
+  \item Sinks: negative terms (where \texttt{isN[term]=True})
+  \end{itemize}
+\item \textbf{Build rates (rts):} Join sources and negated sinks, remove duplicates: \texttt{rts = DeleteDuplicates[Join[sources, -sinks]]}
+\item \textbf{Build gam ($\gamma$):} For each equation and each rate, check if rate appears:
+  \begin{itemize}
+  \item If rate appears as negative term: $\gamma_{ij} = -1$
+  \item If rate appears as positive term: $\gamma_{ij} = +1$
+  \item If rate does not appear: $\gamma_{ij} = 0$
+  \end{itemize}
+\item \textbf{Build alp ($\alpha$):} Reactant matrix from exponents: $\alpha_{ij} = \text{Exponent}[\text{rts}[[j]], \text{var}[[i]]]$
+\item \textbf{Build bet ($\beta$):} Product matrix: $\beta = \gamma + \alpha$
+\item \textbf{Build RN:} Construct reaction network from $\alpha$ (left side) and $\beta$ (right side)
+\end{enumerate}
+
+\textbf{Helper functions:}
+\begin{itemize}
+\item \texttt{allT[expr]}: Expands polynomial and returns list of all terms
+\item \texttt{isN[term]}: Returns True if term has negative sign (coefficient -1 or negative number)
+\end{itemize}
+
+\subsubsection{Mathematical Foundation}
+
+For an ODE system:
+$$\frac{dx}{dt} = \sum_j \gamma_j \cdot r_j(x)$$
+
+where $\gamma_j$ is the $j$-th column of the stoichiometric matrix and $r_j$ is the $j$-th reaction rate.
+
+\textbf{Sign convention:}
+\begin{itemize}
+\item Positive-only terms $\rightarrow$ production (0 $\rightarrow$ species)
+\item Negative-containing terms $\rightarrow$ consumption (reactants)
+\item Constants (sources) $\rightarrow$ reactions from empty set
+\end{itemize}
+
+\subsubsection{Key Assumption}
+
+\textbf{Positive-only monomials:} Monomials appearing only with positive sign are assumed to appear in exactly one reaction. This simplifies rate identification.
+
+\subsubsection{Usage}
+
+\begin{lstlisting}
+(* Input: ODE system as list of expressions *)
+RHS = {La - mu*s - be*s*i, be*s*i - (mu+ga)*i};
+var = {s, i};
+
+(* Convert to reaction network *)
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+
+(* Output: *)
+(* RN: reaction network in standard format *)
+(* rts: rate vector *)
+(* spe: species list *)
+(* alp: alpha matrix (reactants) *)
+(* bet: beta matrix (products) *)
+(* gam: gamma matrix (net) *)
+\end{lstlisting}
+
+\subsubsection{Example}
+
+\textbf{Input ODE:}
+\begin{align}
+\frac{ds}{dt} &= \Lambda - \mu s - \beta s i\\
+\frac{di}{dt} &= \beta s i - (\mu + \gamma) i
+\end{align}
+
+\textbf{Algorithm steps:}
+\begin{enumerate}
+\item \textbf{Extract terms:} allT gives $\{\Lambda, -\mu s, -\beta si\}$ for eq1, $\{\beta si, -\gamma i, -\mu i\}$ for eq2
+\item \textbf{Separate by sign:} sources = $\{\Lambda, \beta si\}$, sinks = $\{-\mu s, -\beta si, -\gamma i, -\mu i\}$
+\item \textbf{Rates:} rts = $\{\Lambda, \beta si, \mu s, \gamma i, \mu i\}$ (after removing duplicates)
+\item \textbf{Gamma:}
+$$\gamma = \begin{pmatrix} 1 & -1 & -1 & 0 & 0 \\ 0 & 1 & 0 & -1 & -1 \end{pmatrix}$$
+\item \textbf{Alpha (exponents):}
+$$\alpha = \begin{pmatrix} 0 & 1 & 1 & 0 & 0 \\ 0 & 1 & 0 & 1 & 1 \end{pmatrix}$$
+\item \textbf{Beta = gamma + alpha:}
+$$\beta = \begin{pmatrix} 1 & 0 & 0 & 0 & 0 \\ 0 & 2 & 0 & 0 & 0 \end{pmatrix}$$
+\end{enumerate}
+
+\textbf{Output RN:}
+\begin{lstlisting}
+RN = {0 -> s, i+s -> 2*i, s -> 0, i -> 0, i -> 0};
+rts = {La, be*i*s, mu*s, ga*i, i*mu};
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+
+\begin{enumerate}
+\item Function returns lists (not associations) following EpidCRN convention
+\item Species names are lowercase strings in RN output (via ToLowerCase)
+\item Rate vector corresponds to reaction order in RN
+\item Stoichiometric matrices follow standard CRNT conventions
+\item Verification: $\frac{dx}{dt} = \gamma \cdot rts$ reproduces original ODE
+\item Matrix names: alp, bet, gam (3 letters for matrices)
+\item Helper functions allT and isN use Expand and detect negative coefficients via pattern matching
+\item Gamma matrix uses -1 for consumption (negative terms) and +1 for production (positive terms)
+\item Alpha matrix extracts exponents directly using Exponent function
+\end{enumerate}
+
+\subsubsection{Location}
+
+Implemented in \texttt{Core.wl} (lines 308-459) with helper functions:
+\begin{itemize}
+\item allT (line 312): Extract all terms from expanded polynomial
+\item isN (line 318): Detect negative sign in term
+\item ODE2RN (line 344): Main conversion function
+\end{itemize}
+
+Inverse operation to \texttt{extMat}.
 
 \input{plan}
 

@@ -1,0 +1,138 @@
+In[80]:=
+(* Recker Antigenic Variation Model *)
+(* Multi-strain pathogen model with antigenic variation *)
+
+<<EpidCRN`
+
+(* ========= Recker-type model with ecological homeostasis ========= *)
+(* user chooses number of variants *)
+n = 3;  (* example *)
+
+(* symbolic variables for algebra *)
+varV = Array[v, n];      (* {v1,v2,...} *)
+varX = Array[x, n];      (* {x1,x2,...} *)
+z    = z;                (* plain symbol *)
+var  = Join[varV, varX, {z}];
+
+(* Reaction network (RN) with string species *)
+RN = Join[
+  (* v dynamics *)
+  Table["v"<>ToString[i] -> 2*"v"<>ToString[i], {i, n}],
+  Table["v"<>ToString[i] + "x"<>ToString[i] -> "x"<>ToString[i], {i, n}],
+  Table["v"<>ToString[i] + "z" -> "z", {i, n}],
+  
+  (* x_i homeostasis + production *)
+  Table[0 -> "x"<>ToString[i], {i, n}],
+  Table["x"<>ToString[i] -> 0, {i, n}],
+  Table["v"<>ToString[i] -> "v"<>ToString[i] + "x"<>ToString[i], {i, n}],
+  
+  (* z homeostasis + infection-driven production *)
+  {0 -> "z", "z" -> 0},
+  Table["v"<>ToString[i] -> "v"<>ToString[i] + "z", {i, n}]
+];
+
+(* Corresponding rate expressions (symbols, lowercase parameters) *)
+rts = Join[
+  Table[phi*varV[[i]], {i, n}],
+  Table[al*varV[[i]]*varX[[i]], {i, n}],
+  Table[alp*varV[[i]]*z, {i, n}],
+  
+  Table[lamx, {i, n}],
+  Table[mu*varX[[i]], {i, n}],
+  Table[be*varV[[i]], {i, n}],
+  
+  {lamz, mup*z},
+  Table[bep*varV[[i]], {i, n}]
+];
+
+Print["reactions and transitions: ",Transpose[{RN,rts}]//MatrixForm]
+
+{spe, alpha, beta, gamma, Rv, RHS, mSi, {defFormula, defTerms, defResult}}=extMat[RN];
+Print["mSi=", mSi];var=ToExpression[spe]
+During evaluation of In[80]:= reactions and transitions: (v1->2 v1	phi v[1]
+v2->2 v2	phi v[2]
+v3->2 v3	phi v[3]
+v1+x1->x1	al v[1] x[1]
+v2+x2->x2	al v[2] x[2]
+v3+x3->x3	al v[3] x[3]
+v1+z->z	alp z v[1]
+v2+z->z	alp z v[2]
+v3+z->z	alp z v[3]
+0->x1	lamx
+0->x2	lamx
+0->x3	lamx
+x1->0	mu x[1]
+x2->0	mu x[2]
+x3->0	mu x[3]
+v1->v1+x1	be v[1]
+v2->v2+x2	be v[2]
+v3->v3+x3	be v[3]
+0->z	lamz
+z->0	mup z
+v1->v1+z	bep v[1]
+v2->v2+z	bep v[2]
+v3->v3+z	bep v[3]
+
+)
+During evaluation of In[80]:= mSi={{v1},{v2},{v3}}
+Out[104]= {v1,v2,v3,x1,x2,x3,z}
+In[51]:=
+{RHS, var, par, cp, mSi, Jx, Jy,cDFE, E0, K, R0A, infVars, alMat, 
+  beMat, gam, ngm}=bdAn[RN,rts];
+Print["RHS=",RHS,"E0 is",E0," K=", K//MatrixForm," infV=",infV," the ",R0A//Length,"repr fns=",R0A]
+
+
+During evaluation of In[51]:= Part::partw: Part 1 of {} does not exist.
+During evaluation of In[51]:= Singular case
+During evaluation of In[51]:= RHS={phi v[1]-alp z v[1]-al v[1] x[1],phi v[2]-alp z v[2]-al v[2] x[2],phi v[3]-alp z v[3]-al v[3] x[3],lamx+be v[1]-mu x[1],lamx+be v[2]-mu x[2],lamx+be v[3]-mu x[3],lamz-mup z+bep v[1]+bep v[2]+bep v[3]}E0 is{}[[1]] K=singular infV=infV the 1repr fns=Eigenvalues[singular]
+(* Analysis *)
+recAnt[RN_, rts_] := bd2[RN, rts]
+
+results = recAnt[RN, rts]
+{RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = results
+Print["Minimal Siphons: ", mSi]
+Print["R0 values: ", R0A]
+Print["Boundary fixed points: ", bdfpT]
+
+Out[163]= {0->s,i1+s->2 i1,i2+s->2 i2,i3+s->2 i3,i1->r1,i2->r2,i3->r3,s->0,i1->0,i2->0,i3->0,r1->0,r2->0,r3->0,r1->s,r2->s,r3->s}
+Out[165]= {\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}
+During evaluation of In[157]:= Set::shape: Lists {EpidCRN`Private`spe$8453,EpidCRN`Private`al$8453,EpidCRN`Private`be$8453,EpidCRN`Private`gam$8453,EpidCRN`Private`Rv$8453,EpidCRN`Private`RHS$8453,EpidCRN`Private`def$8453} and {{s,i1,i2,i3,r1,r2,r3},<<6>>,{\[Delta] = Nc - \[ScriptL] - s,Nc = 14 (complexes), \[ScriptL] = 1 (linkage classes), s = 7 (stoich dimension),\[Delta] = 14 - 1 - 7 = 6}} are not the same shape.
+During evaluation of In[157]:= Complement::normal: Nonatomic expression expected at position 2 in Complement[{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],<<7>>}},EpidCRN`Private`spe$8453].
+During evaluation of In[157]:= Join::heads: Heads Greater and GreaterEqual at positions 1 and 2 are expected to be the same.
+During evaluation of In[157]:= Subsets::normal: Nonatomic expression expected at position 1 in Subsets[EpidCRN`Private`spe$8453,{1,0}].
+During evaluation of In[157]:= Subsets::argb: Subsets called with 0 arguments; between 1 and 3 arguments are expected.
+During evaluation of In[157]:= Subsets::argb: Subsets called with 0 arguments; between 1 and 3 arguments are expected.
+During evaluation of In[157]:= Subsets::argb: Subsets called with 0 arguments; between 1 and 3 arguments are expected.
+During evaluation of In[157]:= General::stop: Further output of Subsets::argb will be suppressed during this calculation.
+During evaluation of In[157]:= ToExpression::notstrbox: Subsets[] is not a string or a box. ToExpression can only interpret strings or boxes as Wolfram Language input.
+During evaluation of In[157]:= ToExpression::notstrbox: Subsets[] is not a string or a box. ToExpression can only interpret strings or boxes as Wolfram Language input.
+During evaluation of In[157]:= Part::pkspec1: The expression {Subsets[]} cannot be used as a part specification.
+During evaluation of In[157]:= Complement::normal: Nonatomic expression expected at position 1 in Complement[EpidCRN`Private`spe$8453,EpidCRN`Private`spe$8453[[{Subsets[]}]]].
+During evaluation of In[157]:= Part::pkspec1: The expression {Subsets[]} cannot be used as a part specification.
+During evaluation of In[157]:= Join::heads: Heads List and Rule at positions 1 and 2 are expected to be the same.
+During evaluation of In[157]:= Symbol::argx: Symbol called with 0 arguments; 1 argument is expected.
+During evaluation of In[157]:= Symbol::argx: Symbol called with 0 arguments; 1 argument is expected.
+During evaluation of In[157]:= Symbol::argx: Symbol called with 0 arguments; 1 argument is expected.
+During evaluation of In[157]:= General::stop: Further output of Symbol::argx will be suppressed during this calculation.
+During evaluation of In[157]:= Eigensystem::matsq: Argument {} at position 1 is not a non-empty square matrix.
+During evaluation of In[157]:= Part::partw: Part 2 of Eigensystem[{}] does not exist.
+During evaluation of In[157]:= Part::pkspec1: The expression {Subsets[]} cannot be used as a part specification.
+During evaluation of In[157]:= General::stop: Further output of Part::pkspec1 will be suppressed during this calculation.
+During evaluation of In[157]:= Complement::normal: Nonatomic expression expected at position 1 in Complement[EpidCRN`Private`spe$8453,EpidCRN`Private`spe$8453[[{Subsets[]}]]].
+During evaluation of In[157]:= General::stop: Further output of Complement::normal will be suppressed during this calculation.
+Out[170]= {EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3},EpidCRN`Private`spe$8453,Complement[{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}},EpidCRN`Private`spe$8453],Complement[{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}},EpidCRN`Private`spe$8453]>0,{Subsets[],Subsets[]},\!\(\*
+SubscriptBox["\[Del]", 
+TemplateArgBox[
+RowBox[{"Symbol", "[", "]"}]]]\*
+TemplateArgBox[
+RowBox[{"Dot", "[", "]"}]]\),{},Join[{},EpidCRN`Private`spe$8453[[{Subsets[]}]]->0],{},{},{{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}==0,Complement[EpidCRN`Private`spe$8453,EpidCRN`Private`spe$8453[[{Subsets[]}]]]},{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}==0,Complement[EpidCRN`Private`spe$8453,EpidCRN`Private`spe$8453[[{Subsets[]}]]]}},{},{}}
+During evaluation of In[157]:= Set::shape: Lists {RHS,var,par,cp,mSi,Jx,Jy,E0,ngm,R0A,<<2>>} and {EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],<<7>>},EpidCRN`Private`spe$8453,<<7>>,{},<<3>>} are not the same shape.
+Out[171]= {EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3},EpidCRN`Private`spe$8453,Complement[{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}},EpidCRN`Private`spe$8453],Complement[{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}},EpidCRN`Private`spe$8453]>0,{Subsets[],Subsets[]},\!\(\*
+SubscriptBox["\[Del]", 
+TemplateArgBox[
+RowBox[{"Symbol", "[", "]"}]]]\*
+TemplateArgBox[
+RowBox[{"Dot", "[", "]"}]]\),{},Join[{},EpidCRN`Private`spe$8453[[{Subsets[]}]]->0],{},{},{{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}==0,Complement[EpidCRN`Private`spe$8453,EpidCRN`Private`spe$8453[[{Subsets[]}]]]},{EpidCRN`Private`gam$8453.{\[CapitalLambda],Subscript[i, 1] s \[Beta]1,Subscript[i, 2] s \[Beta]2,i3 s \[Beta]3,Subscript[i, 1] \[Gamma]1,Subscript[i, 2] \[Gamma]2,i3 \[Gamma]3,s \[Mu],Subscript[i, 1] \[Mu],Subscript[i, 2] \[Mu],i3 \[Mu],Subscript[r, 1] \[Mu],Subscript[r, 2] \[Mu],r3 \[Mu],Subscript[r, 1] \[Rho]1,Subscript[r, 2] \[Rho]2,r3 \[Rho]3}==0,Complement[EpidCRN`Private`spe$8453,EpidCRN`Private`spe$8453[[{Subsets[]}]]]}},{},{}}
+During evaluation of In[157]:= Minimal Siphons: {{v1},{v2}}
+During evaluation of In[157]:= R0 values: {}
+During evaluation of In[157]:= Boundary fixed points: bdfpT
