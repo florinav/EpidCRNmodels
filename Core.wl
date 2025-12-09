@@ -132,14 +132,17 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
 
 
 (* Main extMat function - now handles symbolic stoichiometry *)
-extMat[reactions_] := Module[{
-  spe, al, be, gamma, Rv, RHS, 
-  numReactions, numSpecies, reactants, products, 
-  var, rv, tk, complexes,
-  defFormula, defTerms, defResult, Nc, l, s, mSi},
-  
-  (* Extract species (lowercase) *)
-  spe = extSpe[reactions];
+extMat[reactions_, speOrder_List:{}] := Module[{
+  spe, al, be, gamma, Rv, RHS,
+  numReactions, numSpecies, reactants, products,
+  var, rv, tk, defFormula, defTerms, defResult, Nc, l, s, mSi},
+
+  (* Extract species (lowercase), use provided order if given *)
+  If[Length[speOrder] > 0,
+    spe = ToLowerCase[ToString[#]] & /@ speOrder;
+  ,
+    spe = extSpe[reactions];
+  ];
   
   (* Check if species were found *)
   If[Length[spe] == 0,
@@ -195,30 +198,17 @@ extMat[reactions_] := Module[{
   Rv = tk*rv;
   RHS = gamma . Rv;
   
-  (* Complexes for deficiency *)
-  complexes = DeleteDuplicates[
-    Flatten[Table[{reactions[[i, 1]], reactions[[i, 2]]}, {i, Length[reactions]}]]
-  ];
-  
-  (* Deficiency - for symbolic matrices, may need numeric substitution *)
-  Nc = Length[complexes];
-  l = 1;
-  s = If[gamma === {} || AllTrue[Flatten[gamma], # == 0 &], 
-    0, 
-    If[AllTrue[Flatten[gamma], NumericQ],
-      MatrixRank[gamma],
-      "symbolic"
-    ]
-  ];
-  
+  (* Use defi for deficiency calculation *)
+  {Nc, l, s, mSi} = defi[reactions];
+
   defFormula = "\[Delta] = Nc - \[ScriptL] - s";
   defTerms = "Nc = " <> ToString[Nc] <> " (complexes), " <>
-             "\[ScriptL] = " <> ToString[l] <> " (linkage classes), " <> 
+             "\[ScriptL] = " <> ToString[l] <> " (linkage classes), " <>
              "s = " <> ToString[s] <> " (stoich dimension)";
-  defResult = If[s === "symbolic",
+  defResult = If[mSi === "symbolic",
     "\[Delta] = symbolic (requires numeric parameter values)",
     "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <>
-      " - " <> ToString[s] <> " = " <> ToString[Nc - l - s]
+      " - " <> ToString[s] <> " = " <> ToString[mSi]
   ];
 
   (* Return *)
@@ -344,8 +334,9 @@ Print["isN[-mu*s]=", isN[-mu*s], " isN[be*i*s]=", isN[be*i*s], " isN[-ga*i]=", i
 (* ========================================================================= *)
 
 ODE2RN[RHS_List, var_List] := Module[{
-  n, allTermsByEq, allTermsFlat, sources, sinks, rts,
-  gam, alp, bet, RN, spe, ii, jj, kk, mono, coeff, varPart, coeffPart
+  n, allTermsByEq, allTermsFlat, sources, sinks, rtsRaw,
+  gam, alp, bet, RN, spe, ii, jj, kk,
+  alpRaw, gamRaw, uniqueAlpCols, mergeIdx, rts
   },
 
   n = Length[var];
@@ -353,39 +344,30 @@ ODE2RN[RHS_List, var_List] := Module[{
 
   (* STEP 1: Extract all terms from each equation using allT *)
   allTermsByEq = Table[allT[RHS[[ii]]], {ii, n}];
-
-  (* Flatten all terms across all equations *)
   allTermsFlat = Flatten[allTermsByEq];
 
   (* STEP 2: Separate into sources (positive-only) and sinks (negative) using isN *)
-  sources = Select[allTermsFlat, !isN[#]&];  (* positive terms *)
-  sinks = Select[allTermsFlat, isN[#]&];     (* negative terms *)
-
-  (* Remove duplicates *)
+  sources = Select[allTermsFlat, !isN[#]&];
+  sinks = Select[allTermsFlat, isN[#]&];
   sources = DeleteDuplicates[sources];
   sinks = DeleteDuplicates[sinks];
 
-  (* STEP 3: Build rts from sources and negated sinks *)
-  (* For sinks, negate them to get positive rates *)
-  rts = Join[sources, -sinks];
+  (* STEP 3: Build rtsRaw from sources and negated sinks *)
+  rtsRaw = Join[sources, -sinks];
+  rtsRaw = DeleteDuplicates[rtsRaw];
+  rtsRaw = Select[rtsRaw, # =!= 0 &];
 
-  (* Remove duplicates and any zero rates *)
-  rts = DeleteDuplicates[rts];
-  rts = Select[rts, # =!= 0 &];
-
-  (* Build gamma matrix: gam[[eq, rate]] = coefficient of rts[[rate]] in RHS[[eq]] *)
-  gam = Table[
+  (* Build raw gamma matrix *)
+  gamRaw = Table[
     Module[{eqTerms, coeff},
       eqTerms = allT[RHS[[ii]]];
       Table[
-        (* Check if this rate appears in this equation *)
         coeff = 0;
         Do[
           Module[{term, termAbs},
             term = eqTerms[[kk]];
             termAbs = If[isN[term], -term, term];
-            (* If this term matches the rate *)
-            If[termAbs === rts[[jj]],
+            If[termAbs === rtsRaw[[jj]],
               coeff = If[isN[term], -1, 1];
               Break[];
             ];
@@ -393,63 +375,68 @@ ODE2RN[RHS_List, var_List] := Module[{
           {kk, Length[eqTerms]}
         ];
         coeff
-      , {jj, Length[rts]}]
+      , {jj, Length[rtsRaw]}]
     ],
     {ii, n}
   ];
 
-  (* Build alpha matrix: alp[[species, rate]] = exponent of var[[species]] in rts[[rate]] *)
-  alp = Table[
+  (* Build raw alpha matrix: exponents of variables in each rate *)
+  alpRaw = Table[
     Module[{rate},
-      rate = rts[[jj]];
-      (* Extract exponent of var[[ii]] from rate *)
+      rate = rtsRaw[[jj]];
       If[FreeQ[rate, var[[ii]]], 0, Exponent[rate, var[[ii]]]]
     ],
-    {ii, n}, {jj, Length[rts]}
+    {ii, n}, {jj, Length[rtsRaw]}
+  ];
+
+  (* STEP 4: Merge reactions with same source AND same gamma (same alp and gam columns) *)
+  (* Create combined key: {alp column, gam column} *)
+  Module[{alpGamPairs, uniquePairs},
+    alpGamPairs = Table[{Transpose[alpRaw][[jj]], gamRaw[[All, jj]]}, {jj, Length[rtsRaw]}];
+    uniquePairs = DeleteDuplicates[alpGamPairs];
+
+    rts = {};
+    gam = ConstantArray[0, {n, Length[uniquePairs]}];
+    alp = ConstantArray[0, {n, Length[uniquePairs]}];
+
+    Do[
+      (* Find all indices that match this unique pair *)
+      mergeIdx = Flatten[Position[alpGamPairs, uniquePairs[[jj]]]];
+      (* Sum the rates *)
+      AppendTo[rts, Total[rtsRaw[[mergeIdx]]]];
+      (* Set alp and gam from the unique pair *)
+      alp[[All, jj]] = uniquePairs[[jj, 1]];
+      gam[[All, jj]] = uniquePairs[[jj, 2]],
+      {jj, Length[uniquePairs]}
+    ]
   ];
 
   (* Build beta matrix: bet = gam + alp *)
   bet = gam + alp;
 
-  (* Build reaction network RN in String-Plus format (Format 2: "s" + "i") *)
+  (* Build reaction network RN using string format "s" + "i" -> 2*"i" *)
   RN = Table[
-    Module[{left, right, kk, leftTerms, rightTerms},
+    Module[{left, right, leftTerms, rightTerms},
       (* Left side (reactants from alp) *)
       leftTerms = Table[
-        If[alp[[kk, jj]] == 0,
-          Nothing,
-          If[alp[[kk, jj]] == 1,
-            spe[[kk]],
-            ToString[alp[[kk, jj]]] <> spe[[kk]]
-          ]
+        If[alp[[kk, jj]] == 0, Nothing,
+          If[alp[[kk, jj]] == 1, spe[[kk]], alp[[kk, jj]] * spe[[kk]]]
         ],
         {kk, n}
       ];
-      left = If[Length[leftTerms] == 0,
-        "0",
-        If[Length[leftTerms] == 1,
-          leftTerms[[1]],
-          Plus @@ leftTerms  (* Creates "s" + "i" Plus format *)
-        ]
+      left = If[Length[leftTerms] == 0, 0,
+        If[Length[leftTerms] == 1, leftTerms[[1]], Plus @@ leftTerms]
       ];
 
       (* Right side (products from bet) *)
       rightTerms = Table[
-        If[bet[[kk, jj]] == 0,
-          Nothing,
-          If[bet[[kk, jj]] == 1,
-            spe[[kk]],
-            ToString[bet[[kk, jj]]] <> spe[[kk]]
-          ]
+        If[bet[[kk, jj]] == 0, Nothing,
+          If[bet[[kk, jj]] == 1, spe[[kk]], bet[[kk, jj]] * spe[[kk]]]
         ],
         {kk, n}
       ];
-      right = If[Length[rightTerms] == 0,
-        "0",
-        If[Length[rightTerms] == 1,
-          rightTerms[[1]],
-          Plus @@ rightTerms  (* Creates "s" + "i" Plus format *)
-        ]
+      right = If[Length[rightTerms] == 0, 0,
+        If[Length[rightTerms] == 1, rightTerms[[1]], Plus @@ rightTerms]
       ];
 
       left -> right
@@ -457,13 +444,92 @@ ODE2RN[RHS_List, var_List] := Module[{
     {jj, Length[rts]}
   ];
 
-  (* Print["gam=", gam]; *)
-  (* Print["alp=", alp//MatrixForm]; *)
-  (* Print["bet=", bet//MatrixForm]; *)
-  (* Print["RN=", RN]; *)
-
-  (* Return *)
   {RN, rts, spe, alp, bet, gam}
+];
+
+(* ========================================================================= *)
+(* DEFICIENCY AND WEAK REVERSIBILITY *)
+(* ========================================================================= *)
+
+(* defi[RN] - computes deficiency: delta = Nc - l - s *)
+(* Nc = number of complexes, l = linkage classes, s = rank of gamma *)
+defi[RN_] := Module[{complexes, adj, graph, l, s, gam, spe, al, be, Nc, ii, jj, numSpe, numRea, reactants, products},
+  (* Get complexes *)
+  complexes = DeleteDuplicates[Flatten[{First[#], Last[#]} & /@ RN]];
+  Nc = Length[complexes];
+
+  (* Build adjacency matrix for undirected graph *)
+  adj = ConstantArray[0, {Nc, Nc}];
+  Do[
+    Module[{src, tgt, srcPos, tgtPos},
+      src = First[RN[[ii]]];
+      tgt = Last[RN[[ii]]];
+      srcPos = Position[complexes, src][[1, 1]];
+      tgtPos = Position[complexes, tgt][[1, 1]];
+      adj[[srcPos, tgtPos]] = 1;
+      adj[[tgtPos, srcPos]] = 1;
+    ], {ii, Length[RN]}
+  ];
+
+  (* Linkage classes = connected components *)
+  graph = AdjacencyGraph[adj];
+  l = Length[ConnectedComponents[graph]];
+
+  (* Compute gamma directly (avoid recursion with extMat) *)
+  spe = extSpe[RN];
+  numSpe = Length[spe];
+  numRea = Length[RN];
+  al = ConstantArray[0, {numSpe, numRea}];
+  be = ConstantArray[0, {numSpe, numRea}];
+  Do[
+    reactants = comp2Asso[RN[[jj, 1]]];
+    products = comp2Asso[RN[[jj, 2]]];
+    Do[
+      If[KeyExistsQ[reactants, spe[[ii]]], al[[ii, jj]] = reactants[spe[[ii]]]];
+      If[KeyExistsQ[products, spe[[ii]]], be[[ii, jj]] = products[spe[[ii]]]];
+    , {ii, numSpe}];
+  , {jj, numRea}];
+  gam = be - al;
+
+  s = If[gam === {} || AllTrue[Flatten[gam], # == 0 &], 0,
+    If[AllTrue[Flatten[gam], NumericQ], MatrixRank[gam], "symbolic"]
+  ];
+
+  (* Return {Nc, l, s, delta} *)
+  If[s === "symbolic", {Nc, l, s, "symbolic"}, {Nc, l, s, Nc - l - s}]
+];
+
+(* wrQ[RN] - checks if RN is weakly reversible *)
+(* WR means each linkage class is strongly connected *)
+wrQ[RN_] := Module[{complexes, edges, components, ii, jj, subEdges, subGraph, Nc, isWR, numSCC},
+  (* Get complexes and build directed edges *)
+  complexes = DeleteDuplicates[Flatten[{First[#], Last[#]} & /@ RN]];
+  Nc = Length[complexes];
+  If[Nc == 0, Return[False]];
+
+  (* Build directed edge list *)
+  edges = Table[
+    Module[{srcPos, tgtPos},
+      srcPos = Position[complexes, First[RN[[ii]]]][[1, 1]];
+      tgtPos = Position[complexes, Last[RN[[ii]]]][[1, 1]];
+      DirectedEdge[srcPos, tgtPos]
+    ], {ii, Length[RN]}
+  ];
+
+  (* Get linkage classes from undirected version *)
+  components = WeaklyConnectedComponents[Graph[Range[Nc], edges]];
+
+  (* Check: WR iff each linkage class has exactly 1 SCC *)
+  isWR = True;
+  Do[
+    subEdges = Select[edges, MemberQ[components[[jj]], #[[1]]] && MemberQ[components[[jj]], #[[2]]] &];
+    If[Length[subEdges] == 0, isWR = False; Break[]];
+    subGraph = Graph[components[[jj]], subEdges];
+    numSCC = Length[ConnectedGraphComponents[subGraph, Method -> "StronglyConnected"]];
+    If[numSCC > 1, isWR = False; Break[]],
+    {jj, Length[components]}
+  ];
+  isWR
 ];
 
 (* OLD CODE TO DELETE *)
@@ -677,25 +743,25 @@ ab2RN[alp_, bet_, spe_] := Module[{n, m, jj, kk, left, right, leftTerms, rightTe
   m = Length[alp[[1]]];
 
   Table[
-    (* Left side (reactants from alp) *)
+    (* Left side (reactants from alp): "s" + "i" format *)
     leftTerms = Table[
       If[alp[[kk, jj]] == 0, Nothing,
-        If[alp[[kk, jj]] == 1, spe[[kk]], ToString[alp[[kk, jj]]] <> spe[[kk]]]
+        If[alp[[kk, jj]] == 1, spe[[kk]], alp[[kk, jj]] * spe[[kk]]]
       ],
       {kk, n}
     ];
-    left = If[Length[leftTerms] == 0, "0",
+    left = If[Length[leftTerms] == 0, 0,
       If[Length[leftTerms] == 1, leftTerms[[1]], Plus @@ leftTerms]
     ];
 
-    (* Right side (products from bet) *)
+    (* Right side (products from bet): 2*"i" format *)
     rightTerms = Table[
       If[bet[[kk, jj]] == 0, Nothing,
-        If[bet[[kk, jj]] == 1, spe[[kk]], ToString[bet[[kk, jj]]] <> spe[[kk]]]
+        If[bet[[kk, jj]] == 1, spe[[kk]], bet[[kk, jj]] * spe[[kk]]]
       ],
       {kk, n}
     ];
-    right = If[Length[rightTerms] == 0, "0",
+    right = If[Length[rightTerms] == 0, 0,
       If[Length[rightTerms] == 1, rightTerms[[1]], Plus @@ rightTerms]
     ];
 
@@ -784,6 +850,212 @@ var = {s, i};
 xY = Table[Product[var[[ii]]^Y[[ii, jj]], {ii, Length[var]}], {jj, Length[Y[[1]]]}];
 Print["ODE2WY: ", Simplify[W . xY - RHS] == {0, 0}];
 *)
+
+(* ========================================================================= *)
+(* ODE TO WR0 REALIZATION *)
+(* ========================================================================= *)
+(* ODE2WR0[RHS, var] - Finds WR0 realization if it exists *)
+(* Input: RHS (ODE right-hand sides), var (variables) *)
+(* Output: {success, RN, rts} or {False, reason, {}} *)
+
+ODE2WR0[RHS_List, var_List] := Module[{
+  n, m, RNtmp, rts, spe, alp, bet, gam,
+  kerGam, kerGamPos, extremeRays, supports, partition, Vp, l,
+  NN0, affineIndep, yi, coneGens, decomp, kij,
+  failReason, srcIdx, yVecs, ii, jj, p, failed
+  },
+
+  n = Length[var];
+  spe = ToLowerCase[ToString[#]] & /@ var;
+
+  (* Use ODE2RN to get proper reaction decomposition *)
+  {RNtmp, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+  m = Length[rts];
+
+  (* gam is n x m, alp is n x m *)
+  (* For WR0 algorithm, we need columns to be source complexes *)
+  (* alp columns are the source complexes (Y in paper notation) *)
+  (* gam columns are the net reaction vectors (W in paper notation) *)
+
+  failReason = "NotChecked";
+  NN0 = {};
+
+  (* Step 2: Find extreme rays of ker(gam) ∩ R>=0^m *)
+  kerGam = NullSpace[gam];
+
+  If[Length[kerGam] == 0,
+    failReason = "NoKernel";
+    Return[{False, failReason, {}, {}}]
+  ];
+
+  kerGamPos = Select[kerGam, AllTrue[#, # >= 0 &] &];
+
+  If[Length[kerGamPos] == 0,
+    failReason = "NoNonNegKernel";
+    Return[{False, failReason, {}, {}}]
+  ];
+
+  extremeRays = kerGamPos;
+  (* Get indices where each extreme ray has positive entries *)
+  supports = Table[
+    Flatten[Position[extremeRays[[ii]], _?(# > 0 &)]],
+    {ii, Length[extremeRays]}
+  ];
+  l = Length[extremeRays];
+
+  (* Step 3: Check if supports partition {1,...,m} *)
+  partition = Flatten[supports];
+  If[Sort[DeleteDuplicates[partition]] != Range[m] || Length[partition] != m,
+    failReason = "NoPartition";
+    Return[{False, failReason, {}, {}}]
+  ];
+
+  (* Step 6-20: Build WR0 network *)
+  failed = False;
+  Do[
+    If[failed, Break[]];
+    Vp = supports[[p]];
+
+    (* Step 7-8: Check affine independence *)
+    yVecs = Table[alp[[All, ii]], {ii, Vp}];
+    If[Length[Vp] > 1,
+      affineIndep = MatrixRank[
+        Transpose[Table[yVecs[[ii]] - yVecs[[1]], {ii, 2, Length[yVecs]}]]
+      ] == Min[Length[Vp] - 1, n],
+      affineIndep = True
+    ];
+
+    If[!affineIndep,
+      failReason = "NotAffineIndep";
+      failed = True;
+      Break[]
+    ];
+
+    (* Step 9-20: For each complex in linkage class *)
+    Do[
+      If[failed, Break[]];
+      yi = alp[[All, ii]];
+
+      (* Build cone generators yj - yi for j != i in Vp *)
+      coneGens = Table[
+        If[jj != ii, alp[[All, jj]] - yi, Nothing],
+        {jj, Vp}
+      ];
+
+      If[Length[coneGens] == 0, Continue[]];
+
+      (* Check if gam[[All,i]] in cone{yj - yi} *)
+      decomp = Quiet[LinearProgramming[
+        ConstantArray[0, Length[coneGens]],
+        Transpose[coneGens],
+        gam[[All, ii]],
+        Table[{0, Infinity}, {Length[coneGens]}]
+      ]];
+
+      If[!VectorQ[decomp],
+        failReason = "NotInCone";
+        failed = True;
+        Break[]
+      ];
+
+      (* Add reactions yi -> yj with rate kij *)
+      kij = decomp;
+      srcIdx = 1;
+      Do[
+        If[kij[[srcIdx]] > 10^-10,
+          AppendTo[NN0, {ii, jj, kij[[srcIdx]]}]
+        ];
+        srcIdx++,
+        {jj, Select[Vp, # != ii &]}
+      ],
+      {ii, Vp}
+    ],
+    {p, l}
+  ];
+
+  If[failed,
+    Return[{False, failReason, {}, {}}]
+  ];
+
+  (* Build RN from NN0 *)
+  (* NN0 contains {source_idx, target_idx, rate_multiplier} *)
+  Module[{RN, finalRts, srcAlp, tgtAlp},
+    RN = Table[
+      srcAlp = alp[[All, NN0[[ii, 1]]]];
+      tgtAlp = alp[[All, NN0[[ii, 2]]]];
+      Module[{left, right, leftTerms, rightTerms, kk},
+        leftTerms = Table[
+          If[srcAlp[[kk]] == 0, Nothing,
+            If[srcAlp[[kk]] == 1, spe[[kk]], ToString[srcAlp[[kk]]] <> spe[[kk]]]
+          ],
+          {kk, n}
+        ];
+        left = If[Length[leftTerms] == 0, "0",
+          If[Length[leftTerms] == 1, leftTerms[[1]], Plus @@ leftTerms]
+        ];
+        rightTerms = Table[
+          If[tgtAlp[[kk]] == 0, Nothing,
+            If[tgtAlp[[kk]] == 1, spe[[kk]], ToString[tgtAlp[[kk]]] <> spe[[kk]]]
+          ],
+          {kk, n}
+        ];
+        right = If[Length[rightTerms] == 0, "0",
+          If[Length[rightTerms] == 1, rightTerms[[1]], Plus @@ rightTerms]
+        ];
+        left -> right
+      ],
+      {ii, Length[NN0]}
+    ];
+    (* Final rates = original rate * decomposition coefficient *)
+    finalRts = Table[
+      NN0[[ii, 3]] * rts[[NN0[[ii, 1]]]],
+      {ii, Length[NN0]}
+    ];
+    {True, RN, finalRts}
+  ]
+];
+
+(* ========================================================================= *)
+(* SUBSCRIPT CONVERTER *)
+(* ========================================================================= *)
+
+(* subsCon - Convert variable names to subscripted form
+
+   Purpose: Converts variable names like "i12", "i1", "x23" to subscripted forms
+   where all trailing digits become subscripts: Subscript[i, 12], Subscript[i, 1], etc.
+
+   Input:
+   - str: String or Symbol to convert
+
+   Output:
+   - Subscripted expression if digits found, original otherwise
+
+   Examples:
+   - subsCon["i12"] -> Subscript[i, 12]
+   - subsCon["i1"] -> Subscript[i, 1]
+   - subsCon["s"] -> s
+   - subsCon[i12] -> Subscript[i, 12]
+*)
+
+subsCon[str_String] := Module[{base, digits},
+  If[StringMatchQ[str, RegularExpression["^([A-Za-z]+)([0-9]+)$"]],
+    base = StringCases[str, RegularExpression["^([A-Za-z]+)([0-9]+)$"] -> "$1"][[1]];
+    digits = StringCases[str, RegularExpression["^([A-Za-z]+)([0-9]+)$"] -> "$2"][[1]];
+    Subscript[ToExpression[base], ToExpression[digits]],
+    ToExpression[str]
+  ]
+];
+
+subsCon[sym_Symbol] := Module[{str},
+  str = ToString[sym];
+  subsCon[str]
+];
+
+subsCon[expr_] := expr;
+
+(* Test subsCon *)
+(*Print["subsCon[\"i12\"]=", subsCon["i12"], " subsCon[\"i1\"]=", subsCon["i1"], " subsCon[\"s\"]=", subsCon["s"]];*)
+
 
 (* ========================================================================= *)
 (* TEST ODE2RN *)

@@ -1,0 +1,467 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     17344,        457]
+NotebookOptionsPosition[     16946,        443]
+NotebookOutlinePosition[     17388,        459]
+CellTagsIndexPosition[     17345,        456]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"===", "===", "===", "===", "===", "===", "===", "=="}], "*)"}], 
+  RowBox[{"(*", 
+   RowBox[{"Invasion", " ", "graph", " ", "engine"}], "*)"}], 
+  RowBox[{"(*", " ", 
+   RowBox[{"===", "===", "===", "===", "===", "===", "===", "=="}], "*)"}], 
+  RowBox[{
+   RowBox[{
+    RowBox[{"ClearAll", "[", 
+     RowBox[{
+     "canonicalSiphon", ",", "invasionInequalities", ",", "invasionEdges", 
+      ",", "buildInvasionGraph"}], "]"}], ";"}], "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"--", 
+     RowBox[{"-", 
+      RowBox[{"Utility", ":", 
+       RowBox[{
+        RowBox[{"canonical", " ", "representation", " ", "of", " ", "a", " ", 
+         RowBox[{"siphon", "--"}]}], "-"}]}]}]}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"canonicalSiphon", "[", "S_List", "]"}], ":=", 
+     RowBox[{"Sort", "[", 
+      RowBox[{"DeleteDuplicates", "[", "S", "]"}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"--", 
+       RowBox[{"-", "Module"}]}], " ", "1"}], ":", 
+     RowBox[{
+      RowBox[{
+      "compute", " ", "all", " ", "invasion", " ", "inequalities", " ", "R_j", 
+       RowBox[{"(", "s_S", ")"}]}], ">", 
+      RowBox[{
+       RowBox[{"1", "--"}], "-"}]}]}], "*)"}], "\n", 
+   RowBox[{"(*", 
+    RowBox[{"properSiphons", ":", 
+     RowBox[{"list", " ", "of", " ", "siphons", " ", "S", " ", 
+      RowBox[{"(", 
+       RowBox[{"lists", " ", "of", " ", 
+        RowBox[{"species", "/", "indices"}]}], ")"}], " ", "blockSpecies"}], 
+     ":", 
+     RowBox[{
+      RowBox[{"Association", "[", 
+       RowBox[{"blockID", "->", 
+        RowBox[{
+        "list", " ", "of", " ", "species", " ", "in", " ", "that", " ", 
+         "block"}]}], "]"}], " ", 
+      RowBox[{"sValues", ":", 
+       RowBox[{
+        RowBox[{"Association", "[", 
+         RowBox[{
+          RowBox[{"canonical", " ", "siphon"}], "->", 
+          RowBox[{"resident", " ", "susceptible", " ", "s_S"}]}], "]"}], " ", 
+        "Rfuncs"}], ":", 
+       RowBox[{"Association", "[", 
+        RowBox[{"blockID", "->", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"R_j", "[", "#", "]"}], "&"}], ")"}]}], "]"}]}]}]}], 
+    "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"invasionInequalities", "[", 
+      RowBox[{
+      "properSiphons_List", ",", "blockSpecies_Association", ",", 
+       "sValues_Association", ",", "Rfuncs_Association"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"ineqs", "=", 
+          RowBox[{"{", "}"}]}], ",", "Scanon", ",", "sS", ",", "j", ",", "Tj",
+          ",", "Rj"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Scanon", "=", 
+            RowBox[{"canonicalSiphon", "[", "S", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"sS", "=", 
+            RowBox[{"Lookup", "[", 
+             RowBox[{"sValues", ",", "Scanon", ",", 
+              RowBox[{"Missing", "[", 
+               RowBox[{"\"\<NoSValue\>\"", ",", "Scanon"}], "]"}]}], "]"}]}], 
+           ";", "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"sS", "===", 
+              RowBox[{"Missing", "[", 
+               RowBox[{"\"\<NoSValue\>\"", ",", "Scanon"}], "]"}]}], ",", 
+             RowBox[{
+              RowBox[{"Print", "[", 
+               RowBox[{
+               "\"\<Warning: no s-value specified for siphon \>\"", ",", 
+                "Scanon"}], "]"}], ";", "\[IndentingNewLine]", 
+              RowBox[{"Continue", "[", "]"}], ";"}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Do", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Tj", "=", 
+               RowBox[{"Lookup", "[", 
+                RowBox[{"blockSpecies", ",", "j", ",", 
+                 RowBox[{"Missing", "[", 
+                  RowBox[{"\"\<NoBlock\>\"", ",", "j"}], "]"}]}], "]"}]}], 
+              ";", "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"Tj", "===", 
+                 RowBox[{"Missing", "[", 
+                  RowBox[{"\"\<NoBlock\>\"", ",", "j"}], "]"}]}], ",", 
+                RowBox[{
+                 RowBox[{"Print", "[", 
+                  RowBox[{
+                  "\"\<Warning: block \>\"", ",", "j", ",", 
+                   "\"\< not found in blockSpecies.\>\""}], "]"}], ";", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{"Continue", "[", "]"}], ";"}]}], "]"}], ";", 
+              "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{
+               "Block", " ", "T_j", " ", "must", " ", "be", " ", "contained", 
+                " ", "in", " ", "S", " ", "to", " ", "be", " ", "an", " ", 
+                "invader", " ", "of", " ", 
+                RowBox[{"S", "^", "c"}]}], "*)"}], 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{"SubsetQ", "[", 
+                 RowBox[{"Scanon", ",", "Tj"}], "]"}], ",", 
+                RowBox[{
+                 RowBox[{"Rj", "=", 
+                  RowBox[{"Lookup", "[", 
+                   RowBox[{"Rfuncs", ",", "j", ",", 
+                    RowBox[{"Missing", "[", 
+                    RowBox[{"\"\<NoRfunc\>\"", ",", "j"}], "]"}]}], "]"}]}], 
+                 ";", "\[IndentingNewLine]", 
+                 RowBox[{"If", "[", 
+                  RowBox[{
+                   RowBox[{"Rj", "===", 
+                    RowBox[{"Missing", "[", 
+                    RowBox[{"\"\<NoRfunc\>\"", ",", "j"}], "]"}]}], ",", 
+                   RowBox[{
+                    RowBox[{"Print", "[", 
+                    RowBox[{
+                    "\"\<Warning: no reproduction function for block \>\"", 
+                    ",", "j"}], "]"}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"Continue", "[", "]"}], ";"}]}], "]"}], ";", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{"AppendTo", "[", 
+                  RowBox[{"ineqs", ",", 
+                   RowBox[{"<|", 
+                    RowBox[{
+                    RowBox[{"\"\<Siphon\>\"", "->", "Scanon"}], ",", 
+                    RowBox[{"\"\<Block\>\"", "->", "j"}], ",", 
+                    RowBox[{"\"\<BlockSpecies\>\"", "->", "Tj"}], ",", 
+                    RowBox[{"\"\<InvasionNumber\>\"", "->", 
+                    RowBox[{"Rj", "[", "sS", "]"}]}], ",", 
+                    RowBox[{"\"\<Condition\>\"", "->", 
+                    RowBox[{
+                    RowBox[{"Rj", "[", "sS", "]"}], ">", "1"}]}]}], "|>"}]}], 
+                  "]"}], ";"}]}], "]"}]}], ",", 
+             RowBox[{"{", 
+              RowBox[{"j", ",", 
+               RowBox[{"Keys", "[", "blockSpecies", "]"}]}], "}"}]}], "]"}]}],
+           ",", 
+          RowBox[{"{", 
+           RowBox[{"S", ",", "properSiphons"}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", "ineqs"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"--", 
+        RowBox[{"-", "Module"}]}], " ", "2"}], ":", 
+      RowBox[{"build", " ", "invasion", " ", "edges", " ", "S"}]}], "->", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"S", "\\", "T_j"}], " ", "when", " ", "both", " ", "are", " ", 
+       RowBox[{"proper", "--"}]}], "-"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"invasionEdges", "[", 
+      RowBox[{
+      "ineqs_List", ",", "properSiphons_List", ",", 
+       "blockSpecies_Association"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"vertices", ",", 
+         RowBox[{"edges", "=", 
+          RowBox[{"{", "}"}]}], ",", "S", ",", "Scanon", ",", "j", ",", "Tj", 
+         ",", "Snext", ",", "cond"}], "}"}], ",", 
+       RowBox[{
+        RowBox[{"vertices", "=", 
+         RowBox[{"canonicalSiphon", "/@", "properSiphons"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Do", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Scanon", "=", 
+            RowBox[{"q", "[", "\"\<Siphon\>\"", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"j", "=", 
+            RowBox[{"q", "[", "\"\<Block\>\"", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Tj", "=", 
+            RowBox[{"Lookup", "[", 
+             RowBox[{"blockSpecies", ",", "j"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Snext", "=", 
+            RowBox[{"Complement", "[", 
+             RowBox[{"Scanon", ",", "Tj"}], "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"cond", "=", 
+            RowBox[{"q", "[", "\"\<Condition\>\"", "]"}]}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"If", "[", 
+            RowBox[{
+             RowBox[{"MemberQ", "[", 
+              RowBox[{"vertices", ",", "Snext"}], "]"}], ",", 
+             RowBox[{
+              RowBox[{"AppendTo", "[", 
+               RowBox[{"edges", ",", 
+                RowBox[{"<|", 
+                 RowBox[{
+                  RowBox[{"\"\<From\>\"", "->", "Scanon"}], ",", 
+                  RowBox[{"\"\<To\>\"", "->", "Snext"}], ",", 
+                  RowBox[{"\"\<Block\>\"", "->", "j"}], ",", 
+                  RowBox[{"\"\<Condition\>\"", "->", "cond"}]}], "|>"}]}], 
+               "]"}], ";"}]}], "]"}]}], ",", 
+          RowBox[{"{", 
+           RowBox[{"q", ",", "ineqs"}], "}"}]}], "]"}], ";", 
+        "\[IndentingNewLine]", "edges"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"--", 
+        RowBox[{"-", "Module"}]}], " ", "3"}], ":", 
+      RowBox[{"main", " ", "wrapper"}]}], ",", 
+     RowBox[{
+      RowBox[{"returns", " ", "data"}], "+", 
+      RowBox[{"a", " ", 
+       RowBox[{"Graph", "--"}]}], "-"}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"buildInvasionGraph", "[", 
+      RowBox[{
+      "properSiphons_List", ",", "blockSpecies_Association", ",", 
+       "sValues_Association", ",", "Rfuncs_Association"}], "]"}], ":=", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"ineqs", ",", "edges", ",", "vertices", ",", "graphEdges"}], 
+        "}"}], ",", 
+       RowBox[{
+        RowBox[{"ineqs", "=", 
+         RowBox[{"invasionInequalities", "[", 
+          RowBox[{
+          "properSiphons", ",", "blockSpecies", ",", "sValues", ",", 
+           "Rfuncs"}], "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"edges", "=", 
+         RowBox[{"invasionEdges", "[", 
+          RowBox[{"ineqs", ",", "properSiphons", ",", "blockSpecies"}], 
+          "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"vertices", "=", 
+         RowBox[{"canonicalSiphon", "/@", "properSiphons"}]}], ";", 
+        "\[IndentingNewLine]", 
+        RowBox[{"graphEdges", "=", 
+         RowBox[{"Rule", "@@@", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"#", "[", "\"\<From\>\"", "]"}], ",", 
+               RowBox[{"#", "[", "\"\<To\>\"", "]"}]}], "}"}], "&"}], "/@", 
+            "edges"}], ")"}]}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"<|", 
+         RowBox[{
+          RowBox[{"\"\<Vertices\>\"", "->", "vertices"}], ",", 
+          RowBox[{"\"\<Inequalities\>\"", "->", "ineqs"}], ",", 
+          RowBox[{"\"\<Edges\>\"", "->", "edges"}], ",", 
+          RowBox[{"\"\<Graph\>\"", "->", 
+           RowBox[{"Graph", "[", 
+            RowBox[{"graphEdges", ",", 
+             RowBox[{"VertexLabels", "->", "\"\<Name\>\""}]}], "]"}]}]}], 
+         "|>"}]}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"===", "===", "===", "===", "===", "===", "===", "=="}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"Tiny", " ", "GK", " ", "test", " ", "example"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", 
+    RowBox[{"(", 
+     RowBox[{"logical", " ", "structure"}], ")"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"===", "===", "===", "===", "===", "===", "===", "=="}], "*)"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"infected", " ", "blocks"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"blockSpeciesGK", "=", 
+     RowBox[{"<|", 
+      RowBox[{
+       RowBox[{"\"\<T1\>\"", "->", 
+        RowBox[{"{", "i1", "}"}]}], ",", 
+       RowBox[{"\"\<T2\>\"", "->", 
+        RowBox[{"{", "i2", "}"}]}], ",", 
+       RowBox[{"\"\<T3\>\"", "->", 
+        RowBox[{"{", "i12", "}"}]}]}], "|>"}]}], ";"}], "\[IndentingNewLine]",
+    "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"proper", " ", 
+       RowBox[{"siphons", ":", "S0"}]}], "=", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "2", ",", "3"}], "}"}]}], ",", 
+     RowBox[{"S1", "=", 
+      RowBox[{"{", 
+       RowBox[{"2", ",", "3"}], "}"}]}], ",", 
+     RowBox[{"S2", "=", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "3"}], "}"}]}], ",", 
+     RowBox[{
+      RowBox[{"S", "*"}], " ", "=", 
+      RowBox[{"{", "}"}]}]}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"properSiphonsGK", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"i1", ",", "i2", ",", "i12"}], "}"}], ",", 
+       RowBox[{"(*", "S0", "*)"}], 
+       RowBox[{"{", 
+        RowBox[{"i2", ",", "i12"}], "}"}], ",", 
+       RowBox[{"(*", "S1", "*)"}], 
+       RowBox[{"{", 
+        RowBox[{"i1", ",", "i12"}], "}"}], ",", 
+       RowBox[{"(*", "S2", "*)"}], 
+       RowBox[{"{", "}"}]}], "               ", 
+      RowBox[{"(*", 
+       RowBox[{"S", "*"}], "*)"}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+   "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+    "resident", " ", "susceptibles", " ", "s_S", " ", "for", " ", "each", " ",
+      "siphon"}], "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"sValuesGK", "=", 
+     RowBox[{"<|", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"canonicalSiphon", "[", 
+         RowBox[{"{", 
+          RowBox[{"i1", ",", "i2", ",", "i12"}], "}"}], "]"}], "->", "s0"}], 
+       ",", 
+       RowBox[{
+        RowBox[{"canonicalSiphon", "[", 
+         RowBox[{"{", 
+          RowBox[{"i2", ",", "i12"}], "}"}], "]"}], "->", "s1"}], ",", 
+       RowBox[{
+        RowBox[{"canonicalSiphon", "[", 
+         RowBox[{"{", 
+          RowBox[{"i1", ",", "i12"}], "}"}], "]"}], "->", "s2"}], ",", 
+       RowBox[{
+        RowBox[{"canonicalSiphon", "[", 
+         RowBox[{"{", "}"}], "]"}], "->", "s3"}]}], "|>"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"reproduction", " ", "functions", " ", "R_j", 
+       RowBox[{"(", "s", ")"}]}], "=", 
+      RowBox[{"Rj", "*", "s"}]}], ";", 
+     RowBox[{"here", " ", "we", " ", "keep", " ", "them", " ", "symbolic"}]}],
+     "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"RfuncsGK", "=", 
+     RowBox[{"<|", 
+      RowBox[{
+       RowBox[{"\"\<T1\>\"", "->", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"R1", "[", "#", "]"}], "&"}], ")"}]}], ",", 
+       RowBox[{"\"\<T2\>\"", "->", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"R2", "[", "#", "]"}], "&"}], ")"}]}], ",", 
+       RowBox[{"\"\<T3\>\"", "->", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"R3", "[", "#", "]"}], "&"}], ")"}]}]}], "|>"}]}], ";"}], 
+   "\[IndentingNewLine]", "\n", 
+   RowBox[{"(*", 
+    RowBox[{"build", " ", "invasion", " ", "graph", " ", "data"}], "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"invGK", "=", 
+     RowBox[{"buildInvasionGraph", "[", 
+      RowBox[{
+      "properSiphonsGK", ",", "blockSpeciesGK", ",", "sValuesGK", ",", 
+       "RfuncsGK"}], "]"}]}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"invGK", "[", "\"\<Vertices\>\"", "]"}], "\n", 
+   RowBox[{"invGK", "[", "\"\<Inequalities\>\"", "]"}], "\n", 
+   RowBox[{"invGK", "[", "\"\<Edges\>\"", "]"}], "\n", 
+   RowBox[{"invGK", "[", "\"\<Graph\>\"", "]"}], "\n"}]}]], "Input",
+ CellChangeTimes->{{3.9738255473290167`*^9, 
+  3.9738255473290167`*^9}},ExpressionUUID->"b8cda88a-af82-44a8-bcf9-\
+fccba53aa22b"]
+},
+WindowSize->{791.1428571428571, 371.57142857142856`},
+WindowMargins->{{Automatic, 3.428571428571445}, {-9, Automatic}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e61b9cd7-07a5-47b6-aa9e-6d974c1182db"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 16384, 421, 1570, "Input",ExpressionUUID->"b8cda88a-af82-44a8-bcf9-fccba53aa22b"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

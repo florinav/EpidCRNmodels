@@ -26,6 +26,10 @@ isN::usage="(Core1)isN[term] returns True if term has negative sign, False other
 ODE2RN::usage="(Core){RN,rts,spe,alp,bet,gam}=ODE2RN[RHS,var] converts ODE system to reaction network. RHS is list of expressions, var is list of variables. Returns reaction network RN, rates vector rts, species list spe, reactant matrix alp (alpha), product matrix bet (beta), and net stoichiometric matrix gam (gamma). Algorithm: identifies monomials, uses negative terms to define rates, constructs stoichiometric matrices where sources use alpha=0, then beta=gamma+alpha. Inverse operation to extMat";
 ODE2WY::usage="(Core){W,Y}=ODE2WY[RHS,var] converts ODE system to W,Y matrix format for wr0RealODE. W is coefficient matrix, Y is exponent matrix. Satisfies RHS==W.x^Y.";
 ab2RN::usage="(Core)RN=ab2RN[alp,bet,spe] converts alpha/beta matrices to reaction network format. alp is reactant matrix, bet is product matrix, spe is species list.";
+ODE2WR0::usage="(Core){success,RN,rts}=ODE2WR0[RHS,var] finds WR0 (weakly reversible deficiency zero) realization of ODE system if it exists. Returns {True,RN,rts} on success, {False,reason,{}} on failure.";
+defi::usage="(Core){Nc,l,s,delta}=defi[RN] computes deficiency of reaction network. Nc=complexes, l=linkage classes, s=rank(gamma), delta=Nc-l-s.";
+wrQ::usage="(Core)wrQ[RN] returns True if RN is weakly reversible (each linkage class is strongly connected).";
+subsCon::usage="(Core)subsCon[str] converts variable names to subscripted form. Converts \"i12\" to Subscript[i,12], \"i1\" to Subscript[i,1], etc. Works with strings or symbols. Returns original if no digits found.";
 
 (* CRNT functions *)
 IaFHJ::usage="(CRNT)IaFHJ[vert,edg] analyzes Feinberg-Horn-Jackson graph structure, returns {incidenceMatrix, tableForm}";
@@ -52,8 +56,7 @@ and coP are parameter conditions ensuring both invasion numbers >1 for coexisten
 invN::usage = "invN[E1t, E2t, R0A, E0, par, cp, in1, in2, fval, ins] computes invasion numbers and persistence conditions for multi-strain epidemic models. E1t and E2t are lists of boundary fixed points for strains 1 and 2. R0A contains basic reproduction numbers. E0 is the disease-free equilibrium. par and cp are model parameters and constraints. in1 and in2 are indices selecting equilibria from E1t and E2t (use -1 for irrational equilibria). Optional: fval gives values for fixed parameters, ins specifies which parameters to fix. Returns {E1, E2, R12, R21, coP} where R12, R21 are invasion numbers and coP contains coexistence parameter values. For irrational equilibria, returns 'nonRat' 
 for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary1){RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1t, E2t}=
 bdCo[RN,rts] boundary analysis for two strains with nondisjoint minSiph";
-bdAn::usage="(Boundary1){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,alMat,beMat,gam,ngm}=
-bdAn[RN,rts] boundary analysis for possibly nonrational bdFp. Returns RHS (right-hand side), var (variables), par (parameters), cp (parameter constraints), mSi (minimal siphons), Jx (Jacobian x-block), Jy (Jacobian y-block), cDFE (disease-free equilibrium conditions), E0 (DFE solution), K (next generation matrix), R0A (basic reproduction numbers), infVars (infection variables), alMat (reactant matrix alpha), beMat (product matrix beta), gam (stoichiometric matrix gamma), ngm (full NGM output).";
+bdAn::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAn[RN,rts,var,gam] computes boundary analysis. Pass var and gam from ODE2RN to preserve variable order: {RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; bdAn[RN,rts,var,gam]. Returns RHS, var (variables), par (parameters), cp (parameter constraints), mSi (minimal siphons), Jx, Jy (Jacobian blocks), cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variables), ngm (full NGM output).";
 bdFp::usage = "bdFp[RHS, var, mSi] computes boundary fixed points on siphon facets for epidemic models. RHS is the right-hand side vector of the ODE system, var is the list of all variables as symbols, and mSi is the list of minimal siphons as variable names (strings). Returns a list of pairs {{rationalSols, scalarEq}, ...}, one for each siphon facet, where rationalSols contains explicit rational solutions as replacement rules and scalarEq is either None (if all solutions are rational), a factored polynomial equation 
 (for non-rational solutions), or \"froze\" (if computation timed out).";
 sta::usage = "sta[pol] analyzes polynomial stability by 
@@ -111,6 +114,8 @@ findCatalyticSets::usage="(Siphons)findCatalyticSets[RN] identifies all catalyti
 findMinimalCriticalSiphons::usage="(Siphons)findMinimalCriticalSiphons[reactions] finds all minimal critical siphons in a reaction network. These are the siphons that pose potential threats to persistence according to the theory";
 invFace::usage="(Siphons)invF = invFace[reactions,maxCodim] finds invariant facets of the positive orthant for reaction networks up to specified codimension";
 isInvariantFacet::usage="(Siphons)isInvariantFacet[facetSet,reactions] checks if a given set of species forms an invariant facet";
+IGMS::usage="";
+findCores::usage="";
 
 (* Conv functions - Simple one-liner conversions *)
 toSum::usage="(Conv)toSum[expr] converts expression to sum format";
@@ -184,6 +189,7 @@ endo::usage="(Visualization)endo[reactions] analyzes a reaction network for endo
 isEndotactic::usage="(Visualization)isEndotactic[reactions, speciesList] checks if network is endotactic";
 isStronglyEndotactic::usage="(Visualization)isStronglyEndotactic[reactions, speciesList] checks if network is strongly endotactic";
 phasePl2::usage="(Visualization)phasePl2[RHS,var,par,p0val,opts] creates 2D phase plane plots for dynamical systems";
+invGr::usage="(Visualization){gra,ver,edg,col}=invGr[mSi,bdFps,R0A,RHS,var,E0] constructs invasion graph for multi-strain models. mSi are minimal siphons (list of species name lists), bdFps are boundary fixed points, R0A are basic reproduction numbers, RHS is ODE right-hand side, var is variable list, E0 is disease-free equilibrium. Returns Graph object gra with invasion edges, vertex list ver (communities as sorted index lists), edge list edg showing invasion pathways, vertex colors col (Green=successful invasion, Yellow=failed invasion). Nodes represent communities (siphon complements), edges show strain invasions when Rj(ySc)>1";
 
 Begin["`Private`"];
 
@@ -205,8 +211,6 @@ Get[FileNameJoin[{root, "Extra.wl"}]];
 
 End[];
 EndPackage[];
-
-
 
 
 

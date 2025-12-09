@@ -339,8 +339,9 @@ Returns a list of pairs, one for each siphon facet:
 
 \subsubsection{Basic Usage}
 \begin{lstlisting}
-(* Get core analysis first *)
-{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = bdAn[RN, rts];
+(* Get core analysis, pass var and gam to preserve order *)
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS1, var];
+{RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm} = bdAn[RN, rts, var, gam];
 
 (* Compute boundary fixed points *)
 bdfpT = bdFp[RHS, var, mSi];
@@ -417,7 +418,7 @@ fps on siphon facet {i2} are {{rational solution 1}, {rational solution 2}}
 
 \begin{lstlisting}
 (* 1. Load model and get core analysis *)
-{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = bdAn[RN, rts];
+{RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm} = bdAn[RN, rts];
 
 (* 2. Compute boundary fixed points *)
 bdfpT = bdFp[RHS, var, mSi];
@@ -457,7 +458,7 @@ rationalEquilibria = Flatten[bdfpT[[All, 1]], 1];
 \subsubsection{With bdAn (Core Analysis)}
 \begin{lstlisting}
 coreResults = bdAn[RN, rts];
-{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = coreResults;
+{RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm} = coreResults;
 bdfpT = bdFp[RHS, var, mSi];
 \end{lstlisting}
 
@@ -673,7 +674,7 @@ rts = {La, be1*s*i1/(1+a1*i1), be2*s*i2/(1+a2*i2),
        mu*s, (mu+ga1)*i1, (mu+ga2)*i2};
 
 (* 3. Core analysis (fast, no boundary points) *)
-{RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A} = bdAn[RN, rts];
+{RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm} = bdAn[RN, rts];
 
 (* 4. Complete analysis (with boundary points and timeout protection) *)
 {RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, bdfpT} = bd2[RN, rts];
@@ -923,7 +924,7 @@ RN = {0 -> s, s+i -> 2i, s -> 0}
 RNstr = symbToStr /@ RN;
 
 (* Now can use with bdAn *)
-{RHSback, speBack, Rv} = bdAn[RNstr, rts];
+{RHSback, varBack, parBack, cpBack, mSiBack, JxBack, JyBack, cDFEBack, E0Back, KBack, R0ABack, infVarsBack, ngmBack} = bdAn[RNstr, rts];
 \end{lstlisting}
 
 \subsubsection{strToSymb - Convert String to Symbolic Format}
@@ -950,7 +951,7 @@ var = {s, i};
 (* RN is already in string format, ready to use *)
 
 (* Step 2: Use with bdAn to get model structure *)
-{RHSback, speBack, Rv} = bdAn[RN, rts];
+{RHSback, varBack, parBack, cpBack, mSiBack, JxBack, JyBack, cDFEBack, E0Back, KBack, R0ABack, infVarsBack, ngmBack} = bdAn[RN, rts];
 mod = {RHSback, var, parameters};
 
 (* Step 3: Use with NGM *)
@@ -1083,6 +1084,33 @@ Implemented in \texttt{Core.wl} (lines 308-459) with helper functions:
 \end{itemize}
 
 Inverse operation to \texttt{extMat}.
+
+\subsection{Subscript Converter: \texttt{subsCon}}
+
+The \texttt{subsCon} function converts variable names to subscripted form for improved readability in graphs and visualizations.
+
+\textbf{Purpose:} Transforms variable names like ``i12'', ``i1'', ``x23'' to subscripted forms where trailing digits become subscripts: $i_{12}$, $i_1$, $x_{23}$.
+
+\textbf{Input:}
+\begin{itemize}
+\item \texttt{str}: String or Symbol to convert
+\end{itemize}
+
+\textbf{Output:}
+\begin{itemize}
+\item Subscripted expression if trailing digits found
+\item Original expression otherwise
+\end{itemize}
+
+\textbf{Examples:}
+\begin{verbatim}
+subsCon["i12"]  (* Returns Subscript[i, 12] *)
+subsCon["i1"]   (* Returns Subscript[i, 1] *)
+subsCon["s"]    (* Returns s *)
+subsCon[i12]    (* Returns Subscript[i, 12] *)
+\end{verbatim}
+
+\textbf{Usage:} This function is automatically used by \texttt{invGr} to create readable labels in invasion graphs. It can also be used independently for formatting variable names in plots and outputs.
 
 \input{plan}
 

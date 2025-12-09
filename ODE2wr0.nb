@@ -1,4 +1,6 @@
-In[1827]:=
+In[2477]:=
+In[2430]:=
+In[2391]:=
 ClearAll["Global`*"]
 SetDirectory[NotebookDirectory[]];
 SetOptions[$FrontEndSession, NotebookAutoSave -> True];
@@ -6,816 +8,164 @@ NotebookSave[];
 AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
 << EpidCRN`;
 
-(* Algorithm 1: WR0 realizations of MASS-ACTION ODE SYSTEMS *)
-(* Input: W and Y matrices defining dx/dt = W x^Y *)
-(* Output: WR0 network or indication that none exists, plus RN representation *)
+(* TEST ODE2RN - converts ODE to reaction network *)
 
-wr0RealODE[W_, Y_] := Module[
-  {n, m, kerW, kerWpos, extremeRays, supports, partition, Vp, l, 
-   NN0, kappa0, affineIndep, yi, coneGens, decomp, kij, 
-   isWR0, failReason, outputRN, outputRates, srcIdx, yVecs},
-  
-  n = Length[W]; (* number of species *)
-  m = Length[Y[[1]]]; (* number of source complexes *)
-  
-  Print["ODE system: dx/dt = W x^Y"];
-  Print["W = ", W // MatrixForm];
-  Print["Y = ", Y // MatrixForm];
-  
-  isWR0 = False;
-  failReason = "NotChecked";
-  NN0 = {};
-  kappa0 = {};
-  
-  (* Build direct RN representation from W, Y *)
-  outputRN = Table[
-    ToString[Y[[All, i]]] <> "->" <> ToString[Y[[All, i]] + W[[All, i]]],
-    {i, m}];
-  outputRates = Table[1, {i, m}]; (* arbitrary positive rates *)
-  
-  (* Step 2: Find extreme rays of ker(W) ∩ R>=0^m *)
-  kerW = NullSpace[W];
-  
-  If[Length[kerW] == 0,
-    Print["No kernel: stoichiometric subspace full rank"];
-    Print["Returning direct RN from (W,Y). No WR0 possible."];
-    failReason = "NoKernel";
-    Goto[returnResult]
-  ];
-  
-  Print["Kernel basis: ", kerW // MatrixForm];
-  
-  kerWpos = Select[kerW, AllTrue[#, # >= -10^-10 &] &];
-  
-  If[Length[kerWpos] == 0,
-    Print["No non-negative kernel vectors"];
-    Print["Returning direct RN. No WR0 possible."];
-    failReason = "NoNonNegKernel";
-    Goto[returnResult]
-  ];
-  
-  extremeRays = kerWpos;
-  supports = Map[Position[#, _?(# > 10^-10 &)] // Flatten &, extremeRays];
-  l = Length[extremeRays];
-  
-  Print["Found ", l, " extreme rays"];
-  Print["Supports: ", supports];
-  
-  (* Step 3: Check if supports partition {1,...,m} *)
-  partition = Flatten[supports];
-  If[Sort[partition] != Range[m],
-    Print["FAIL: Supports do not partition {1,...,m}"];
-    Print["Missing indices: ", Complement[Range[m], partition]];
-    Print["Overlapping: ", Select[Tally[partition], #[[2]] > 1 &]];
-    Print["Returning direct RN. No WR0 exists."];
-    failReason = "NoPartition";
-    Goto[returnResult]
-  ];
-  
-  Print["Supports form a partition - potential WR0"];
-  
-  (* Step 6-20: Build WR0 network *)
-  Block[{failed = False},
-    Do[
-      Vp = supports[[p]];
-      Print["Linkage class ", p, ": complexes ", Vp];
-      
-      (* Step 7-8: Check affine independence *)
-      yVecs = Table[Y[[All, i]], {i, Vp}];
-      If[Length[Vp] > 1,
-        affineIndep = MatrixRank[
-          Transpose[yVecs[[2 ;; -1]] - ConstantArray[yVecs[[1]], Length[Vp] - 1]]
-        ] == Min[Length[Vp] - 1, n],
-        affineIndep = True
-      ];
-      
-      If[! affineIndep,
-        Print["FAIL: Complexes not affinely independent"];
-        Print["Returning direct RN. No WR0 exists."];
-        failReason = "NotAffineIndep";
-        failed = True;
-        Break[]
-      ];
-      
-      (* Step 9-20: For each complex in linkage class *)
-      Do[
-        yi = Y[[All, i]];
-        
-        (* Step 11-12: Build cone generators yj - yi for j != i in Vp *)
-        coneGens = Table[
-          If[j != i, Y[[All, j]] - yi, Nothing],
-          {j, Vp}
-        ];
-        
-        If[Length[coneGens] == 0, 
-          Print["Warning: isolated complex ", i];
-          Continue[]
-        ];
-        
-        (* Step 13-14: Check if wi \[Element] cone{yj - yi} *)
-        (* Solve: W[[All,i]] = Sum[kij (yj - yi)] with kij >= 0 *)
-        decomp = Quiet[LinearProgramming[
-          ConstantArray[0, Length[coneGens]],
-          {Transpose[coneGens], 
-           Join[ConstantArray[1, n], ConstantArray[-1, n]]},
-          Join[W[[All, i]], -W[[All, i]]],
-          Table[{0, \[Infinity]}, {Length[coneGens]}]
-        ]];
-        
-        If[decomp === {} || ! VectorQ[decomp],
-          Print["FAIL: w", i, " = ", W[[All, i]], " not in cone"];
-          Print["Returning direct RN. No WR0 exists."];
-          failReason = "NotInCone";
-          failed = True;
-          Break[]
-        ];
-        
-        (* Step 15-20: Add reactions yi -> yj with rate kij *)
-        kij = decomp;
-        srcIdx = 1;
-        Do[
-          If[kij[[srcIdx]] > 10^-10,
-            AppendTo[NN0, 
-              ToString[Y[[All, i]]] <> "->" <> ToString[Y[[All, j]]]];
-            AppendTo[kappa0, kij[[srcIdx]]]
-          ];
-          srcIdx++,
-          {j, Delete[Vp, Position[Vp, i]]}
-        ],
-        {i, Vp}
-      ];
-      
-      If[failed, Break[]],
-      {p, l}
-    ];
-    
-    If[! failed,
-      isWR0 = True;
-      failReason = "None";
-      outputRN = NN0;
-      outputRates = kappa0;
-      Print["SUCCESS: WR0 realization exists!"]
-    ]
-  ];
-  
-  Label[returnResult];
-  Print["\n" <> If[isWR0, "=== WR0 REALIZATION ===", 
-    "=== DIRECT RN (NO WR0) ==="]];
-  Print[Transpose[{outputRN, outputRates}] // MatrixForm];
-  
-  <|"WR0" -> isWR0, "FailReason" -> failReason, 
-    "RN" -> outputRN, "Rates" -> outputRates,
-    "ExtremeRays" -> If[Length[kerW] > 0, extremeRays, {}],
-    "Supports" -> If[Length[kerW] > 0, supports, {}]|>
-]
+(* Example 1: Reversible A <-> B *)
+RHS1 = {-k1*a + k2*b, k1*a - k2*b};
+var1 = {a, b};
+{RN1, rts1, spe1, alp1, bet1, gam1} = ODE2RN[RHS1, var1];
+Print["Ex1 A<->B: RN=", RN1, " rts=", rts1, " alp=", alp1, " bet=", bet1, " gam=", gam1];
 
-(* Helper: Build W, Y from RN string list *)
-buildWY[RN_, rts_] := Module[{n, m, W, Y, parsedRN, rxn, parts, left, right,
-  leftVec, rightVec, i},
+(* Example 2: Birth-death *)
+RHS2 = {La - mu*x};
+var2 = {x};
+{RN2, rts2, spe2, alp2, bet2, gam2} = ODE2RN[RHS2, var2];
+Print["Ex2 birth-death: RN=", RN2, " rts=", rts2, " alp=", alp2, " bet=", bet2, " gam=", gam2];
 
-  (* Parse RN strings: "0,0->1,1" becomes {{0,0},{1,1}} *)
-  parsedRN = Table[
-    rxn = RN[[i]];
-    parts = StringSplit[rxn, "->"];
-    left = ToExpression /@ StringSplit[parts[[1]], ","];
-    right = ToExpression /@ StringSplit[parts[[2]], ","];
-    {left, right},
-    {i, Length[RN]}
-  ];
+(* Example 3: SIS model *)
+RHS3 = {La - be*i*s - mu*s, be*i*s - (ga + mu)*i};
+var3 = {s, i};
+{RN3, rts3, spe3, alp3, bet3, gam3} = ODE2RN[RHS3, var3];
+Print["Ex3 SIS: RN=", RN3, " rts=", rts3, " alp=", alp3, " bet=", bet3, " gam=", gam3];
 
-  n = Length[parsedRN[[1, 1]]]; (* number of species *)
-  m = Length[parsedRN]; (* number of reactions *)
+(* Example 4: Lotka-Volterra *)
+RHS4 = {a1*x - b1*x*y, -a2*y + b2*x*y};
+var4 = {x, y};
+{RN4, rts4, spe4, alp4, bet4, gam4} = ODE2RN[RHS4, var4];
+Print["Ex4 LV: RN=", RN4, " rts=", rts4, " alp=", alp4, " bet=", bet4, " gam=", gam4];
 
-  (* Build Y (products) and W (stoichiometry) *)
-  Y = Table[parsedRN[[j, 2]], {j, m}];
-  W = Table[parsedRN[[j, 2]] - parsedRN[[j, 1]], {j, m}];
+(* Verify: gam.rts should equal RHS *)
+Print["Ex1 verify: gam.rts-RHS=", Simplify[gam1.rts1 - RHS1]];
+Print["Ex2 verify: gam.rts-RHS=", Simplify[gam2.rts2 - RHS2]];
+Print["Ex3 verify: gam.rts-RHS=", Simplify[gam3.rts3 - RHS3]];
+Print["Ex4 verify: gam.rts-RHS=", Simplify[gam4.rts4 - RHS4]];
 
-  {W, Y}
-]
-
-(* Example 0: Using ODE2WY from EpidCRN *)
-Print["========================================"];
-Print["EXAMPLE 0: SIS model using ODE2WY"];
-Print["========================================"];
-RHS0 = {La - be*i*s - mu*s, be*i*s - (ga + mu)*i};
-var0 = {s, i};
-{W0, Y0} = ODE2WY[RHS0, var0];
-Print["W0=", W0];
-Print["Y0=", Y0];
-res0 = wr0RealODE[W0, Y0];
-
-(* Example 1 from paper: eq (1) *)
-Print["\n========================================"];
-Print["EXAMPLE 1: From paper equation (1)"];
-Print["========================================"];
-RN1 = {"0,0->1,1", "1,2->1,1", "2,1->1,1"};
-rts1 = {3, 3, 3};
-{W1, Y1} = buildWY[RN1, rts1];
-res1 = wr0RealODE[W1, Y1];
-
-(* Example 2 from paper: eq (2) when kappa2=kappa3 *)
-Print["\n========================================"];
-Print["EXAMPLE 2: From paper equation (2), kappa2=kappa3=1"];
-Print["========================================"];
-W2 = {{1, -1}, {1, -1}};
-Y2 = {{0, 1}, {0, 1}};
-res2 = wr0RealODE[W2, Y2];
-
-(* Example 3 from paper: eq (3) when kappa1>kappa4 *)
-Print["\n========================================"];
-Print["EXAMPLE 3: From paper equation (3)"];
-Print["========================================"];
-W3 = {{1, 0, -1}, {0, 1, -1}};
-Y3 = {{0, 1, 1}, {0, 0, 1}};
-res3 = wr0RealODE[W3, Y3];
-
-(* Example 4: NO WR0 - different rates in Example 2 *)
-Print["\n========================================"];
-Print["EXAMPLE 4: NO WR0 (kappa2 != kappa3)"];
-Print["========================================"];
-W4 = {{1, -2}, {1, -3}};
-Y4 = {{0, 1}, {0, 1}};
-res4 = wr0RealODE[W4, Y4];
-
-(* Example 5: NO WR0 - irreversible chain *)
-Print["\n========================================"];
-Print["EXAMPLE 5: NO WR0 (irreversible chain)"];
-Print["========================================"];
-RN5 = {"0,0->1,0", "1,0->0,1", "0,1->0,0"};
-rts5 = {1, 1, 1};
-{W5, Y5} = buildWY[RN5, rts5];
-res5 = wr0RealODE[W5, Y5];
-
-During evaluation of In[238]:= ========================================
-During evaluation of In[238]:= EXAMPLE 1: From paper equation (1)
-During evaluation of In[238]:= ========================================
-During evaluation of In[238]:= Part::partd: Part specification {0,0->1,1,1,2->1,1,2,1->1,1}[[1,1]] is longer than depth of object.
-During evaluation of In[238]:= Part::partd: Part specification {0,0->1,1,1,2->1,1,2,1->1,1}[[1,2]] is longer than depth of object.
-During evaluation of In[238]:= Part::partd: Part specification {0,0->1,1,1,2->1,1,2,1->1,1}[[2,1]] is longer than depth of object.
-During evaluation of In[238]:= General::stop: Further output of Part::partd will be suppressed during this calculation.
-During evaluation of In[238]:= Set::shape: Lists {spe$24466,alp$24466,bet$24466,gam$24466,Rv$24466,RHS$24466,mSi$24466,defData$24466} and {{{0,0->1,1, 1,2->1,1, 2,1->1,1}[[1,1]],{0,0->1,1, 1,2->1,1, 2,1->1,1}[[1,2]],{0,0->1,1, 1,2->1,1, 2,1->1,1}[[2,1]],{0,0->1,1, 1,2->\[Ellipsis] 2,1->1,1}[[2,2]],{0,0->1,1, 1,2->1,1, 2,1->1,1}[[3,1]],{0,0->1,1, 1,2->1,1, 2,1->1,1}[[3,2]]},<<6>>} are not the same shape.
-During evaluation of In[238]:= ODE system: dx/dt = W x^Y
-During evaluation of In[238]:= W = Transpose[alp$24466-bet$24466]
-During evaluation of In[238]:= Y = Transpose[bet$24466]
-During evaluation of In[238]:= Kernel basis: NullSpace[Transpose[alp$24466-bet$24466]]
-During evaluation of In[238]:= NullSpace::argx: NullSpace called with 0 arguments; 1 argument is expected.
-During evaluation of In[238]:= No non-negative kernel vectors
-During evaluation of In[238]:= Returning direct RN. No WR0 possible.
-During evaluation of In[238]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[238]:= {}
-During evaluation of In[238]:= 
-========================================
-During evaluation of In[238]:= EXAMPLE 2: From paper equation (2), kappa2=kappa3=1
-During evaluation of In[238]:= ========================================
-During evaluation of In[238]:= ODE system: dx/dt = W x^Y
-During evaluation of In[238]:= W = (1	-1
-1	-1
-
-)
-During evaluation of In[238]:= Y = (0	1
-0	1
-
-)
-During evaluation of In[238]:= Kernel basis: (1	1)
-During evaluation of In[238]:= Found 1 extreme rays
-During evaluation of In[238]:= Supports: {{1,1}}
-During evaluation of In[238]:= FAIL: Supports do not partition {1,...,m}
-During evaluation of In[238]:= Missing indices: {2}
-During evaluation of In[238]:= Overlapping: {{1,2}}
-During evaluation of In[238]:= Returning direct RN. No WR0 exists.
-During evaluation of In[238]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[238]:= ({0, 0}->{1, 1}	1
-{1, 1}->{0, 0}	1
-
-)
-During evaluation of In[238]:= 
-========================================
-During evaluation of In[238]:= EXAMPLE 3: From paper equation (3)
-During evaluation of In[238]:= ========================================
-During evaluation of In[238]:= ODE system: dx/dt = W x^Y
-During evaluation of In[238]:= W = (1	0	-1
-0	1	-1
-
-)
-During evaluation of In[238]:= Y = (0	1	1
-0	0	1
-
-)
-During evaluation of In[238]:= Kernel basis: (1	1	1)
-During evaluation of In[238]:= Found 1 extreme rays
-During evaluation of In[238]:= Supports: {{1,1,1}}
-During evaluation of In[238]:= FAIL: Supports do not partition {1,...,m}
-During evaluation of In[238]:= Missing indices: {2,3}
-During evaluation of In[238]:= Overlapping: {{1,3}}
-During evaluation of In[238]:= Returning direct RN. No WR0 exists.
-During evaluation of In[238]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[238]:= ({0, 0}->{1, 0}	1
-{1, 0}->{1, 1}	1
-{1, 1}->{0, 0}	1
-
-)
-During evaluation of In[238]:= 
-========================================
-During evaluation of In[238]:= EXAMPLE 4: NO WR0 (kappa2 != kappa3)
-During evaluation of In[238]:= ========================================
-During evaluation of In[238]:= ODE system: dx/dt = W x^Y
-During evaluation of In[238]:= W = (1	-2
-1	-3
-
-)
-During evaluation of In[238]:= Y = (0	1
-0	1
-
-)
-During evaluation of In[238]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[238]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[238]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[238]:= ({0, 0}->{1, 1}	1
-{1, 1}->{-1, -2}	1
-
-)
-During evaluation of In[238]:= 
-========================================
-During evaluation of In[238]:= EXAMPLE 5: NO WR0 (irreversible chain)
-During evaluation of In[238]:= ========================================
-During evaluation of In[238]:= Part::partd: Part specification {0,0->1,0,1,0->0,1,0,1->0,0}[[1,1]] is longer than depth of object.
-During evaluation of In[238]:= Part::partd: Part specification {0,0->1,0,1,0->0,1,0,1->0,0}[[1,2]] is longer than depth of object.
-During evaluation of In[238]:= Part::partd: Part specification {0,0->1,0,1,0->0,1,0,1->0,0}[[2,1]] is longer than depth of object.
-During evaluation of In[238]:= General::stop: Further output of Part::partd will be suppressed during this calculation.
-During evaluation of In[238]:= Set::shape: Lists {spe$24534,alp$24534,bet$24534,gam$24534,Rv$24534,RHS$24534,mSi$24534,defData$24534} and {{{0,0->1,0, 1,0->0,1, 0,1->0,0}[[1,1]],{0,0->1,0, 1,0->0,1, 0,1->0,0}[[1,2]],{0,0->1,0, 1,0->0,1, 0,1->0,0}[[2,1]],{0,0->1,0, 1,0->\[Ellipsis] 0,1->0,0}[[2,2]],{0,0->1,0, 1,0->0,1, 0,1->0,0}[[3,1]],{0,0->1,0, 1,0->0,1, 0,1->0,0}[[3,2]]},<<6>>} are not the same shape.
-During evaluation of In[238]:= ODE system: dx/dt = W x^Y
-During evaluation of In[238]:= W = Transpose[alp$24534-bet$24534]
-During evaluation of In[238]:= Y = Transpose[bet$24534]
-During evaluation of In[238]:= Kernel basis: NullSpace[Transpose[alp$24534-bet$24534]]
-During evaluation of In[238]:= NullSpace::argx: NullSpace called with 0 arguments; 1 argument is expected.
-During evaluation of In[238]:= No non-negative kernel vectors
-During evaluation of In[238]:= Returning direct RN. No WR0 possible.
-During evaluation of In[238]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[238]:= {}
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= EXAMPLE 0: SIS model using ODE2WY
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= W0={{1,0},{-1,1},{-1,0},{0,-1}}
-During evaluation of In[1752]:= Y0={{1,0},{0,2},{0,0},{0,0}}
-During evaluation of In[1752]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1752]:= W = (1	0
--1	1
--1	0
-0	-1
-
-)
-During evaluation of In[1752]:= Y = (1	0
-0	2
-0	0
-0	0
-
-)
-During evaluation of In[1752]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1752]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1752]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1752]:= ({1, 0, 0, 0}->{2, -1, -1, 0}	1
-{0, 2, 0, 0}->{0, 3, 0, -1}	1
-
-)
-During evaluation of In[1752]:= 
-========================================
-During evaluation of In[1752]:= EXAMPLE 1: From paper equation (1)
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1752]:= W = (1	1
-0	-1
--1	0
-
-)
-During evaluation of In[1752]:= Y = (1	1
-1	1
-1	1
-
-)
-During evaluation of In[1752]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1752]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1752]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1752]:= ({1, 1, 1}->{2, 1, 0}	1
-{1, 1, 1}->{2, 0, 1}	1
-
-)
-During evaluation of In[1752]:= 
-========================================
-During evaluation of In[1752]:= EXAMPLE 2: From paper equation (2), kappa2=kappa3=1
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1752]:= W = (1	-1
-1	-1
-
-)
-During evaluation of In[1752]:= Y = (0	1
-0	1
-
-)
-During evaluation of In[1752]:= Kernel basis: (1	1)
-During evaluation of In[1752]:= Found 1 extreme rays
-During evaluation of In[1752]:= Supports: {{1,1}}
-During evaluation of In[1752]:= FAIL: Supports do not partition {1,...,m}
-During evaluation of In[1752]:= Missing indices: {2}
-During evaluation of In[1752]:= Overlapping: {{1,2}}
-During evaluation of In[1752]:= Returning direct RN. No WR0 exists.
-During evaluation of In[1752]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1752]:= ({0, 0}->{1, 1}	1
-{1, 1}->{0, 0}	1
-
-)
-During evaluation of In[1752]:= 
-========================================
-During evaluation of In[1752]:= EXAMPLE 3: From paper equation (3)
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1752]:= W = (1	0	-1
-0	1	-1
-
-)
-During evaluation of In[1752]:= Y = (0	1	1
-0	0	1
-
-)
-During evaluation of In[1752]:= Kernel basis: (1	1	1)
-During evaluation of In[1752]:= Found 1 extreme rays
-During evaluation of In[1752]:= Supports: {{1,1,1}}
-During evaluation of In[1752]:= FAIL: Supports do not partition {1,...,m}
-During evaluation of In[1752]:= Missing indices: {2,3}
-During evaluation of In[1752]:= Overlapping: {{1,3}}
-During evaluation of In[1752]:= Returning direct RN. No WR0 exists.
-During evaluation of In[1752]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1752]:= ({0, 0}->{1, 0}	1
-{1, 0}->{1, 1}	1
-{1, 1}->{0, 0}	1
-
-)
-During evaluation of In[1752]:= 
-========================================
-During evaluation of In[1752]:= EXAMPLE 4: NO WR0 (kappa2 != kappa3)
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1752]:= W = (1	-2
-1	-3
-
-)
-During evaluation of In[1752]:= Y = (0	1
-0	1
-
-)
-During evaluation of In[1752]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1752]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1752]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1752]:= ({0, 0}->{1, 1}	1
-{1, 1}->{-1, -2}	1
-
-)
-During evaluation of In[1752]:= 
-========================================
-During evaluation of In[1752]:= EXAMPLE 5: NO WR0 (irreversible chain)
-During evaluation of In[1752]:= ========================================
-During evaluation of In[1752]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1752]:= W = (1	0
--1	1
-0	-1
-
-)
-During evaluation of In[1752]:= Y = (1	0
-0	1
-0	0
-
-)
-During evaluation of In[1752]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1752]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1752]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1752]:= ({1, 0, 0}->{2, -1, 0}	1
-{0, 1, 0}->{0, 2, -1}	1
-
-)
-During evaluation of In[1752]:=
+During evaluation of In[2391]:= Ex1 A<->B: RN={b->a,a->b} rts={b k2,a k1} alp={{0,1},{1,0}} bet={{1,0},{0,1}} gam={{1,-1},{-1,1}}
+During evaluation of In[2391]:= Ex2 birth-death: RN={0->x,x->0} rts={La,mu x} alp={{0,1}} bet={{1,0}} gam={{1,-1}}
+During evaluation of In[2391]:= Ex3 SIS: RN={0->s,i+s->2i,s->0,i->0,i->0} rts={La,be i s,mu s,ga i,i mu} alp={{0,1,1,0,0},{0,1,0,1,1}} bet={{1,0,0,0,0},{0,2,0,0,0}} gam={{1,-1,-1,0,0},{0,1,0,-1,-1}}
+During evaluation of In[2391]:= Ex4 LV: RN={x->2x,x+y->2y+x,x+y->y,y->0} rts={a1 x,b2 x y,b1 x y,a2 y} alp={{1,1,1,0},{0,1,1,1}} bet={{2,1,0,0},{0,2,1,0}} gam={{1,0,-1,0},{0,1,0,-1}}
+During evaluation of In[2391]:= Ex1 verify: gam.rts-RHS={0,0}
+During evaluation of In[2391]:= Ex2 verify: gam.rts-RHS={0}
+During evaluation of In[2391]:= Ex3 verify: gam.rts-RHS={0,0}
+During evaluation of In[2391]:= Ex4 verify: gam.rts-RHS={0,0}
+During evaluation of In[2430]:= SetDelayed::write: Tag In in In[2391] is Protected.
+Out[2430]= $Failed
+During evaluation of In[2430]:= Ex1 A<->B: RN={b->a,a->b} rts={b k2,a k1} alp={{0,1},{1,0}} bet={{1,0},{0,1}} gam={{1,-1},{-1,1}}
+During evaluation of In[2430]:= Ex2 birth-death: RN={0->x,x->0} rts={La,mu x} alp={{0,1}} bet={{1,0}} gam={{1,-1}}
+During evaluation of In[2430]:= Ex3 SIS: RN={0->s,s+i->2i,s->0,i->-1i} rts={La,be i s,mu s,ga i+i mu} alp={{0,1,1,0},{0,1,0,1}} bet={{1,0,0,0},{0,2,0,-1}} gam={{1,-1,-1,0},{0,1,0,-2}}
+During evaluation of In[2430]:= Ex4 LV: RN={x->2x,x+y->2y,y->0} rts={a1 x,b1 x y+b2 x y,a2 y} alp={{1,1,0},{0,1,1}} bet={{2,0,0},{0,2,0}} gam={{1,-1,0},{0,1,-1}}
+During evaluation of In[2430]:= Ex1 verify: gam.rts-RHS={0,0}
+During evaluation of In[2430]:= Ex2 verify: gam.rts-RHS={0}
+During evaluation of In[2430]:= Ex3 verify: gam.rts-RHS={0,-i (ga+mu)}
+During evaluation of In[2430]:= Ex4 verify: gam.rts-RHS={-b2 x y,b1 x y}
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2469]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2470]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2471]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2472]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2473]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2474]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2475]= $Failed
+During evaluation of In[2430]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2476]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2430] is Protected.
+Out[2477]= $Failed
+During evaluation of In[2477]:= Ex1 A<->B: RN={b->a,a->b} rts={b k2,a k1} alp={{0,1},{1,0}} bet={{1,0},{0,1}} gam={{1,-1},{-1,1}}
+During evaluation of In[2477]:= Ex2 birth-death: RN={0->x,x->0} rts={La,mu x} alp={{0,1}} bet={{1,0}} gam={{1,-1}}
+During evaluation of In[2477]:= Ex3 SIS: RN={0->s,s+i->2i,s->0,i->0} rts={La,be i s,mu s,ga i+i mu} alp={{0,1,1,0},{0,1,0,1}} bet={{1,0,0,0},{0,2,0,0}} gam={{1,-1,-1,0},{0,1,0,-1}}
+During evaluation of In[2477]:= Ex4 LV: RN={x->2x,x+y->x+2y,x+y->y,y->0} rts={a1 x,b2 x y,b1 x y,a2 y} alp={{1,1,1,0},{0,1,1,1}} bet={{2,1,0,0},{0,2,1,0}} gam={{1,0,-1,0},{0,1,0,-1}}
+During evaluation of In[2477]:= Ex1 verify: gam.rts-RHS={0,0}
+During evaluation of In[2477]:= Ex2 verify: gam.rts-RHS={0}
+During evaluation of In[2477]:= Ex3 verify: gam.rts-RHS={0,0}
+During evaluation of In[2477]:= Ex4 verify: gam.rts-RHS={0,0}
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2516]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2517]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2518]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2519]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2520]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2521]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2522]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation Null of is Protected.
+Out[2523]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by "ry[NotebookDirectory[]];".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "okDirectory[]];".
-Out[1825]= equation From paper
-During evaluation of In[1752]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in in In is Null Tag Protected.$Failed is Protected.
+Out[2524]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2525]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2526]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2527]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2528]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2529]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2530]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2531]= $Failed
+During evaluation of In[2477]:= SetDelayed::write: Tag In in In[2391] is Protected.
+During evaluation of In[2477]:= SetDelayed::write: Tag Times in During evaluation of $Failed is Protected.
+Out[2532]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by "ry[NotebookDirectory[]];".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "Directory[]];".
-During evaluation of In[1752]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2533]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by 
-    "pendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox",
-      "EpidCRNmodels"}]];".
-During evaluation of In[1752]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2534]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by 
-    "pendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox",
-      "EpidCRNmodels"}]];".
-During evaluation of In[1752]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2535]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by 
-    "ndTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox",
-      "EpidCRNmodels"}]];".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "bookSave[];".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "".
-During evaluation of In[1752]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= EXAMPLE 0: SIS model using ODE2WY
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= W0={{La,-be,-mu,0},{0,be,0,-ga-mu}}
-During evaluation of In[1827]:= Y0={{0,1,1,0},{0,1,0,1}}
-During evaluation of In[1827]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1827]:= W = (La	-be	-mu	0
-0	be	0	-ga-mu
-
-)
-During evaluation of In[1827]:= Y = (0	1	1	0
-0	1	0	1
-
-)
-During evaluation of In[1827]:= Kernel basis: (-((-ga-mu)/La)	-((-ga-mu)/be)	0	1
-mu/La	0	1	0
-
-)
-During evaluation of In[1827]:= No non-negative kernel vectors
-During evaluation of In[1827]:= Returning direct RN. No WR0 possible.
-During evaluation of In[1827]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1827]:= ({0, 0}->{La, 0}	1
-{1, 1}->{1 - be, 1 + be}	1
-{1, 0}->{1 - mu, 0}	1
-{0, 1}->{0, 1 - ga - mu}	1
-
-)
-During evaluation of In[1827]:= 
-========================================
-During evaluation of In[1827]:= EXAMPLE 1: From paper equation (1)
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1827]:= W = (1	1
-0	-1
--1	0
-
-)
-During evaluation of In[1827]:= Y = (1	1
-1	1
-1	1
-
-)
-During evaluation of In[1827]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1827]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1827]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1827]:= ({1, 1, 1}->{2, 1, 0}	1
-{1, 1, 1}->{2, 0, 1}	1
-
-)
-During evaluation of In[1827]:= 
-========================================
-During evaluation of In[1827]:= EXAMPLE 2: From paper equation (2), kappa2=kappa3=1
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1827]:= W = (1	-1
-1	-1
-
-)
-During evaluation of In[1827]:= Y = (0	1
-0	1
-
-)
-During evaluation of In[1827]:= Kernel basis: (1	1)
-During evaluation of In[1827]:= Found 1 extreme rays
-During evaluation of In[1827]:= Supports: {{1,1}}
-During evaluation of In[1827]:= FAIL: Supports do not partition {1,...,m}
-During evaluation of In[1827]:= Missing indices: {2}
-During evaluation of In[1827]:= Overlapping: {{1,2}}
-During evaluation of In[1827]:= Returning direct RN. No WR0 exists.
-During evaluation of In[1827]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1827]:= ({0, 0}->{1, 1}	1
-{1, 1}->{0, 0}	1
-
-)
-During evaluation of In[1827]:= 
-========================================
-During evaluation of In[1827]:= EXAMPLE 3: From paper equation (3)
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1827]:= W = (1	0	-1
-0	1	-1
-
-)
-During evaluation of In[1827]:= Y = (0	1	1
-0	0	1
-
-)
-During evaluation of In[1827]:= Kernel basis: (1	1	1)
-During evaluation of In[1827]:= Found 1 extreme rays
-During evaluation of In[1827]:= Supports: {{1,1,1}}
-During evaluation of In[1827]:= FAIL: Supports do not partition {1,...,m}
-During evaluation of In[1827]:= Missing indices: {2,3}
-During evaluation of In[1827]:= Overlapping: {{1,3}}
-During evaluation of In[1827]:= Returning direct RN. No WR0 exists.
-During evaluation of In[1827]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1827]:= ({0, 0}->{1, 0}	1
-{1, 0}->{1, 1}	1
-{1, 1}->{0, 0}	1
-
-)
-During evaluation of In[1827]:= 
-========================================
-During evaluation of In[1827]:= EXAMPLE 4: NO WR0 (kappa2 != kappa3)
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1827]:= W = (1	-2
-1	-3
-
-)
-During evaluation of In[1827]:= Y = (0	1
-0	1
-
-)
-During evaluation of In[1827]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1827]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1827]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1827]:= ({0, 0}->{1, 1}	1
-{1, 1}->{-1, -2}	1
-
-)
-During evaluation of In[1827]:= 
-========================================
-During evaluation of In[1827]:= EXAMPLE 5: NO WR0 (irreversible chain)
-During evaluation of In[1827]:= ========================================
-During evaluation of In[1827]:= ODE system: dx/dt = W x^Y
-During evaluation of In[1827]:= W = (1	0
--1	1
-0	-1
-
-)
-During evaluation of In[1827]:= Y = (1	0
-0	1
-0	0
-
-)
-During evaluation of In[1827]:= No kernel: stoichiometric subspace full rank
-During evaluation of In[1827]:= Returning direct RN from (W,Y). No WR0 possible.
-During evaluation of In[1827]:= 
-=== DIRECT RN (NO WR0) ===
-During evaluation of In[1827]:= ({1, 0, 0}->{2, -1, 0}	1
-{0, 1, 0}->{0, 2, -1}	1
-
-)
-During evaluation of In[1827]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2536]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by "ry[NotebookDirectory[]];".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "okDirectory[]];".
-Out[1897]= equation From paper
-During evaluation of In[1827]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2537]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by "ry[NotebookDirectory[]];".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "Directory[]];".
-During evaluation of In[1827]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2538]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by 
-    "pendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox",
-      "EpidCRNmodels"}]];".
-During evaluation of In[1827]:=
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2539]= $Failed
+During evaluation of In[2477]:=
 Syntax::sntxf: 
-   "" cannot be followed by 
-    "pendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox",
-      "EpidCRNmodels"}]];".
-During evaluation of In[1827]:=
-Syntax::sntxf: 
-   "" cannot be followed by 
-    "ndTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox",
-      "EpidCRNmodels"}]];".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "bookSave[];".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "".
-During evaluation of In[1827]:=
-Syntax::sntxf: "" cannot be followed by "ClearAll["Global`*"]".
+   "" cannot be followed by "ectory[NotebookDirectory[]];".
+During evaluation of In[2477]:= Set::write: Tag Times in During evaluation in is Null of Tag Times Protected.$Failed is Protected.
+Out[2540]= $Failed

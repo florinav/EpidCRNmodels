@@ -527,3 +527,169 @@ networks. This network has ", Length[speciesList], " species."];]];
 (*
 endo[{"X" -> "Y", "Y" -> "X"}]  (* Should return analysis results *)
 *)
+
+
+(* ========================================================================== *)
+(* INVASION GRAPH CONSTRUCTION *)
+(* ========================================================================== *)
+
+(* invGr - Invasion Graph Construction and Visualization
+
+   Purpose: Constructs invasion graphs for multi-strain epidemic models showing
+   which communities can invade which boundary equilibria.
+
+   Input:
+   - mSi: minimal siphons (list of lists of species names as strings)
+   - bdFps: boundary fixed points (list of solution lists, one per siphon)
+   - R0A: basic reproduction numbers (list)
+   - RHS: right-hand side of ODE
+   - var: variable list
+   - E0: disease-free equilibrium
+
+   Output: {gra, ver, edg, col}
+   - gra: Graph object with invasion edges
+   - ver: vertex list (communities as sorted integer lists)
+   - edg: edge list (rules showing invasion pathways)
+   - col: vertex colors (invasion rates: positive=Green, negative=Yellow)
+
+   Algorithm:
+   1. Build vertices from siphon complements (communities)
+   2. Compute invasion numbers Rj(ySc) for each strain at each community
+   3. Create edge S->S\Tj when Rj(ySc)>1
+   4. Color nodes by invasion success
+*)
+
+invGr[mSi_List, bdFps_List, R0A_List, RHS_List, var_List, E0_List] :=
+  Module[{
+    n, nSi, ver, edg, invNum, col, gra,
+    ii, jj, allSiphonIndices, siphonIndicesList,
+    fromCom, toCom, invasionRate, canInvade, vertexColors
+  },
+
+  (* Number of strains *)
+  n = Length[R0A];
+  nSi = Length[mSi];
+
+  (* Helper: convert siphon species names to indices *)
+  (* mSi[[i]] is a list of species names like {"x1", "x2"} *)
+  siphonIndicesList = Table[
+    Flatten[Position[var, ToExpression[#]] & /@ mSi[[i]]],
+    {i, nSi}
+  ];
+
+  (* All infection indices (union of all siphons) *)
+  allSiphonIndices = Sort[DeleteDuplicates[Flatten[siphonIndicesList]]];
+
+  (* Build vertices: all possible subcommunities *)
+  ver = Subsets[allSiphonIndices];
+  ver = Sort[ver];
+
+  (* Build edges and compute invasion numbers *)
+  edg = {};
+  invNum = Table[{}, {Length[ver]}];
+
+  Do[
+    fromCom = ver[[ii]];
+
+    (* For each strain jj *)
+    Do[
+      (* Strain jj can invade if its siphon is contained in fromCom *)
+      If[SubsetQ[fromCom, siphonIndicesList[[jj]]],
+        (* Compute invasion number R0j at DFE for now *)
+        invasionRate = R0A[[jj]] /. E0;
+
+        (* Numerical check *)
+        canInvade = TrueQ[N[invasionRate] > 1];
+
+        (* Target community: remove strain jj's siphon *)
+        toCom = Sort[Complement[fromCom, siphonIndicesList[[jj]]]];
+
+        (* Add edge if invasion successful and target is a vertex *)
+        If[canInvade && MemberQ[ver, toCom],
+          AppendTo[edg, fromCom -> toCom];
+        ];
+
+        (* Store invasion number *)
+        AppendTo[invNum[[ii]], {jj, invasionRate, canInvade}];
+      ];
+    , {jj, nSi}];
+  , {ii, Length[ver]}];
+
+  (* Color vertices by invasion success *)
+  col = Table[
+    If[Length[invNum[[ii]]] > 0,
+      If[AnyTrue[invNum[[ii]], #[[3]] &],
+        RGBColor[0, 0.7, 0],  (* Green: successful invasion *)
+        RGBColor[1, 1, 0]     (* Yellow: no successful invasions *)
+      ],
+      RGBColor[0.8, 0.8, 0.8]  (* LightGray: no invasion attempts *)
+    ],
+    {ii, Length[ver]}
+  ];
+
+  (* Build graph with subscripted labels *)
+  vertexColors = Thread[ver -> col];
+  vertexLabels = Table[
+    ver[[i]] -> If[Length[ver[[i]]] == 0,
+      "",
+      Module[{varNames, subsVars, labelPos},
+        varNames = var[[ver[[i]]]];
+        (* Convert each variable to subscripted form and use Row for display *)
+        subsVars = Row[subsCon[ToString[#]] & /@ varNames];
+        (* Position logic: use Center for intermediate levels, Above/Below for ends *)
+        (* Also offset horizontally for vertically aligned nodes *)
+        labelPos = Which[
+          Length[ver[[i]]] == 0, Center,
+          Length[ver[[i]]] == Length[allSiphonIndices], Below,
+          Length[ver[[i]]] <= Length[allSiphonIndices]/3, Above,
+          Length[ver[[i]]] >= 2*Length[allSiphonIndices]/3, Below,
+          True, If[Mod[i, 2] == 0, {Right, Above}, {Left, Above}]
+        ];
+        Placed[subsVars, labelPos]
+      ]
+    ],
+    {i, Length[ver]}
+  ];
+  gra = If[Length[edg] > 0,
+    Graph[ver, edg,
+      VertexLabels -> vertexLabels,
+      VertexStyle -> vertexColors,
+      VertexSize -> 0.4,
+      EdgeStyle -> Directive[RGBColor[0, 0, 0], Thickness[0.005]],
+      GraphLayout -> {"LayeredDigraphEmbedding", "Orientation" -> Top, "RootVertex" -> {}},
+      ImageSize -> {300, 300},
+      ImagePadding -> {{40, 40}, {30, 30}}
+    ],
+    Graph[ver, {},
+      VertexLabels -> vertexLabels,
+      VertexStyle -> vertexColors,
+      VertexSize -> 0.4,
+      GraphLayout -> {"LayeredDigraphEmbedding", "Orientation" -> Top, "RootVertex" -> {}},
+      ImageSize -> {300, 300},
+      ImagePadding -> {{40, 40}, {30, 30}}
+    ]
+  ];
+
+  (* Return *)
+  {gra, ver, edg, col}
+];
+
+(* Test: 4 invasion graphs like Figure 2 in AF.pdf *)
+(* Example call:
+Module[{mSi, RHS, var, E0, res1, res2, res3, res4},
+  mSi = {{"x1"}, {"x2"}, {"x3"}};
+  RHS = {r*x1*(1 - x1 - alp*x2 - alp*x3),
+         r*x2*(1 - x2 - alp*x1 - alp*x3),
+         r*x3*(1 - x3 - alp*x1 - alp*x2)};
+  var = {x1, x2, x3};
+  E0 = {x1 -> 0, x2 -> 0, x3 -> 0};
+
+  res1 = invGr[mSi, {}, {1.2, 0.8, 0.8}, RHS, var, E0];
+  res2 = invGr[mSi, {}, {1.5, 1.3, 0.9}, RHS, var, E0];
+  res3 = invGr[mSi, {}, {1.8, 1.6, 1.4}, RHS, var, E0];
+  res4 = invGr[mSi, {}, {2.0, 1.9, 1.7}, RHS, var, E0];
+
+  GraphicsRow[{res1[[1]], res2[[1]], res3[[1]], res4[[1]]}, ImageSize -> Full, Spacings -> 10]
+]
+*)
+

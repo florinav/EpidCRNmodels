@@ -1,0 +1,26 @@
+(* Test NGM on SI2Coinf *)
+ClearAll["Global`*"];
+SetDirectory[NotebookDirectory[]];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+<<EpidCRN`;
+
+RN = {
+  0 -> "s",
+  "s" + "i1" -> 2*"i1",
+  "s" + "i2" -> 2*"i2",
+  "i1" -> 0,
+  "i2" -> 0
+};
+
+rts = {s0*mu0, be1*s*i1, be2*s*i2, mu1*i1, mu2*i2};
+
+Print["RN=", RN];
+Print["rts=", rts];
+
+{RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, al, be, gam, ng} = bdAn[RN, rts];
+
+Print["var=", var];
+Print["infVars=", infVars];
+Print["F=", ng[[2]]];
+Print["V=", ng[[3]]];
+Print["K=", ng[[4]]];

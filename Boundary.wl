@@ -111,33 +111,36 @@ bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps},
 ]
 
 
-bdAn[RN_, rts_] := Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, mSi, inf, mod,
+bdAn[RN_, rts_, var_] := Module[{spe, alp, bet, gam, Rv, RHS, def, par, cp, cv, ct, mS, mSi, inf, mod,
 K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs,
 nonzeroIndices, relevantEigenvals, ngm, infVars},
 
-  {spe, al, be, gam, Rv, RHS, def} = extMat[RN];
-  var = ToExpression[spe];
+  (* Extract stoichiometric matrices with var order *)
+  {spe, alp, bet, gam, Rv, RHS, def} = extMat[RN, var];
   RHS = gam . rts;
   par = Par[RHS, var];
   cp = Thread[par > 0];
   cv = Thread[var >= 0];
   ct = Join[cp, cv];
-  mSi = minSiph[spe, RN][[1]];
-  
- (* infVars is union of all siphon variables - convert strings to symbols *)
-  infVars = ToExpression[Union[Flatten[mSi]]];
+  mS = minSiph[spe, asoRea[RN]];
+  mSi = mS[[1]];
 
-  cDFE = Thread[infVars -> 0];
+  (* infVars is union of all siphon variables - keep as strings for mSi output *)
+  infVars = Union[Flatten[mSi]];
+
+  (* Convert string species to symbol variables for substitution *)
+  cDFE = Thread[ToExpression[infVars] -> 0];
   RDFE = RHS /. cDFE;
   eq0 = Thread[RDFE == 0];
-  var0 = Complement[var, infVars];
+  var0 = Complement[var, ToExpression[infVars]];
   E0 = Join[Solve[eq0, var0] // Flatten, cDFE];
 
+  (* NGM expects symbols, so convert infVars to symbols *)
   mod = {RHS, var, par};
-  ngm = NGM[mod, infVars];
-  Jx = ngm[[1]] // FullSimplify;
-  Jy = ngm[[5]] // FullSimplify;
-  K = ngm[[4]] // FullSimplify;
+  ngm = NGM[mod, ToExpression[infVars]];
+  Jx = ngm[[1]];
+  Jy = ngm[[5]];
+  K = ngm[[4]];
 
   eigenvals = Eigenvalues[K];
   R0A = Select[eigenvals, # =!= 0 &];
@@ -147,7 +150,7 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   relevantEigenvals = eigenvals[[nonzeroIndices]];
   R0A = relevantEigenvals;*)
 
-  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, al, be, gam, ngm}
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm}
 ];
 (* Key change explanation:
    The critical fix is in the line:
@@ -264,38 +267,24 @@ NGM[mod_, infVars_] :=
 *)
 
 NGM[mod_, infVars_, Fuser_: {}] :=
-  Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, Vinv, allPos},
+  Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, Vinv, allPos, dfeRules},
    dyn = mod[[1]];
    X = mod[[2]];
    par = If[Length[mod] >= 3, mod[[3]], {}];
-
-   (* Convert infVars to positions in X *)
    inf = Flatten[Position[X, #] & /@ infVars];
    infc = Complement[Range[Length[X]], inf];
-
-   (* Compute Jacobian blocks *)
    Jx = Grad[dyn[[inf]], X[[inf]]];
    Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
    Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
    Jyx = If[Length[infc] > 0, Grad[dyn[[infc]], X[[inf]]], {}];
-
-   (* NGM computation at DFE *)
-   V1 = -Jx /. Thread[X[[infc]] -> 0];
-   F1 = Jx + V1 /. Thread[X[[inf]] -> 0];
-
-   (* Check if user provided F *)
+   V1 = If[Length[infc] > 0, (-Jx) /. Thread[X[[infc]] -> 0], -Jx];
+   F1 = (Jx + V1) /. Thread[X[[inf]] -> 0];
    If[Fuser === {},
-     (* No user F, use automatic posM extraction *)
      F = posM[F1];
      V = F - Jx;,
-
-     (* User provided F - validate it *)
      V = Fuser - Jx;
      Vinv = Inverse[V] /. Thread[X[[inf]] -> 0];
-
-     (* Check if all entries of Vinv are nonnegative using isNNe *)
      allPos = AllTrue[Flatten[Vinv], isNNe];
-
      If[allPos,
        F = Fuser;
        Print["NGM: user F accepted (Inverse[V] all positive)"],
@@ -304,10 +293,8 @@ NGM[mod_, infVars_, Fuser_: {}] :=
        V = F - Jx;
      ];
    ];
-
-   K = (F . Inverse[V]) /. Thread[X[[inf]] -> 0] // FullSimplify;
-   Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // FullSimplify;
-
+   K = (F . Inverse[V]) /. Thread[X[[inf]] -> 0] // Simplify;
+   Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // Simplify;
    {Jx, F, V, K, Jy, Jxy, Jyx, Kd}
   ]
 
@@ -365,10 +352,9 @@ extHD[poly_, var_] :=
    Print["Linear factors with possibly negative constant terms: ", linear];
    {highDegree, linear}];
 
+
+
 (*bd1*)
-
-
-
 bd1[RN_, rts_] := 
   Module[{spe, al, be, gam, Rv, RHS, def, var, par, cp, cv, ct, mS, 
     mSi, inf, mod, K, Jx, Jy, R0, R0A, E0, EA, E1, ngm, fps, 
@@ -531,7 +517,7 @@ bdCo[RN_, rts_] := Module[{
   
   (* First call bdAn to get basic analysis *)
   bdAnResult = bdAn[RN, rts];
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,ngm,infV} = bdAnResult;
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infV, ngm} = bdAnResult;
   
   (* Compute boundary equilibria for each siphon *)
   EA = {};
@@ -581,6 +567,4 @@ Print["Test 2 - NGM with valid F: K=", ngm2[[4]]];
 Finvalid = {{-be*s}};
 ngm3 = NGM[mod, infVars, Finvalid];
 Print["Test 3 - NGM with invalid F: K=", ngm3[[4]]];*)
-
-
 

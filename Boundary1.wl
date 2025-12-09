@@ -482,7 +482,7 @@ bdCo[RN_, rts_] := Module[{
   
   (* First call bdAn to get basic analysis *)
   bdAnResult = bdAn[RN, rts];
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,ngm,infV} = bdAnResult;
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infV, ngm} = bdAnResult;
   
   (* Compute boundary equilibria for each siphon *)
   EA = {};

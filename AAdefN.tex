@@ -14,7 +14,7 @@
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
-\newtheorem{open}{Open Problem}
+\newtheorem{open}{Problem}
 \newtheorem{example}{Example}
 
 % COUNTER DEFINITIONS
@@ -100,7 +100,7 @@
       name={#1},%
       description={p.~\pageref{op:#1}},%  % Use pageref of the label
       user1={\theopcounter},%
-      user2={Open Problem}%
+      user2={Problem}%
     }%
   \fi
 }
@@ -134,7 +134,7 @@
 % PRINT COMMAND
 \newcommand{\printboth}{%
   \glsaddall  % Add all entries to glossary
-  \printglossary[style=unifiedstyle, title={Definitions, Theorems, Examples and Open Problems}]%
+  \printglossary[style=unifiedstyle, title={Definitions, Theorems, Examples and  Problems}]%
 }
 
 %% ========================================
@@ -168,8 +168,8 @@
 \definecolor{funccolor}{RGB}{25,25,112}
 \definecolor{desccolor}{RGB}{64,64,64}
 \newcommand{\func}[1]{\texttt{\textcolor{funccolor}{#1}}}
- 
- 
+
+
 
 %% ========================================
 %% BASIC MATH ENVIRONMENTS
@@ -340,8 +340,8 @@
 \def\RR{\mathcal R}
 
 % Reproduction numbers
-\def\Rot{R_{{1}}^{\tilde{2}}}
-\def\Rto{R_{{2}}^{\tilde{1}}}
+\def\Rto{R_{{1}}^{\tilde{2}}}
+\def\Rot{R_{{2}}^{\tilde{1}}}
 \def\Roc{R_{1,c}}
 \def\Rtc{R_{2,c}}
 \def\rd{r_{0}}
