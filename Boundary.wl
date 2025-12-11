@@ -126,7 +126,9 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   mSi = mS[[1]];
 
   (* infVars is union of all siphon variables - keep as strings for mSi output *)
-  infVars = Union[Flatten[mSi]];
+  (* EXCLUDE variables named 's' or starting with 's' followed by digit from infection vars *)
+  infVars = DeleteCases[Union[Flatten[mSi]], "s"];
+  infVars = Select[infVars, !StringMatchQ[#, "s" ~~ DigitCharacter ..] &];
 
   (* Convert string species to symbol variables for substitution *)
   cDFE = Thread[ToExpression[infVars] -> 0];
@@ -155,13 +157,70 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
 (* Key change explanation:
    The critical fix is in the line:
    mSiIndices = Map[Flatten[Position[var, #] & /@ #] &, mS];
-   
+
    This now searches for expressions in var (which contains expressions like Subscript[i,1])
    instead of searching for expressions in spe (which contains strings like "i1").
-   
+
    Since mS now contains expressions from the updated minSiph function,
    we search directly in var which also contains expressions.
 *)
+
+(* bdAnC - Boundary analysis for closed systems (N conserved) *)
+bdAnC[RN_, rts_, var_] := Module[{
+  spe, alp, bet, gam, Rv, RHS, RHSsum, varReduced, RHSreduced,
+  RNreduced, rtsReduced, speReduced, alpReduced, betReduced, gamReduced,
+  result, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm,
+  mS, mod, ngmOrig, R0Aorig, DFEclosed
+  },
+
+  (* Extract stoichiometric matrices *)
+  {spe, alp, bet, gam, Rv, RHS, def} = extMat[RN, var];
+  RHS = gam . rts;
+
+  (* Check if closed system: Sum[RHS] == 0 *)
+  RHSsum = Total[RHS] // Simplify;
+
+  If[RHSsum =!= 0,
+    (* Not closed - use regular bdAn *)
+    Print["System not closed (Sum[RHS] != 0), using regular bdAn"];
+    Return[bdAn[RN, rts, var]]
+  ];
+
+  (* Closed system: First compute R0 from ORIGINAL system at s=1 *)
+  par = Par[RHS, var];
+  cp = Thread[par > 0];
+  mS = minSiph[spe, asoRea[RN]];
+  mSi = mS[[1]];
+  infVars = DeleteCases[Union[Flatten[mSi]], "s"];
+  infVars = Select[infVars, !StringMatchQ[#, "s" ~~ DigitCharacter ..] &];
+
+  (* DFE for closed system: infection vars = 0, s = 1 *)
+  DFEclosed = Join[Thread[ToExpression[infVars] -> 0], {var[[1]] -> 1}];
+
+  (* Compute NGM at DFE with s=1 *)
+  mod = {RHS, var, par};
+  ngmOrig = NGM[mod, ToExpression[infVars]];
+  K = ngmOrig[[4]] /. DFEclosed;
+  R0Aorig = Select[Eigenvalues[K], # =!= 0 &];
+
+  (* Now reduce system for other analyses *)
+  varReduced = Drop[var, 1];
+  RHSreduced = Drop[RHS, 1] /. {var[[1]] -> 1 - Total[varReduced]} // Simplify;
+
+  (* Convert reduced RHS to reaction network *)
+  {RNreduced, rtsReduced, speReduced, alpReduced, betReduced, gamReduced} =
+    ODE2RN[RHSreduced, varReduced];
+
+  (* Apply bdAn to reduced system for mSi, Jx, Jy, etc. *)
+  result = bdAn[RNreduced, rtsReduced, varReduced];
+  {RHSreduced, varReduced, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm} = result;
+
+  (* Override R0A with the correctly computed value from original system *)
+  R0A = R0Aorig;
+
+  (* Return results (note: var and RHS are now for reduced system, but R0A is from original) *)
+  {RHSreduced, varReduced, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm}
+];
 
 
 bd2[RN_, rts_] := 

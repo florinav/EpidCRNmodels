@@ -1,0 +1,57 @@
+(* ::Package:: *)
+
+ClearAll["Global`*"];
+SetDirectory[NotebookDirectory[]];
+SetOptions[$FrontEndSession,NotebookAutoSave->True];
+NotebookSave[];
+AppendTo[$Path,FileNameJoin[{$HomeDirectory,"Dropbox","EpidCRNmodels"}]];
+<<EpidCRN`;
+(* Shiu Chemical Reaction Network *)
+(* ====================================================================== *)
+(* Parameters *)
+(*Format[k1] := Subscript[k, 1];
+Format[k2] := Subscript[k, 2];
+Format[k3] := Subscript[k, 3];
+Format[k4] := Subscript[k, 4];
+Format[k5] := Subscript[k, 5];
+Format[k6] := Subscript[k, 6];
+Format[k7] := Subscript[k, 7];
+Format[k8] := Subscript[k, 8];*)
+
+(* Variables *)
+(*Format[a] := A;
+Format[b] := B;
+Format[c] := C;
+Format[d] := D;
+Format[e] := E;*)
+
+(* ====================================================================== *)
+(* MODEL: Shiu Chemical Reaction Network                                 *)
+(* ====================================================================== *)
+
+(* Define RHS *)
+RHS = {
+  -(k1 + 2*k8)*a^2*c + (k2 - k3)*a*d + k4*e + 2*k7*b*c,
+  k5*e - (k6 + k7)*b*c + k8*a^2*c,
+  -k1*a^2*c - k6*b*c + k2*a*d + k5*e,
+  k1*a^2*c + k4*e - (k2 + k3)*a*d,
+  k3*a*d + k6*b*c - (k4 + k5)*e
+};
+
+var = {a, b, c, d, e};
+
+(* Convert to reaction network *)
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+
+(* Boundary analysis *)
+{RHS1, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ng} =
+ bdAn[RN, rts, var];
+
+Print["Shiu Chemical Reaction Network, Verify=",
+RHS - RHS1 // FullSimplify];
+(* reconstruction *)
+
+(* Display RN and rts side by side *)
+Print[RN // Length, " reactions and transitions: ", Transpose[{RN, rts}] // MatrixForm];
+
+Print["DFE=", cDFE,"R0 funcs=", R0A,"Inf var=", infVars];
