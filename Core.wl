@@ -231,13 +231,13 @@ arrow2pairReac[reactions_] := Module[{converted},
 
 asoRea[RN_]:=Module[{parseSide,extractSpecies},
   extractSpecies[expr_]:=Module[{terms,species},
-    If[expr===0,Return[{}]];
+    If[expr===0 || expr==="0",Return[{}]];
     terms=If[Head[expr]===Plus,List@@expr,{expr}];
     species={};
     Do[Which[
       StringQ[term]&&StringContainsQ[term," "],AppendTo[species,StringTrim[StringDrop[term,1]]],
       Head[term]===Times,AppendTo[species,Cases[term,_String][[1]]],
-      StringQ[term],AppendTo[species,term]];,{term,terms}];
+      StringQ[term]&&term=!="0",AppendTo[species,term]];,{term,terms}];
     DeleteDuplicates[species]];
   parseSide[expr_]:=extractSpecies[expr];
   Map[Function[r,Association["Substrates"->parseSide[r[[1]]],"Products"->parseSide[r[[2]]]]],RN]];

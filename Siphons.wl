@@ -73,22 +73,22 @@ isSiph[W_List, species_List, alpha_, beta_] := Module[
 
 (* Siphon test - W is list of species names *)
 isSiph[W_List, species_List, alpha_, beta_] := Module[
-  {indices, alphaW, betaW, nReac, producingReactions},
-  
+  {indices, alphaW, betaW, nReac, producingReactions, result},
+
   (* Convert species names to indices *)
   indices = Flatten[Position[species, #] & /@ W];
   If[Length[indices] != Length[W], Return[False]];
-  
+
   nReac = Dimensions[alpha][[2]];
   alphaW = alpha[[indices]];
   betaW = beta[[indices]];
-  
+
   (* Reactions where (S+)_W > 0 *)
   producingReactions = Select[Range[nReac], pos[betaW[[All, #]]] &];
-  
+
   (* If no producing reactions, vacuously true *)
   If[Length[producingReactions] == 0, Return[True]];
-  
+
   (* All producing reactions must also have (S-)_W > 0 *)
   AllTrue[producingReactions, pos[alphaW[[All, #]]] &]
 ];
@@ -96,10 +96,10 @@ isSiph[W_List, species_List, alpha_, beta_] := Module[
 (* Find minimal siphons *)
 minSiph[vars_, reactions_] := Module[{
   species, alpha, beta, n, m, reactionsAsso, siphons, minimal, nonm},
-  
+
   species = If[ListQ[vars] && AllTrue[vars, StringQ], vars, ToString /@ vars];
   reactionsAsso = asoRea[reactions];
-  
+
   n = Length[species];
   m = Length[reactions];
   

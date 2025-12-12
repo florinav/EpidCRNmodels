@@ -122,13 +122,11 @@ nonzeroIndices, relevantEigenvals, ngm, infVars},
   cp = Thread[par > 0];
   cv = Thread[var >= 0];
   ct = Join[cp, cv];
-  mS = minSiph[spe, asoRea[RN]];
+  mS = minSiph[spe, RN];
   mSi = mS[[1]];
 
   (* infVars is union of all siphon variables - keep as strings for mSi output *)
-  (* EXCLUDE variables named 's' or starting with 's' followed by digit from infection vars *)
-  infVars = DeleteCases[Union[Flatten[mSi]], "s"];
-  infVars = Select[infVars, !StringMatchQ[#, "s" ~~ DigitCharacter ..] &];
+  infVars = Union[Flatten[mSi]];
 
   (* Convert string species to symbol variables for substitution *)
   cDFE = Thread[ToExpression[infVars] -> 0];
@@ -189,10 +187,9 @@ bdAnC[RN_, rts_, var_] := Module[{
   (* Closed system: First compute R0 from ORIGINAL system at s=1 *)
   par = Par[RHS, var];
   cp = Thread[par > 0];
-  mS = minSiph[spe, asoRea[RN]];
+  mS = minSiph[spe, RN];
   mSi = mS[[1]];
-  infVars = DeleteCases[Union[Flatten[mSi]], "s"];
-  infVars = Select[infVars, !StringMatchQ[#, "s" ~~ DigitCharacter ..] &];
+  infVars = Union[Flatten[mSi]];
 
   (* DFE for closed system: infection vars = 0, s = 1 *)
   DFEclosed = Join[Thread[ToExpression[infVars] -> 0], {var[[1]] -> 1}];
