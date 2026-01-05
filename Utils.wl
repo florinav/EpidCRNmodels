@@ -17,10 +17,16 @@ reCL[re_] :=DeleteCases[re, _Symbol > 0 | Subscript[_, __] > 0, Infinity];
 
 remZ[li_]:=Select[li, # =!= 0 &];
 
-isNNe[m_] := m // Together // NumeratorDenominator //
-  Map@CoefficientArrays //
-  ReplaceAll[sa_SparseArray :> sa["NonzeroValues"]] // Flatten //
-  AllTrue[#, NonNegative] &;
+remN[expr_] := Module[{withZeros},
+  withZeros = expr //. {
+    -Sqrt[x_] :> 0,
+    Times[-1, Sqrt[x_], rest___] :> 0,
+    Times[coef_?Negative, Sqrt[x_], rest___] :> 0
+  };
+  If[ListQ[withZeros], remZ[withZeros], withZeros]
+];
+
+redTout[con_, var_:{}, time_:300] := TimeConstrained[Reduce[con, var], time, "timeOut"];
 
 whenP=Function[exprs,
   Module[{params,reducedConditions},
@@ -75,13 +81,13 @@ Grobpol[RHS_, var_, par_, ind_, cn_ : {}] := Module[{dyn, X, eq, elim, pol, rats
   { pol}
 ]
 
-(* Tests for isNNe 
+(* Tests for onlyP (from Conv.wl)
 
-isNNe[a + b]
-isNNe[1/(a*b)]
-isNNe[-a]
-isNNe[a - b]
-isNNe[0]
+onlyP[a + b]
+onlyP[1/(a*b)]
+onlyP[-a]
+onlyP[a - b]
+onlyP[0]
 *)
 
 

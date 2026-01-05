@@ -4,6 +4,8 @@
 
 ClearAll[isSiph, isAutoC, minSiph, findCores];
 
+(* toStr removed - use version from epi.wl instead *)
+
 (* Check if a reaction is an inflow (0 \[RightArrow] ...) or outflow (... \[RightArrow] 0) *)
 isInflowOrOutflow[reaction_] := 
   reaction[[1]] === 0 || reaction[[2]] === 0;
@@ -36,104 +38,7 @@ filterInternalReactions[RN_List] :=
 *)
 
 
-
-isSiph[W_List, species_List, alpha_, beta_] := Module[
-  {indices, alphaW, betaW, nReac, producingReactions, result},
-  
-  indices = Flatten[Position[species, #] & /@ W];
-  If[Length[indices] != Length[W], Return[False]];
-  
-  nReac = Dimensions[alpha][[2]];
-  alphaW = alpha[[indices]];
-  betaW = beta[[indices]];
-  
-  (* Reactions where (S+)_W > 0 *)
-  producingReactions = Select[Range[nReac], pos[betaW[[All, #]]] &];
-  
-  (* Debug output *)
-  If[W == {"a"}, 
-    Print["Testing W = ", W];
-    Print["  Producing reactions: ", producingReactions];
-    Print["  For each producing reaction, check alphaW:"];
-    Do[
-      Print["    Reaction ", r, ": alphaW = ", alphaW[[All, r]], 
-            ", pos = ", pos[alphaW[[All, r]]]],
-      {r, producingReactions}
-    ];
-  ];
-  
-  If[Length[producingReactions] == 0, Return[True]];
-  
-  result = AllTrue[producingReactions, pos[alphaW[[All, #]]] &];
-  
-  If[W == {"a"}, Print["  Result: ", result]];
-  
-  result
-];
-
-(* Siphon test - W is list of species names *)
-isSiph[W_List, species_List, alpha_, beta_] := Module[
-  {indices, alphaW, betaW, nReac, producingReactions, result},
-
-  (* Convert species names to indices *)
-  indices = Flatten[Position[species, #] & /@ W];
-  If[Length[indices] != Length[W], Return[False]];
-
-  nReac = Dimensions[alpha][[2]];
-  alphaW = alpha[[indices]];
-  betaW = beta[[indices]];
-
-  (* Reactions where (S+)_W > 0 *)
-  producingReactions = Select[Range[nReac], pos[betaW[[All, #]]] &];
-
-  (* If no producing reactions, vacuously true *)
-  If[Length[producingReactions] == 0, Return[True]];
-
-  (* All producing reactions must also have (S-)_W > 0 *)
-  AllTrue[producingReactions, pos[alphaW[[All, #]]] &]
-];
-
-(* Find minimal siphons *)
-minSiph[vars_, reactions_] := Module[{
-  species, alpha, beta, n, m, reactionsAsso, siphons, minimal, nonm},
-
-  species = If[ListQ[vars] && AllTrue[vars, StringQ], vars, ToString /@ vars];
-  reactionsAsso = asoRea[reactions];
-
-  n = Length[species];
-  m = Length[reactions];
-  
-  alpha = ConstantArray[0, {n, m}];
-  beta = ConstantArray[0, {n, m}];
-  
-  Do[
-    Module[{subs, prods},
-      subs = Lookup[reactionsAsso[[j]], "Substrates", {}];
-      prods = Lookup[reactionsAsso[[j]], "Products", {}];
-      
-      (* Convert to lowercase strings for comparison *)
-      subs = ToLowerCase[ToString[#]] & /@ subs;
-      prods = ToLowerCase[ToString[#]] & /@ prods;
-      
-      Do[
-        If[MemberQ[subs, species[[i]]], alpha[[i, j]] = 1];
-        If[MemberQ[prods, species[[i]]], beta[[i, j]] = 1];
-      , {i, n}];
-    ];
-  , {j, m}];
-  
-  siphons = Select[Subsets[species, {1, n}], isSiph[#, species, alpha, beta] &];
-  
-  minimal = Select[siphons, 
-    Function[s, AllTrue[siphons, Function[t, t === s || !SubsetQ[s, t]]]]
-  ];
-  nonm = Complement[siphons, minimal];
-  {minimal, nonm}
-];
-
-
-(* Helper: check if vector is >= 0 and != 0 *)
-pos[v_] := AllTrue[v, # >= 0 &] && Total[v] > 0;
+(* isSiph, minSiph, and pos removed - use versions from epi.wl instead *)
 
 (* Check if W with reactions R forms an autocatalytic core *)
 isAutoC[W_List, R_List, species_List, reactions_List, alpha_, beta_] := Module[
@@ -192,11 +97,11 @@ findCores[RN_, maxSize_] := Module[{
   , {j, m}];
   
   allSubsets = Subsets[species, {1, Min[maxSize, n]}];
-  
+
   autocatalyticSets = Select[allSubsets, Function[W,
     Module[{allReactionSubsets},
-      allReactionSubsets = Subsets[RN, {1, m}];
-      AnyTrue[allReactionSubsets, 
+      allReactionSubsets = Subsets[RN, {1, Min[maxSize, m]}];
+      AnyTrue[allReactionSubsets,
         isAutoC[W, #, species, RN, alpha, beta] &
       ]
     ]
@@ -228,8 +133,8 @@ Print["Non-minimal cores: ", result[[2]]];*)
 
 ClearAll[safeLowerKeys, canActRea, edgIGMS, IGMS];
 
-(* Map association keys to lowercase strings, preserving values *)
-safeLowerKeys[asso_Association] := Association @ KeyValueMap[ToLowerCase[ToString[#1]] -> #2 &, asso];
+(* Map association keys to strings preserving case, preserving values *)
+safeLowerKeys[asso_Association] := Association @ KeyValueMap[toStr[#1] -> #2 &, asso];
 
 (* reaction: a Rule lhs->rhs (your RN format)
    Si, Sj: lists of species names (strings) \[LongDash] can be mixed case.
@@ -242,13 +147,13 @@ canActRea[reaction_, Si_List, Sj_List] := Module[
 
   {lhs, rhs} = List @@ reaction;
 
-  (* build stoichiometric maps via your comp2Asso, then lowercase keys locally *)
+  (* build stoichiometric maps via your comp2Asso, then convert keys to strings preserving case *)
   lhsComp = comp2Asso[lhs];  rhsComp = comp2Asso[rhs];
   lhsL = safeLowerKeys @ lhsComp;  rhsL = safeLowerKeys @ rhsComp;
 
-  (* lowercase versions of siphon species *)
-  SiL = ToLowerCase /@ ToString /@ Si;
-  SjL = ToLowerCase /@ ToString /@ Sj;
+  (* string versions of siphon species preserving case *)
+  SiL = toStr /@ Si;
+  SjL = toStr /@ Sj;
 
   (* must consume something in Si *)
   If[Intersection[Keys[lhsL], SiL] === {}, Return[False]];
@@ -265,8 +170,8 @@ edgIGMS[RN_List, mSi_List] := Module[
   {n = Length[mSi], edges = {}, firstLabels = {}, allLabels = <||>, SiL, SjL, hits},
   Do[
     If[i =!= j,
-      SiL = ToLowerCase /@ ToString /@ mSi[[i]];
-      SjL = ToLowerCase /@ ToString /@ mSi[[j]];
+      SiL = toStr /@ mSi[[i]];
+      SjL = toStr /@ mSi[[j]];
       hits = Select[RN, canActRea[#, SiL, SjL] &];
       If[hits =!= {},
         AppendTo[edges, i \[DirectedEdge] j];
@@ -302,7 +207,7 @@ scaledEmbedding},
 
   (* build label text explicitly as in IGMSL *)
   pairs = (List @@ #) & /@ edges;
-  mSiStr = Map[ToLowerCase@*ToString, mSi, {2}];
+  mSiStr = Map[toStr, mSi, {2}];
   labText = Table[
     Module[{i = pairs[[k, 1]], j = pairs[[k, 2]], hits},
       hits = Select[RN, canActRea[#, mSiStr[[i]], mSiStr[[j]]] &];
@@ -556,8 +461,8 @@ reacToString[r_Rule] := ToString[r, InputForm];
 edgIGMS[RN_List, mSi_List] := Module[
   {n = Length[mSi], mSiStr, edgeLabelAssoc, edgeAllLabels, edges},
 
-  (* Your canActRea expects lower-case species strings *)
-  mSiStr = Map[ToLowerCase @* ToString, mSi, {2}];
+  (* Convert species to strings preserving case *)
+  mSiStr = Map[toStr, mSi, {2}];
 
   edgeLabelAssoc = <||>;              (* edge -> first label (string) *)
   edgeAllLabels  = <||>;              (* edge -> list of all labels  *)
@@ -643,49 +548,9 @@ Notes:
 *)
 
 
-(* Convert compound expression to association with lowercase species names *)
+(* Convert compound expression to association preserving species case *)
 (* Enhanced to handle symbolic coefficients using * separator *)
-comp2Asso[expr_] := Module[{terms, result, coeff, species},
-  If[expr === 0 || expr === Null,
-    Association[], (* Empty association for zero or null *)
-    terms = If[Head[expr] === Plus, List @@ expr, {expr}];
-    result = Association[];
-    Do[
-      Which[
-        (* Handle Times with coefficient * species *)
-        Head[term] === Times && Length[term] == 2,
-        (* Determine which part is species (String) and which is coefficient *)
-        If[StringQ[First[term]],
-          (* First is species (string), second is coefficient *)
-          species = First[term];
-          coeff = Last[term],
-          (* Else: first is coefficient, second is species (string) *)
-          coeff = First[term];
-          species = Last[term]
-        ];
-        (* Convert species to lowercase and store *)
-        If[StringQ[species],
-          result[ToLowerCase[species]] = coeff,
-          (* Fallback if species is not a string (shouldn't happen) *)
-          result[ToLowerCase[ToString[species]]] = coeff
-        ],
-        
-        (* Handle string species alone (coefficient 1) *)
-        StringQ[term],
-        result[ToLowerCase[term]] = 1,
-        
-        (* Handle symbol species alone (coefficient 1) *)
-        AtomQ[term],
-        result[ToLowerCase[ToString[term]]] = 1,
-        
-        (* Handle other cases - convert to lowercase *)
-        True,
-        result[ToLowerCase[ToString[term]]] = 1
-      ];
-    , {term, terms}];
-    result
-  ]
-];
+(* comp2Asso removed - use version from epi.wl instead *)
 
 (* Tests 
 Print["=== Test comp2Asso ==="];

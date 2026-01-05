@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section*{Alizon Model - Abbreviated Notation}
+
+Using the conventions: subscripts become concatenation, Greek letters abbreviated to first two letters.
+
+\textbf{IMPORTANT NOTE:} When requesting RHS, provide in \texttt{verbatim} format for direct Mathematica paste, NOT in \texttt{align} environment.
+
+\subsection*{RHS for Mathematica (copy-paste ready)}
+
+\begin{verbatim}
+RHS = {Ph - nu0*m0 - m0*(la1 + la2 + la1c + la2c + La1 + La2),
+       -nu1*m1 + m0*la1 - m1*(la1 + la2 + la1c + la2c + La1 + La2),
+       -nu2*m2 + m0*la2 - m2*(la1 + la2 + la1c + la2c + La1 + La2),
+       -nuc*mc + m0*(la1c + la2c) + m1*(la2 + la2c + La2) + m2*(la1 + la1c + La1),
+       -up1*M1 + m0*La1 + m1*(la1 + la1c + La1),
+       -up2*M2 + m0*La2 + m2*(la2 + la2c + La2)};
+\end{verbatim}
+
+\subsection*{Variables and Parameters}
+
+\noindent
+Variables: \texttt{m0, m1, m2, mc, M1, M2}
+
+\noindent
+Parameters: \texttt{Ph, nu0, nu1, nu2, nuc, up1, up2, la1, la2, la1c, la2c, La1, La2}
+
+\subsection*{Equations (for documentation)}
+
+\begin{align}
+m0' &= Ph - nu0 \cdot m0 - m0 \cdot (la1 + la2 + la1c + la2c + La1 + La2), \\
+m1' &= -nu1 \cdot m1 + m0 \cdot la1 - m1 \cdot (la1 + la2 + la1c + la2c + La1 + La2), \\
+m2' &= -nu2 \cdot m2 + m0 \cdot la2 - m2 \cdot (la1 + la2 + la1c + la2c + La1 + La2), \\
+mc' &= -nuc \cdot mc + m0 \cdot (la1c + la2c) + m1 \cdot (la2 + la2c + La2) + m2 \cdot (la1 + la1c + La1), \\
+M1' &= -up1 \cdot M1 + m0 \cdot La1 + m1 \cdot (la1 + la1c + La1), \\
+M2' &= -up2 \cdot M2 + m0 \cdot La2 + m2 \cdot (la2 + la2c + La2)
+\end{align}
+
+\section*{Format Function for Mathematica}
+
+\begin{verbatim}
+(* Format function to convert abbreviated notation to LaTeX subscripts *)
+prF[expr_] := expr /. {
+  (* Variables *)
+  m0 -> Subscript[m, 0],
+  m1 -> Subscript[m, 1],
+  m2 -> Subscript[m, 2],
+  mc -> Subscript[m, c],
+  M1 -> Subscript[M, 1],
+  M2 -> Subscript[M, 2],
+  (* Parameters - Greek letters with subscripts *)
+  Ph -> \[CapitalPhi],
+  nu0 -> Subscript[\[Nu], 0],
+  nu1 -> Subscript[\[Nu], 1],
+  nu2 -> Subscript[\[Nu], 2],
+  nuc -> Subscript[\[Nu], c],
+  up1 -> Subscript[\[Upsilon], 1],
+  up2 -> Subscript[\[Upsilon], 2],
+  la1 -> Subscript[\[Lambda], 1],
+  la2 -> Subscript[\[Lambda], 2],
+  la1c -> Subscript[\[Lambda], "1,c"],
+  la2c -> Subscript[\[Lambda], "2,c"],
+  La1 -> Subscript[\[CapitalLambda], 1],
+  La2 -> Subscript[\[CapitalLambda], 2]
+};
+
+(* Example usage: *)
+(* prF[m0' == Ph - nu0*m0 - m0*(la1 + la2)] *)
+\end{verbatim}
+
+\end{document}

@@ -30,10 +30,10 @@ fpHopf[RHS_, var_, par_, p0val_] :=
 
 
 (*Equilibrium scanning with automatic varInd detection and performance optimizations*)
-scan[RHS_, var_, par_, persRule_, plotInd_, mSi_, 
-  gridRes_: Automatic, steadyTol_: 10^(-5), 
-  stabTol_: 10^(-8), chopTol_: 10^(-10), R01_: Automatic, 
-  R02_: Automatic, R12_: Automatic, R21_: Automatic] := 
+scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
+  gridRes_: Automatic, steadyTol_: 10^(-5),
+  stabTol_: 10^(-8), chopTol_: 10^(-10), R01_: Automatic,
+  R02_: Automatic, R12_: Automatic, R21_: Automatic, rangeExtension_: 2.5] := 
  Block[{bifP1min, bifP1max, bifP2min, bifP2max, bifP1vals, bifP2vals, 
    totalPoints, res, outcomes, outcomeCounts, finalPlot, plotData, 
    useGridMode, bifParIdx1, bifParIdx2, bifP1Center, bifP2Center, 
@@ -51,29 +51,37 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
   
   (*AUTO-DETERMINE varInd from mSi*)
   (* Convert variable names in mSi to their positions in var *)
+  (* mSi contains strings, so convert to symbols before searching *)
   infPositions = Union[Flatten[Table[
-    FirstPosition[var, mSi[[i]][[j]]][[1]], 
+    FirstPosition[var, ToExpression[mSi[[i]][[j]]]][[1]],
     {i, 1, Length[mSi]}, {j, 1, Length[mSi[[i]]]}
     ]]]; (* All infected compartment positions *)
   susceptiblePositions = Complement[Range[Length[var]], infPositions];
-  
+
   (* Construct varInd automatically using positions *)
   varInd = {
     susceptiblePositions[[1]], (* First non-infected compartment *)
-    FirstPosition[var, mSi[[1]][[1]]][[1]], (* First infected compartment of strain 1 *)
-    FirstPosition[var, mSi[[2]][[1]]][[1]]  (* First infected compartment of strain 2 *)
+    FirstPosition[var, ToExpression[mSi[[1]][[1]]]][[1]], (* First infected compartment of strain 1 *)
+    FirstPosition[var, ToExpression[mSi[[2]][[1]]]][[1]]  (* First infected compartment of strain 2 *)
     };
-  
-  Print["Auto-determined varInd: ", varInd];
-  Print["  Susceptible: ", var[[varInd[[1]]]]];
-  Print["  Strain 1 (first compartment): ", var[[varInd[[2]]]]];
-  Print["  Strain 2 (first compartment): ", var[[varInd[[3]]]]];
   
   (* Extract variables using auto-determined indices *)
   varS = var[[varInd[[1]]]]; (* Susceptible variable *)
   varI1 = var[[varInd[[2]]]]; (* Strain 1 variable *)
   varI2 = var[[varInd[[3]]]]; (* Strain 2 variable *)
-  
+
+  (*Compute endemic equilibrium at persVal*)
+  Module[{endemicEqs, endemicSols, endemicEE},
+   endemicEqs = Join[Thread[RHS == 0], Thread[var > 0]];
+   endemicSols = Quiet[FindInstance[endemicEqs /. Thread[par -> persVal], var, Reals, 1],
+     {Power::infy, Infinity::indet, Power::indet}];
+   If[Length[endemicSols] > 0,
+    endemicEE = N[var /. endemicSols[[1]]];
+    Print["Endemic equilibrium: ", Thread[var -> endemicEE]];,
+    Print["No endemic equilibrium found"];
+   ];
+  ];
+
   (*Set default scanning parameters*)
   delta = 1/10;
   wRan = 1;
@@ -89,9 +97,9 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
   (*Extract bifurcation parameter indices for plotting*)
   bifParIdx1 = plotInd[[1]];
   bifParIdx2 = plotInd[[2]];
-  bifP1Center = persVal[[bifParIdx1]]; 
-  bifP2Center = persVal[[bifParIdx2]]; 
-  
+  bifP1Center = persVal[[bifParIdx1]];
+  bifP2Center = persVal[[bifParIdx2]];
+
   (*Parameters for R-curve plotting*)
   par1 = par[[bifParIdx1]];
   par2 = par[[bifParIdx2]];
@@ -100,47 +108,49 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
   fInd = Complement[Range[Length[par]], plotInd];
   fixedParams = Thread[par[[fInd]] -> persVal[[fInd]]];
   
-  (*Set initial parameter ranges*)
-  bifP1min = Max[bifP1Center*(1 - wRan), 0.001];
-  bifP1max = bifP1Center*(1 + wRan);
-  bifP2min = Max[bifP2Center*(1 - hRan), 0.001];
-  bifP2max = bifP2Center*(1 + hRan);
-  
-  (*Compute R01-R02 intersection point if both R-curves are provided*)
+  (*Compute intersection of all 4 R curves to set ranges*)
   intersectionPoint = {};
-  If[R01 =!= Automatic && R02 =!= Automatic,
-   Print["Computing R01=1, R02=1 intersection point..."];
-   
-   (* Try numerical method directly for better performance *)
-   numSol = Quiet[NSolve[{(R01 /. fixedParams) == 1, (R02 /. fixedParams) == 1}, {par1, par2}, Reals]];
-   
+  If[R01 =!= Automatic && R02 =!= Automatic && R12 =!= Automatic && R21 =!= Automatic,
+   (* Try to find intersection of all 4 curves *)
+   numSol = Quiet[NSolve[{(R01 /. fixedParams) == 1, (R02 /. fixedParams) == 1,
+     (R12 /. fixedParams) == 1, (R21 /. fixedParams) == 1}, {par1, par2}, Reals],
+     {Power::infy, Infinity::indet, Power::indet, Solve::ratnz}];
+
    If[Length[numSol] > 0 && AllTrue[numSol[[1]], NumericQ[#[[2]]] &],
     intersectionPoint = {par1, par2} /. numSol[[1]];,
-    
-    (* Fallback to FindRoot *)
-    Print["Using FindRoot for intersection..."];
-    startPt = {bifP1Center, bifP2Center};
-    rootSol = Quiet[FindRoot[{(R01 /. fixedParams) == 1, (R02 /. fixedParams) == 1}, 
-      {{par1, startPt[[1]]}, {par2, startPt[[2]]}}]];
-    If[Head[rootSol] === List && AllTrue[rootSol, NumericQ[#[[2]]] &],
-     intersectionPoint = {par1, par2} /. rootSol;
-     ];
+
+    (* Fallback: find R01-R02 intersection *)
+    numSol = Quiet[NSolve[{(R01 /. fixedParams) == 1, (R02 /. fixedParams) == 1}, {par1, par2}, Reals],
+      {Power::infy, Infinity::indet, Power::indet, Solve::ratnz}];
+    If[Length[numSol] > 0 && AllTrue[numSol[[1]], NumericQ[#[[2]]] &],
+     intersectionPoint = {par1, par2} /. numSol[[1]];
+     Print["4-curve intersection not found, using R01-R02"];
     ];
-   
+   ];
+
    If[Length[intersectionPoint] == 2 && AllTrue[intersectionPoint, NumericQ],
-    Print["R01-R02 intersection at: ", par1, " = ", intersectionPoint[[1]], ", ", par2, " = ", intersectionPoint[[2]]];
-    
-    (*Expand ranges to include intersection point if needed*)
-    If[intersectionPoint[[1]] < bifP1min, bifP1min = intersectionPoint[[1]] * 0.9];
-    If[intersectionPoint[[1]] > bifP1max, bifP1max = intersectionPoint[[1]] * 1.1];
-    If[intersectionPoint[[2]] < bifP2min, bifP2min = intersectionPoint[[2]] * 0.9];
-    If[intersectionPoint[[2]] > bifP2max, bifP2max = intersectionPoint[[2]] * 1.1];
-    
-    Print["Adjusted ranges: ", par1, " \[Element] [", N[bifP1min], ", ", N[bifP1max], "], ", par2, " \[Element] [", N[bifP2min], ", ", N[bifP2max], "]"];,
-    
-    Print["Warning: Could not find R01-R02 intersection point"];
-    intersectionPoint = {};
-    ];
+    (*Set ranges to exceed intersection point - use rangeExtension parameter*)
+    bifP1min = Max[intersectionPoint[[1]] * 0.1, 0.001];
+    bifP1max = intersectionPoint[[1]] * rangeExtension;
+    bifP2min = Max[intersectionPoint[[2]] * 0.1, 0.001];
+    bifP2max = intersectionPoint[[2]] * rangeExtension;
+
+    Print["Intersection: ", par1, "=", N[intersectionPoint[[1]]], " ", par2, "=", N[intersectionPoint[[2]]],
+      " Ranges: ", par1, "\[Element][", N[bifP1min], ",", N[bifP1max], "] ", par2, "\[Element][", N[bifP2min], ",", N[bifP2max], "]"];,
+
+    (* Fallback to default ranges *)
+    Print["Warning: Could not find intersection, using default ranges"];
+    bifP1min = Max[bifP1Center*(1 - wRan), 0.001];
+    bifP1max = bifP1Center*(1 + wRan);
+    bifP2min = Max[bifP2Center*(1 - hRan), 0.001];
+    bifP2max = bifP2Center*(1 + hRan);
+    ];,
+
+   (* If R curves not provided, use default ranges *)
+   bifP1min = Max[bifP1Center*(1 - wRan), 0.001];
+   bifP1max = bifP1Center*(1 + wRan);
+   bifP2min = Max[bifP2Center*(1 - hRan), 0.001];
+   bifP2max = bifP2Center*(1 + hRan);
    ];
   
   (*Update ranges after potential intersection adjustment*)
@@ -179,17 +189,17 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
   Do[
    Do[currentProgress++;
     progressVar = N[currentProgress/totalPoints];
-    
+
     (*Create parameter values for this grid point*)
     numpar = persVal;
     numpar[[bifParIdx1]] = bifP1;
     numpar[[bifParIdx2]] = bifP2;
     conPar = Thread[par -> numpar];
-    
+
     (*Pre-evaluate reproduction numbers with error handling*)
     R01val = Quiet[N[R01 /. conPar], {Power::infy, Overflow::unfl, Power::indet}];
     R02val = Quiet[N[R02 /. conPar], {Power::infy, Overflow::unfl, Power::indet}];
-    
+
     (*Early validation*)
     If[!NumericQ[R01val] || !NumericQ[R02val] || !FiniteQ[R01val] || !FiniteQ[R02val] ||
        R01val < 0 || R02val < 0,
@@ -232,12 +242,12 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
      (*Competitive exclusion cases*)
      R12val < 1 && R21val < 1,
      classification = If[R01val > R02val, "E1", "E2"],
-     
+
      R12val > 1 && R21val < 1,
-     classification = "E2",
-     
-     R12val < 1 && R21val > 1,
      classification = "E1",
+
+     R12val < 1 && R21val > 1,
+     classification = "E2",
      
      (*Potential coexistence*)
      R12val > 1 && R21val > 1,
@@ -287,10 +297,13 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
   
   (*Debug output*)
   Print["Checked ", coexistencePoints, " potential coexistence points"];
-  
+
   (*Process results*)
   outcomes = DeleteDuplicates[Table[res[[i, 3]], {i, 1, Length[res]}]];
   outcomeCounts = Table[Count[res, {_, _, outcomes[[i]]}], {i, 1, Length[outcomes]}];
+
+  (*Summary with percentages - print before plot generation*)
+  Do[Print[outcomes[[i]], ": ", outcomeCounts[[i]], " (", Round[100.*outcomeCounts[[i]]/Length[res]], "%)"], {i, 1, Length[outcomes]}];
   
   (*Create plot with fixed colors*)
   plotData = Table[Select[res, #[[3]] == outcomes[[i]] &][[All, 1 ;; 2]], {i, 1, Length[outcomes]}];
@@ -311,26 +324,30 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
   (*Create R-curve plots*)
   rCurves = {};
   rCurveLabels = {};
-  If[R01 =!= Automatic || R02 =!= Automatic || R12 =!= Automatic || R21 =!= Automatic, 
+  If[R01 =!= Automatic || R02 =!= Automatic || R12 =!= Automatic || R21 =!= Automatic,
    activeEquations = {};
    activeColors = {};
-   If[R01 =!= Automatic, 
-    AppendTo[activeEquations, Evaluate[(R01 /. fixedParams) == 1]];
+   If[R01 =!= Automatic,
+    AppendTo[activeEquations, Evaluate[Quiet[FullSimplify[(R01 /. fixedParams) == 1],
+      {Power::infy, Infinity::indet, Power::indet}]]];
     AppendTo[activeColors, Directive[Red, Thick]];
     AppendTo[rCurveLabels, "R01=1"];];
-   If[R02 =!= Automatic, 
-    AppendTo[activeEquations, Evaluate[(R02 /. fixedParams) == 1]];
+   If[R02 =!= Automatic,
+    AppendTo[activeEquations, Evaluate[Quiet[FullSimplify[(R02 /. fixedParams) == 1],
+      {Power::infy, Infinity::indet, Power::indet}]]];
     AppendTo[activeColors, Directive[Blue, Thick]];
     AppendTo[rCurveLabels, "R02=1"];];
-   If[R12 =!= Automatic, 
-    AppendTo[activeEquations, Evaluate[(R12 /. fixedParams) == 1]];
+   If[R12 =!= Automatic,
+    AppendTo[activeEquations, Evaluate[Quiet[FullSimplify[(R12 /. fixedParams) == 1],
+      {Power::infy, Infinity::indet, Power::indet}]]];
     AppendTo[activeColors, Directive[Purple, Thick]];
     AppendTo[rCurveLabels, "R12=1"];];
-   If[R21 =!= Automatic, 
-    AppendTo[activeEquations, Evaluate[(R21 /. fixedParams) == 1]];
+   If[R21 =!= Automatic,
+    AppendTo[activeEquations, Evaluate[Quiet[FullSimplify[(R21 /. fixedParams) == 1],
+      {Power::infy, Infinity::indet, Power::indet}]]];
     AppendTo[activeColors, Directive[Green, Thick]];
     AppendTo[rCurveLabels, "R21=1"];];
-   Print["All Rij equations: ", activeEquations];
+   Print["Rij equations: ", activeEquations];
    If[Length[activeEquations] > 0, 
     rCurves = {ContourPlot[Evaluate[activeEquations], 
        Evaluate[{par1, range1[[1]], range1[[2]]}], 
@@ -373,15 +390,12 @@ scan[RHS_, var_, par_, persRule_, plotInd_, mSi_,
     AppendTo[legendItems, intersectionLegend];
     ];
    
-   finalPlot = Show[finalPlot, Frame -> True, 
-     FrameLabel -> {ToString[par1], ToString[par2]}, 
+   finalPlot = Show[finalPlot, Frame -> True,
+     FrameLabel -> {ToString[par1], ToString[par2]},
      PlotLabel -> "Equilibrium Classification", ImageSize -> 450];
    finalPlot = Legended[finalPlot, Placed[Column[legendItems, Spacings -> 0.5], Right]];
    ];
-  
-  (*Summary with percentages*)
-  Do[Print[outcomes[[i]], ": ", outcomeCounts[[i]], " (", Round[100.*outcomeCounts[[i]]/Length[res]], "%)"], {i, 1, Length[outcomes]}];
-  
+
   (*Return NoSol points as errors*)
   noSolPoints = Select[res, #[[3]] == "NoSol" &];
   {finalPlot, noSolPoints, res}

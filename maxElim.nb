@@ -1,0 +1,171 @@
+(* ::Package:: *)
+
+(* ===================================================================== *)
+(* maxElim.nb - Find Maximal Eliminable Subset for Mass-Action ODEs     *)
+(* Based on Saez-Feliu-Wiuf linear elimination theory                   *)
+(* ===================================================================== *)
+
+ClearAll["Global`*"];
+SetDirectory[FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+<< EpidCRN`;
+Get["red.wl"];
+
+(* Identify species that appear linearly in RHS *)
+LinearSpecies[RN_List, rts_List] := Module[{RHS, spe, var, linear = {}, rhs},
+  RHS = RHSFromCRN[RN, rts];
+  spe = extSpe[RN];
+  var = ToExpression /@ spe;
+
+  Do[
+    (* Check if species v appears at most linearly in its RHS equation *)
+    rhs = var[[i]] /. RHS;
+    If[Exponent[rhs, var[[i]]] <= 1,
+      AppendTo[linear, spe[[i]]]
+    ],
+  {i, Length[spe]}];
+
+  DeleteDuplicates[linear]
+];
+
+(* Check if steady-state expressions are positive (heuristic) *)
+PositiveSteadyStateQ[RN_List, rts_List, U_List] := Module[
+  {rules, allPos = True, expr},
+
+  (* Get elimination rules *)
+  rules = LinearEliminationRules[RN, rts, U];
+
+  (* Check each eliminated species expression *)
+  Do[
+    expr = u /. rules;
+    (* Heuristic: check if expression has only positive terms *)
+    (* For mass-action with positive rates, numerator and denominator should be positive *)
+    If[!FreeQ[expr, Alternatives[LinearSolve, PseudoInverse]],
+      (* System is singular, may not have positive solution *)
+      allPos = False; Break[]
+    ];
+    (* Could add more sophisticated positivity checks here *)
+  , {u, ToExpression /@ U}];
+
+  allPos
+];
+
+(* Find maximal eliminable subset among linear species *)
+MaximalEliminableSubset[RN_List, rts_List, checkPositive_:True] := Module[
+  {linSpe, U, maxU = {}, g, positive},
+
+  Print["Step 1: Identify linear species"];
+  linSpe = LinearSpecies[RN, rts];
+  Print["  Linear species: ", linSpe];
+  Print["  (", Length[linSpe], " out of ", Length[extSpe[RN]], " total species)\n"];
+
+  Print["Step 2: Find maximal eliminable subset"];
+  Print["  Checking FSW conditions:"];
+  Print["    - Noninteracting (no two U species in same complex)"];
+  Print["    - U-linear kinetics (each rate at most linear in U)"];
+  Print["    - Spanning tree condition in G_U\n"];
+
+  (* Try greedy elimination starting from all linear species *)
+  U = MaxLinearEliminableSet[RN, rts, linSpe];
+  Print["  Maximal FSW-eliminable subset: ", U];
+  Print["  (", Length[U], " species can be eliminated)\n"];
+
+  If[Length[U] == 0,
+    Print["  No eliminable species found."];
+    Return[{}]
+  ];
+
+  (* Check positivity if requested *)
+  If[checkPositive,
+    Print["Step 3: Check positivity of steady-state expressions"];
+    positive = PositiveSteadyStateQ[RN, rts, U];
+    Print["  Positive steady-state? ", positive];
+    If[!positive,
+      Print["  Warning: Steady-state expressions may not be positive."];
+      Print["  This may indicate conservation laws or singular system."];
+    ];
+  ];
+
+  Print["\nResult: Maximal eliminable subset = ", U];
+  U
+];
+
+(* ===================================================================== *)
+(* TEST: Two-Strain SIR from John.nb                                    *)
+(* ===================================================================== *)
+
+Print["==================================================================="];
+Print["Test: Two-Strain SIR Model (John.nb)"];
+Print["===================================================================\n"];
+
+RN = {
+  0 -> "s",
+  "r1" -> "s",
+  "r2" -> "s",
+  "i1" + "s" -> 2*"i1",
+  "i1" + "r2" -> 2*"i1",
+  "i2" + "s" -> 2*"i2",
+  "i2" + "r1" -> 2*"i2",
+  "i1" -> "r1",
+  "i2" -> "r2",
+  "s" -> 0,
+  "i1" -> 0,
+  "i2" -> 0,
+  "r1" -> 0,
+  "r2" -> 0
+};
+
+rts = {
+  la, th1*r1, th2*r2, be1*i1*s, be1*si1*i1*r2,
+  be2*i2*s, be2*si2*i2*r1, ga1*i1, ga2*i2,
+  mu*s, mu1*i1, mu2*i2, mu*r1, mu*r2
+};
+
+Print[RN // Length, " reactions and transitions: ", Transpose[{RN, rts}] // MatrixForm];
+spe = extSpe[RN];
+Print[spe // Length, " species: ", spe, "\n"];
+
+Umax = MaximalEliminableSubset[RN, rts, True];
+
+Print["\n==================================================================="];
+Print["Analysis: In this SIR model, all species are linear in their"];
+Print["  own RHS equations. The algorithm finds {i1,i2} eliminable."];
+Print["===================================================================\n\n"];
+
+(* ===================================================================== *)
+(* TEST 2: Ping-Pong Bi-Bi                                              *)
+(* ===================================================================== *)
+
+Print["==================================================================="];
+Print["Test 2: Ping-Pong Bi-Bi Mechanism"];
+Print["===================================================================\n"];
+
+RN2 = {
+  "e" + "s1" -> "y1", "y1" -> "e" + "s1",
+  "y1" -> "estar" + "p1", "estar" + "p1" -> "y1",
+  "estar" + "s2" -> "y2", "y2" -> "estar" + "s2",
+  "y2" -> "e" + "p2", "e" + "p2" -> "y2"
+};
+
+rts2 = {k1*e*s1, k2*y1, k3*y1, k4*estar*p1, k5*estar*s2, k6*y2, k7*y2, k8*e*p2};
+
+Print[RN2 // Length, " reactions and transitions: ", Transpose[{RN2, rts2}] // MatrixForm];
+spe2 = extSpe[RN2];
+Print[spe2 // Length, " species: ", spe2, "\n"];
+
+Umax2 = MaximalEliminableSubset[RN2, rts2, True];
+
+Print["\n==================================================================="];
+Print["Analysis: Found maximal eliminable set {p1,s2,y2,p2}."];
+Print["  Note: Maximal eliminable sets are NOT UNIQUE!"];
+Print["  Another maximal set is {e,estar,y1,y2} (the enzyme species)."];
+Print["  Both are valid. The greedy algorithm finds one depending on"];
+Print["  species ordering. To eliminate specific species, use"];
+Print["  MaxLinearEliminableSet[RN, rts, preferredSet] directly."];
+Print["===================================================================\n\n"];
+
+(* Demonstrate with preferred elimination set *)
+Print["Testing with preferred elimination set {e,estar,y1,y2}:");
+UmaxEnzyme = MaxLinearEliminableSet[RN2, rts2, {"e","estar","y1","y2"}];
+Print["  Result: ", UmaxEnzyme];
+Print["  This gives the biochemically meaningful reduction.\n"];

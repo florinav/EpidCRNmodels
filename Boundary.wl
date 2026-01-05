@@ -57,111 +57,47 @@ sta[pol_, par_] := Module[{
   {linearConditions, quadraticConditions, higherFactors, linearFactors, quadraticFactors}
  ]
 
+ClearAll[bdFp];
+bdFp[RHS_, var_, mSi_] := Module[{allInfectionVars, EA},
+  (* Compute boundary equilibria for each siphon *)
+  allInfectionVars = ToExpression[Union[Flatten[mSi]]];
+  EA = {};
 
-bdFp[RHS_, var_, mSi_] := Module[{eq, lS, bdfps},
-  eq = Thread[RHS == 0];
-  lS = Length[mSi];
-  bdfps = Table[
-    Module[{siphonVars, remainingVars, siphonZeros, timeoutResult, 
-            isRationalSolutionQ, rationalSols, nonrationalSols, eqSystem, 
-            scalarEq, scalarPol, eliminationVar, totalCount},
+  Do[
+    Module[{siphonVars, cEj, RHSEj, eqEj, varEj, solutions, completeSolutions, positiveSolutions},
+      (* Set variables in siphon j to 0 *)
       siphonVars = ToExpression[mSi[[j]]];
-      remainingVars = Complement[var, siphonVars];
-      siphonZeros = Thread[siphonVars -> 0];
-      eqSystem = eq /. siphonZeros;
-      
-      timeoutResult = TimeConstrained[
-        Solve[eqSystem, remainingVars],
-        10,
-        "froze"
+      cEj = Thread[siphonVars -> 0];
+      RHSEj = RHS /. cEj;
+      eqEj = Thread[RHSEj == 0];
+      varEj = Complement[var, siphonVars];
+
+      (* Solve for non-siphon variables *)
+      solutions = Solve[eqEj, varEj];
+      (* Create complete solutions by adding siphon variables = 0 *)
+      (* Ensure no duplicate rules by keeping first occurrence of each variable *)
+      completeSolutions = Table[
+        DeleteDuplicatesBy[Join[cEj, sol], First],
+        {sol, solutions}
       ];
-      
-      If[timeoutResult === "froze",
-        Print["fps on siphon facet ", mSi[[j]], " froze"];
-        {"froze", "froze"},
-        (* Separate rational and non-rational solutions *)
-        isRationalSolutionQ[sol_] := 
-          FreeQ[sol, Sqrt | Power[_, Except[_Integer]] | Root | _Complex];
-        rationalSols = Select[timeoutResult, isRationalSolutionQ];
-        nonrationalSols = Complement[timeoutResult, rationalSols];
-        
-        (* Generate scalar equation if needed *)
-        If[Length[nonrationalSols] > 0,
-          eliminationVar = First[remainingVars];
-          scalarEq = TimeConstrained[
-            Factor[Eliminate[eqSystem, Complement[remainingVars, {eliminationVar}]]],
-            3,
-            Factor[First[eqSystem]] (* fallback to factored first equation if elimination fails *)
-          ];
-          (* Extract polynomial from equation (remove == 0 part) *)
-          scalarPol = scalarEq /. Equal[lhs_, 0] :> lhs /. Equal[lhs_, rhs_] :> (lhs - rhs);,
-          scalarPol = AllSolsRational;
-        ];
-        
-        (* Print only the count *)
-        totalCount = Length[rationalSols] + Length[nonrationalSols];
-        Print["fps on siphon facet ", mSi[[j]], ": ", totalCount, " boundary points"];
-        
-        (* Return structured pair with polynomial *)
-        {rationalSols, scalarPol}
-      ]
-    ], {j, lS}];
-    
-  bdfps
+
+      (* Filter using onlyNN: remove DFE and negative solutions *)
+      positiveSolutions = Select[completeSolutions,
+        onlyNN[#, var, allInfectionVars] &
+      ];
+
+      (* Append either positive solutions or unsolved system *)
+      If[Length[positiveSolutions] > 0,
+        AppendTo[EA, positiveSolutions];,
+        AppendTo[EA, {eqEj, varEj}];
+      ];
+    ];
+  , {j, Length[mSi]}];
+
+  EA
 ]
 
-
-bdAn[RN_, rts_, var_] := Module[{spe, alp, bet, gam, Rv, RHS, def, par, cp, cv, ct, mS, mSi, inf, mod,
-K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, eigenSystem, eigenvals, eigenvecs,
-nonzeroIndices, relevantEigenvals, ngm, infVars},
-
-  (* Extract stoichiometric matrices with var order *)
-  {spe, alp, bet, gam, Rv, RHS, def} = extMat[RN, var];
-  RHS = gam . rts;
-  par = Par[RHS, var];
-  cp = Thread[par > 0];
-  cv = Thread[var >= 0];
-  ct = Join[cp, cv];
-  mS = minSiph[spe, RN];
-  mSi = mS[[1]];
-
-  (* infVars is union of all siphon variables - keep as strings for mSi output *)
-  infVars = Union[Flatten[mSi]];
-
-  (* Convert string species to symbol variables for substitution *)
-  cDFE = Thread[ToExpression[infVars] -> 0];
-  RDFE = RHS /. cDFE;
-  eq0 = Thread[RDFE == 0];
-  var0 = Complement[var, ToExpression[infVars]];
-  E0 = Join[Solve[eq0, var0] // Flatten, cDFE];
-
-  (* NGM expects symbols, so convert infVars to symbols *)
-  mod = {RHS, var, par};
-  ngm = NGM[mod, ToExpression[infVars]];
-  Jx = ngm[[1]];
-  Jy = ngm[[5]];
-  K = ngm[[4]];
-
-  eigenvals = Eigenvalues[K];
-  R0A = Select[eigenvals, # =!= 0 &];
-  (*eigenSystem = Eigensystem[K];
-  eigenvals = eigenSystem[[1]];
-  nonzeroIndices = Flatten[Position[eigenvals, _?(# =!= 0 &)]];
-  relevantEigenvals = eigenvals[[nonzeroIndices]];
-  R0A = relevantEigenvals;*)
-
-  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ngm}
-];
-(* Key change explanation:
-   The critical fix is in the line:
-   mSiIndices = Map[Flatten[Position[var, #] & /@ #] &, mS];
-
-   This now searches for expressions in var (which contains expressions like Subscript[i,1])
-   instead of searching for expressions in spe (which contains strings like "i1").
-
-   Since mS now contains expressions from the updated minSiph function,
-   we search directly in var which also contains expressions.
-*)
+(* bdAn removed - use version from epi.wl instead *)
 
 (* bdAnC - Boundary analysis for closed systems (N conserved) *)
 bdAnC[RN_, rts_, var_] := Module[{
@@ -320,7 +256,7 @@ NGM[mod_, infVars_] :=
 
    {Jx, F, V, K, Jy, Jxy, Jyx,  Kd}
   ]
-*)
+
 
 NGM[mod_, infVars_, Fuser_: {}] :=
   Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, Vinv, allPos, dfeRules},
@@ -340,7 +276,7 @@ NGM[mod_, infVars_, Fuser_: {}] :=
      V = F - Jx;,
      V = Fuser - Jx;
      Vinv = Inverse[V] /. Thread[X[[inf]] -> 0];
-     allPos = AllTrue[Flatten[Vinv], isNNe];
+     allPos = AllTrue[Flatten[Vinv], onlyP];
      If[allPos,
        F = Fuser;
        Print["NGM: user F accepted (Inverse[V] all positive)"],
@@ -353,6 +289,7 @@ NGM[mod_, infVars_, Fuser_: {}] :=
    Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // Simplify;
    {Jx, F, V, K, Jy, Jxy, Jyx, Kd}
   ]
+  *)
 
 
 (* Helper function to compute infection indices directly from variable names *)
@@ -565,42 +502,244 @@ Print["END invNr OUTPUT"];
 
 
 
-bdCo[RN_, rts_] := Module[{
-    bdAnResult, RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A,
+onlyNN[sol_, var_, infVars_] := Module[{vals, allInfZero},
+  vals = FullSimplify[var /. sol];
+  (* Check no non-zero component has all-negative coefficients *)
+  If[!NoneTrue[vals, (# =!= 0 && onlyN[#]) &], Return[False]];
+  (* Check not all infection variables are zero (DFE) *)
+  allInfZero = And @@ ((# === 0) & /@ (infVars /. sol));
+  !allInfZero
+];
+
+ClearAll[bdCo];
+bdCo[RN_, rts_, var_] := Module[{
+    bdAnResult, RHS, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A,
     EA, ElTRat, siphonVars, cEj, RHSEj, eqEj, varEj, solutions, completeSolutions,ngm,infV,
-    allInfectionVars,nonDFESolutions
+    allInfectionVars
   },
-  
+
   (* First call bdAn to get basic analysis *)
-  bdAnResult = bdAn[RN, rts];
+  bdAnResult = bdAn[RN, rts, var];
   {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infV, ngm} = bdAnResult;
-  
+
   (* Compute boundary equilibria for each siphon *)
   EA = {};
   ElTRat = {};
   
   Do[
     (* Set variables in siphon j to 0 *)
-    siphonVars = var[[Flatten[Position[var, #] & /@ mSi[[j]]]]];
+    siphonVars = ToExpression[mSi[[j]]];
     cEj = Thread[siphonVars -> 0];
     RHSEj = RHS /. cEj;
     eqEj = Thread[RHSEj == 0];
     varEj = Complement[var, siphonVars];
-    AppendTo[EA, {eqEj, varEj}];
-    
+
     (* Solve for non-siphon variables *)
     solutions = Solve[eqEj, varEj];
-    completeSolutions = Table[Join[sol, cEj], {sol, solutions}];
-    
-    (* Filter out DFE-like solutions (where all infection variables are zero) *)
-    allInfectionVars = var[[Union[Flatten[Flatten[Position[var, #] & /@ #] & /@ mSi]]]];
-    nonDFESolutions = Select[completeSolutions, 
-      Function[sol, !And @@ ((# === 0) & /@ (allInfectionVars /. sol))]];
-    
-    AppendTo[ElTRat, nonDFESolutions];
+    (* Create complete solutions by adding siphon variables = 0 *)
+    (* Ensure no duplicate rules by keeping first occurrence of each variable *)
+    completeSolutions = Table[
+      DeleteDuplicatesBy[Join[cEj, sol], First],
+      {sol, solutions}
+    ];
+
+    (* Filter using onlyNN: remove DFE and negative solutions *)
+    allInfectionVars = ToExpression[Union[Flatten[mSi]]];
+    positiveSolutions = Select[completeSolutions,
+      onlyNN[#, var, allInfectionVars] &
+    ];
+
+    (* If solutions found, append them; otherwise append the system to solve *)
+    If[Length[positiveSolutions] > 0,
+      AppendTo[EA, positiveSolutions];,
+      AppendTo[EA, {eqEj, varEj}];
+    ];
+    AppendTo[ElTRat, positiveSolutions];
     , {j, Length[mSi]}];
-  
-  {RHS, var, par, cp, mSi, Jx, Jy, E0, K, R0A, infV, ElTRat}
+
+  (* Check if any EA elements are unsolved systems *)
+  If[AnyTrue[EA, ListQ[#] && Length[#] == 2 && FreeQ[#, _Rule] &],
+    Print["Rational solutions not found, EA will yield the systems"];
+  ];
+
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infV, EA}
+];
+
+ClearAll[bdCom];
+bdCom[RN_, rts_, var_] := Module[{
+    bdAnResult, RHS, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, EA, ngm, infV, F, V,
+    allInfectionVars, Esys, EAsolved, siphonVars, cEj, RHSEj, eqEj, varEj, timedOut
+  },
+
+  bdAnResult = bdAn[RN, rts, var];
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, F, V, K, R0A, infV} = bdAnResult;
+
+  allInfectionVars = ToExpression[Union[Flatten[mSi]]];
+
+  (* Reorder siphons by descending cardinality (larger siphons often simpler to solve) *)
+  mSiSorted = SortBy[mSi, -Length[#]&];
+  Print["Siphons by size: ", Table[{mSiSorted[[i]], Length[mSiSorted[[i]]]}, {i, Length[mSiSorted]}]];
+
+  Esys = {};
+  EAsolved = {};
+  timedOut = False;
+  solvedIndices = {};     (* Siphons solved with replacement rules *)
+  scalarEqIndices = {};   (* Siphons reduced to scalar equations *)
+  timedOutIndices = {};   (* Siphons that timed out *)
+
+  (* PASS 1: Build all Esys entries (fast - no solving) *)
+  Do[
+    siphonVars = ToExpression[mSiSorted[[j]]];
+    cEj = Thread[siphonVars -> 0];
+    RHSEj = RHS /. cEj;
+    eqEj = Thread[RHSEj == 0];
+    varEj = Complement[var, siphonVars];
+    AppendTo[Esys, {eqEj, varEj}];
+  , {j, Length[mSiSorted]}];
+
+  Print[Length[Esys], " bd sys"];
+
+  (* PASS 2: Try to solve each system with timeout *)
+  Do[
+    {eqEj, varEj} = Esys[[j]];
+    siphonVars = ToExpression[mSiSorted[[j]]];
+    cEj = Thread[siphonVars -> 0];
+
+    (* Try to solve and save rational solutions - with 15 sec timeout *)
+    Module[{solutions, completeSolutions, hasIrrational, positiveSolutions,
+            infVarsInSys, nonInfVarsInSys, scalarEq, solveResult},
+
+      solveResult = TimeConstrained[
+        Module[{sols, compSols, hasIrr, posSols, infVars, nonInfVars, scEq},
+          sols = Solve[eqEj, varEj];
+          compSols = Table[DeleteDuplicatesBy[Join[cEj, sol], First], {sol, sols}];
+          hasIrr = !FreeQ[compSols, Sqrt | Root | Power[_, Rational[_, _]]];
+
+          If[!hasIrr,
+            (* Rational solutions - filter with onlyNN *)
+            posSols = Select[compSols, onlyNN[#, var, allInfectionVars] &];
+            If[Length[posSols] > 0, {True, posSols}, {False, {}}]
+          ,
+            (* Irrational solutions - eliminate infectious variables to get polynomial system *)
+            infVars = Intersection[varEj, allInfectionVars];
+            nonInfVars = Complement[varEj, allInfectionVars];
+
+            If[Length[nonInfVars] >= 1 && Length[infVars] > 0,
+              (* Use Eliminate to remove infectious variables *)
+              elimResult = Eliminate[eqEj, infVars];
+              If[elimResult =!= False && elimResult =!= True,
+                (* Convert result to list of polynomials *)
+                polys = If[Head[elimResult] === And,
+                  List @@ (elimResult /. {Equal[lhs_, 0] :> lhs, Equal[lhs_, rhs_] :> lhs - rhs}),
+                  {elimResult /. {Equal[lhs_, 0] :> lhs, Equal[lhs_, rhs_] :> lhs - rhs}}
+                ];
+                {True, polys},
+                {False, {}}
+              ]
+            ,
+              {False, {}}
+            ]
+          ]
+        ],
+        15,
+        $TimedOut
+      ];
+
+      If[solveResult === $TimedOut,
+        AppendTo[timedOutIndices, j];
+        timedOut = True;
+        Break[];
+      ];
+
+      If[solveResult[[1]],
+        (* Check if it's a scalar equation or list of rules *)
+        If[MatchQ[solveResult[[2]], {{___Rule}..}],
+          AppendTo[solvedIndices, j];,
+          AppendTo[scalarEqIndices, j];
+        ];
+        AppendTo[EAsolved, solveResult[[2]]];
+      ];
+    ];
+  , {j, Length[mSiSorted]}];
+
+  (* Print summary by category *)
+  Print["\n=== SIPHON ANALYSIS SUMMARY ==="];
+
+  If[Length[solvedIndices] > 0,
+    Print["Solved (", Length[solvedIndices], " siphons with replacement rules):"];
+    Do[
+      idx = solvedIndices[[i]];
+      Print["  Siphon ", idx, " (", mSiSorted[[idx]], "): ", Length[EAsolved[[Position[Join[solvedIndices, scalarEqIndices], idx][[1, 1]]]]], " solutions"];
+    , {i, 1, Length[solvedIndices]}];
+  ];
+
+  If[Length[scalarEqIndices] > 0,
+    Print["Reduced to polynomial equations (", Length[scalarEqIndices], " siphons):"];
+    printedCount = 0;
+    Do[
+      idx = scalarEqIndices[[i]];
+      eaIdx = Length[solvedIndices] + i;
+      scEq = EAsolved[[eaIdx]];
+
+      (* Get varEj from Esys to determine collection variable *)
+      varEj = Esys[[idx]][[2]];
+      infVars = Intersection[varEj, allInfectionVars];
+      nonInfVars = Complement[varEj, allInfectionVars];
+
+      (* Check if polynomial system (list) or single polynomial *)
+      If[Length[varEj] > 0,
+        polySys = EAsolved[[eaIdx]];
+
+        (* Get all variables appearing in the polynomial system *)
+        allVars = If[ListQ[polySys] && Length[polySys] > 0,
+          Union[Flatten[Variables /@ polySys]],
+          Variables[polySys]
+        ];
+        varsInEq = Intersection[varEj, allVars];
+        numPols = If[ListQ[polySys], Length[polySys], 1];
+
+        If[Length[varsInEq] == 1,
+          (* True scalar polynomial *)
+          collVar = varsInEq[[1]];
+          pol = If[ListQ[polySys], polySys[[1]], polySys];
+          deg = Exponent[pol, collVar, Max];
+          collectedEq = Collect[pol, collVar];
+          eqStr = ToString[collectedEq, InputForm];
+          If[StringLength[eqStr] < 200,
+            Print["  Esys[[", idx, "]] -> scalar pol of degree ", deg, " in ", collVar, ": ", collectedEq, " = 0"];
+            printedCount++;,
+            Print["  Esys[[", idx, "]] -> scalar pol of degree ", deg, " in ", collVar, " (too long)"];
+          ];,
+          (* Multivariate - show number of polynomials and variables *)
+          Print["  Esys[[", idx, "]] -> system of ", numPols, " pols in ", Length[varsInEq], " vars ", varsInEq];
+        ];
+      ];
+    , {i, 1, Min[2, Length[scalarEqIndices]]}];
+
+    skipped = Length[scalarEqIndices] - 2;
+    If[skipped > 0 && Length[scalarEqIndices] > 2,
+      Print["  ... (", skipped, " more polynomial equations)"];
+    ];
+  ];
+
+  If[Length[timedOutIndices] > 0,
+    Print["Timed out (", Length[timedOutIndices], " siphons after 15 sec):"];
+    Do[
+      idx = timedOutIndices[[i]];
+      Print["  Siphon ", idx, " (", mSiSorted[[idx]], ")"];
+    , {i, 1, Length[timedOutIndices]}];
+    (* Add skipped siphons *)
+    If[Length[timedOutIndices] > 0,
+      firstTimeout = timedOutIndices[[1]];
+      skipped = Range[firstTimeout + 1, Length[mSiSorted]];
+      If[Length[skipped] > 0,
+        Print["Skipped (", Length[skipped], " siphons after first timeout):"];
+        Do[Print["  Siphon ", s, " (", mSiSorted[[s]], ")"], {s, skipped}];
+      ];
+    ];
+  ];
+
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, Esys, EAsolved}
 ];
 
 (* Tests for NGM 

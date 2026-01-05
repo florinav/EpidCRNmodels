@@ -1,0 +1,63 @@
+(* ::Package:: *)
+
+ClearAll["Global`*"];
+SetDirectory[NotebookDirectory[]];
+SetOptions[$FrontEndSession,NotebookAutoSave->True];
+NotebookSave[];
+AppendTo[$Path,FileNameJoin[{$HomeDirectory,"Dropbox","EpidCRNmodels"}]];
+<<EpidCRN`;
+(* Two-Strain SIR Model with Cross-Immunity - Closed System *)
+(* ====================================================================== *)
+
+(* ====================================================================== *)
+(* MODEL: Two-Strain SIR with Cross-Immunity - Closed (N conserved)      *)
+(* ====================================================================== *)
+
+(* Define RHS without births and deaths - closed system *)
+RHS = {
+   - (s)*(be1*i1 + be2*i2) + th1*r1 + th2*r2,
+  (be1)*i1*(s + si1*r2) - ga1*i1 ,
+  (be2)*i2*s +(be2)*si2*i2* r1 - ga2*i2 ,
+  ga1*i1 - th1*r1 - (be2)*si2*r1*i2 ,
+  ga2*i2 - th2*r2 - (be1)*si1*r2*i1 
+};
+
+var = {s, i1, i2, r1, r2};
+
+(* Convert to reaction network *)
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+
+(* Boundary analyths *)
+
+
+Print["Two-Strain SIR Model with Cross-Immunity - Closed System, Verify=",
+(Drop[RHS, 1] /. {s -> 1 - i1 - i2 - r1 - r2}) - RHS1 // FullSimplify];
+(* reconstruction *)
+
+(* Display RN and rts thde by thde *)
+Print[RN // Length, " reactions and transitions: ", Transpose[{RN, rts}] // MatrixForm];
+(* Parameters *)
+Format[be1] := Subscript[\[Beta], 1];
+Format[be2] := Subscript[\[Beta], 2];
+Format[ga1] := Subscript[\[Gamma], 1];
+Format[ga2] := Subscript[\[Gamma], 2];
+Format[th1] := Subscript[\[Theta], 1];
+Format[th2] := Subscript[\[Theta], 2];
+Format[ep] := \[CurlyEpsilon];
+
+(* Variables *)
+Format[s] := S;
+Format[i1] := Subscript[i, 1];
+Format[i2] := Subscript[i, 2];
+Format[r1] := Subscript[r, 1];
+Format[r2] := Subscript[r, 2];
+
+Print["DFE=", cDFE,"R0 funcs=", R0A,"Inf var=", infVars];
+
+
+
+
+1726.50/29
+
+
+1380/16//N

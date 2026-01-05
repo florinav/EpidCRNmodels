@@ -1,0 +1,77 @@
+(* ::Package:: *)
+
+(* Aliz.nb - Reaction Network with Catalyst Extraction *)
+
+(* rnC: Reaction Network with Catalyst
+   Takes a reaction and extracts common terms (catalyzers) *)
+rnC[reaction_] := Module[{lhs, rhs, common, newLhs, newRhs, catalyst},
+  (* Parse reaction: assume format {lhs, rhs} *)
+  {lhs, rhs} = reaction;
+
+  (* Find common terms between lhs and rhs *)
+  common = Intersection[lhs, rhs];
+
+  If[common === {},
+    (* No common terms - return reaction as is *)
+    Row[{lhs, " \[Rule] ", rhs}],
+    (* Common terms exist - extract catalyst *)
+    catalyst = common;
+    newLhs = Complement[lhs, common];
+    newRhs = Complement[rhs, common];
+
+    (* Print with catalyst above arrow *)
+    Column[{
+      Row[{"     ", catalyst}],
+      Row[{newLhs, " \[Rule] ", newRhs}]
+    }, Center]
+  ]
+];
+
+(* Alternative version using string format for prettier output *)
+rnCPretty[reaction_] := Module[{lhs, rhs, common, newLhs, newRhs, catalyst},
+  {lhs, rhs} = reaction;
+  common = Intersection[lhs, rhs];
+
+  If[common === {},
+    (* No catalyst *)
+    ToString[lhs, StandardForm] <> " \[Rule] " <> ToString[rhs, StandardForm],
+    (* With catalyst *)
+    catalyst = common;
+    newLhs = Complement[lhs, common];
+    newRhs = Complement[rhs, common];
+    StringJoin[
+      ToString[catalyst, StandardForm], "\n",
+      ToString[newLhs, StandardForm], " \[Rule] ", ToString[newRhs, StandardForm]
+    ]
+  ]
+];
+
+(* Test example: Create some sample reactions *)
+(* Format: {{reactants}, {products}} *)
+testRN = {
+  {{A}, {B}},                      (* Simple: A -> B *)
+  {{A, C}, {B, C}},                (* With catalyst: A + C -> B + C *)
+  {{A, B, E}, {C, D, E}},          (* Multiple catalyst: A + B + E -> C + D + E *)
+  {{X}, {Y, Z}},                   (* No catalyst: X -> Y + Z *)
+  {{P, Q, R}, {P, S, R}}           (* Two catalysts: P,R; Q -> S *)
+};
+
+(* Apply rnC to test reactions *)
+Print["Testing rnC on sample reactions:\n"];
+Print[Column[Table[
+  Row[{"Reaction ", i, ": ", rnC[testRN[[i]]]}],
+  {i, Length[testRN]}
+], Spacer[5]]];
+
+(* Test with more complex example *)
+Print["\n\nComplex example:"];
+complexRN = {{S, i1, M}, {i1, M, B}};  (* S + i1 + M -> i1 + M + B, catalyst: i1,M *)
+Print["Original: ", complexRN];
+Print["Reduced: ", rnC[complexRN]];
+
+(* Column display of all reactions *)
+Print["\n\nAll reactions in column format:"];
+Print[Column[rnC /@ testRN, Spacer[10]]];
+
+
+

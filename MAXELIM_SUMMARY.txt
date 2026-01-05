@@ -1,0 +1,40 @@
+===================================================================
+Summary: maxElim Algorithm for Finding Maximal Eliminable Sets
+===================================================================
+
+CHANGES MADE:
+1. Renamed MaxLinearEliminableSet -> maxElim
+2. Changed maxElim to return LIST of maximal eliminable sets
+3. Removed preferredSet parameter (user selects from returned list)
+4. Updated LinearReduceRHS to use first maximal set automatically
+5. Added to testRed.nb to demonstrate usage
+
+ALGORITHM (red.wl):
+- greedyElim[RN, rts, U0]: Greedy elimination starting from U0
+- maxElim[RN, rts]: Find multiple maximal sets by trying different orderings
+  * Returns list of truly maximal sets (not contained in others)
+  * Uses heuristic (may not find ALL possible maximal sets)
+
+USAGE in testRed.nb:
+1. Find all maximal sets: allMaxElim = maxElim[RN, rts]
+2. User selects which set to eliminate: Uselected = {"e","estar","y1","y2"}
+3. Proceed with reduction using selected set
+
+EXAMPLE OUTPUT (Ping-Pong Bi-Bi):
+Found 2 maximal set(s):
+  [1] {e}                           - just enzyme E
+  [2] {p1, p2, s1, s2, y1, y2}      - substrates/products/intermediates
+
+User can also verify custom set {e,estar,y1,y2} satisfies FSW conditions
+and use it for biochemically meaningful reduction.
+
+FILES:
+- red.wl: Contains maxElim, greedyElim functions
+- maxElim.wl: Helper functions (LinearSpecies, MaximalEliminableSubsets)
+- testRed.nb: Demonstrates maxElim in ping-pong example
+- testMaxElim.nb: Standalone test of maximal set finder
+
+NOTE: Finding ALL maximal eliminable sets is computationally hard (NP-complete).
+The heuristic approach finds several representative maximal sets efficiently.
+For specific applications, users should verify FSW conditions for their
+preferred elimination set.

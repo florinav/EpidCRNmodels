@@ -1,5 +1,10 @@
 (* ::Package:: *)
 
+(* ========================================================================= *)
+(* BACKUP VERSION - DO NOT USE FOR ACTIVE DEVELOPMENT *)
+(* Active versions are in epi.wl and Core.wl *)
+(* ========================================================================= *)
+
 BeginPackage["EpidCRN`"];
 (* Global variables used throughout the package *)
 Global`ome;

@@ -7,6 +7,11 @@
 (* SYMBOL TO STRING CONVERSION *)
 (* ========================================================================== *)
 
+(* Helper: Convert to string preserving case - handles both symbols and strings *)
+toStr[s_String] := s;
+toStr[s_Symbol] := SymbolName[s];
+toStr[s_] := SymbolName[s]; (* fallback for other types *)
+
 symbToStr[complex_] := 
   Module[{}, 
    Which[complex === 0, "0", Head[complex] === Plus, 
@@ -118,7 +123,7 @@ cons[{{-a, b, 0}, {0, -c, d}}, {a > 0, b > 0, c > 0, d > 0}]*)
 (* Returns {nullspace, constraints} for Reduce/Solve *)
 
 
-(* Fixed extSpe to return lowercase species names *)
+(* extSpe extracts species names preserving case *)
 extSpe[reactions_] := Module[{allSpecies, reactants, products}, 
   allSpecies = {};
   Do[
@@ -126,94 +131,13 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
    products = comp2Asso[reactions[[i, 2]]];
    allSpecies = Join[allSpecies, Keys[reactants], Keys[products]];
    , {i, Length[reactions]}];
-  ToLowerCase /@ DeleteDuplicates[allSpecies]
+  DeleteDuplicates[allSpecies]
 ];
 
 
 
-(* Main extMat function - now handles symbolic stoichiometry *)
-extMat[reactions_, speOrder_List:{}] := Module[{
-  spe, al, be, gamma, Rv, RHS,
-  numReactions, numSpecies, reactants, products,
-  var, rv, tk, defFormula, defTerms, defResult, Nc, l, s, mSi},
-
-  (* Extract species (lowercase), use provided order if given *)
-  If[Length[speOrder] > 0,
-    spe = ToLowerCase[ToString[#]] & /@ speOrder;
-  ,
-    spe = extSpe[reactions];
-  ];
-  
-  (* Check if species were found *)
-  If[Length[spe] == 0,
-    Print["Error: No species found in reactions"];
-    Return[$Failed]
-  ];
-  
-  numSpecies = Length[spe];
-  numReactions = Length[reactions];
-  
-  (* Initialize stoichiometric matrices - can contain symbolic entries *)
-  al = ConstantArray[0, {numSpecies, numReactions}];
-  be = ConstantArray[0, {numSpecies, numReactions}];
-  
-  (* Build stoichiometric matrices *)
-  Do[
-    reactants = comp2Asso[reactions[[j, 1]]];
-    products = comp2Asso[reactions[[j, 2]]];
-    
-    (* Fill matrices - match lowercase species *)
-    Do[
-      If[KeyExistsQ[reactants, spe[[i]]], 
-        al[[i, j]] = reactants[spe[[i]]]];
-      If[KeyExistsQ[products, spe[[i]]], 
-        be[[i, j]] = products[spe[[i]]]];
-    , {i, numSpecies}];
-  , {j, numReactions}];
-  
-  (* Calculate derived matrices *)
-  gamma = be - al;
-  
-  (* Convert lowercase species to variables *)
-  var = ToExpression /@ spe;
-  
-  (* Calculate reaction rates *)
-  rv = Table[
-    Product[
-      If[al[[i, j]] == 0, 
-        1, 
-        (* Handle symbolic exponents *)
-        If[NumericQ[al[[i, j]]], 
-          var[[i]]^al[[i, j]],
-          Power[var[[i]], al[[i, j]]]
-        ]
-      ], 
-      {i, numSpecies}
-    ],
-    {j, numReactions}
-  ];
-  
-  (* Rate constants and RHS *)
-  tk = Table[Symbol["k" <> ToString[j]], {j, numReactions}];
-  Rv = tk*rv;
-  RHS = gamma . Rv;
-  
-  (* Use defi for deficiency calculation *)
-  {Nc, l, s, mSi} = defi[reactions];
-
-  defFormula = "\[Delta] = Nc - \[ScriptL] - s";
-  defTerms = "Nc = " <> ToString[Nc] <> " (complexes), " <>
-             "\[ScriptL] = " <> ToString[l] <> " (linkage classes), " <>
-             "s = " <> ToString[s] <> " (stoich dimension)";
-  defResult = If[mSi === "symbolic",
-    "\[Delta] = symbolic (requires numeric parameter values)",
-    "\[Delta] = " <> ToString[Nc] <> " - " <> ToString[l] <>
-      " - " <> ToString[s] <> " = " <> ToString[mSi]
-  ];
-
-  (* Return *)
-  {spe, al, be, gamma, Rv, RHS, {defFormula, defTerms, defResult}}
-];
+(* extMat moved to epi.wl to avoid duplication *)
+(* NOTE: Backup versions exist in Core1.wl and EpidCRNo.wl *)
 
 
 arrow2pairReac[reactions_] := Module[{converted},
@@ -333,119 +257,7 @@ Print["isN[-mu*s]=", isN[-mu*s], " isN[be*i*s]=", isN[be*i*s], " isN[-ga*i]=", i
 (* ODE TO REACTION NETWORK CONVERSION *)
 (* ========================================================================= *)
 
-ODE2RN[RHS_List, var_List] := Module[{
-  n, allTermsByEq, allTermsFlat, sources, sinks, rtsRaw,
-  gam, alp, bet, RN, spe, ii, jj, kk,
-  alpRaw, gamRaw, uniqueAlpCols, mergeIdx, rts
-  },
-
-  n = Length[var];
-  spe = ToLowerCase[ToString[#]] & /@ var;
-
-  (* STEP 1: Extract all terms from each equation using allT *)
-  allTermsByEq = Table[allT[RHS[[ii]]], {ii, n}];
-  allTermsFlat = Flatten[allTermsByEq];
-
-  (* STEP 2: Separate into sources (positive-only) and sinks (negative) using isN *)
-  sources = Select[allTermsFlat, !isN[#]&];
-  sinks = Select[allTermsFlat, isN[#]&];
-  sources = DeleteDuplicates[sources];
-  sinks = DeleteDuplicates[sinks];
-
-  (* STEP 3: Build rtsRaw from sources and negated sinks *)
-  rtsRaw = Join[sources, -sinks];
-  rtsRaw = DeleteDuplicates[rtsRaw];
-  rtsRaw = Select[rtsRaw, # =!= 0 &];
-
-  (* Build raw gamma matrix *)
-  gamRaw = Table[
-    Module[{eqTerms, coeff},
-      eqTerms = allT[RHS[[ii]]];
-      Table[
-        coeff = 0;
-        Do[
-          Module[{term, termAbs},
-            term = eqTerms[[kk]];
-            termAbs = If[isN[term], -term, term];
-            If[termAbs === rtsRaw[[jj]],
-              coeff = If[isN[term], -1, 1];
-              Break[];
-            ];
-          ],
-          {kk, Length[eqTerms]}
-        ];
-        coeff
-      , {jj, Length[rtsRaw]}]
-    ],
-    {ii, n}
-  ];
-
-  (* Build raw alpha matrix: exponents of variables in each rate *)
-  alpRaw = Table[
-    Module[{rate},
-      rate = rtsRaw[[jj]];
-      If[FreeQ[rate, var[[ii]]], 0, Exponent[rate, var[[ii]]]]
-    ],
-    {ii, n}, {jj, Length[rtsRaw]}
-  ];
-
-  (* STEP 4: Merge reactions with same source AND same gamma (same alp and gam columns) *)
-  (* Create combined key: {alp column, gam column} *)
-  Module[{alpGamPairs, uniquePairs},
-    alpGamPairs = Table[{Transpose[alpRaw][[jj]], gamRaw[[All, jj]]}, {jj, Length[rtsRaw]}];
-    uniquePairs = DeleteDuplicates[alpGamPairs];
-
-    rts = {};
-    gam = ConstantArray[0, {n, Length[uniquePairs]}];
-    alp = ConstantArray[0, {n, Length[uniquePairs]}];
-
-    Do[
-      (* Find all indices that match this unique pair *)
-      mergeIdx = Flatten[Position[alpGamPairs, uniquePairs[[jj]]]];
-      (* Sum the rates *)
-      AppendTo[rts, Total[rtsRaw[[mergeIdx]]]];
-      (* Set alp and gam from the unique pair *)
-      alp[[All, jj]] = uniquePairs[[jj, 1]];
-      gam[[All, jj]] = uniquePairs[[jj, 2]],
-      {jj, Length[uniquePairs]}
-    ]
-  ];
-
-  (* Build beta matrix: bet = gam + alp *)
-  bet = gam + alp;
-
-  (* Build reaction network RN using string format "s" + "i" -> 2*"i" *)
-  RN = Table[
-    Module[{left, right, leftTerms, rightTerms},
-      (* Left side (reactants from alp) *)
-      leftTerms = Table[
-        If[alp[[kk, jj]] == 0, Nothing,
-          If[alp[[kk, jj]] == 1, spe[[kk]], alp[[kk, jj]] * spe[[kk]]]
-        ],
-        {kk, n}
-      ];
-      left = If[Length[leftTerms] == 0, 0,
-        If[Length[leftTerms] == 1, leftTerms[[1]], Plus @@ leftTerms]
-      ];
-
-      (* Right side (products from bet) *)
-      rightTerms = Table[
-        If[bet[[kk, jj]] == 0, Nothing,
-          If[bet[[kk, jj]] == 1, spe[[kk]], bet[[kk, jj]] * spe[[kk]]]
-        ],
-        {kk, n}
-      ];
-      right = If[Length[rightTerms] == 0, 0,
-        If[Length[rightTerms] == 1, rightTerms[[1]], Plus @@ rightTerms]
-      ];
-
-      left -> right
-    ],
-    {jj, Length[rts]}
-  ];
-
-  {RN, rts, spe, alp, bet, gam}
-];
+(* ODE2RN moved to epi.wl to avoid duplication *)
 
 (* ========================================================================= *)
 (* DEFICIENCY AND WEAK REVERSIBILITY *)
@@ -866,7 +678,7 @@ ODE2WR0[RHS_List, var_List] := Module[{
   },
 
   n = Length[var];
-  spe = ToLowerCase[ToString[#]] & /@ var;
+  spe = toStr /@ var;
 
   (* Use ODE2RN to get proper reaction decomposition *)
   {RNtmp, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];

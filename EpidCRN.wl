@@ -5,7 +5,10 @@ BeginPackage["EpidCRN`"];
 (* Global variables *)
 Global`ome;
 
-(* Core1 functions *)
+(*epi funtions*) 
+minSiph::usage = "minSiph[var, RN] finds minimal siphons in reaction network RN. 
+Returns {minimal, nonMinimal}.";
+(* Core functions *)
 extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
 compToAsso::usage = "(Core1)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "(Core1)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
@@ -54,12 +57,11 @@ invN2::usage = "(Boundary1)invNr[E1t,E2t,R0A,E0,par,cp,in1,in2,fval,ins] compute
 and persistence conditions for two-strain models. Takes lists of boundary equilibria E1t, E2t, basic reproduction numbers R0A, disease-free equilibrium E0, parameters par with constraints cp, solution indices in1,in2 to select specific equilibria, optional parameter values fval and indices ins for parameter fixing. Returns {E1,E2,R12,R21,coP} where E1,E2 are selected equilibria, R12,R21 are invasion numbers, 
 and coP are parameter conditions ensuring both invasion numbers >1 for coexistence.";
 invN::usage = "invN[E1t, E2t, R0A, E0, par, cp, in1, in2, fval, ins] computes invasion numbers and persistence conditions for multi-strain epidemic models. E1t and E2t are lists of boundary fixed points for strains 1 and 2. R0A contains basic reproduction numbers. E0 is the disease-free equilibrium. par and cp are model parameters and constraints. in1 and in2 are indices selecting equilibria from E1t and E2t (use -1 for irrational equilibria). Optional: fval gives values for fixed parameters, ins specifies which parameters to fix. Returns {E1, E2, R12, R21, coP} where R12, R21 are invasion numbers and coP contains coexistence parameter values. For irrational equilibria, returns 'nonRat' 
-for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary1){RHS, var, par, cp, mSi, Jx, Jy, E0, ngm, R0A, EA, E1t, E2t}=
-bdCo[RN,rts] boundary analysis for two strains with nondisjoint minSiph";
-bdAn::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAn[RN,rts,var,gam] computes boundary analysis. Pass var and gam from ODE2RN to preserve variable order: {RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; bdAn[RN,rts,var,gam]. Returns RHS, var (variables), par (parameters), cp (parameter constraints), mSi (minimal siphons), Jx, Jy (Jacobian blocks), cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variables), ngm (full NGM output).";
+for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ElTRat}=bdCo[RN,rts,var] boundary analysis for two strains with nondisjoint minSiph. Pass var from ODE2RN to preserve variable order. Returns RHS, var, par, cp, mSi, Jx, Jy, cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variable symbols labeling K rows/columns), ElTRat (boundary equilibrium solutions for each siphon).";
+bdCom::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, Esys, EA}=bdCom[RN,rts,var] boundary analysis using bdFp. Esys contains unsolved systems (each {equations, variables}), EA contains rational boundary equilibrium solutions.";
+bdAn::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAn[RN,rts,var,gam] computes boundary analysis. Pass var and gam from ODE2RN to preserve variable order: {RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; bdAn[RN,rts,var,gam]. Returns RHS, var (variables), par (parameters), cp (parameter constraints), mSi (minimal siphons), Jx, Jy (Jacobian blocks), cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variable symbols corresponding to rows/columns of K), ngm (full NGM output).";
 bdAnC::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAnC[RN,rts,var] boundary analysis for closed systems (N conserved). Checks if Sum[RHS]==0. If yes, assumes N=1 and eliminates first variable using conservation law, then applies bdAn to reduced system. Returns same outputs as bdAn but for reduced system.";
-bdFp::usage = "bdFp[RHS, var, mSi] computes boundary fixed points on siphon facets for epidemic models. RHS is the right-hand side vector of the ODE system, var is the list of all variables as symbols, and mSi is the list of minimal siphons as variable names (strings). Returns a list of pairs {{rationalSols, scalarEq}, ...}, one for each siphon facet, where rationalSols contains explicit rational solutions as replacement rules and scalarEq is either None (if all solutions are rational), a factored polynomial equation
-(for non-rational solutions), or \"froze\" (if computation timed out).";
+bdFp::usage = "bdFp[RHS, var, mSi] computes boundary equilibria on siphon facets. RHS is the ODE right-hand side, var is the list of variables, mSi is the list of minimal siphons (strings). For each siphon, sets siphon variables to 0, solves the system, and filters using onlyNN to remove DFE and negative solutions. Returns list where bdFp[[j]] is either positive solutions (list of rule lists) or {equations, variables} if no positive solutions exist. Typically bdFp[[j,1]] is the biologically relevant endemic equilibrium.";
 sta::usage = "sta[pol] analyzes polynomial stability by 
 factoring pol and examining linear and quadratic factors separately. Assumes all parameters are positive. For linear factors (au + b), stability requires b > 0. For quadratic factors (au\.b2 + bu + c), stability requires both b > 0 and c > 0 (Routh-Hurwitz criteria). Returns {lSta, qSta, hDeg} where lSta contains linear stability conditions, qSta contains quadratic stability conditions, and hDeg contains higher-degree factors (degree \[GreaterEqual] 3) requiring manual stability analysis. Polynomial variable should be u.";
 
@@ -124,12 +126,14 @@ toProd::usage="(Conv)toProd[expr] converts expression to product format";
 l2L::usage="(Conv)l2L[list] converts lowercase list format to uppercase format";
 m2toM::usage="(Conv)m2toM[expr] converts m2 expressions to M format";
 remZ::usage="(Conv)remZ[li] removes zeroes from list";
-isNNe::usage="(Utils)isNNe[expr] checks if expression is nonnegative (no negative terms and nonzero)";
+remN::usage="(Utils)remN[expr] removes negative terms from expression. Applies DeleteCases to remove all negative numbers and terms with negative coefficients at all levels.";
+redTout::usage="(Utils)redTout[con,var,time] applies Reduce[con,var] with timeout. Returns 'timeOut' if computation exceeds time limit (default 300 seconds = 5 minutes). var defaults to empty list, time defaults to 300.";
 selZR::usage="(Conv)selZR[con] selects zero rules from conditions";
 seZF::usage="(Conv)seZF[so] removes in a list of lists those with a 0";
 strEdg::usage="(Conv)strEdg[edges] processes edge structures for graph operations";
 countMS::usage="(Conv)countMS[matrix] counts negative coefficients in a matrix";
 onlyP::usage="(Conv)onlyP[m] checks whether all the coefficients of the numerator of a rational expression m are nonnegative";
+onlyN::usage="(Conv)onlyN[m] checks whether all the coefficients of the numerator of a rational expression m are negative";
 rtS::usage="(Conv)rtS[RHS] extracts reaction terms from RHS";
 
 (* Extra functions - Complex utilities *)
@@ -189,8 +193,12 @@ FHJ::usage="(Visualization)FHJ[comp,edges,rates,ver,groups] generates the Feinbe
 endo::usage="(Visualization)endo[reactions] analyzes a reaction network for endotactic properties. Options: \"ShowPlot\" -> True/False/Automatic (default: Automatic), \"Verbose\" -> True/False (default: False)";
 isEndotactic::usage="(Visualization)isEndotactic[reactions, speciesList] checks if network is endotactic";
 isStronglyEndotactic::usage="(Visualization)isStronglyEndotactic[reactions, speciesList] checks if network is strongly endotactic";
-phasePl2::usage="(Visualization)phasePl2[RHS,var,par,p0val,opts] creates 2D phase plane plots for dynamical systems";
+phase2::usage="(Visualization){Xs,eig,stab,sad,pFP,pStr,rhN}=phase2[RHS,var,cN,tMax,nTraj] creates 2D phase plane with nullclines and streamplot. RHS is list of 2 ODEs, var is list of 2 variables, cN is parameter substitutions, tMax is max time, nTraj is number of trajectories. Returns sorted positive fixed points Xs, eigenvalues eig, stabilities stab, saddles sad, fixed point plot pFP, streamplot pStr, numeric RHS rhN";
+phN::usage="(Visualization){Xs,eig,stab,sad,pFP,pStr}=phN[rhN,tMax,nTraj] creates 2D phase portrait for fully numeric RHS. rhN is numeric RHS (all parameters substituted), variables extracted automatically. Optional: tMax (default 50), nTraj (default 15). Returns sorted positive fixed points Xs, eigenvalues eig, stabilities stab, saddles sad, fixed point plot pFP, streamplot pStr";
+proj2::usage="(Visualization){fpProj,eig,stab,pFP,pStream}=proj2[RHS,var,projVars,cN] projects n-dimensional system onto 2D plane. RHS is n-dimensional ODE system, var is list of all n variables, projVars is list of 2 variables to project onto, cN is parameter substitutions. Solves nullclines of other (n-2) variables to create projected 2D phase portrait. Returns projected fixed points fpProj, eigenvalues eig (from full nD system), stabilities stab, fixed point plot pFP, streamplot pStream";
+phase3::usage="(Visualization){Xs,eig,stab,pFP,pStream}=phase3[rhN,var,tMax,pts,rad,opts] creates 3D phase portrait for fully numeric RHS. rhN is numeric 3D RHS (all parameters substituted), var is list of 3 variables IN THE SAME ORDER as the RHS equations (e.g., {s,i2,i12} if equation 1 is ds/dt, equation 2 is di2/dt, equation 3 is di12/dt). Optional: tMax (default 50), pts is StreamPoints density (default 10), rad is sphere radius for fixed points (default 0.015), opts are StreamPlot3D options (e.g., StreamScale->0.05). Default uses Arrow3D markers with rainbow colors. Returns positive fixed points Xs, eigenvalues eig, stabilities stab, fixed point plot pFP (Graphics3D with colored spheres: Green=stable, Orange=saddle, Red=unstable), streamplot pStream (StreamPlot3D). Use Show[pFP,pStream,ViewPoint->{1.5,-2,1.5}] to combine";
 invGr::usage="(Visualization){gra,ver,edg,col}=invGr[mSi,bdFps,R0A,RHS,var,E0] constructs invasion graph for multi-strain models. mSi are minimal siphons (list of species name lists), bdFps are boundary fixed points, R0A are basic reproduction numbers, RHS is ODE right-hand side, var is variable list, E0 is disease-free equilibrium. Returns Graph object gra with invasion edges, vertex list ver (communities as sorted index lists), edge list edg showing invasion pathways, vertex colors col (Green=successful invasion, Yellow=failed invasion). Nodes represent communities (siphon complements), edges show strain invasions when Rj(ySc)>1";
+DSR::usage="(Visualization)DSR[RN] builds the directed species-reaction (SR) bipartite graph for reaction network RN. Returns an association with keys: \"Graph\" -> the Graph object with signed, stoichiometric edge labels, \"EdgeData\" -> list of associations {<|\"edge\"->_, \"sign\"->_, \"stoich\"->_|>, ...}, \"ReactionNodes\" -> list of reaction node labels {\"R1\", \"R2\", ...}, \"SpeciesNodes\" -> list of species node labels";
 
 Begin["`Private`"];
 
@@ -199,19 +207,21 @@ root=If[StringQ[$InputFileName] && $InputFileName =!= "",
     NotebookDirectory[]
 ];
 
-(* Load in proper order - simple to complex *)
-Get[FileNameJoin[{root, "Core.wl"}]];
+(* Loaded later may override doubles loaded former *)
 Get[FileNameJoin[{root, "Siphons.wl"}]];
 Get[FileNameJoin[{root, "Boundary.wl"}]];
 Get[FileNameJoin[{root, "Bifurcation.wl"}]];
 Get[FileNameJoin[{root, "Conv.wl"}]];
 Get[FileNameJoin[{root, "Utils.wl"}]];
+Get[FileNameJoin[{root, "Core.wl"}]];
 Get[FileNameJoin[{root, "CRNT.wl"}]];
 Get[FileNameJoin[{root, "Visualize.wl"}]];
 Get[FileNameJoin[{root, "Extra.wl"}]];
+Get[FileNameJoin[{root, "epi.wl"}]];  (* Canonical ODE2RN and extMat with rnRed *)
+(*
+
+*)
 
 End[];
 EndPackage[];
-
-
 

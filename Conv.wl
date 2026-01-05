@@ -44,6 +44,13 @@ Map@CoefficientArrays //
    AllTrue[#, NonNegative] &;
 (* onlyP[x + y + z] returns True, onlyP[x - y + z] returns False *)
 
+onlyN[m_] := m // Together // Numerator //
+  CoefficientArrays[#, Variables[#]]& //
+  ReplaceAll[sa_SparseArray :> sa["NonzeroValues"]] // Flatten //
+  DeleteCases[#, 0]& // AllTrue[#, Negative] &;
+(* onlyN checks if numerator has only negative coefficients *)
+(* onlyN[-x - y] returns True, onlyN[x - y] returns False *)
+
 
 
 

@@ -1064,7 +1064,7 @@ rts = {La, be*i*s, mu*s, ga*i, i*mu};
 
 \begin{enumerate}
 \item Function returns lists (not associations) following EpidCRN convention
-\item Species names are lowercase strings in RN output (via ToLowerCase)
+\item Species names preserve case as strings in RN output (using SymbolName)
 \item Rate vector corresponds to reaction order in RN
 \item Stoichiometric matrices follow standard CRNT conventions
 \item Verification: $\frac{dx}{dt} = \gamma \cdot rts$ reproduces original ODE

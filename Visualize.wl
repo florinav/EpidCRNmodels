@@ -1,97 +1,75 @@
 (* ::Package:: *)
 
-phase2[RHS_, var_, cN_:{}, tMax_:50, nTraj_:15] := Module[{
-  dyn, cFP, fp, jac, eigVals, stabilities, Xp, Xs, saddles, 
+(* phN - Numeric phase portrait for 2D systems with fully substituted parameters *)
+phN[rhN_, tMax_:50, nTraj_:15] := Module[{
+  var, cFP, fp, jac, eigVals, stabilities, Xp, Xs, saddles,
   xM, r1, r2, plotFP, plotStream, Gp, cP1, cP2},
-  
-  (* Apply parameter substitutions *)
-  dyn = If[Length[cN] > 0, RHS /. cN, RHS];
-  Print["dyn=", dyn];
-  
+
+  (* Extract variables from RHS *)
+  var = Variables[rhN];
+
   (* Find fixed points as conditions (rules) *)
-  cFP = Quiet[NSolve[And @@ Thread[dyn == 0], var, Reals]];
-  Print["cFP (conditions)=", cFP];
-  
+  cFP = Quiet[NSolve[And @@ Thread[rhN == 0], var, Reals]];
+
   (* Extract coordinate values from conditions *)
   fp = var /. cFP;
-  Print["fp (all fixed points)=", fp];
-  
-  (* Check if any fixed points found *)
-  If[Length[fp] == 0,
-    Print["Warning: No fixed points found"];
+
+  (* Filter positive fixed points EARLY and remove duplicates *)
+  Xp = DeleteDuplicates[Select[fp, AllTrue[#, NonNegative] &], Norm[#1 - #2] < 10^-6 &];
+
+  (* Check if any positive fixed points found *)
+  If[Length[Xp] == 0,
+    Print["Warning: No positive fixed points found"];
     Return[{{}, {}, {}, {}, Graphics[], Graphics[]}]
   ];
-  
+
   (* Jacobian *)
-  jac = Outer[D, dyn, var];
-  
-  (* Analyze each fixed point *)
+  jac = Outer[D, rhN, var];
+
+  (* Analyze each positive fixed point *)
   eigVals = Table[
-    Eigenvalues[jac /. Thread[var -> fp[[i]]]],
-    {i, Length[fp]}
+    Chop[Eigenvalues[jac /. Thread[var -> Xp[[i]]]]],
+    {i, Length[Xp]}
   ];
-  
+
   stabilities = Table[
     Which[
       AllTrue[Re[eigVals[[i]]], # < 0 &], "Stable",
       AllTrue[Re[eigVals[[i]]], # > 0 &], "Unstable",
       True, "Saddle"
     ],
-    {i, Length[fp]}
+    {i, Length[Xp]}
   ];
-  
-  Print["stabilities=", stabilities];
-  
-  (* Filter positive fixed points *)
-  Xp = Select[fp, AllTrue[#, NonNegative] &];
-  Print["Xp (positive fixed points)=", Xp];
-  
-  (* Identify saddle points among positive fps *)
-  saddles = If[Length[Xp] > 0,
-    Module[{indices},
-      indices = Flatten[Position[fp, #] & /@ Xp];
-      Select[
-        MapThread[{#1, #2, #3} &, 
-          {Xp, eigVals[[indices]], stabilities[[indices]]}],
-        #[[3]] == "Saddle" &
-      ]
-    ],
-    {}
+
+  Print["fp=", Xp, " eig=", eigVals, " stab=", stabilities];
+
+  (* Identify saddle points *)
+  saddles = Select[
+    MapThread[{#1, #2, #3} &, {Xp, eigVals, stabilities}],
+    #[[3]] == "Saddle" &
   ];
-  
-  Print["saddles=", saddles];
-  
+
   (* Sort fixed points *)
-  Xs = If[Length[Xp] > 0, SortBy[Xp, Identity], {}];
-  xM = If[Length[Xp] > 0, Max /@ Transpose[Xp], {1, 1}];
-  
+  Xs = SortBy[Xp, Identity];
+  xM = Max /@ Transpose[Xp];
+
   (* Plotting ranges *)
   r1 = {var[[1]], -0.05, xM[[1]] + 0.3};
   r2 = {var[[2]], -0.05, xM[[2]] + 0.3};
-  
-  Print["Plot ranges: r1=", r1, ", r2=", r2];
-  
+
   (* Fixed points with color coding *)
-  Gp = If[Length[Xp] > 0,
-    Module[{indices},
-      indices = Flatten[Position[fp, #] & /@ Xp];
-      Print["Plotting fixed points at: ", Xp];
-      Graphics[{
-        PointSize[0.05],
-        EdgeForm[Directive[Black, Thick]],
-        MapThread[
-          {Switch[#2, "Stable", Green, "Unstable", Red, "Saddle", Orange, _, Black],
-           Disk[#1, 0.03]} &,
-          {Xp, stabilities[[indices]]}
-        ]
-      }]
-    ],
-    Graphics[]
-  ];
-  
+  Gp = Graphics[{
+    EdgeForm[Directive[Black, Thick]],
+    MapThread[
+      {Switch[#2, "Stable", Green, "Unstable", Red, "Saddle", Orange, _, Black],
+       Disk[#1, 0.015]} &,
+      {Xp, stabilities}
+    ]
+  }];
+
   (* First nullcline - dx1/dt = 0 in Blue *)
   cP1 = ContourPlot[
-    dyn[[1]],
+    rhN[[1]],
     r1, r2,
     Contours -> {0},
     ContourStyle -> Directive[Blue, Thick],
@@ -99,10 +77,10 @@ phase2[RHS_, var_, cN_:{}, tMax_:50, nTraj_:15] := Module[{
     Frame -> True,
     FrameLabel -> {ToString[var[[1]]], ToString[var[[2]]]}
   ];
-  
+
   (* Second nullcline - dx2/dt = 0 in Red *)
   cP2 = ContourPlot[
-    dyn[[2]],
+    rhN[[2]],
     r1, r2,
     Contours -> {0},
     ContourStyle -> Directive[Red, Thick],
@@ -110,14 +88,14 @@ phase2[RHS_, var_, cN_:{}, tMax_:50, nTraj_:15] := Module[{
     Frame -> True,
     FrameLabel -> {ToString[var[[1]]], ToString[var[[2]]]}
   ];
-  
+
   (* Plot 1: Fixed points + both nullclines *)
-  plotFP = Show[cP1, cP2, Gp, 
+  plotFP = Show[cP1, cP2, Gp,
     PlotLabel -> Style["Nullclines and Fixed Points", Medium]];
-  
+
   (* Plot 2: StreamPlot *)
   plotStream = StreamPlot[
-    {dyn[[1]], dyn[[2]]},
+    {rhN[[1]], rhN[[2]]},
     r1, r2,
     StreamStyle -> Arrowheads[0.02],
     ColorFunction -> "Rainbow",
@@ -126,9 +104,223 @@ phase2[RHS_, var_, cN_:{}, tMax_:50, nTraj_:15] := Module[{
     FrameLabel -> {ToString[var[[1]]], ToString[var[[2]]]},
     PlotLabel -> Style["Stream Plot", Medium]
   ];
-  
+
   (* Return results *)
   {Xs, eigVals, stabilities, saddles, plotFP, plotStream}
+];
+
+(* phase2 - Wrapper that applies parameter substitution then calls phN *)
+phase2[RHS_, var_, cN_:{}, tMax_:50, nTraj_:15] := Module[{rhN, result},
+  (* Apply parameter substitutions repeatedly *)
+  rhN = If[Length[cN] > 0, RHS //. cN, RHS];
+
+  (* Call numeric phase portrait (var extracted automatically in phN) *)
+  result = phN[rhN, tMax, nTraj];
+
+  (* Return results with rhN appended *)
+  Append[result, rhN]
+];
+
+
+(* ========================================================================== *)
+(* PROJ2 - PROJECT N-DIMENSIONAL SYSTEM ONTO 2D PLANE *)
+(* ========================================================================== *)
+
+(* proj2 - Project n-dimensional system onto 2D plane for visualization *)
+proj2[RHS_, var_, projVars_, cN_:{}, opts___] := Module[{
+  rhN, otherVars, varIndices, projIndices, otherIndices,
+  otherSol, rhN2d, cFP, Xs, fpProj, eigVals, stabilities,
+  pNull, pStream, pFP, r1, r2, xM},
+
+  (* Substitute parameters *)
+  rhN = If[Length[cN] > 0, RHS //. cN, RHS];
+
+  (* Identify projection and other variables *)
+  If[Length[projVars] != 2,
+    Print["Error: projVars must have exactly 2 variables"];
+    Return[{{}, {}, {}, Graphics[], Graphics[]}]
+  ];
+
+  otherVars = Complement[var, projVars];
+  projIndices = Flatten[Position[var, #] & /@ projVars];
+  otherIndices = Flatten[Position[var, #] & /@ otherVars];
+
+  Print["Projecting ", Length[var], "D system onto (", projVars[[1]], ",", projVars[[2]], ")"];
+
+  (* Try to solve nullclines of other variables *)
+  If[Length[otherVars] > 0,
+    Print["Solving nullclines for: ", otherVars];
+    otherSol = Quiet[Solve[Thread[rhN[[otherIndices]] == 0], otherVars]];
+
+    If[Length[otherSol] > 0,
+      rhN2d = rhN[[projIndices]] /. otherSol[[1]] // Simplify;
+      Print["Projected 2D dynamics: ", rhN2d];,
+      Print["Warning: Cannot solve nullclines analytically, using full dynamics"];
+      rhN2d = rhN[[projIndices]];
+    ];,
+    rhN2d = rhN;
+  ];
+
+  (* Find fixed points of full n-D system *)
+  cFP = Quiet[NSolve[Thread[rhN == 0], var, Reals]];
+  Xs = DeleteDuplicates[
+    Select[var /. cFP, AllTrue[#, NumericQ] && AllTrue[#, # >= 0 &] &],
+    Norm[#1 - #2] < 10^-6 &];
+
+  Print["fp (", Length[var], "D)=", Xs];
+
+  (* Project onto 2D plane *)
+  fpProj = If[Length[Xs] > 0, Xs[[All, projIndices]], {}];
+  Print["fp proj (", projVars, ")=", fpProj];
+
+  (* Compute eigenvalues and stability *)
+  If[Length[Xs] > 0,
+    Module[{jac},
+      jac = Outer[D, rhN, var];
+      eigVals = Table[Chop[Eigenvalues[jac /. Thread[var -> Xs[[i]]]]], {i, Length[Xs]}];
+      stabilities = Table[
+        Which[
+          AllTrue[Re[eigVals[[i]]], # < 0 &], "Stable",
+          AllTrue[Re[eigVals[[i]]], # > 0 &], "Unstable",
+          True, "Saddle"
+        ],
+        {i, Length[Xs]}
+      ];
+      Print["eig=", eigVals, " stab=", stabilities];
+    ];,
+    eigVals = {}; stabilities = {};
+  ];
+
+  (* Plotting ranges *)
+  If[Length[fpProj] > 0,
+    xM = Max /@ Transpose[fpProj];
+    r1 = {projVars[[1]], -0.05, xM[[1]] + 0.3};
+    r2 = {projVars[[2]], -0.05, xM[[2]] + 0.3};,
+    r1 = {projVars[[1]], 0, 1};
+    r2 = {projVars[[2]], 0, 1};
+  ];
+
+  (* Nullcline plots *)
+  pNull = ContourPlot[{rhN2d[[1]], rhN2d[[2]]},
+    r1, r2,
+    Contours -> {0},
+    ContourStyle -> {Directive[Blue, Thick], Directive[Red, Thick]},
+    ContourShading -> None,
+    Frame -> True,
+    FrameLabel -> {ToString[projVars[[1]]], ToString[projVars[[2]]]}
+  ];
+
+  (* Streamplot *)
+  pStream = StreamPlot[{rhN2d[[1]], rhN2d[[2]]},
+    r1, r2,
+    StreamStyle -> Arrowheads[0.02],
+    ColorFunction -> "Rainbow",
+    StreamPoints -> Fine
+  ];
+
+  (* Fixed points *)
+  If[Length[fpProj] > 0,
+    pFP = Graphics[{
+      EdgeForm[Directive[Black, Thick]],
+      MapThread[
+        {Switch[#2, "Stable", Green, "Unstable", Red, "Saddle", Orange, _, Black],
+         Disk[#1, 0.015]} &,
+        {fpProj, stabilities}
+      ]
+    }];,
+    pFP = Graphics[];
+  ];
+
+  (* Return *)
+  {fpProj, eigVals, stabilities, pFP, pStream}
+];
+
+
+(* phase3 - 3D phase portrait for numeric RHS *)
+phase3[rhN_, var_List, tMax_:50, pts_:10, rad_:0.015, opts___] := Module[{
+  cFP, fp, jac, eigVals, stabilities, Xs, xM,
+  pFP, pStream, r1, r2, r3},
+
+  Print["phase3 v2.1 Module with direct ranges"];
+
+  If[Length[var] != 3,
+    Print["Error: phase3 requires 3D system, got ", Length[var], "D"];
+    Return[{{}, {}, {}, Graphics3D[], Graphics3D[]}]
+  ];
+
+  (* Find fixed points *)
+  cFP = Quiet[NSolve[And @@ Thread[rhN == 0], var, Reals]];
+  fp = var /. cFP;
+
+  (* Filter positive fixed points and remove duplicates *)
+  Xs = DeleteDuplicates[Select[fp, AllTrue[#, NonNegative] &],
+                        Norm[#1 - #2] < 10^-6 &];
+
+  If[Length[Xs] == 0,
+    Print["No positive fixed points found"];
+    Return[{{}, {}, {}, Graphics3D[], Graphics3D[]}]
+  ];
+
+  (* Compute eigenvalues and stability *)
+  jac = Outer[D, rhN, var];
+  eigVals = Table[Chop[Eigenvalues[jac /. Thread[var -> Xs[[i]]]]],
+                  {i, Length[Xs]}];
+
+  stabilities = Table[
+    Which[
+      AllTrue[Re[eigVals[[i]]], # < 0 &], "Stable",
+      AllTrue[Re[eigVals[[i]]], # > 0 &], "Unstable",
+      True, "Saddle"
+    ],
+    {i, Length[Xs]}
+  ];
+
+  Print["fp=", Xs, " eig=", eigVals, " stab=", stabilities];
+
+  (* Plotting ranges *)
+  xM = Max /@ Transpose[Xs];
+  Print["ranges: ", var[[1]], ":{0,", xM[[1]] + 0.3, "} ",
+                    var[[2]], ":{0,", xM[[2]] + 0.3, "} ",
+                    var[[3]], ":{0,", xM[[3]] + 0.3, "}"];
+
+  (* 3D streamplot - use With to inject all values *)
+  (* Post-processing tip from forum: reduces tube thickness and arrowhead size for cleaner visualization *)
+  pStream = With[{
+    v1 = var[[1]], v2 = var[[2]], v3 = var[[3]],
+    rhs = rhN,
+    max1 = xM[[1]] + 0.3, max2 = xM[[2]] + 0.3, max3 = xM[[3]] + 0.3,
+    npts = pts, options = opts
+  },
+    StreamPlot3D[rhs,
+      {v1, 0, max1},
+      {v2, 0, max2},
+      {v3, 0, max3},
+      StreamMarkers -> "Arrow3D",
+      StreamStyle -> Directive[Opacity[0.8], Thickness[0.003]],
+      StreamColorFunction -> "Rainbow",
+      StreamPoints -> npts,
+      BoxRatios -> {1, 1, 1},
+      AxesLabel -> (ToString /@ {v1, v2, v3}),
+      PlotRange -> All,
+      options
+    ] /. x_Tube :> Tube[x[[1]], x[[2]]/5] /.
+      Arrowheads[x_, y__] :> Arrowheads[x/3, y]
+  ];
+
+  Print["pStream Head=", Head[pStream], " Len=", If[Head[pStream] === Graphics3D, Length[pStream[[1]]], "N/A"]];
+
+  (* Fixed points as spheres *)
+  pFP = Graphics3D[{
+    EdgeForm[Directive[Black, Thick]],
+    MapThread[
+      {Switch[#2, "Stable", Green, "Unstable", Red, "Saddle", Orange, _, Black],
+       Sphere[#1, rad]} &,
+      {Xs, stabilities}
+    ]
+  }];
+
+  (* Return *)
+  {Xs, eigVals, stabilities, pFP, pStream}
 ];
 
 
@@ -692,4 +884,138 @@ Module[{mSi, RHS, var, E0, res1, res2, res3, res4},
   GraphicsRow[{res1[[1]], res2[[1]], res3[[1]], res4[[1]]}, ImageSize -> Full, Spacings -> 10]
 ]
 *)
+
+
+(* ========================================================================== *)
+(* DIRECTED SPECIES-REACTION GRAPH (DSR) *)
+(* ========================================================================== *)
+
+(* Helper function to parse complex expressions into associations *)
+parseComplex[0] := <||>;
+parseComplex[complex_String] := Module[{terms, result, coeff, species},
+  If[complex == "0", Return[<||>]];
+  terms = If[StringContainsQ[complex, "+"],
+    StringSplit[complex, "+"],
+    {complex}];
+  result = <||>;
+  Do[
+    Module[{term, matched},
+      term = StringTrim[terms[[i]]];
+      (* Try to match digit+letter pattern *)
+      matched = StringCases[term, (n:DigitCharacter..) ~~ (s:LetterCharacter..) :> {ToExpression[n], s}];
+      If[Length[matched] > 0,
+        (* Found coefficient and species *)
+        result[matched[[1, 2]]] = matched[[1, 1]],
+        (* Try just letters *)
+        matched = StringCases[term, s:LetterCharacter.. :> s];
+        If[Length[matched] > 0,
+          result[matched[[1]]] = 1
+        ]
+      ];
+    ], {i, Length[terms]}
+  ];
+  result
+];
+parseComplex[complex_] := Module[{str},
+  str = ToString[complex];
+  str = StringReplace[str, {" " -> "", "\"" -> ""}];
+  parseComplex[str]
+];
+
+DSR[RN_List] :=
+  Module[{snodes, rnodes, vertices, edges, edgeLabels, parsedRN,
+    rComp, pComp, rSpecies, pSpecies, DSRGraph, DSRresult,
+    edgeLabelRules},
+
+   (* Species nodes *)
+   snodes = extSpe[RN];
+
+   (* Reaction nodes *)
+   rnodes = Table["R" <> ToString[i], {i, Length[RN]}];
+
+   (* All vertices *)
+   vertices = Join[snodes, rnodes];
+
+   (* Parse each reaction *)
+   parsedRN = Table[
+     rComp = parseComplex[RN[[i, 1]]];
+     pComp = parseComplex[RN[[i, 2]]];
+     rSpecies = Keys[rComp];
+     pSpecies = Keys[pComp];
+     {i, rComp, pComp, rSpecies, pSpecies},
+     {i, Length[RN]}
+   ];
+
+   (* Build edges and labels *)
+   edges = {};
+   edgeLabels = {};
+   Do[
+     With[{rxnNode = rnodes[[i]], rComp = parsedRN[[i, 2]],
+       pComp = parsedRN[[i, 3]], rSpecies = parsedRN[[i, 4]],
+       pSpecies = parsedRN[[i, 5]]},
+
+       (* Reactant->Reaction edges (sign=-1) *)
+       Do[
+         AppendTo[edges, s -> rxnNode];
+         AppendTo[edgeLabels,
+           <|"edge" -> (s -> rxnNode), "sign" -> -1,
+             "stoich" -> rComp[s]|>],
+         {s, rSpecies}
+       ];
+
+       (* Reaction->Product edges (sign=+1) *)
+       Do[
+         AppendTo[edges, rxnNode -> s];
+         AppendTo[edgeLabels,
+           <|"edge" -> (rxnNode -> s), "sign" -> 1,
+             "stoich" -> pComp[s]|>],
+         {s, pSpecies}
+       ];
+     ],
+     {i, Length[RN]}
+   ];
+
+   (* Convert edge labels to rules for EdgeLabels option *)
+   edgeLabelRules =
+     Thread[(#["edge"] & /@ edgeLabels) ->
+       ((#["sign"] /. {1 -> "+", -1 -> "-"}) <> ToString[#["stoich"]] & /@
+         edgeLabels)];
+
+   (* Graph construction *)
+   DSRGraph =
+     Graph[vertices, edges,
+       VertexLabels -> Placed[Automatic, Center],
+       EdgeLabels -> edgeLabelRules,
+       VertexShapeFunction ->
+         (If[StringMatchQ[ToString[#2], "R" ~~ __], "Square", "Circle"] &),
+       ImagePadding -> 10,
+       GraphLayout -> "LayeredDigraphEmbedding",
+       DirectedEdges -> True];
+
+   DSRresult = <|"Graph" -> DSRGraph, "EdgeData" -> edgeLabels,
+     "ReactionNodes" -> rnodes, "SpeciesNodes" -> snodes|>;
+
+   DSRresult
+];
+
+
+(* ========================================================================== *)
+(* DSR TESTS *)
+(* ========================================================================== *)
+
+(*Print["=== Testing parseComplex ==="];
+Print["parseComplex[0]=", parseComplex[0]];
+Print["parseComplex[\"A\"]=", parseComplex["A"]];
+Print["parseComplex[\"A\"+\"B\"]=", parseComplex["A" + "B"]];
+Print["parseComplex[2*\"C\"]=", parseComplex[2*"C"]];
+Print["parseComplex[\"A\"+2*\"B\"+3*\"C\"]=",
+  parseComplex["A" + 2*"B" + 3*"C"]];
+
+Print["\n=== Testing DSR ==="];
+RNtest = {"A" + "B" -> "C", 2*"C" -> "A" + "B", 0 -> "A"};
+DSRres = DSR[RNtest];
+Print["Spe nod=", DSRres["SpeciesNodes"], " Rea nod=",
+  DSRres["ReactionNodes"]];
+Print["Edg dat=", DSRres["EdgeData"]];
+Print[DSRres["Graph"]];*)
 
