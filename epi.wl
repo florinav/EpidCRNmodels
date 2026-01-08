@@ -198,9 +198,13 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
     {jj, Length[rts]}
   ];
 
-  (* Print reduced reactions with rates only if prF is provided *)
   If[prF =!= Identity,
-    Print[Length[RN], " reactions and rts=", Transpose[{rnRed, Factor /@ rts}] // prF // MatrixForm]
+    Print[Length[RN], " reactions and rts=",
+      Row[{
+        Transpose[{prF[RN], prF[Factor /@ rts]}] // MatrixForm,
+        Spacer[20],
+        Transpose[{prF[rnRed], prF[Factor /@ rts]}] // MatrixForm
+      }]]
   ];
 
   {RN, rts, spe, alp, bet, gam, rnRed}
@@ -253,7 +257,7 @@ defi[RN_] := Module[{complexes, adj, graph, l, s, gam, spe, al, be, Nc, ii, jj, 
 ];
 
 extMat[reactions_, speOrder_List:{}] := Module[{
-  spe, al, be, gamma, Rv, RHS,
+  spe, alp, bet, gamma, Rv, RHS,
   numReactions, numSpecies, reactants, products,
   var, rv, tk, defFormula, defTerms, defResult, Nc, l, s, mSi},
 
@@ -274,8 +278,8 @@ extMat[reactions_, speOrder_List:{}] := Module[{
   numReactions = Length[reactions];
 
   (* Initialize stoichiometric matrices - can contain symbolic entries *)
-  al = ConstantArray[0, {numSpecies, numReactions}];
-  be = ConstantArray[0, {numSpecies, numReactions}];
+  alp = ConstantArray[0, {numSpecies, numReactions}];
+  bet = ConstantArray[0, {numSpecies, numReactions}];
 
   (* Build stoichiometric matrices *)
   Do[
@@ -285,14 +289,14 @@ extMat[reactions_, speOrder_List:{}] := Module[{
     (* Fill matrices - match lowercase species *)
     Do[
       If[KeyExistsQ[reactants, spe[[i]]],
-        al[[i, j]] = reactants[spe[[i]]]];
+        alp[[i, j]] = reactants[spe[[i]]]];
       If[KeyExistsQ[products, spe[[i]]],
-        be[[i, j]] = products[spe[[i]]]];
+        bet[[i, j]] = products[spe[[i]]]];
     , {i, numSpecies}];
   , {j, numReactions}];
 
   (* Calculate derived matrices *)
-  gamma = be - al;
+  gamma = bet - alp;
 
   (* Convert lowercase species to variables *)
   var = ToExpression /@ spe;
@@ -300,11 +304,11 @@ extMat[reactions_, speOrder_List:{}] := Module[{
   (* Calculate reaction rates *)
   rv = Table[
     Product[
-      If[al[[i, j]] == 0,
+      If[alp[[i, j]] == 0,
         1,
         (* Handle symbolic exponents *)
-        If[NumericQ[al[[i, j]]],
-          var[[i]]^al[[i, j]],
+        If[NumericQ[alp[[i, j]]],
+          var[[i]]^alp[[i, j]],
           Power[var[[i]], al[[i, j]]]
         ]
       ],
@@ -332,8 +336,10 @@ extMat[reactions_, speOrder_List:{}] := Module[{
   ];
 
   (* Return *)
-  {spe, al, be, gamma, Rv, RHS, {defFormula, defTerms, defResult}}
+  {spe, alp, bet, gamma, Rv, RHS, {defFormula, defTerms, defResult}}
 ];
+
+
 
 asoRea[RN_]:=Module[{parseSide,extractSpecies},
   extractSpecies[expr_]:=Module[{terms,species},

@@ -359,3 +359,8 @@ If[Length[maxId] >= 8,
   ];
   Print[GraphicsRow[plots8, ImageSize -> 700]];
 ];
+
+
+ ClearAll["Global`*"];
+  <<EpidCRN`;
+  ?bdCom
