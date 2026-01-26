@@ -1,62 +1,5 @@
 (* ::Package:: *)
 
-sta[pol_, par_] := Module[{
-   factors, processedFactors, linearConditions, quadraticConditions, 
-   higherFactors, linearFactors, quadraticFactors, deg, coeff, const, a, b, c, factor, var
-   },
-  
-  (* Find the variable - it's in Variables[pol] but not in par *)
-  var = First[Complement[Variables[pol], par]];
-  
-  (* Factor the polynomial completely *)
-  factors = Factor[pol];
-  
-  (* Convert to list of factors, handling both single factors and products *)
-  processedFactors = If[Head[factors] === Times, List @@ factors, {factors}];
-  
-  (* Remove constant factors (those not involving var) *)
-  processedFactors = Select[processedFactors, !FreeQ[#, var] &];
-  
-  (* Initialize condition and factor lists *)
-  linearConditions = {};
-  quadraticConditions = {};
-  higherFactors = {};
-  linearFactors = {};
-  quadraticFactors = {};
-  
-  (* Process each factor by degree *)
-  Do[
-   deg = Exponent[factor, var];
-   
-   Which[
-    deg == 1,
-    (* Linear factors: a*var + b *)
-    coeff = Coefficient[factor, var, 1]; 
-    const = Coefficient[factor, var, 0]; 
-    AppendTo[linearConditions, const > 0];
-    AppendTo[linearFactors, factor],
-    
-    deg == 2,
-    (* Quadratic factors: a*var^2 + b*var + c *)
-    a = Coefficient[factor, var, 2];
-    b = Coefficient[factor, var, 1]; 
-    c = Coefficient[factor, var, 0];
-    AppendTo[quadraticConditions, b > 0];
-    AppendTo[quadraticConditions, c > 0];
-    AppendTo[quadraticFactors, factor],
-    
-    deg >= 3,
-    (* Higher degree factors *)
-    AppendTo[higherFactors, factor]
-    ],
-   
-   {factor, processedFactors}
-   ];
-  
-  (* Return as list {lSta, qSta, hDeg, linearFactors, quadraticFactors} *)
-  {linearConditions, quadraticConditions, higherFactors, linearFactors, quadraticFactors}
- ]
-
 ClearAll[bdFp];
 bdFp[RHS_, var_, mSi_] := Module[{allInfectionVars, EA},
   (* Compute boundary equilibria for each siphon *)
@@ -525,4 +468,36 @@ onlyNN[sol_, var_, infVars_] := Module[{vals, allInfZero},
   (* Check not all infection variables are zero (DFE) *)
   allInfZero = And @@ ((# === 0) & /@ (infVars /. sol));
   !allInfZero
+];
+
+(* Routh-Hurwitz stability analysis for matrices *)
+Hur3M[A_] := Module[{co, h3, inec, ineSys, ω},
+  co = CoefficientList[(-1)^Length[A] CharacteristicPolynomial[A, ω], ω];
+  h3 = co[[2]]*co[[3]] - co[[1]]*co[[4]];
+  inec = {co[[1]] > 0, co[[2]] > 0};
+  ineSys = Append[inec, h3 > 0];
+  {co, h3, ineSys}
+];
+
+Hur4M[mat_] := Module[{lm, ch, cot, co, H4, h4, ine},
+  lm = mat // Length;
+  ch = ((-1)^lm * CharacteristicPolynomial[mat, λ] // Factor);
+  cot = CoefficientList[ch, λ];
+  co = Reverse[Drop[cot, -1]];
+  H4 = {{co[[1]], 1, 0, 0}, {co[[3]], co[[2]], co[[1]], 1}, {0, co[[4]], co[[3]], co[[2]]}, {0, 0, 0, co[[4]]}};
+  h4 = Det[H4];
+  ine = Thread[co > 0];
+  {co, h4, ine}
+];
+
+Hur5M[jac_] := Module[{lm, ch, cot, co, H5, h5, ine},
+  lm = jac // Length;
+  ch = ((-1)^lm * CharacteristicPolynomial[jac, λ] // Factor);
+  cot = CoefficientList[ch, λ];
+  co = Reverse[Drop[cot, -1]];
+  H5 = {{co[[1]], 1, 0, 0, 0}, {co[[3]], co[[2]], co[[1]], 1, 0},
+        {co[[5]], co[[4]], co[[3]], co[[2]], co[[1]]}, {0, 0, co[[5]], co[[4]], co[[3]]}, {0, 0, 0, 0, co[[5]]}};
+  h5 = Det[H5];
+  ine = Append[Thread[co > 0], co[[1]] co[[2]] > co[[3]]];
+  {co, h5, ine, H5}
 ];

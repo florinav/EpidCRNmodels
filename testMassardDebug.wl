@@ -1,0 +1,20 @@
+<<EpidCRN`;
+RHSf = {-alhv*H*v + behd*H*d - muh*H, alhv*H*v - alei*i*Te - mui*i,
+        lamd*d*(1-M) + lamv*v*(1-M) - mum*M};
+varFull = {H, i, M, d};
+RHS = Drop[RHSf, -1] /. d -> (1 - H - i);
+var = {H, i, M};
+res = EpidCRN`ODE2RN[RHS, var];
+RN = res[[1]];
+Print["Testing smaller system..."];
+mSi = EpidCRN`minSiph[var, RN][[1]];
+Print["mSi=", mSi];
+cDFEspecies = DeleteDuplicates[Flatten[mSi]];
+cDFE = Thread[ToExpression[cDFEspecies] -> 0];
+nonSiphonVars = Complement[var, ToExpression[cDFEspecies]];
+Print["nonSiphonVars=", nonSiphonVars];
+eqsAtDFE = RHS /. cDFE;
+Print["eqsAtDFE=", eqsAtDFE];
+eqsNonTrivial = DeleteCases[eqsAtDFE, 0];
+Print["eqsNonTrivial=", eqsNonTrivial];
+Print["Length[eqsNonTrivial]=", Length[eqsNonTrivial], " vs Length[nonSiphonVars]=", Length[nonSiphonVars]];

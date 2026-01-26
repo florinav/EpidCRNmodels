@@ -5,11 +5,34 @@ BeginPackage["EpidCRN`"];
 (* Global variables *)
 Global`ome;
 
-(*epi funtions*) 
-minSiph::usage = "minSiph[var, RN] finds minimal siphons in reaction network RN. 
-Returns {minimal, nonMinimal}.";
+(*epi funtions*)
+minSiph::usage = "minSiph[var, reactions, RHS] 
+finds minimal siphons. RHS optional (default Null). 
+Returns {mSi, cDFE, E0, nonm} if RHS given, or {mSi, nonm} if RHS=Null";
+extMat::usage = "{spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] 
+Returns species list, alpha matrix (reactants), beta matrix (products), 
+gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, 
+and deficiency as {formula, terms, result}.";
+NGM::usage = "NGM[mod, infVars, F] computes Next Generation Matrix. 
+mod={RHS,var,par}. If F provided, validates Inverse[V] all positive under par>0. 
+If not or invalid, uses posM. Returns {Jx,F,V,K,Jy,Jxy,Jyx,Kd}.";
+staPP::usage = "{lSta,qSta,hDeg,lFac,qFac}=staPP[pol,par]
+analyzes polynomial stability by factoring. Automatically assumes par>0.
+Linear factors (au+b): requires b>0. Quadratic factors (au^2+bu+c): requires b>0 && c>0 (Routh-Hurwitz).
+Returns lSta, qSta as logical expressions (simplified using par>0), hDeg as list of higher-degree factors (deg>=3),
+lFac as list of linear factors, qFac as list of quadratic factors.";
+Hur3::usage="ine=Hur3[pol,var] computes Routh-Hurwitz stability for degree-3 polynomial in variable var. Assumes leading coefficient positive. Returns ine (list of 3 stability inequalities).";
+cons::usage="cons[gam] finds positive conservation laws from gamma matrix. Returns list of positive left nullspace vectors w such that w.gam=0.";
+ODE2RN::usage="{RN,rts,spe,alp,bet,gam}=ODE2RN[RHS,var] converts ODE system to reaction network. RHS is list of expressions, var is list of variables. Returns reaction network RN, rates vector rts, species list spe, reactant matrix alp (alpha), product matrix bet (beta), and net stoichiometric matrix gam (gamma). Algorithm: identifies monomials, uses negative terms to define rates, constructs stoichiometric matrices where sources use alpha=0, then beta=gamma+alpha. Inverse operation to extMat";
+ODE2RNp::usage="{RN,rts,spe,alp,bet,gam,rnRed}=ODE2RNp[RHS,var,prF] 
+converts ODE system with rational rates to reaction network RN. 
+Separates numerators/denominators, analyzes polynomial model, returns 
+true rates multiplied by 1/denominators. Prints also rnRed, a version of RN where common factors 
+appearing
+both in alp and bet are printed above the transition arrow";
+
 (* Core functions *)
-extMat::usage = "(Core){spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] Returns species list, alpha matrix (reactants), beta matrix (products), gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, and deficiency as {formula, terms, result}.";
+
 compToAsso::usage = "(Core1)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "(Core1)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
 asoRea::usage = "(Core1)asoRea[RN] transforms classic reaction network format into association format with \"Substrates\" and \"Products\" keys.";
@@ -24,9 +47,10 @@ reaToRHS::usage = "(Core1){RHS, species, Rv} = reaToRHS[reactions] generates the
 expM::usage = "(Core1)expM[var,expo] gives the vector var at power in matrix expo using
 Inner[OperatorApplied[Power],#2,#1,Times]&";
 Par::usage="(Core1)Par[RHS,var] extracts parameters from dynamics";
+chk::usage="(Core1)chk[RHS] checks if RHS variables conflict with package names (V,F,K,mSi,RN,alp,bet,gam,etc). Returns list of conflicts and prints warning.";
 allT::usage="(Core1)allT[expr] extracts all terms from expanded polynomial as list";
 isN::usage="(Core1)isN[term] returns True if term has negative sign, False otherwise";
-ODE2RN::usage="(Core){RN,rts,spe,alp,bet,gam}=ODE2RN[RHS,var] converts ODE system to reaction network. RHS is list of expressions, var is list of variables. Returns reaction network RN, rates vector rts, species list spe, reactant matrix alp (alpha), product matrix bet (beta), and net stoichiometric matrix gam (gamma). Algorithm: identifies monomials, uses negative terms to define rates, constructs stoichiometric matrices where sources use alpha=0, then beta=gamma+alpha. Inverse operation to extMat";
+
 ODE2WY::usage="(Core){W,Y}=ODE2WY[RHS,var] converts ODE system to W,Y matrix format for wr0RealODE. W is coefficient matrix, Y is exponent matrix. Satisfies RHS==W.x^Y.";
 ab2RN::usage="(Core)RN=ab2RN[alp,bet,spe] converts alpha/beta matrices to reaction network format. alp is reactant matrix, bet is product matrix, spe is species list.";
 ODE2WR0::usage="(Core){success,RN,rts}=ODE2WR0[RHS,var] finds WR0 (weakly reversible deficiency zero) realization of ODE system if it exists. Returns {True,RN,rts} on success, {False,reason,{}} on failure.";
@@ -42,8 +66,6 @@ getComE::usage="(CRNT)getComE[RN] extracts complexes and edges from reaction net
 lapK::usage="(CRNT)lapK[RN, rates] computes Laplacian matrix of reaction network";
 
 (* Boundary1 analysis functions *)
-NGM::usage = "NGM[mod, infVars, F] computes Next Generation Matrix. mod={RHS,var,par}. If F provided, validates Inverse[V] all positive under par>0. If not or invalid, uses posM. Returns {Jx,F,V,K,Jy,Jxy,Jyx,Kd}.";
-
 getInfectionIndices::usage = "getInfectionIndices[variables, siphonExpressions] extracts infection compartment indices from minimal siphons. variables is the list of system variables, siphonExpressions is the list of minimal siphon expressions. Returns a list of integer indices corresponding to infection compartments. Used to automatically compute the inf parameter for NGM analysis from siphon structure.";
 DFE::usage="(Boundary1)DFE[mod,inf] yields the disease-free equilibrium of the model";
 mRts::usage="(Boundary1)mRts[RN,ks] creates mass action rates with names ks";
@@ -59,11 +81,21 @@ and coP are parameter conditions ensuring both invasion numbers >1 for coexisten
 invN::usage = "invN[E1t, E2t, R0A, E0, par, cp, in1, in2, fval, ins] computes invasion numbers and persistence conditions for multi-strain epidemic models. E1t and E2t are lists of boundary fixed points for strains 1 and 2. R0A contains basic reproduction numbers. E0 is the disease-free equilibrium. par and cp are model parameters and constraints. in1 and in2 are indices selecting equilibria from E1t and E2t (use -1 for irrational equilibria). Optional: fval gives values for fixed parameters, ins specifies which parameters to fix. Returns {E1, E2, R12, R21, coP} where R12, R21 are invasion numbers and coP contains coexistence parameter values. For irrational equilibria, returns 'nonRat' 
 for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ElTRat}=bdCo[RN,rts,var] boundary analysis for two strains with nondisjoint minSiph. Pass var from ODE2RN to preserve variable order. Returns RHS, var, par, cp, mSi, Jx, Jy, cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variable symbols labeling K rows/columns), ElTRat (boundary equilibrium solutions for each siphon).";
 bdCom::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, Esys, EA}=bdCom[RN,rts,var] boundary analysis using bdFp. Uses complementarity principle: for siphon constraints, non-siphon variables are positive so equations can be divided by them, reducing polynomial degree (e.g., degree 2 instead of 4). Esys contains unsolved systems (each {equations, variables}), EA contains rational boundary equilibrium solutions.";
-bdAn::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAn[RN,rts,var,gam] computes boundary analysis. Pass var and gam from ODE2RN to preserve variable order: {RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; bdAn[RN,rts,var,gam]. Returns RHS, var (variables), par (parameters), cp (parameter constraints), mSi (minimal siphons), Jx, Jy (Jacobian blocks), cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variable symbols corresponding to rows/columns of K), ngm (full NGM output).";
-bdAnC::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAnC[RN,rts,var] boundary analysis for closed systems (N conserved). Checks if Sum[RHS]==0. If yes, assumes N=1 and eliminates first variable using conservation law, then applies bdAn to reduced system. Returns same outputs as bdAn but for reduced system.";
+NGMRN::usage="(epi){RHS, var, par, cp, mSi, Jx, Jy, cDFE, cE0, F, V, K, R0A, infV}=
+NGMRN[RN,rts,var]  Pass var and gam from ODE2RN to preserve variable order. 
+{RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; 
+ infV are infection variable symbols corresponding to rows/columns of K), ngm (full NGM output).";
+bdAnC::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAnC[RN,rts,var] 
+boundary analysis for closed systems (N conserved). Checks if Sum[RHS]==0. If yes, assumes N=1 and eliminates first variable using conservation law, then applies bdAn to reduced system. Returns same outputs as bdAn but for reduced system.";
 bdFp::usage = "bdFp[RHS, var, mSi] computes boundary equilibria on siphon facets. RHS is the ODE right-hand side, var is the list of variables, mSi is the list of minimal siphons (strings). For each siphon, sets siphon variables to 0, solves the system, and filters using onlyNN to remove DFE and negative solutions. Returns list where bdFp[[j]] is either positive solutions (list of rule lists) or {equations, variables} if no positive solutions exist. Typically bdFp[[j,1]] is the biologically relevant endemic equilibrium.";
-sta::usage = "sta[pol] analyzes polynomial stability by 
-factoring pol and examining linear and quadratic factors separately. Assumes all parameters are positive. For linear factors (au + b), stability requires b > 0. For quadratic factors (au\.b2 + bu + c), stability requires both b > 0 and c > 0 (Routh-Hurwitz criteria). Returns {lSta, qSta, hDeg} where lSta contains linear stability conditions, qSta contains quadratic stability conditions, and hDeg contains higher-degree factors (degree \[GreaterEqual] 3) requiring manual stability analysis. Polynomial variable should be u.";
+
+(* Equilibria classification functions *)
+sipLat::usage="(Equilibria)sipLat[mSi,vars] constructs lattice of minimal siphons ordered by decreasing length. mSi is list of minimal siphons from bdAn, vars is variable list. Builds all unions of minimal siphons, removes cDFE (union of all), converts to rules (siphon variables -> 0). Returns list of rules ordered longest first.";
+slvLvl::usage="(Equilibria)slvLvl[eqs,vars,rules,solved,dfe] solves equilibrium equations at one siphon length level. eqs are equilibrium equations (RHS==0), vars is variable list, rules are siphon rules of same length, solved is list of already-found equilibria, dfe is disease-free equilibrium. Attempts Solve with 300s timeout for each rule, filters out DFE and duplicates, keeps only rational solutions. Returns {ratSols,timeOuts}.";
+slvAll::usage="(Equilibria)slvAll[eqs,vars,sipRules,dfe] iteratively solves all siphon length levels from longest to shortest. Maintains accumulator of solved equilibria to avoid duplicates. For timeouts, attempts RUR (Real Univariate Representation) computation. Returns {ratSols,rurSols,timeOuts}.";
+clsEqb::usage="(Equilibria)clsEqb[RHS,var,mSi,E0] classifies equilibria per siphon facet. Returns list of {siphon, nRat, nRur, {ratSols, rurSols}} for each siphon (excluding cDFE). nRat includes DFE, nRur counts equations not solutions. If Sp/Time limit reached, returns \"limit\". DFE filtered from stored solutions.";
+clsEq::usage="(Equilibria)clsEq[RHS,var,mSi,E0,prF,tim,keepVar] first runs clsEqb to print all siphon results, then finds endemic equilibrium using unrestricted Solve with timeout tim. If timeout, attempts RUR approach. keepVar (optional) is variable to keep for RUR extraction (default: first var not in any siphon). Prints nSol with Short solutions if successful, nRUR with RUR polynomials if RUR used, or TIME-OUT if both timeout. Filters out DFE and siphon-zero equilibria. Returns list of solutions.";
+clsEq1::usage="(Equilibria)clsEq1[RHS,var,mSi,E0,prF,tim,keepVar] same as clsEq. keepVar (optional) allows user to suggest which variable to keep for RUR polynomial extraction.";
 
 (* Bifurcation analysis functions *)
 fpHopf::usage="(Bifurcation)fpHopf[RHS,var,par,p0val] finds positive fixed points and analyzes for Hopf bifurcations. Returns {posSols,complexEigs,angle,eigs} where angle is ArcTan[Re/Im]*180/Pi of complex eigenvalues";
@@ -101,7 +133,6 @@ Hopf tolerance hTol for bifurcation detection, step size delta for range mode, w
 making it suitable for broader classes of models beyond epidemic systems.";
 
 (* Siphon and persistence functions *)
-minSiph::usage="(Siphons)minSiph[species,reactions] finds minimal siphons in a reaction network";
 isSiph::usage="(Siphons)isSiph[species,reactions,siphon] checks if a given set forms a siphon in the reaction network";
 isDrainable::usage="(Siphons)isDrainable[reactions, speciesSet] checks if speciesSet is drainable for the given reaction network. A set is drainable if there exists a reaction pathway that decreases all species in the set";
 isSelfReplicable::usage="(Siphons)isSelfReplicable[reactions, speciesSet] checks if speciesSet is self-replicable for the given reaction network. A set is self-replicable if there exists a reaction pathway that increases all species in the set";
@@ -127,7 +158,7 @@ l2L::usage="(Conv)l2L[list] converts lowercase list format to uppercase format";
 m2toM::usage="(Conv)m2toM[expr] converts m2 expressions to M format";
 remZ::usage="(Conv)remZ[li] removes zeroes from list";
 remN::usage="(Utils)remN[expr] removes negative terms from expression. Applies DeleteCases to remove all negative numbers and terms with negative coefficients at all levels.";
-redTout::usage="(Utils)redTout[con,var,time] applies Reduce[con,var] with timeout. Returns 'timeOut' if computation exceeds time limit (default 300 seconds = 5 minutes). var defaults to empty list, time defaults to 300.";
+redTim::usage="(Utils)redTout[con,var,time] applies Reduce[con,var] with timeout. Returns 'timeOut' if computation exceeds time limit (default 300 seconds = 5 minutes). var defaults to empty list, time defaults to 300.";
 selZR::usage="(Conv)selZR[con] selects zero rules from conditions";
 seZF::usage="(Conv)seZF[so] removes in a list of lists those with a 0";
 strEdg::usage="(Conv)strEdg[edges] processes edge structures for graph operations";
@@ -152,17 +183,15 @@ RHS2RN::usage="(Extra)RHS2RN[RHS,var] extracts reactions representation of an OD
 CofRH::usage="(Utils)CofRH[A] yields coefficients of CharacteristicPolynomial, as required by Routh-Hurwitz theory, normalized so the free coefficient is 1";
 CofP::usage="(Utils)CofP[list] yields coefficients of a polynomial as required by Routh-Hurwitz theory, normalized so the free coefficient is 1";
 Hur2::usage="(Utils)Hur2[co] yields stability conditions for second-order system";
-Hur3M::usage="(Utils){co,h3,ine} = Hur3M[A] yields third-order Hurwitz analysis";
-Hur4M::usage="(Utils){co,h4,ine} = Hur4M[A] yields fourth-order Hurwitz analysis";
-Hur5M::usage="(Utils){co,h5,ine,H5} = Hur5M[jac] yields fifth-order Hurwitz analysis";
+Hur3M::usage="(Boundary){co,h3,ine} = Hur3M[A] yields third-order Hurwitz analysis";
+Hur4M::usage="(Boundary){co,h4,ine} = Hur4M[A] yields fourth-order Hurwitz analysis";
+Hur5M::usage="(Boundary){co,h5,ine,H5} = Hur5M[jac] yields fifth-order Hurwitz analysis";
 H4::usage="(Utils)H4[co] gives the 4th Hurwitz determinant, needed in Routh-Hurwitz theory";
 H6::usage="(Utils)H6[co] computes the 6th Hurwitz determinant for stability analysis";
 makeLPM::usage="(Utils)makeLPM[mat] yields the leading principal minors";
 ACM::usage="(Utils)ACM[A,k] yields additive compound matrix";
 perR::usage="(Utils)perR[M,i,j] swaps rows i and j in matrix M";
 perC::usage="(Utils)perC[matrix,cycle] performs a cyclic permutation on the rows (or columns) of the input matrix";
-Stab::usage="(Utils)Stab[mod,cfp,cn] analyzes stability at fixed point";
-Sta::usage="(Utils)Sta[jac,X,Xv] numeric stability analysis";
 JTD::usage="(Utils)JTD[mod,cn] performs JTD analysis";
 JTDP::usage="(Utils)JTDP[mod,zeta,cn] performs JTDP analysis with parameter zeta";
 Grobpol::usage="(Utils)Grobpol[RHS,var,par,ind,cn] computes a reduced polynomial system by eliminating variables using Gr\[ODoubleDot]bner basis methods";
@@ -172,7 +201,7 @@ L1Planar::usage="(Utils)L1Planar[fg,eq] performs L1 planar analysis";
 DerEq::usage="(Utils)DerEq[fg,eq] computes derivative equations";
 Stodola::usage="(Utils)Stodola[pol,var] implements Stodola method for polynomial analysis";
 red::usage="(Utils)red[re,cond:{}] erases from the output of a Reduce all the conditions in cond";
-reCL::usage="(Utils)reCL[re] erases from the output of a Reduce all the conditions in cond";
+(*reCL::usage="(Utils)reCL[re] erases from the output of a Reduce all the conditions in cond";*)
 onePR::usage="(Utils)onePR[cof,cp] outputs conditions that the first and last coefs of a list have different signs";
 expon::usage="(Utils)expon computes the maximum power of an expanded form";
 posM::usage="(Utils) posM[matrix] keeps all syntactically positive terms.";
@@ -200,6 +229,13 @@ phase3::usage="(Visualization){Xs,eig,stab,pFP,pStream}=phase3[rhN,var,tMax,pts,
 invGr::usage="(Visualization){gra,ver,edg,col}=invGr[mSi,bdFps,R0A,RHS,var,E0] constructs invasion graph for multi-strain models. mSi are minimal siphons (list of species name lists), bdFps are boundary fixed points, R0A are basic reproduction numbers, RHS is ODE right-hand side, var is variable list, E0 is disease-free equilibrium. Returns Graph object gra with invasion edges, vertex list ver (communities as sorted index lists), edge list edg showing invasion pathways, vertex colors col (Green=successful invasion, Yellow=failed invasion). Nodes represent communities (siphon complements), edges show strain invasions when Rj(ySc)>1";
 DSR::usage="(Visualization)DSR[RN] builds the directed species-reaction (SR) bipartite graph for reaction network RN. Returns an association with keys: \"Graph\" -> the Graph object with signed, stoichiometric edge labels, \"EdgeData\" -> list of associations {<|\"edge\"->_, \"sign\"->_, \"stoich\"->_|>, ...}, \"ReactionNodes\" -> list of reaction node labels {\"R1\", \"R2\", ...}, \"SpeciesNodes\" -> list of species node labels";
 
+(*Cl - experimental versions*)
+minSiph1::usage="(Cl) Copy of minSiph0. {mSi,cDFE,cE0,nonm}=minSiph1[var,RN,RHS] or {mSi,cDFE,nonm}=minSiph1[var,RN]. Outputs cE0 when RHS present.";
+minSiph0::usage="(Cl) Exact copy of minSiph. {mSi,cDFE,cE0,nonm}=minSiph0[var,RN,RHS] or {mSi,cDFE,nonm}=minSiph0[var,RN]. Always outputs cDFE even without RHS.";
+
+(*old version*)
+Sta::usage="(old)Stab[mod,cfp,cn] analyzes stability at fixed point";
+Stab::usage="(old)Sta[jac,X,Xv] numeric stability analysis";
 Begin["`Private`"];
 
 root=If[StringQ[$InputFileName] && $InputFileName =!= "",
@@ -210,6 +246,7 @@ root=If[StringQ[$InputFileName] && $InputFileName =!= "",
 (* Loaded later may override doubles loaded former *)
 Get[FileNameJoin[{root, "Siphons.wl"}]];
 Get[FileNameJoin[{root, "Boundary.wl"}]];
+Get[FileNameJoin[{root, "Equilibria.wl"}]];
 Get[FileNameJoin[{root, "Bifurcation.wl"}]];
 Get[FileNameJoin[{root, "Conv.wl"}]];
 Get[FileNameJoin[{root, "Utils.wl"}]];
@@ -217,8 +254,9 @@ Get[FileNameJoin[{root, "Core.wl"}]];
 Get[FileNameJoin[{root, "CRNT.wl"}]];
 Get[FileNameJoin[{root, "Visualize.wl"}]];
 Get[FileNameJoin[{root, "Extra.wl"}]];
-Get[FileNameJoin[{root, "bdCom.wl"}]];
-Get[FileNameJoin[{root, "epi.wl"}]];  (* Canonical ODE2RN and extMat with rnRed *)
+(*Get[FileNameJoin[{root, "bdCom.wl"}]];*)
+Get[FileNameJoin[{root, "Cl.wl"}]];  (* Experimental versions for testing *)
+Get[FileNameJoin[{root, "epi.wl"}]];  (* ODE2RN, extMat with rnRed,... *)
 (*
 
 *)

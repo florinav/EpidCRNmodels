@@ -3,15 +3,11 @@
 (* ========================================================================= *)
 (* EPI - MINIMAL EPIDEMIC MODELING SUBPACKAGE *)
 (* Contains the essential functions for epidemic CRN modeling *)
-(* IMPORTANT: This is the canonical version of ODE2RN and extMat *)
+(* IMPORTANT: This conains ODE2RN , extMat, minSiph, ... *)
 (* Goal: Serve as foundation for future Python port *)
 (* NOTE: Backup versions exist in Core1.wl and EpidCRNo.wl *)
 (* ========================================================================= *)
 
-
-(* ========================================================================= *)
-(* FROM UTILS.WL *)
-(* ========================================================================= *)
 
 posM=
 Replace[#,{_?Negative->0,e_:>Replace[Expand[e],
@@ -24,6 +20,18 @@ t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
 (* ========================================================================= *)
 
 Par[RHS_,X_]:=Complement[Variables[RHS],X];
+
+chk[RHS_] := Module[{vars, reserved, conflicts},
+  vars = ToString /@ Variables[RHS];
+  reserved = {"RHS","var", "rts", "RN","V", "F", "K", "Jx", "Jy", "Jxy", "Jyx", "Kd", "mSi",
+              "alp", "bet", "gam", "spe", "E0", "cE0", "cDFE",
+               "inf", "infc", "mod", "par", "cp","I","E"};
+  conflicts = Intersection[vars, reserved];
+  If[Length[conflicts] > 0,
+    Print["WARNING: RHS variables conflict with package names: ", conflicts, " from ", reserved];
+  ];
+  ToExpression /@ conflicts
+];
 
 extSpe[reactions_] := Module[{allSpecies, reactants, products},
   allSpecies = {};
@@ -140,6 +148,15 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
   (* Build beta matrix: bet = gam + alp *)
   bet = gam + alp;
 
+  (* Fix negative stoichiometry: move negatives from bet to alp *)
+  Do[
+    If[bet[[ii, jj]] < 0,
+      alp[[ii, jj]] = alp[[ii, jj]] - bet[[ii, jj]];
+      bet[[ii, jj]] = 0
+    ],
+    {ii, n}, {jj, Length[rts]}
+  ];
+
   (* Build reaction network RN using string format "s" + "i" -> 2*"i" *)
   RN = Table[
     Module[{left, right, leftTerms, rightTerms},
@@ -183,13 +200,18 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
   newBet = bet - catCoef;
 
   rnRed = Table[
-    Module[{catList, newL, newR, catExpr, lExpr, rExpr},
+    Module[{catList, newL, newR, fixedL, fixedR, catExpr, lExpr, rExpr},
       catList = catCoef[[All, jj]];
       newL = newAlp[[All, jj]];
       newR = newBet[[All, jj]];
+
+      (* Move negative stoichiometry from products to reactants *)
+      fixedL = MapThread[If[#2 < 0, #1 - #2, #1] &, {newL, newR}];
+      fixedR = MapThread[If[#2 < 0, 0, #2] &, {newL, newR}];
+
       catExpr = coefToExpr[catList, var];
-      lExpr = coefToExpr[newL, var];
-      rExpr = coefToExpr[newR, var];
+      lExpr = coefToExpr[fixedL, var];
+      rExpr = coefToExpr[fixedR, var];
       If[catExpr === {},
         lExpr -> rExpr,
         Row[{lExpr, Overscript[" \[Rule] ", catExpr], rExpr}]
@@ -198,16 +220,94 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
     {jj, Length[rts]}
   ];
 
-  If[prF =!= Identity,
-    Print[Length[RN], " reactions and rts=",
-      Row[{
-        Transpose[{prF[RN], prF[Factor /@ rts]}] // MatrixForm,
-        Spacer[20],
-        Transpose[{prF[rnRed], prF[Factor /@ rts]}] // MatrixForm
-      }]]
+  Print[Length[RN], " reactions and rts=",
+    Row[{
+      Transpose[{prF[RN], prF[Factor /@ rts]}] // MatrixForm,
+      Spacer[20],
+      Transpose[{prF[rnRed], prF[Factor /@ rts]}] // MatrixForm
+    }]
   ];
 
   {RN, rts, spe, alp, bet, gam, rnRed}
+];
+
+ODE2RNp[RHS_List, var_List, prF_:Identity] := Module[{
+  n, RHSpol, RHSexp, allTerms, numList, denList, dens,
+  RN, rts, spe, alp, bet, gam, rnRed, rtsTrue
+  },
+
+  n = Length[var];
+
+  (* STEP 1: Expand RHS and extract all terms *)
+  RHSexp = Expand /@ RHS;
+
+  (* STEP 2: Process each equation to separate numerators and denominators *)
+  RHSpol = Table[
+    Module[{eq, terms, numPol},
+      eq = RHSexp[[ii]];
+      terms = If[Head[eq] === Plus, List @@ eq, {eq}];
+      numPol = Total[Table[
+        Module[{term, num, den},
+          term = terms[[jj]];
+          {num, den} = {Numerator[term], Denominator[term]};
+          num
+        ],
+        {jj, Length[terms]}
+      ]]
+    ],
+    {ii, n}
+  ];
+
+  (* STEP 3: Call ODE2RN on polynomial model *)
+  {RN, rts, spe, alp, bet, gam, rnRed} =
+    Block[{Print = (Null &)}, ODE2RN[RHSpol, var, Identity]];
+
+  (* STEP 4: Build dens list by matching rts back to original terms *)
+  dens = Table[
+    Module[{rate, allDens, matchFound},
+      rate = rts[[jj]];
+      matchFound = False;
+      allDens = 1;
+
+      (* Search through all equations for terms whose numerator matches rate *)
+      Do[
+        Module[{eq, terms},
+          eq = RHSexp[[ii]];
+          terms = If[Head[eq] === Plus, List @@ eq, {eq}];
+          Do[
+            Module[{term, num, den},
+              term = terms[[kk]];
+              {num, den} = {Numerator[term], Denominator[term]};
+              If[num === rate || num === -rate,
+                allDens = 1/den;
+                matchFound = True;
+              ]
+            ],
+            {kk, Length[terms]}
+          ];
+          If[matchFound, Break[]];
+        ],
+        {ii, n}
+      ];
+
+      allDens
+    ],
+    {jj, Length[rts]}
+  ];
+
+  (* STEP 5: Compute true rates *)
+  rtsTrue = MapThread[#1 * #2 &, {rts, dens}];
+
+  (* STEP 6: Print always *)
+  Print[Length[RN], " reactions and rts=",
+    Row[{
+      Transpose[{prF[RN], prF[Factor /@ rtsTrue]}] // MatrixForm,
+      Spacer[20],
+      Transpose[{prF[rnRed], prF[Factor /@ rtsTrue]}] // MatrixForm
+    }]
+  ];
+
+  {RN, rtsTrue, spe, alp, bet, gam, rnRed}
 ];
 
 defi[RN_] := Module[{complexes, adj, graph, l, s, gam, spe, al, be, Nc, ii, jj, numSpe, numRea, reactants, products},
@@ -407,8 +507,9 @@ isSiph[W_List, species_List, alpha_, beta_] := Module[
 
 
 
-minSiph[vars_, reactions_] := Module[{
-  species, alpha, beta, n, m, reactionsAsso, siphons, minimal, nonm},
+minSiph[vars_, reactions_, RHS_:Null] := Module[{
+  species, alpha, beta, n, m, reactionsAsso, siphons, minimal, nonm,
+  cDFEspecies, cDFE, E0, nonSiphonVars, eqsAtDFE, sol},
 
   species = toStr /@ vars;
   reactionsAsso = asoRea[reactions];
@@ -439,8 +540,33 @@ minSiph[vars_, reactions_] := Module[{
     Function[s, AllTrue[siphons, Function[t, t === s || !SubsetQ[s, t]]]]
   ];
   nonm = Complement[siphons, minimal];
-  {minimal, nonm}
+
+  (* Compute cDFE and E0 if RHS is provided *)
+  If[RHS =!= Null,
+    (* cDFE: union of all minimal siphons set to zero *)
+    cDFEspecies = DeleteDuplicates[Flatten[minimal]];
+    cDFE = Thread[ToExpression[cDFEspecies] -> 0];
+
+    (* cE0: solve RHS==0 under cDFE constraint *)
+    nonSiphonVars = Complement[vars, ToExpression[cDFEspecies]];
+    If[Length[nonSiphonVars] > 0,
+      eqsAtDFE = Thread[(RHS /. cDFE) == 0];
+      sol = Quiet[Solve[eqsAtDFE, nonSiphonVars], Solve::svars];
+      If[sol === {} || sol === $Failed,
+        cE0 = cDFE,
+        cE0 = Join[cDFE, First[sol]]
+      ],
+      cE0 = cDFE
+    ];
+
+    {minimal, cDFE, cE0, nonm},
+
+    (* Legacy output if RHS not provided *)
+    {minimal, nonm}
+  ]
 ];
+
+
 
 comp2Asso[expr_] := Module[{terms, result, coeff, species},
   If[expr === 0 || expr === Null,
@@ -485,13 +611,9 @@ comp2Asso[expr_] := Module[{terms, result, coeff, species},
 ];
 
 
-(* ========================================================================= *)
-(* FROM BOUNDARY.WL *)
-(* ========================================================================= *)
-
-
 NGM[mod_, infVars_, Fuser_: {}] :=
-  Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, Vinv, allPos, dfeRules},
+  Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, Jyx, V1, F1, F, V, K, Kd, Vinv, allPos, 
+  dfeRules},
    dyn = mod[[1]];
    X = mod[[2]];
    par = If[Length[mod] >= 3, mod[[3]], {}];
@@ -543,8 +665,8 @@ NGM[mod_, infVars_, Fuser_: {}] :=
 
 
 
-bdAn[RN_, rts_, var_] := Module[{spe, alp, bet, gam, Rv, RHS, def, par, cp, cv, ct, mS, mSi, inf, mod,
-K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, F, V, eigenvals, ngm, infVarsStr, infVars},
+NGMRN[RN_, rts_, var_] := Module[{spe, alp, bet, gam, Rv, RHS, def, par, cp, cv, ct, mS, mSi, inf, mod,
+K, R0A, cDFE, RDFE, eq0, var0, cE0, Jx, Jy, F, VV, eigenvals, ngm, infVarsStr, infV},
 
   (* Extract stoichiometric matrices with var order *)
   {spe, alp, bet, gam, Rv, RHS, def} = extMat[RN, var];
@@ -553,53 +675,393 @@ K, R0A, cDFE, RDFE, eq0, var0, E0, Jx, Jy, F, V, eigenvals, ngm, infVarsStr, inf
   cp = Thread[par > 0];
   cv = Thread[var >= 0];
   ct = Join[cp, cv];
-  mS = minSiph[var, RN];
+  mS = minSiph[var, RN, RHS];
   mSi = mS[[1]];
+  cDFE = mS[[2]];
+  cE0 = mS[[3]];
 
-  (* infVars as strings for internal use *)
+  (* infV: infection variable symbols (from minimal siphons) *)
   infVarsStr = Union[Flatten[mSi]];
+  infV = ToExpression[infVarsStr];
 
-  (* Convert string species to symbol variables for substitution *)
-  cDFE = Thread[ToExpression[infVarsStr] -> 0];
-  RDFE = RHS /. cDFE;
-  eq0 = Thread[RDFE == 0];
-  var0 = Complement[var, ToExpression[infVarsStr]];
-  E0 = Join[Solve[eq0, var0] // Flatten, cDFE];
-
-  (* NGM expects symbols, so convert infVarsStr to symbols *)
+  (* Call NGM with infection variables *)
   mod = {RHS, var, par};
-  ngm = NGM[mod, ToExpression[infVarsStr]];
+  ngm = NGM[mod, infV];
   Jx = ngm[[1]];
   F = ngm[[2]];
-  V = ngm[[3]];
+  VV = ngm[[3]];  (* Renamed to avoid conflict with model variable v *)
   K = ngm[[4]];
   Jy = ngm[[5]];
 
-  (* infVars are the variable symbols corresponding to rows/columns of K *)
-  infVars = ToExpression[infVarsStr];
-
-  (* Check if V is singular (K = 0 from NGM) *)
+  (* Check if VV is singular (K = 0 from NGM) *)
   If[K === 0,
-    (* V is singular - print informative warning and set dummy values *)
+    (* VV is singular - print informative warning and set dummy values *)
     Module[{Vdfe, rnk, dim},
-      Vdfe = V /. Thread[infVars -> 0];
+      Vdfe = VV /. Thread[infV -> 0];
       rnk = MatrixRank[Vdfe];
       dim = Length[Vdfe];
-      Print["V with dim=", dim, " has rank=", rnk, ", so is singular"];
+      Print["VV with dim=", dim, " has rank=", rnk, ", so is singular"];
     ];
     R0A = {};
   ,
-    (* V is nonsingular - compute R0A *)
+    (* VV is nonsingular - compute R0A *)
     eigenvals = Eigenvalues[K];
     R0A = Select[eigenvals, # =!= 0 &];
   ];
 
-  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, F, V, K, R0A, infVars}
+  (* Return with standard reserved names in signature *)
+  V = VV;  (* Map internal VV to output V *)
+  {RHS, var, par, cp, mSi, Jx, Jy, cDFE, cE0, F, V, K, R0A, infV}
+];
+
+Hur3[pol_, var_] := Module[{co, h3, inec, ineSys, polExpanded, deg},
+  (* Expand polynomial *)
+  polExpanded = Expand[pol];
+
+  (* Check degree *)
+  deg = Exponent[polExpanded, var];
+  If[deg != 3,
+    Print["Error: Expected degree-3 polynomial, got degree ", deg];
+    Return[{}]
+  ];
+
+  (* Extract coefficients [a0, a1, a2, a3] using Coefficient *)
+  co = {
+    Coefficient[polExpanded, var, 0],
+    Coefficient[polExpanded, var, 1],
+    Coefficient[polExpanded, var, 2],
+    Coefficient[polExpanded, var, 3]
+  };
+
+  (* Compute Hurwitz determinant h3 *)
+  h3 = co[[2]]*co[[3]] - co[[1]]*co[[4]];
+
+  (* Form stability inequalities *)
+  inec = {co[[2]] > 0, co[[3]] > 0};
+  ineSys = Append[inec, h3 > 0];
+
+  ineSys
+];
+
+staPP[pol_, par_] := Module[{
+   factors, processedFactors, linearConditions, quadraticConditions,
+   higherFactors, linearFactors, quadraticFactors, deg, coeff, const, a, b, c, factor, var, lSta, qSta, cp
+   },
+
+  (* Define cp as positivity constraints for all parameters *)
+  cp = Thread[par > 0];
+
+  (* Find the variable - it's in Variables[pol] but not in par *)
+  var = First[Complement[Variables[pol], par]];
+  
+  (* Factor the polynomial completely *)
+  factors = Factor[pol];
+  
+  (* Convert to list of factors, handling both single factors and products *)
+  processedFactors = If[Head[factors] === Times, List @@ factors, {factors}];
+  
+  (* Remove constant factors (those not involving var) *)
+  processedFactors = Select[processedFactors, !FreeQ[#, var] &];
+  
+  (* Initialize condition and factor lists *)
+  linearConditions = {};
+  quadraticConditions = {};
+  higherFactors = {};
+  linearFactors = {};
+  quadraticFactors = {};
+  
+  (* Process each factor by degree *)
+  Do[
+   deg = Exponent[factor, var];
+   
+   Which[
+    deg == 1,
+    (* Linear factors: a*var + b *)
+    coeff = Coefficient[factor, var, 1]; 
+    const = Coefficient[factor, var, 0]; 
+    AppendTo[linearConditions, const > 0];
+    AppendTo[linearFactors, factor],
+    
+    deg == 2,
+    (* Quadratic factors: a*var^2 + b*var + c *)
+    a = Coefficient[factor, var, 2];
+    b = Coefficient[factor, var, 1]; 
+    c = Coefficient[factor, var, 0];
+    AppendTo[quadraticConditions, b > 0];
+    AppendTo[quadraticConditions, c > 0];
+    AppendTo[quadraticFactors, factor],
+    
+    deg >= 3,
+    (* Higher degree factors *)
+    AppendTo[higherFactors, factor]
+    ],
+   
+   {factor, processedFactors}
+   ];
+  
+  (* Combine conditions with And *)
+  lSta = If[Length[linearConditions] > 0, Apply[And, linearConditions], True];
+  qSta = If[Length[quadraticConditions] > 0, Apply[And, quadraticConditions], True];
+
+  (* Simplify using positivity constraints *)
+  If[cp =!= {},
+    Module[{assumptions, red},
+      assumptions = If[Length[cp] > 0, Apply[And, cp], True];
+      (* red: remove cp conditions from Reduce output *)
+      red[re_, cond_:{}] := re /. (# -> True & /@ cond);
+      (* Use Reduce to eliminate factors, then remove cp from output *)
+      lSta = red[Reduce[lSta && assumptions, Variables[lSta]], cp];
+      qSta = red[Reduce[qSta && assumptions, Variables[qSta]], cp];
+    ]
+  ];
+
+  (* Return as list {lSta, qSta, hDeg, linearFactors, quadraticFactors} *)
+  {lSta, qSta, higherFactors, linearFactors, quadraticFactors}
+ ]
+cons[gamma_] := Module[{
+  positiveConservationLaws, nullSpace, dims},
+
+  dims = Dimensions[gamma];
+
+  (* Find the left nullspace of gamma (vectors w such that w.gamma = 0) *)
+  nullSpace = Quiet[NullSpace[Transpose[gamma]]];
+
+  If[nullSpace === {} || nullSpace === $Failed,
+    (* No conservation laws *)
+    {},
+    (* Filter for positive conservation laws *)
+    positiveConservationLaws = Select[nullSpace,
+      AllTrue[#, # >= 0 &] && AnyTrue[#, # > 0 &] &
+    ];
+
+    (* If no positive ones found, try to make them positive *)
+    If[Length[positiveConservationLaws] == 0,
+      positiveConservationLaws = Select[nullSpace,
+        AllTrue[-#, # >= 0 &] && AnyTrue[-#, # > 0 &] &
+      ];
+      positiveConservationLaws = -# & /@ positiveConservationLaws;
+    ];
+
+    positiveConservationLaws
+  ]
 ];
 
 (* TEST posM - Commented out
 Print["posM inp={{-a+2b,c-3d},{ef-g,2h}} out=", posM[{{-a + 2*b, c - 3*d}, {e*f - g, 2*h}}], " exp={{2b,c},{ef,2h}}"];
 *)
+
+(* ========================================================================= *)
+(* EQUILIBRIA CLASSIFICATION *)
+(* ========================================================================= *)
+
+sipLat[mSi_, vars_] := Module[{lattice, unions, cDFE, filtered, rules},
+  lattice = Subsets[mSi, {1, Length[mSi]}];
+  unions = Map[Flatten[#, 1] &, lattice];
+  unions = DeleteDuplicates[unions];
+  cDFE = Flatten[mSi, 1];
+  filtered = DeleteCases[unions, cDFE];
+  rules = Map[Module[{sipVars},
+    sipVars = Map[If[StringQ[#], ToExpression[#], #] &, #];
+    Thread[sipVars -> 0]] &, filtered];
+  rules = Reverse[SortBy[rules, Length]];
+  rules
+]
+
+clsEqb[RHS_, vars_, mSi_, cE0_, prF_, tim_, keepVarUser_:Null] := Module[{
+  eqs, sipRules, perSiphon, isDFEsol, isRational, printedRat, isTrulyRational, sameSol, alreadyPrinted,
+  mSiSymbols, allSiphonVars, x1, x1Idx
+  },
+  eqs = Thread[RHS == 0];
+  sipRules = sipLat[mSi, vars];
+
+  (* Compute keep variable ONCE for all siphons *)
+  mSiSymbols = Map[Map[If[StringQ[#], ToExpression[#], #]&, #]&, mSi];
+  allSiphonVars = DeleteDuplicates[Flatten[mSiSymbols, 1]];
+  x1 = If[keepVarUser =!= Null && MemberQ[vars, keepVarUser],
+    keepVarUser,
+    First[Select[vars, !MemberQ[allSiphonVars, #]&]]];
+  x1Idx = Position[vars, x1][[1, 1]];
+
+  isDFEsol[s_] := Module[{completed},
+    completed = Join[s, Select[cE0, !MemberQ[s[[All, 1]], #[[1]]]&]];
+    Sort[completed] === Sort[cE0]];
+
+  isRational[s_] := FreeQ[s, Root | RootOf | AlgebraicNumber] &&
+    FreeQ[s, _Power?((!IntegerQ[#[[2]]] && Head[#[[2]]] =!= Symbol)&)];
+
+  isTrulyRational[s_] := isRational[s] && StringLength[ToString[s]] < 5000;
+  sameSol[s1_, s2_] := Sort[s1] === Sort[s2];
+  alreadyPrinted[s_] := AnyTrue[printedRat, sameSol[#, s]&];
+  printedRat = {};
+
+  perSiphon = Table[
+    Module[{eqsWithRule, sol, rat, rur, siphonVars, allRat, allRur,
+            ratS, rurEq, sipIdx, nBoundary, nIrrat, nDFE, sipName, solRed, nRur},
+
+      siphonVars = rule[[All, 1]];
+      sipIdx = Position[sipRules, rule][[1, 1]];
+      sipName = "E" <> StringJoin[SymbolName /@ siphonVars];
+
+      nonZat[sol_, varList_] := AllTrue[varList /. sol, # =!= 0 &];
+
+      hasOtherSiphonZero[s_] := Module[{otherSiphons, antiSiph},
+        otherSiphons = Select[mSiSymbols, !SubsetQ[siphonVars, #]&];
+        antiSiph = DeleteDuplicates[Flatten[otherSiphons, 1]];
+        !nonZat[s, antiSiph]];
+
+      eqsWithRule = eqs /. rule;
+      sol = MemoryConstrained[TimeConstrained[Quiet[Solve[eqsWithRule, vars], Solve::svars], tim, "limit"], 1024^3, "limit"];
+
+      If[sol === "limit",
+        Print["S", sipIdx, ":", sipName, ": timeout"];
+        {siphonVars, 0, 0, "limit"},
+
+        allRat = Select[sol, isRational];
+        allRur = Map[Join[#, rule]&, Select[sol, !isRational[#]&]];
+
+        ratS = {}; rurEq = {};
+        If[Length[allRur] > 0,
+          solRed = TimeConstrained[Quiet[Solve[Drop[eqsWithRule, x1Idx], Delete[vars, x1Idx]], Solve::svars], tim, "limit"];
+          If[solRed =!= "limit" && solRed =!= {} && solRed =!= $Aborted,
+            Module[{antiSiph, solComplete},
+              antiSiph = Complement[Delete[vars, x1Idx], siphonVars];
+              Do[solComplete = Join[solRed[[i]], rule];
+                If[isTrulyRational[solRed[[i]]] && !alreadyPrinted[solRed[[i]]] && nonZat[solComplete, antiSiph],
+                  ratS = solComplete;
+                  rurEq = Collect[Numerator[Together[eqsWithRule[[x1Idx, 1]] /. solRed[[i]]]], x1, Factor];
+                  Break[]],
+                {i, Length[solRed]}]]]];
+
+        rat = {};
+        Do[Module[{solComplete},
+            solComplete = Join[allRat[[i]], rule];
+            If[!isDFEsol[allRat[[i]]] && !alreadyPrinted[allRat[[i]]] && !hasOtherSiphonZero[solComplete],
+              AppendTo[rat, solComplete]]],
+          {i, Length[allRat]}];
+        rur = If[Length[ratS] > 0, {ratS, rurEq}, {}];
+
+        nBoundary = Length[rat];
+        nDFE = Count[allRat, _?(isDFEsol)];
+        nIrrat = Length[allRur];
+
+        If[nIrrat > 0 && Length[rur] == 0 && Length[allRur] > 0,
+          Module[{irratSol, irratWithoutX1, poly},
+            irratSol = allRur[[1]];
+            irratWithoutX1 = Select[irratSol, #[[1]] =!= x1 &];
+            poly = Collect[Numerator[Together[eqsWithRule[[x1Idx, 1]] /. irratWithoutX1]], x1, Factor];
+            If[FreeQ[poly, Root | RootOf | AlgebraicNumber],
+              ratS = irratWithoutX1; rurEq = poly; rur = {ratS, rurEq}]]];
+
+        nRur = If[Length[rur] > 0, Ceiling[nIrrat/2], 0];
+        If[nRur > 0, nIrrat = 0];
+
+        (* Concise print: S#:sipName=solution *)
+        If[Length[rat] > 0,
+          Module[{short},
+            short = Select[rat, StringLength[ToString[#]] < 3000 &];
+            Do[Print["S", sipIdx, ":", sipName, "=", short[[j]] // prF], {j, Length[short]}];
+            printedRat = Join[printedRat, rat]]];
+
+        If[Length[rur] > 0,
+          Print["S", sipIdx, ":", If[isRational[ratS], "RUR ", "nonRUR "], sipName, ": ratS=", ratS // prF, " poly=", rurEq // prF]];
+
+        {nBoundary + nDFE, nRur, {rat, rur, allRur}}
+      ]
+    ],
+    {rule, sipRules}];
+  {perSiphon, Length[printedRat]}
+]
+
+clsEq[RHS_, vars_, mSi_, cE0_, prF_, tim_, keepVarUser_:Null] := Module[{
+  eqs, sol, rat, irrat, perSiphon, isDFEsol, isTrulyRational, nonZeroSol, filtered, nSol, nS, emptySiphonResult,
+  x1, x1Idx, solRed, rurEq, rurOK, nRat, nRUR, nNonRUR, eeNonRUR, clsEqbResult, nRatSiphon
+  },
+  clsEqbResult = clsEqb[RHS, vars, mSi, cE0, prF, tim, keepVarUser];
+  perSiphon = clsEqbResult[[1]];
+  nRatSiphon = clsEqbResult[[2]];
+  nS = 2^Length[mSi] - 1;
+  eqs = Thread[RHS == 0];
+  eeNonRUR = 0;
+
+  isDFEsol[s_] := Module[{completed},
+    completed = Join[s, Select[cE0, !MemberQ[s[[All, 1]], #[[1]]]&]];
+    Sort[completed] === Sort[cE0]];
+
+  isTrulyRational[s_] := FreeQ[s, Root | RootOf | AlgebraicNumber] &&
+    FreeQ[s, _Power?((!IntegerQ[#[[2]]] && Head[#[[2]]] =!= Symbol)&)] &&
+    StringLength[ToString[s]] < 5000;
+
+  hasSiphonZero[s_] := Module[{mSiSymbols},
+    mSiSymbols = Map[Map[If[StringQ[#], ToExpression[#], #]&, #]&, mSi];
+    AnyTrue[mSiSymbols, AllTrue[# /. s, # === 0 &]&]];
+
+  sol = TimeConstrained[Quiet[Solve[eqs, vars], Solve::svars], tim, "timeout"];
+
+  If[sol === "timeout",
+    Print["EE: timeout"];
+    emptySiphonResult = {0, 0, {{}, {}, {}}},
+
+    rat = Select[sol, isTrulyRational];
+    irrat = Select[sol, !isTrulyRational[#]&];
+    filtered = Select[rat, !isDFEsol[#] && !hasSiphonZero[#]&];
+    nonZeroSol = Select[filtered, !AllTrue[vars /. #, # === 0 &]&];
+    nSol = Length[nonZeroSol];
+
+    If[nSol > 0,
+      If[nSol == 1,
+        Print["EE=", prF[nonZeroSol[[1]]]],
+        Do[Print["EE", i, "=", prF[nonZeroSol[[i]]]], {i, nSol}]];
+      emptySiphonResult = {nSol, 0, {nonZeroSol, {}, irrat}},
+
+      (* No rational endemic - check for irrational *)
+      If[Length[irrat] > 0,
+        Module[{nBefore = Length[irrat]},
+        (* Filter irrational: no variable is zero *)
+        irrat = Select[irrat, !MemberQ[#[[All, 2]], 0]&];
+        If[Length[irrat] == 0,
+          Print["EE: ", nBefore, " irrational but all have zeros"];
+          emptySiphonResult = {0, 0, {{}, {}, {}}},
+
+          (* Try RUR: keep x1 (non-siphon var or user choice), drop its eq, solve rest *)
+          Module[{mSiSymbols, allSiphonVars, nonSiphonVars},
+            mSiSymbols = Map[Map[If[StringQ[#], ToExpression[#], #]&, #]&, mSi];
+            allSiphonVars = DeleteDuplicates[Flatten[mSiSymbols, 1]];
+            nonSiphonVars = Select[vars, !MemberQ[allSiphonVars, #]&];
+            x1 = If[keepVarUser =!= Null && MemberQ[vars, keepVarUser],
+              keepVarUser,
+              If[Length[nonSiphonVars] > 0, First[nonSiphonVars], vars[[1]]]];
+            x1Idx = Position[vars, x1][[1, 1]]];
+          rurOK = False;
+          solRed = TimeConstrained[Quiet[Solve[Drop[eqs, {x1Idx}], Delete[vars, x1Idx]], Solve::svars], tim, "timeout"];
+          If[solRed =!= "timeout" && solRed =!= {},
+            Module[{ratRed, ratNoZero, poly},
+              ratRed = Select[solRed, isTrulyRational];
+              ratNoZero = Select[ratRed, !MemberQ[#[[All, 2]], 0]&];
+              If[Length[ratNoZero] > 0,
+                poly = Numerator[Together[eqs[[x1Idx, 1]] /. ratNoZero[[1]]]];
+                poly = Collect[poly, x1, Factor];
+                If[FreeQ[poly, Root | RootOf | AlgebraicNumber],
+                  rurOK = True;
+                  rurEq = poly;
+                  Print["EE:RUR in ", x1, ": ratS=", prF[ratNoZero[[1]]], " poly=", prF[rurEq]]]]]];
+          If[!rurOK,
+            eeNonRUR = Length[irrat];
+            Print["EE:nonRUR ", Length[irrat], " irrational"]];
+          emptySiphonResult = {0, If[rurOK, Ceiling[Length[irrat]/2], 0], {{}, {}, irrat}}]],
+
+        emptySiphonResult = {0, 0, {{}, {}, {}}}]]];
+
+  perSiphon = Append[perSiphon, emptySiphonResult];
+
+  (* Final summary: r=rational (unique), R=RUR, n=nonRUR *)
+  nRat = nRatSiphon + nSol + 1;  (* unique siphon rational + EE rational + DFE *)
+  nRUR = Total[perSiphon[[All, 2]]];
+  (* nonRUR = irrational solutions where RUR failed (nRur=0 but has irrat) *)
+  nNonRUR = Total[Map[If[#[[2]] == 0, Length[#[[3, 3]]], 0]&, Most[perSiphon]]] + eeNonRUR;
+  Print["r=", nRat, " R=", nRUR, " n=", nNonRUR];
+
+  {nS, perSiphon}
+]
 
 (* TEST - Commented out
 RHS1 = {-be1 i12 s - be2 i12 s - mu0 s - (i1 mu1 R1 s)/s0 - (i2 mu2 R2 s)/s0 - (i12 mu3 R3 s)/s0 + mu0 s0,
@@ -611,4 +1073,16 @@ var = {s, i1, i2, i12};
 {RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, F, V, K, R0A, infVars} = bdAn[RN, rts, var];
 RHS - RHS1 // FullSimplify  (*Should be {0,0,0,0}*)
 *)
+
+(* TEST ODE2RNr with rational rates
+RHSrat = {1 - x1 - (x1*x2)/(1 + x1), (x1*x2)/(1 + x1) - x2};
+varRat = {x1, x2};
+{RNrat, rtsRat, speRat, alpRat, betRat, gamRat, rnRedRat} =
+  Block[{Print = (Null &)}, ODE2RNr[RHSrat, varRat, Identity]];
+Print["ODE2RNr verif=", (gamRat . rtsRat - RHSrat) // Simplify, " exp={0,0}"];*)
+
+(* TEST cons - find conservation laws
+gamTest = {{1, -1, 0}, {0, 1, -1}, {-1, 0, 1}};
+consLaws = cons[gamTest];
+Print["cons gamTest=", gamTest, " consLaws=", consLaws, " verif=", consLaws.gamTest];*)
 

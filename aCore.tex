@@ -1,0 +1,488 @@
+   Autocatalytic Core Detection (aCore) - Implementation Plan (2026-01-19)
+
+    Motivation
+Implement autocatalytic core detection based on autogato (https://github.com/hollyritch/autogato). Cores are irreducible autocatalytic subsystems - minimal sets of metabolites/reactions that self-sustain. In epidemiology, multiple cores correspond to multistrain boundary equilibria (different strains extinct).
+
+    Mathematical Framework
+
+**Definitions:**
+- **MR-edge**: Metabolite to Reaction edge in bipartite graph
+- **Equivalence class**: Set of MR-edges from elementary circuits
+- **CS matrix** (Catalytic Stoichiometric): For equivalence class E = {(m1,r1), ..., (mk,rk)}, build k* k matrix where CS[i,j] = S[mi,rj] (stoichiometric coefficient)
+- **Metzler property**: Off-diagonal entries CS[i,j] >= 0 for i not equal to j
+- **Autocatalytic condition**: Largest eigenvalue lambdamax(CS) > 0 (unstable/growing)
+- **Core**: Minimal autocatalytic set (no proper subset is autocatalytic)
+
+**Autogato Algorithm:**
+1. Find elementary circuits in metabolic-reaction bipartite graph
+2. Group circuits into equivalence classes by MR-edges
+3. For each equivalence class: compute CS matrix, check Metzler, compute lambdamax
+4. Assemble larger classes from intersecting smaller ones
+5. Identify minimal/irreducible cores
+
+    Implementation Strategy
+
+**Phase 1: Foundation (Data Structures  and  Graph Construction)**
+
+**1.1 Network Representation**
+```mathematica
+(* Input: RN, rts from ODE2RN *)
+(* Build bipartite graph: metabolites (M) <-> reactions (R) *)
+mrGraph[RN_, spe_] := Module[{edges, ...},
+  (* For each reaction: substrate to reaction, reaction to product edges *)
+  (* Return: directed graph with M-nodes and R-nodes *)
+]
+```
+- M-nodes: species from spe
+- R-nodes: reaction indices 1..Length[RN]
+- Edges: substrate->reaction (input), reaction->product (output)
+
+**1.2 Elementary Circuit Enumeration**
+```mathematica
+(* Find all elementary circuits up to length bound *)
+elmCir[G_, bound_:20] := Module[{circuits, ...},
+  (* Use built-in FindCycle or implement Johnson's algorithm *)
+  (* Filter: only circuits alternating M->R->M->R->... *)
+  (* Return: list of circuits as vertex sequences *)
+]
+```
+- Use Mathematica's `FindCycle[G, {1, bound}, All]` or custom Johnson algorithm
+- Filter out non-alternating circuits
+- Bound prevents combinatorial explosion (default 20)
+
+**1.3 MR-Edge Extraction**
+```mathematica
+(* Extract MR-edges from circuit *)
+mrEdg[circ_] := Module[{edges, ...},
+  (* From circuit [m1, r1, m2, r2, ...], extract (m1->r1), (m2->r2), ... *)
+  (* Return: set of {metabolite, reaction} pairs *)
+]
+```
+
+**Phase 2: CS Matrix Construction**
+
+**2.1 Stoichiometric Matrix S**
+```mathematica
+(* Build full stoichiometric matrix S[metabolite, reaction] *)
+stoMat[RN_, spe_] := Module[{S, m, n, ...},
+  m = Length[spe];
+  n = Length[RN];
+  S = ConstantArray[0, {m, n}];
+  (* S[i,j] = net stoichiometric coefficient of species i in reaction j *)
+  (* From gamma matrix: S = gamma *)
+]
+```
+- Dimensions: m metabolites * n reactions
+- S[i,j] = change in metabolite i from reaction j
+- Can directly use gamma from extMat
+
+**2.2 CS Matrix for Equivalence Class**
+```mathematica
+(* Compute Catalytic Stoichiometric matrix for MR-edge set *)
+csMat[mrEdges_, S_, mID_, rID_] := Module[{k, CS, sortedEdges, ...},
+  k = Length[mrEdges];
+  sortedEdges = Sort[mrEdges]; (* consistent ordering *)
+  CS = ConstantArray[0, {k, k}];
+  Do[
+    {mi, ri} = sortedEdges[[i]];
+    {mj, rj} = sortedEdges[[j]];
+    CS[[i,j]] = S[[mID[mi], rID[rj]]];
+  , {i, k}, {j, k}];
+  CS
+]
+```
+- mID: metabolite to row index map
+- rID: reaction to column index map
+- CS[i,j] = S[metabolitei, reactionj]
+
+**2.3 Metzler Check**
+```mathematica
+(* Check if matrix has non-negative off-diagonals *)
+isMet[M_] := Module[{n, ...},
+  n = Length[M];
+  AllTrue[Flatten[Table[M[[i,j]], {i,n}, {j,n}] /. {M[[i_,i_]] -> 0}],   >= 0  and ]
+]
+```
+
+**Phase 3: Autocatalytic Detection**
+
+**3.1 Spectral Radius Check**
+```mathematica
+(* Check if largest eigenvalue has positive real part *)
+isAut[CS_] := Module[{eigs, maxEig, ...},
+  eigs = Eigenvalues[CS];
+  maxEig = First[SortBy[eigs, -Re[ ] and ]]; (* largest by real part *)
+  Re[maxEig] > 0
+]
+```
+- Use `Eigenvalues` for small matrices (<10*10)
+- For larger matrices, use `Eigensystem[CS, 1]` or iterative methods
+
+**Phase 4: Core Assembly**
+
+**4.1 Equivalence Class Database**
+```mathematica
+(* Structure: Association[frozenMRset -> {properties}] *)
+(* Properties: {mrEdges, metabolites, reactions, CS, metzler, autocatalytic, core, predecessors} *)
+```
+
+**4.2 Intersection  and  Assembly**
+```mathematica
+(* Find intersecting equivalence classes and build larger ones *)
+asmCor[E_, Q_] := Module[{equivClass, intersecting, newClasses, ...},
+  (* Pop equivClass from queue Q *)
+  (* Find all other classes that intersect (share MR-edges) *)
+  (* For each intersection: merge, check plausibility, compute CS, test autocatalytic *)
+  (* Add new autocatalytic classes to Q *)
+  (* Mark cores: autocatalytic but both predecessors are NOT autocatalytic *)
+]
+```
+- Queue Q: classes to process
+- Plausibility: metabolites and reactions match up correctly
+- Core criterion: autocatalytic but not derived from two autocatalytic parents
+
+**4.3 Minimality Filter**
+```mathematica
+(* Remove non-minimal cores (those containing smaller cores) *)
+minCor[cores_] := Module[{minimal, ...},
+  (* For each core, check if any other core is proper subset *)
+  (* Keep only minimal ones *)
+]
+```
+
+**Phase 5: Main Interface**
+
+**5.1 Main Function: aCore**
+```mathematica
+aCore[RN_, rts_, var_, bound_:20, tim_:300] := Module[{
+  spe, alp, bet, gam, G, circuits, E, Q, cores, ...
+  },
+
+  (* Step 1: Extract species *)
+  {spe, alp, bet, gam, ...} = extMat[RN];
+
+  (* Step 2: Build bipartite graph *)
+  G = mrGraph[RN, spe];
+
+  (* Step 3: Find elementary circuits with timeout *)
+  circuits = TimeConstrained[elmCir[G, bound], tim, {}];
+  If[circuits === {}, Return["TIME-OUT"]];
+
+  (* Step 4: Initialize equivalence classes *)
+  E = Association[]; (* mrEdgeSet -> properties *)
+  Q = {}; (* queue of classes to process *)
+  Do[
+    mrSet = mrEdg[circuits[[i]]];
+    If[!KeyExistsQ[E, mrSet],
+      (* Add to database *)
+      CS = csMat[mrSet, gam, mID, rID];
+      metz = isMet[CS];
+      aut = If[metz, isAut[CS], False];
+      E[mrSet] = <|"CS" -> CS, "Metzler" -> metz,
+                   "Autocatalytic" -> aut, "Core" -> False|>;
+      If[aut, AppendTo[Q, mrSet]];
+    ];
+  , {i, Length[circuits]}];
+
+  (* Step 5: Assemble larger classes *)
+  asmCor[E, Q];
+
+  (* Step 6: Identify cores *)
+  cores = Keys[Select[E,  ["Core"] === True  and ]];
+  cores = minCor[cores];
+
+  (* Step 7: Convert to species sets *)
+  coreSets = Map[extractMetabolites, cores];
+
+  coreSets
+]
+```
+
+**Output:** List of minimal cores, each core is a set of species
+
+    Dependencies  and  File Structure
+
+**New subpackage: Cores.wl**
+```mathematica
+(* Location: C:\Users\flori\Dropbox\EpidCRNmodels\Cores.wl *)
+(* Functions: mrGraph, elmCir, mrEdg, stoMat, csMat, isMet, isAut, asmCor, minCor, aCore *)
+```
+
+**Loader update: EpidCRN.wl**
+```mathematica
+(* Add usage statements *)
+aCore::usage="(Cores){coreSets}=aCore[RN,rts,var,bound,tim] finds autocatalytic cores. bound=max circuit length (default 20), tim=timeout (default 300s). Returns list of minimal core sets (species).";
+
+(* Add Get statement *)
+Get[FileNameJoin[{root, "Cores.wl"}]];
+```
+
+**Dependencies:**
+- Core.wl: extMat (for gamma matrix)
+- Graph functions: built-in FindCycle or custom circuit finder
+- Linear algebra: Eigenvalues, Eigensystem
+
+    Testing Strategy
+
+**Test 1: Simple autocatalytic cycle**
+```mathematica
+(* A + B -> 2B (autocatalytic in B) *)
+RN = {"A" + "B" -> 2*"B", "B" -> 0};
+rts = {k1*A*B, k2*B};
+var = {A, B};
+cores = aCore[RN, rts, var];
+(* Expected: {{B}} - single core containing B *)
+```
+
+**Test 2: Two competing cycles (Example10.wl)**
+```mathematica
+(* Two autocatalytic cycles competing for food F *)
+(* Load Example10.wl *)
+cores = aCore[RN, rts, var];
+(* Expected: {{C1, P1}, {C2, P2}} - two cores *)
+```
+
+**Test 3: E. coli core subset**
+```mathematica
+(* Subset of metabolic network *)
+(* Verify against autogato output if possible *)
+```
+
+    Implementation Phases
+
+**Priority 1 (Essential):**
+- Phase 1: mrGraph, elmCir (circuit enumeration)
+- Phase 2: csMat (CS matrix construction)
+- Phase 3: isMet, isAut (autocatalytic detection)
+- Basic test with simple examples
+
+**Priority 2 (Core functionality):**
+- Phase 4: asmCor (assembly algorithm)
+- Phase 4.3: minCor (minimality filter)
+- Test with Example10.wl (two competing cycles)
+
+**Priority 3 (Optimization):**
+- Parallel processing for large networks
+- Sparse matrix methods for efficiency
+- Circuit enumeration optimizations
+
+    Known Challenges
+
+**1. Circuit Enumeration:**
+- Combinatorial explosion for large networks
+- Need efficient bounds and pruning
+- May need iterative deepening by length
+
+**2. Type Matching:**
+- Species may be strings in spe but symbols in var
+- Need consistent conversion (use SymbolName or ToExpression)
+
+**3. Performance:**
+- Large metabolic networks have 1000s of species, 1000s of reactions
+- Autogato uses Cython and parallel processing
+- May need to focus on smaller networks or strong bounds
+
+**4. Validation:**
+- No ground truth for most CRNs (autogato paper focuses on E. coli)
+- Will need to verify against:
+  - Minimal siphons (cores should relate to critical siphons)
+  - Boundary equilibria structure
+  - Known autocatalytic motifs (formose, hypercycles)
+
+    Integration with Existing Code
+
+**Relationship to Siphons:**
+- Siphons: algebraic/combinatorial (from stoichiometry only)
+- Cores: dynamic (require stoichiometry + kinetics via CS matrix)
+- Critical siphons subset of cores (?)
+- Need to investigate: are critical siphons always cores? vice versa?
+
+**Relationship to Boundary Equilibria:**
+- Multiple cores to multiple boundary equilibria
+- Each core empty to corresponding boundary equilibrium
+- aCore could help predict multistrain structure
+
+**Usage in Pipeline:**
+```mathematica
+(* Standard analysis pipeline *)
+{RN, rts, spe, alp, bet, gam} = ODE2RN[RHS, var];
+{RHS, var, par, cp, mSi, ...} = NGMRN[RN, rts, var];
+
+(* New: core analysis *)
+cores = aCore[RN, rts, var];
+Print["Minimal siphons: ", mSi];
+Print["Autocatalytic cores: ", cores];
+(* Compare structure *)
+```
+
+    Alternative Approach: Bi.R.Ne (Characteristic Polynomial Method)
+
+**Repository:** https://github.com/Bi-R-Ne/Bi.R.Ne
+
+**Key Differences from autogato:**
+
+| Aspect | autogato | Bi.R.Ne |
+|--------|----------|---------|
+| Method | CS matrix on elementary circuits | Characteristic polynomial coefficients |
+| Matrix | Catalytic Stoichiometric (CS) | Jacobian J = S*R |
+| Analysis | Eigenvalues of CS matrices | Coefficients of det(\lambdaI - J) |
+| Scope | Elementary circuits to equivalence classes | Full Jacobian analysis |
+| Output | Minimal autocatalytic cores | Unstable cores + oscillatory cores |
+| Scale | Handles large networks (E. coli 72*95) | Limited to ~14 metabolites, 23 reactions |
+
+**Bi.R.Ne Algorithm:**
+
+1. Build stoichiometric matrix S (m metabolites * n reactions)
+2. Build reactivity matrix R (n reactions * m metabolites) where R[j,i] = symbolic rate if S[i,j] < 0
+3. Compute Jacobian J = S*R (m * m matrix)
+4. Compute characteristic polynomial det(\lambdaI - J) symbolically
+5. Extract coefficients (CB = Characteristic-Based summands)
+6. Build Hasse diagram for negative-positive CB inclusion relationships
+7. Identify minimal unstable cores and oscillatory cores
+
+**Bi.R.Ne Input Format:**
+```
+Metabolites
+A: Metabolite A
+B: Metabolite B
+
+Reactions
+R1: A+B -> C
+R2: C+B -> D
+```
+
+**Advantages of Bi.R.Ne:**
+- Simpler implementation (no circuit enumeration)
+- Detects oscillatory cores in addition to autocatalytic ones
+- Symbolic approach may capture more dynamics
+
+**Disadvantages of Bi.R.Ne:**
+- Does NOT scale (14 metabolites max, characteristic polynomial takes hours)
+- Requires symbolic computation (memory intensive)
+- Less modular than circuit-based approach
+
+**Recommendation:**
+- Use Bi.R.Ne approach for **initial prototype** on small examples
+- Computing characteristic polynomial is straightforward in Mathematica
+- Can validate against autogato for larger networks later
+
+**Modified Implementation Strategy:**
+
+**Priority 0 (Simpler Prototype):**
+```mathematica
+(* Bi.R.Ne-inspired simple prototype *)
+aCoreSimple[RN_, rts_, var_] := Module[{
+  spe, alp, bet, gam, S, R, J, chPoly, coeffs, ...
+  },
+
+  (* Extract stoichiometric matrix *)
+  {spe, alp, bet, gam, ...} = extMat[RN];
+  S = gam; (* m * n *)
+
+  (* Build reactivity matrix R: R[j,i] = symbolic rate if S[i,j] < 0 *)
+  (* For mass action: R[j,i] = rate constant if metabolite i consumed in reaction j *)
+
+  (* Compute Jacobian J = S.R *)
+  J = S.R;
+
+  (* Characteristic polynomial *)
+  chPoly = CharacteristicPolynomial[J, \lambda];
+  coeffs = CoefficientList[chPoly, \lambda];
+
+  (* Analyze coefficients for unstable cores *)
+  (* Implementation TBD - requires Hasse diagram analysis *)
+
+  cores
+]
+```
+
+This simpler approach:
+- No circuit enumeration needed
+- Uses standard Mathematica functions
+- Good for testing on Example10.wl, GlyPPP.wl
+- Can implement full autogato approach later if needed
+
+    Test Example: Glycolysis  and  Pentose Phosphate Pathway (GlyPPP)
+
+**File:** `C:\Users\flori\Dropbox\Granada\GlyPPP.wl`
+
+**Network Description:**
+- 14 metabolites: G (Glucose), G6P, 6PG, F6P, F16P, DHAP, G3P, X5P, R5P, E4P, S7P, S17P, PEP, PYR
+- 23 reactions: glycolysis + pentose phosphate pathway + reversible steps
+
+**Key Reactions:**
+```mathematica
+RN = {
+  0 -> "G",                        (* Glucose production *)
+  "G" + "PEP" -> "G6P" + "PYR",   (* GLCPts *)
+  "G6P" -> "F6P",                  (* PGI forward *)
+  "F6P" -> "G6P",                  (* PGI reverse *)
+  "F6P" -> "F16P",                 (* PFK *)
+  "F16P" -> "DHAP" + "G3P",       (* FBA *)
+  "DHAP" -> "G3P",                 (* TPI *)
+  "G3P" -> "PEP",                  (* GAPD_PGK_PGM_ENO *)
+  "PEP" -> "PYR",                  (* PYK *)
+  "PYR" -> "PEP",                  (* PPS *)
+  "G6P" -> "6PG",                  (* G6PDH_PGL *)
+  "6PG" -> "X5P",                  (* GND_RPE *)
+  "6PG" -> "R5P",                  (* GND_RPI *)
+  "X5P" + "R5P" -> "G3P" + "S7P", (* TKT1 forward *)
+  "G3P" + "S7P" -> "X5P" + "R5P", (* TKT1 reverse *)
+  "G3P" + "S7P" -> "F6P" + "E4P", (* TALA forward *)
+  "F6P" + "E4P" -> "G3P" + "S7P", (* TALA reverse *)
+  "X5P" + "E4P" -> "F6P" + "G3P", (* TKT2 forward *)
+  "F6P" + "G3P" -> "X5P" + "E4P", (* TKT2 reverse *)
+  "6PG" -> "G3P" + "PYR",          (* 6PGDH_KDPGA *)
+  "S7P" -> "S17P",                 (* S7PK *)
+  "S17P" -> "DHAP" + "E4P",       (* FBACII *)
+  "PYR" -> 0                       (* PYR export *)
+};
+```
+
+**Expected Results:**
+- Multiple autocatalytic cores involving glycolysis and PPP cycles
+- Bi.R.Ne reports this takes ~5 hours to compute characteristic polynomial
+- Good test case for validating simpler prototype before scaling up
+
+**Usage:**
+```mathematica
+<<EpidCRN`;
+Get["C:\\Users\\flori\\Dropbox\\Granada\\GlyPPP.wl"];
+(* Once aCore is implemented: *)
+cores = aCore[RN, rts, var];
+```
+
+    Revised Next Steps
+
+1. **Implement aCoreSimple**: Bi.R.Ne-inspired prototype using characteristic polynomial
+   - Start with 2*2 or 3*3 examples (Example10.wl subset)
+   - Compute J = S.R symbolically
+   - Get characteristic polynomial coefficients
+   - Manual analysis of coefficients for unstable patterns
+
+2. **Validate on Small Examples:**
+   - Test 1: A+B\to2B simple autocatalytic
+   - Test 2: Example10.wl (two competing cycles, 5 species)
+   - Verify against analytical results
+
+3. **Scale to GlyPPP:**
+   - Test aCoreSimple on GlyPPP (14 species)
+   - Compare computation time vs Bi.R.Ne
+   - May timeout - provides motivation for circuit-based approach
+
+4. **Implement Full autogato Approach:**
+   - Only if aCoreSimple proves insufficient
+   - Phase 1: mrGraph, elmCir (circuit enumeration)
+   - Phase 2-4: CS matrix, assembly, minimality
+
+5. **Compare Approaches:**
+   - Run both on Example10.wl
+   - Check if results agree
+   - Document tradeoffs
+
+6. **Document  and  Integrate:**
+   - Add to usage statements
+   - Create test suite
+   - Integrate with NGMRN pipeline
+
+---

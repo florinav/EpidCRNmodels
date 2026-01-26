@@ -1653,8 +1653,10 @@ str2Sym= #//. s_String :>ToExpression[s]&;
 varLS= (#//. s_String :>ToExpression[s])//Variables&;
 rul2Str=# /. r_Rule :> ToString /@ r &;
 
-Hur3M[A_]:=Module[{co,h3,inec,ineSys,\[Omega]},co=CoefficientList[(-1)^Length[A] CharacteristicPolynomial[A,\[Omega]],\[Omega]];
-h3=co[[ 2]]* co[[ 3]]-co[[ 1]] *co[[ 4]];inec={co[[ 1]]>0,co[[ 2]]>0};ineSys=Append[inec,h3>0];{co,h3,ineSys}];
+Hur3M[A_]:=Module[{co,h3,inec,ineSys,\[Omega]},co=CoefficientList[(-1)^Length[A] 
+CharacteristicPolynomial[A,\[Omega]],\[Omega]];
+h3=co[[ 2]]* co[[ 3]]-co[[ 1]] *co[[ 4]];inec={co[[ 1]]>0,co[[ 2]]>0};
+ineSys=Append[inec,h3>0];{co,h3,ineSys}];
 
 Hur4M[mat_]:=Module[{lm,ch,cot,co,H4,h4,ine},lm=mat//Length;ch=((-1)^lm * CharacteristicPolynomial[mat,\[Lambda]]//Factor);
 cot=CoefficientList[ch,\[Lambda]];co=Reverse[Drop[cot,-1]];H4={{co[[1]],1,0,0},{co[[3]],co[[2]],co[[1]],1},{0,co[[4]],co[[3]],co[[2]]},{0,0,0,co[[4]]}};

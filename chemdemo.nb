@@ -1,0 +1,994 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 5.2'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     29698,        824]*)
+(*NotebookOutlinePosition[     30565,        853]*)
+(*  CellTagsIndexPosition[     30521,        849]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["\<\
+DEMO OF DETERMINANT OF    JACOBIAN OF CHEM REACTION NETWORK SOFTWARE\
+\>", "Title"],
+
+Cell[BoxData[{
+    StyleBox[\(\(Here, \ we\ consider\ the\ differential\ equation\)\(\ \)\),
+      FontColor->RGBColor[1, 0, 0]], "\[IndentingNewLine]", 
+    RowBox[{
+      StyleBox["      ",
+        FontColor->RGBColor[1, 0, 0]], 
+      RowBox[{
+        RowBox[{
+          StyleBox[\(dx\/dt\),
+            FontSlant->"Italic",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["=",
+            FontSlant->"Italic",
+            FontColor->RGBColor[1, 0, 0]], 
+          RowBox[{
+            StyleBox[\(f \((x)\)\),
+              FontSlant->"Italic",
+              FontColor->RGBColor[1, 0, 0]], 
+            StyleBox["=",
+              FontSlant->"Italic",
+              FontColor->RGBColor[1, 0, 0]], 
+            RowBox[{
+              RowBox[{
+                StyleBox["Sv",
+                  FontSlant->"Italic",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox[\((x)\),
+                  FontSlant->"Italic",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox[" ",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox["which",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox[" ",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox["acts",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox[" ",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox["on",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox[" ",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox["the",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox[" ",
+                  FontColor->RGBColor[1, 0, 0]], 
+                StyleBox["non",
+                  FontColor->RGBColor[1, 0, 0]]}], 
+              StyleBox["-",
+                FontColor->RGBColor[1, 0, 0]], 
+              
+              StyleBox[\(negative\ orthant\ \(R\^d\)\_\( \[GreaterEqual] \
+\_0\)\),
+                FontColor->RGBColor[1, 0, 0]]}]}]}], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[" ",
+          FontColor->RGBColor[1, 0, 0]], 
+        RowBox[{
+          StyleBox["where",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["S",
+            FontSlant->"Italic",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["is",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["a",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["d",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["x",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[\(d'\),
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["Stoichiometric",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["Matrix",
+            FontColor->RGBColor[1, 0, 0]]}], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox["  ",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[\(and\ v \((x)\)\ is\ a\ vector\ with\ d'\ components\ \
+consisting\ of\ monomials\ multiplied\ by\ rate\ constants . \ 
+              These\ are\ called\ fluxes . \[IndentingNewLine]\ 
+              This\ differential\ equation\ is\ associated\ to\),
+          FontColor->RGBColor[1, 0, 0]]}], 
+      StyleBox[" ",
+        FontColor->RGBColor[1, 0, 0]]}], "\[IndentingNewLine]", 
+    RowBox[{
+      StyleBox["     ",
+        FontColor->RGBColor[1, 0, 0]], 
+      StyleBox[\(a\ chemical\ network\ modeled\ \ with\ mass - 
+          action\ kinetics . \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ Runs\ in\ MMa\ 4.2  and\ \(\(higher\)\(.\)\)\),
+        FontColor->RGBColor[1, 0, 0]]}]}], "Subsubtitle"],
+
+Cell["\<\
+
+    \
+\>", "Subsubtitle"],
+
+Cell[CellGroupData[{
+
+Cell["Input the Differential Equation", "Subtitle",
+  CellChangeTimes -> {{3.400351612083209*^9, 3.400351614389969*^9}}],
+
+Cell["   Input the Stoichiometric matrix S ", "Subsubtitle"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(S\)\(=\)\({{\(-1\), 0, 2}, {\(-1\), \(-1\), 
+          0}, {0, \(-1\), \(-1\)}, {1, 0, 0}, {0, 1, 
+          0}}\)\( (*stoichiometric\ matrix*) \)\)\)], "Input",
+  CellChangeTimes -> {3.400358440573351*^9}],
+
+Cell[BoxData[
+    \({{\(-1\), 0, 2}, {\(-1\), \(-1\), 0}, {0, \(-1\), \(-1\)}, {1, 0, 
+        0}, {0, 1, 0}}\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(S\  // MatrixForm\)\(\[IndentingNewLine]\)
+    \)\)], "Input"],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", GridBox[{
+            {\(-1\), "0", "2"},
+            {\(-1\), \(-1\), "0"},
+            {"0", \(-1\), \(-1\)},
+            {"1", "0", "0"},
+            {"0", "1", "0"}
+            },
+          RowSpacings->1,
+          ColumnSpacings->1,
+          ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        All\ of\ the\ reactions\ in\ the\ network\ associated\ to\ the\ above\
+\ stoichiometric\ matrix\ are\ irreversible, \ 
+        because\ none\ of\ the\ negatives\ of\ the\ three\ columns\ appear . \
+\ \ If\ all\ the\ reactions\ in\ a\ reaction\ network\ are\ reversible, \ 
+        then\ it\ is\ only\ necessary\ to\ input\ one\ column\ for\ each\ \
+reaction\ \((representing\ either\ the\ forward\ or\ backward\ direction)\), \
+\ because\ the\ makeReversible\ command\ can\ be\ used\ \(\(later\)\(.\)\)\
+\[IndentingNewLine]*) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox[\( (*this\ command\ is\ equivalent\ to\ MatrixRank \((which\ \
+is\ not\ implemented\ in\ earlier\ mathematica\ versions)\)*) \),
+        FontColor->RGBColor[1, 0, 0]], "\[IndentingNewLine]", 
+      "\[IndentingNewLine]", \(\(mr3[m_] := 
+          Length[Select[
+              RowReduce[
+                m], \(! \ \((Dot[#, #] === 0)\)\)\  &]];\)\[IndentingNewLine]
+      mr3[S]\)}]], "Input"],
+
+Cell[BoxData[
+    \(3\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+
+    Make the flux vector and list of species concentrations automatically \
+from the Stoiciometric matrix\
+\>", "Subsubtitle"],
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox["(*",
+        FontColor->RGBColor[1, 0, 0]], 
+      StyleBox[" ",
+        FontColor->RGBColor[1, 0, 0]], 
+      RowBox[{
+        RowBox[{
+          StyleBox["Each",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["column",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["of",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["S",
+            FontSlant->"Italic",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["corresponds",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["to",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["a",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["chemical",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["reaction",
+            FontColor->RGBColor[1, 0, 0]]}], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[" ",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[\(modeled\ by\ a\ monomial\ multiplied\ by\ a\ rate\ \
+constant\ \((flux)\) . \ \[IndentingNewLine]In\ particular\),
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[" ",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[
+          RowBox[{
+            RowBox[{"writing", " ", 
+              StyleBox["S",
+                FontSlant->"Italic"]}], " ", "=", " ", \((S\_ij)\)}],
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[\(x\  = \ \((x\_1,  ... , x\_d)\)\^T\),
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox["  ",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[\(and\ v \((x)\)\  = \ \((\(v\_1\) \((x)\),  ... , \(v\_\(d'\
+\)\) \((x)\))\)\^T\),
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[",",
+          FontColor->RGBColor[1, 0, 0]], 
+        StyleBox[" ",
+          FontColor->RGBColor[1, 0, 0]], 
+        RowBox[{
+          StyleBox[\(we\ have\),
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox[" ",
+            FontColor->RGBColor[1, 0, 0]], 
+          StyleBox["\[IndentingNewLine]",
+            FontColor->RGBColor[1, 0, 0]], 
+          RowBox[{
+            
+            StyleBox[\(\(v\_j\) \((x)\) = 
+                k\_j\ \(\[Product]\+\(i = 1\)\%d x\_i\^\(\(|\)\(min {0, \
+S\_ij}\)\(|\)\) . \ \[IndentingNewLine]\[IndentingNewLine]The\ function\ ' 
+                      makeMonomial'\ will\ construct\ v \((x)\)\)\),
+              FontColor->RGBColor[1, 0, 0]], 
+            StyleBox[",",
+              FontColor->RGBColor[1, 0, 0]], 
+            StyleBox[" ",
+              FontColor->RGBColor[1, 0, 0]], 
+            RowBox[{
+              StyleBox["and",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox[" ",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox["take",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox[" ",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox["S",
+                FontSlant->"Italic",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox[" ",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox["as",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox[" ",
+                FontColor->RGBColor[1, 0, 0]], 
+              StyleBox[\(\(input\)\(.\)\),
+                FontColor->RGBColor[1, 0, 0]]}]}]}]}], 
+      StyleBox["*)",
+        FontColor->RGBColor[1, 0, 0]]}]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(makeMonomial[Smatrix_] := 
+      Module[{tmp, lista, pow, mat}, 
+        refine[S_] := S\  /. Map[# \[Rule] 1 &, Variables[S]]; 
+        mat = refine[Smatrix]; \[IndentingNewLine]pow = 
+          Table[0, {Length[mat[\([1]\)]]}]; 
+        tmp = Table[
+            If[mat[\([i, j]\)] \[GreaterEqual] 0, 1, 
+              If[pow[\([j]\)] > 0, 
+                a[i]^\((\(-Smatrix[\([i, j]\)]\))\), \(pow[\([j]\)]++\); \ 
+                k[j]\ a[i]^\((\(-Smatrix[\([i, j]\)]\))\)]], {i, 1, 
+              Length[mat]}, {j, 1, 
+              Length[mat[\([1]\)]]}]; \[IndentingNewLine]lista = 
+          Map[Apply[Times, #] &, Transpose[tmp]]; \ lista]\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell1"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(refine\\)\\\" is similar to existing symbol \
+\\\"\\!\\(Refine\\)\\\". \\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", \
+ButtonStyle->\\\"RefGuideLinkText\\\", ButtonFrame->None, \
+ButtonData:>\\\"General::spell1\\\"]\\)\"\>"}]], "Message"]
+}, Open  ]],
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox[\( (*\ \(\('\) \(makeMonomialNMA'\)\(\ \)\(is\)\(\ \)\(a\)\(\ \
+\)\(command\)\(\ \)\(to\)\(\ \)\(make\)\(\ \)\(the\)\(\ \)\(flux\)\(\ \
+\)\(vector\)\(\ \)\(v\) \((x)\)\(\ \)\(in\)\(\ \)\(the\)\(\ \)\(more\)\(\ \
+\)\(general\)\(\ \)\(situation\)\(\ \)\(of\)\(\ \)\(non\)\) - mass - 
+            action\ kinetics . \ \ The\ entry\ of\ the\ flux\ vector\ for\ \
+the\ jth\ reaction\ will\ be\ of\ the\ form\ \(k[j]\)[a[i_  1], 
+                a[i_  2],  ... , a[i_n]], \ where\ a[i_  1],  ... , 
+          a[i_n]\ are\ the\ reactants . \ \ In\ other\ words, \ 
+          we\ assume\ the\ reaction\ rate\ is\ an\ indeterminate\ function\ \
+of\ the\ reactant\ \(\(concentrations\)\(.\)\)\ *) \),
+        FontColor->RGBColor[1, 0, 0]], "   "}]], "Input"],
+
+Cell[BoxData[
+    \(makeMonomialNMA[
+        Smatrix_] := \[IndentingNewLine]Module[{reactantlist, tmp}, 
+        tmp = Smatrix; \ tmp = Map[If[# < 0, 1, 0] &, tmp, {2}]; 
+        tmp = Transpose[tmp]; 
+        reactantlist = 
+          Table[tmp[\([i, j]\)]*a[j], {i, 
+              1, \(Dimensions[tmp]\)[\([1]\)]}, {j, 
+              1, \(Dimensions[
+                  tmp]\)[\([2]\)]}]; \[IndentingNewLine]reactantlist = 
+          DeleteCases[reactantlist, 0, {2}]; \[IndentingNewLine]Table[
+          Apply[k[i], reactantlist[\([i]\)]], {i, 1, 
+            Length[reactantlist]}]]\)], "Input"],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        The\ function\ ' 
+          variables'\ takes\ a\ vector\ of\ monomials\ \((fluxes)\)\ as\ \
+input, \ and\ returns\ a\ vector\ of\ all\ the\ variables\ \((species)\)\ \
+appearing\ in\ the\ vector\ of\ monomials . \ \ \(WARNING : \ 
+              if\ the\ stoichiometric\ matrix\ is\ not\ fully\ reversible\), \
+\ then\ not\ all\ species\ may\ appear\ as\ variables\ in\ the\ monomial\ \
+vector, \ 
+        so\ this\ command\ may\ return\ too\ few\ \(\(variables\)\(.\)\)\ *) \
+\),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(variables[monom_] := 
+      Module[{list}, \ \ list = 
+            Select[Variables[monom], 
+              Head[#] \[Equal] 
+                    Head[a[1]] || \ \((Head[#] \[Equal] Power\  && \ 
+                      Head[\(Level[#, 1]\)[\([1]\)]] \[Equal] 
+                        Head[a[1]])\) &]; \ \[IndentingNewLine]Table[\ 
+            If[\ Length[list[\([i]\)]] \[Equal] 1, \ 
+              list[\([i]\)], \((\ Level[list[\([i]\)], 1])\)[\([1]\)]\ ], {i, 
+              1, Length[list]}]] // Union\)\(\[IndentingNewLine]\)
+    \)\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell1"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(variables\\)\\\" is similar to existing \
+symbol \\\"\\!\\(Variables\\)\\\". \
+\\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", ButtonStyle->\\\"RefGuideLinkText\
+\\\", ButtonFrame->None, ButtonData:>\\\"General::spell1\\\"]\\)\"\>"}]], \
+"Message"],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(list\\)\\\" is similar to existing symbols \
+\\!\\({List, lista}\\). \\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", \
+ButtonStyle->\\\"RefGuideLinkText\\\", ButtonFrame->None, \
+ButtonData:>\\\"General::spell\\\"]\\)\"\>"}]], "Message"]
+}, Open  ]],
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox[\( (*\ 
+          The\ command\ ' 
+            svars'\ can\ be\ used\ to\ generate\ the\ species\ variables\ \
+whenever\ the\ flux\ vector\ has\ been\ generated\ using\ the\ makeMonomial\ \
+or\ makeMonomialNMA\ commands . \ \ It\ takes\ a\ stoichiometric\ matrix\ as\ \
+input\ and\ simply\ returns\ a\ list\ {a[1], \ a[2], \  ... , \ 
+              a[n]}\ where\ n\ is\ the\ number\ of\ rows\ in\ the\ \
+stoichiometric\ matrix\ \((a . k . a . \ 
+                    the\ number\ of\ species)\) . \ \ This\ can\ be\ \
+preferable\ to\ using\ the\ above\ command\ since\ it\ avoids\ the\ problem\ \
+of\ returning\ too\ few\ \(\(variables\)\(.\)\)\ *) \),
+        FontColor->RGBColor[1, 0, 0]], " "}]], "Input"],
+
+Cell[BoxData[
+    \(\(svars[Smatrix_] := Table[a[i], {i, 1, Length[Smatrix]}];\)\)], "Input"],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        The\ command\ ' 
+          makeReversible'\ takes\ a\ stoichiometric\ matrix\ that\ only\ has\ \
+one\ direction\ entered\ for\ each\ reaction\ and\ makes\ it\ fully\ \
+reversible\ \((so\ the\ number\ of\ columns\ will\ be\ doubled)\)*) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[BoxData[
+    \(makeReversible[S_] := 
+      Module[{tmp}, tmp = Transpose[S]; \ 
+        Flatten[\ \[IndentingNewLine]Table[\ {tmp[\([i]\)], \
+\(-tmp[\([i]\)]\)}, {i, 1, Length[tmp]}], 1] // Transpose]\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(rS = makeReversible[S]\)], "Input"],
+
+Cell[BoxData[
+    \({{\(-1\), 1, 0, 0, 2, \(-2\)}, {\(-1\), 1, \(-1\), 1, 0, 0}, {0, 
+        0, \(-1\), 1, \(-1\), 1}, {1, \(-1\), 0, 0, 0, 0}, {0, 0, 1, \(-1\), 
+        0, 0}}\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(monomialvec\  = \ makeMonomial[rS]; 
+    monomialvec // MatrixForm\)], "Input"],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", 
+        TagBox[GridBox[{
+              {\(a[1]\ a[2]\ k[1]\)},
+              {\(a[4]\ k[2]\)},
+              {\(a[2]\ a[3]\ k[3]\)},
+              {\(a[5]\ k[4]\)},
+              {\(a[3]\ k[5]\)},
+              {\(a[1]\^2\ k[6]\)}
+              },
+            RowSpacings->1,
+            ColumnAlignments->{Left}],
+          Column], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    StyleBox[\( (*\ \(\('\) \(vars'\)\(\ \)\(will\)\(\ \)\(contain\)\(\ \
+\)\(all\)\(\ \)\(the\)\(\ \)\(variables\)\(\ \)\(of\)\(\ \
+\)\(`monomialvec'\)\) = \ v \((x)\)\ *) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(vars\  = \ variables[monomialvec]\)], "Input",
+  CellChangeTimes -> {{3.40027231109886*^9, 3.400272325468032*^9}, \
+3.40035846166197*^9}],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell1"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(vars\\)\\\" is similar to existing symbol \\\
+\"\\!\\(svars\\)\\\". \\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", \
+ButtonStyle->\\\"RefGuideLinkText\\\", ButtonFrame->None, \
+ButtonData:>\\\"General::spell1\\\"]\\)\"\>"}]], "Message"],
+
+Cell[BoxData[
+    \({a[1], a[2], a[3], a[4], a[5]}\)], "Output"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Right - hand side of the ODE", "Subsubtitle",
+  CellChangeTimes -> {{3.400351683956031*^9, 3.400351695210476*^9}}],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        We' ll\ compute\ fns\  = \ \(dx\/dt = \ \(Sv \((x)\)\  = \ 
+              S . monomialvec\)\)\ *) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(fns = rS . monomialvec;\)\), "\[IndentingNewLine]", 
+    \(fns // MatrixForm\)}], "Input",
+  CellChangeTimes -> {{3.400272676147732*^9, 3.400272677707345*^9}, \
+{3.400351529612084*^9, 3.400351537969328*^9}}],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", 
+        TagBox[GridBox[{
+              {\(\(-a[1]\)\ a[2]\ k[1] + a[4]\ k[2] + 2\ a[3]\ k[5] - 
+                  2\ a[1]\^2\ k[6]\)},
+              {\(\(-a[1]\)\ a[2]\ k[1] + a[4]\ k[2] - a[2]\ a[3]\ k[3] + 
+                  a[5]\ k[4]\)},
+              {\(\(-a[2]\)\ a[3]\ k[3] + a[5]\ k[4] - a[3]\ k[5] + 
+                  a[1]\^2\ k[6]\)},
+              {\(a[1]\ a[2]\ k[1] - a[4]\ k[2]\)},
+              {\(a[2]\ a[3]\ k[3] - a[5]\ k[4]\)}
+              },
+            RowSpacings->1,
+            ColumnAlignments->{Left}],
+          Column], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox[\( (*\ the\ Jacobian\ of\ fns\ wrt\ Vars\ *) \),
+        FontColor->RGBColor[1, 0, 0]], 
+      "\n", \(jac[Fns_, Vars_] := 
+        Table[D[Fns[\([i]\)], Vars[\([j]\)]], {i, 1, Length[Fns]}, {j, 1, 
+            Length[Vars]}]\)}]], "Input",
+  CellChangeTimes -> {{3.400272415382093*^9, 3.40027241670597*^9}, \
+{3.400272468446807*^9, 3.400272593924067*^9}, {3.400351912324716*^9, \
+3.400351921054516*^9}}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+
+Computations start here\
+\>", "Subtitle"],
+
+Cell["The Jacobian of the RHS of the ODE and their Determinants", \
+"Subsubtitle",
+  CellChangeTimes -> {{3.400351864593326*^9, 3.40035187363796*^9}}],
+
+Cell[BoxData[
+    StyleBox[\( (*\ Computation\ of\ Sv' \((x)\)*) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(\ \ \ \ \)\(\(J = jac[fns, vars];\)\[IndentingNewLine]
+    J // MatrixForm\)\)\)], "Input",
+  CellChangeTimes -> {{3.400272615589665*^9, 3.400272627994375*^9}, \
+{3.400272998870269*^9, 3.4002730030440283`*^9}}],
+
+Cell[BoxData[
+    TagBox[
+      RowBox[{"(", "\[NoBreak]", GridBox[{
+            {\(\(-a[2]\)\ k[1] - 
+                4\ a[1]\ k[6]\), \(\(-a[1]\)\ k[1]\), \(2\ k[5]\), \(k[2]\), 
+              "0"},
+            {\(\(-a[2]\)\ k[1]\), \(\(-a[1]\)\ k[1] - 
+                a[3]\ k[3]\), \(\(-a[2]\)\ k[3]\), \(k[2]\), \(k[4]\)},
+            {\(2\ a[1]\ k[6]\), \(\(-a[3]\)\ k[3]\), \(\(-a[2]\)\ k[3] - 
+                k[5]\), "0", \(k[4]\)},
+            {\(a[2]\ k[1]\), \(a[1]\ k[1]\), "0", \(-k[2]\), "0"},
+            {"0", \(a[3]\ k[3]\), \(a[2]\ k[3]\), "0", \(-k[4]\)}
+            },
+          RowSpacings->1,
+          ColumnSpacings->1,
+          ColumnAlignments->{Left}], "\[NoBreak]", ")"}],
+      Function[ BoxForm`e$, 
+        MatrixForm[ BoxForm`e$]]]], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        Computing\ the\ Craciun - 
+            Feinberg\ Determinant\[IndentingNewLine]\((cfdet)\)\  = \ \(Det \
+\((Sv' \((x)\)\  - \ I)\) = \ Det \((J\  - \ I)\)\)\ \ \ *) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[BoxData[
+    \(\(cfDet[Jac_] := \ 
+        Det[Jac - IdentityMatrix[Length[Jac]]] // Expand;\)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(cf = cfDet[J]\)], "Input"],
+
+Cell[BoxData[
+    \(\(-1\) - a[1]\ k[1] - a[2]\ k[1] - k[2] - a[2]\ k[3] - a[3]\ k[3] - 
+      a[1]\ a[2]\ k[1]\ k[3] - a[2]\^2\ k[1]\ k[3] - a[2]\ a[3]\ k[1]\ k[3] - 
+      a[2]\ k[2]\ k[3] - a[3]\ k[2]\ k[3] - k[4] - a[1]\ k[1]\ k[4] - 
+      a[2]\ k[1]\ k[4] - k[2]\ k[4] - k[5] - a[1]\ k[1]\ k[5] - 
+      a[2]\ k[1]\ k[5] - k[2]\ k[5] - a[3]\ k[3]\ k[5] + 
+      a[2]\ a[3]\ k[1]\ k[3]\ k[5] - a[3]\ k[2]\ k[3]\ k[5] - k[4]\ k[5] - 
+      a[1]\ k[1]\ k[4]\ k[5] - a[2]\ k[1]\ k[4]\ k[5] - k[2]\ k[4]\ k[5] - 
+      4\ a[1]\ k[6] - 4\ a[1]\^2\ k[1]\ k[6] - 4\ a[1]\ k[2]\ k[6] - 
+      4\ a[1]\ a[2]\ k[3]\ k[6] - 4\ a[1]\ a[3]\ k[3]\ k[6] - 
+      2\ a[1]\^2\ a[2]\ k[1]\ k[3]\ k[6] - 4\ a[1]\ a[2]\ k[2]\ k[3]\ k[6] - 
+      4\ a[1]\ a[3]\ k[2]\ k[3]\ k[6] - 4\ a[1]\ k[4]\ k[6] - 
+      4\ a[1]\^2\ k[1]\ k[4]\ k[6] - 4\ a[1]\ k[2]\ k[4]\ k[6]\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        The\ functions\ ' coeffsList'\ and\ ' 
+          coeffs'\ count\ the\ number\ of\ terms\ in\ a\ determinant\ \
+expansion, \ 
+        find\ all\ the\ numerical\ coefficients\ of\ all\ the\ terms\ in\ the\
+\ determinant\ expansion, \ 
+        and\ count\ the\ number\ of\ times\ each\ coefficient\ appears\ in\ \
+the\ expansion\ *) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[BoxData[
+    \(coeffsList[expansion_] := 
+      DeleteCases[\ 
+        Flatten[CoefficientList[expansion, \ Variables[expansion]]], 
+        0]\)], "Input"],
+
+Cell[BoxData[
+    \(coeffs[expansion_] := 
+      Module[{tmp}, 
+        tmp = coeffsList[
+            expansion]; \[IndentingNewLine]Print["\<The number of terms in \
+the det expansion is \>", 
+          Length[tmp], "\<,\>"]; \[IndentingNewLine]Print["\<and (a,b) says \
+that the number of terms with coeff. a is b:\>"]; \[IndentingNewLine]Map[{#, 
+              Count[tmp, #]} &, Union[tmp]]]\)], "Input",
+  CellChangeTimes -> {{3.400352042029539*^9, 3.4003520789669733`*^9}, \
+{3.4003522043041067`*^9, 3.4003522250154963`*^9}, {3.4003522629115562`*^9, \
+3.400352291321508*^9}, {3.400358583115815*^9, 3.4003585998824577`*^9}, \
+{3.400358653380625*^9, 3.400358690449944*^9}, {3.400358813410887*^9, \
+3.400358819208962*^9}, 3.400358856827376*^9}],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        Looking\ at\ the\ coefficients\ of\ the\ Craciun - 
+          Feinberg\ determinant\ \((cfdet)\)\ *) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(coeffs[cf]\)], "Input",
+  CellChangeTimes -> {{3.400358704197009*^9, 3.400358705535829*^9}, \
+{3.4003587404193573`*^9, 3.400358744377282*^9}}],
+
+Cell[BoxData[
+    InterpretationBox[\("The number of terms in the det expansion is "\
+\[InvisibleSpace]37\[InvisibleSpace]","\),
+      SequenceForm[ "The number of terms in the det expansion is ", 37, ","],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    \("and (a,b) says that the number of terms with coeff. a is b:"\)], \
+"Print"],
+
+Cell[BoxData[
+    \({{\(-4\), 10}, {\(-2\), 1}, {\(-1\), 25}, {1, 1}}\)], "Output"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Core Determinant ", "Subtitle"],
+
+Cell["\<\
+ The core determinant   is the determinant of  the Jacobian, \
+fns'(x), restricted to range S.
+It is natural for analyzing chem reactions with no outflows, (see \
+Helton-Klep-Gomez).\
+\>", "Subsubtitle"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox[\( (*\ 
+          To\ compute\ \ the\ Core\ Determinant\ we\ use\ the\ formula\
+\[IndentingNewLine]\ \ \ \ \ \ \((CoreDet)\)\  = \ 
+            lim\+\(t \[Rule] 0\)\ \(1\/t\^\((d - rank \((S)\))\)\) 
+                Det \((Sv' \((x)\) - \ tI)\)\ \ \ \ \ \ \ *) \),
+        FontColor->RGBColor[1, 0, 0]], 
+      StyleBox["\[IndentingNewLine]",
+        FontColor->RGBColor[1, 0, 0]], 
+      "\[IndentingNewLine]", \(coreDet[Jac_, \ Smatrix_]\  := 
+        Module[{d, \ cdet}, 
+          d = \ Length[Jac]\  - \ 
+              mr3[Smatrix]; \[IndentingNewLine]cdet\  = \ \((Det[
+                    Jac - \ t\ IdentityMatrix[Length[Jac]]])\)/t^d // 
+              Expand; \[IndentingNewLine]cdet\  /. t \[Rule] 0]\)}]], "Input"],
+
+Cell[BoxData[
+    RowBox[{\(General::"spell1"\), \(\(:\)\(\ \)\), "\<\"Possible spelling \
+error: new symbol name \\\"\\!\\(cdet\\)\\\" is similar to existing symbol \\\
+\"\\!\\(cfdet\\)\\\". \\!\\(\\*ButtonBox[\\\"More\[Ellipsis]\\\", \
+ButtonStyle->\\\"RefGuideLinkText\\\", ButtonFrame->None, \
+ButtonData:>\\\"General::spell1\\\"]\\)\"\>"}]], "Message"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(core\  = \ coreDet[J, \ rS]\)], "Input"],
+
+Cell[BoxData[
+    \(a[2]\ a[3]\ k[1]\ k[3]\ k[5] - a[3]\ k[2]\ k[3]\ k[5] - 
+      a[1]\ k[1]\ k[4]\ k[5] - a[2]\ k[1]\ k[4]\ k[5] - k[2]\ k[4]\ k[5] - 
+      2\ a[1]\^2\ a[2]\ k[1]\ k[3]\ k[6] - 4\ a[1]\ a[2]\ k[2]\ k[3]\ k[6] - 
+      4\ a[1]\ a[3]\ k[2]\ k[3]\ k[6] - 4\ a[1]\^2\ k[1]\ k[4]\ k[6] - 
+      4\ a[1]\ k[2]\ k[4]\ k[6]\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    StyleBox[\( (*\ 
+        looking\ at\ the\ coefficients\ of\ the\ Core\ Determinant\ expansion\
+\ *) \),
+      FontColor->RGBColor[1, 0, 0]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(coeffs[core]\)], "Input"],
+
+Cell[BoxData[
+    InterpretationBox[\("The number of terms in the det expansion is "\
+\[InvisibleSpace]10\[InvisibleSpace]","\),
+      SequenceForm[ "The number of terms in the det expansion is ", 10, ","],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    \("and (a,b) says that the number of terms with coeff. a is b:"\)], \
+"Print"],
+
+Cell[BoxData[
+    \({{\(-4\), 4}, {\(-2\), 1}, {\(-1\), 4}, {1, 1}}\)], "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+FrontEndVersion->"5.2 for Macintosh",
+ScreenRectangle->{{0, 1280}, {0, 956}},
+WindowToolbars->"EditBar",
+WindowSize->{1016, 651},
+WindowMargins->{{41, Automatic}, {Automatic, 1}},
+PrintingCopies->1,
+PrintingPageRange->{Automatic, Automatic},
+DockedCells -> FEPrivate`FrontEndResource[ "FEExpressions", \
+"CompatibilityToolbar"],
+Magnification->1.5,
+StyleDefinitions -> "Default.nb"
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1776, 53, 93, 2, 276, "Title"],
+Cell[1872, 57, 4279, 112, 293, "Subsubtitle"],
+Cell[6154, 171, 36, 3, 75, "Subsubtitle"],
+
+Cell[CellGroupData[{
+Cell[6215, 178, 120, 1, 71, "Subtitle"],
+Cell[6338, 181, 60, 0, 45, "Subsubtitle"],
+
+Cell[CellGroupData[{
+Cell[6423, 185, 230, 4, 62, "Input"],
+Cell[6656, 191, 123, 2, 40, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[6816, 198, 86, 2, 62, "Input"],
+Cell[6905, 202, 430, 13, 147, "Output"]
+}, Open  ]],
+Cell[7350, 218, 619, 10, 200, "Input"],
+
+Cell[CellGroupData[{
+Cell[7994, 232, 434, 9, 131, "Input"],
+Cell[8431, 243, 35, 1, 40, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[8503, 249, 137, 4, 105, "Subsubtitle"],
+Cell[8643, 255, 4188, 114, 265, "Input"],
+
+Cell[CellGroupData[{
+Cell[12856, 373, 680, 13, 223, "Input"],
+Cell[13539, 388, 360, 5, 49, "Message"]
+}, Open  ]],
+Cell[13914, 396, 790, 12, 177, "Input"],
+Cell[14707, 410, 599, 12, 177, "Input"],
+Cell[15309, 424, 570, 11, 154, "Input"],
+
+Cell[CellGroupData[{
+Cell[15904, 439, 573, 11, 200, "Input"],
+Cell[16480, 452, 368, 6, 49, "Message"],
+Cell[16851, 460, 356, 5, 49, "Message"]
+}, Open  ]],
+Cell[17222, 468, 749, 13, 200, "Input"],
+Cell[17974, 483, 93, 1, 39, "Input"],
+Cell[18070, 486, 329, 6, 85, "Input"],
+Cell[18402, 494, 219, 4, 62, "Input"],
+
+Cell[CellGroupData[{
+Cell[18646, 502, 55, 1, 39, "Input"],
+Cell[18704, 505, 192, 3, 64, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[18933, 513, 99, 2, 39, "Input"],
+Cell[19035, 517, 489, 15, 175, "Output"]
+}, Open  ]],
+Cell[19539, 535, 237, 4, 39, "Input"],
+
+Cell[CellGroupData[{
+Cell[19801, 543, 157, 3, 39, "Input"],
+Cell[19961, 548, 357, 5, 49, "Message"],
+Cell[20321, 555, 64, 1, 40, "Output"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[20434, 562, 120, 1, 45, "Subsubtitle"],
+Cell[20557, 565, 191, 4, 52, "Input"],
+
+Cell[CellGroupData[{
+Cell[20773, 573, 230, 4, 62, "Input"],
+Cell[21006, 579, 705, 17, 157, "Output"]
+}, Open  ]],
+Cell[21726, 599, 446, 9, 85, "Input"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[22221, 614, 52, 3, 109, "Subtitle"],
+Cell[22276, 619, 150, 2, 45, "Subsubtitle"],
+Cell[22429, 623, 115, 2, 39, "Input"],
+
+Cell[CellGroupData[{
+Cell[22569, 629, 234, 4, 62, "Input"],
+Cell[22806, 635, 777, 17, 147, "Output"]
+}, Open  ]],
+Cell[23598, 655, 258, 5, 62, "Input"],
+Cell[23859, 662, 112, 2, 39, "Input"],
+
+Cell[CellGroupData[{
+Cell[23996, 668, 46, 1, 39, "Input"],
+Cell[24045, 671, 864, 12, 212, "Output"]
+}, Open  ]],
+Cell[24924, 686, 423, 9, 131, "Input"],
+Cell[25350, 697, 161, 4, 62, "Input"],
+Cell[25514, 703, 746, 13, 108, "Input"],
+Cell[26263, 718, 194, 4, 39, "Input"],
+
+Cell[CellGroupData[{
+Cell[26482, 726, 162, 3, 39, "Input"],
+Cell[26647, 731, 240, 4, 34, "Print"],
+Cell[26890, 737, 96, 2, 34, "Print"],
+Cell[26989, 741, 83, 1, 40, "Output"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[27121, 748, 41, 0, 71, "Subtitle"],
+Cell[27165, 750, 213, 5, 105, "Subsubtitle"],
+
+Cell[CellGroupData[{
+Cell[27403, 759, 767, 15, 192, "Input"],
+Cell[28173, 776, 357, 5, 49, "Message"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[28567, 786, 60, 1, 39, "Input"],
+Cell[28630, 789, 348, 5, 114, "Output"]
+}, Open  ]],
+Cell[28993, 797, 169, 4, 39, "Input"],
+
+Cell[CellGroupData[{
+Cell[29187, 805, 45, 1, 39, "Input"],
+Cell[29235, 808, 240, 4, 34, "Print"],
+Cell[29478, 814, 96, 2, 34, "Print"],
+Cell[29577, 818, 81, 1, 40, "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+

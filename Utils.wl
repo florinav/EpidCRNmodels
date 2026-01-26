@@ -13,8 +13,7 @@ t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
 }, {1}]&;*)
 
 
-reCL[re_] :=DeleteCases[re, _Symbol > 0 | Subscript[_, __] > 0, Infinity];
-
+(*reCL[re_] :=DeleteCases[re, _Symbol > 0 | Subscript[_, __] > 0, Infinity];*)
 remZ[li_]:=Select[li, # =!= 0 &];
 
 remN[expr_] := Module[{withZeros},
@@ -26,7 +25,7 @@ remN[expr_] := Module[{withZeros},
   If[ListQ[withZeros], remZ[withZeros], withZeros]
 ];
 
-redTout[con_, var_:{}, time_:300] := TimeConstrained[Reduce[con, var], time, "timeOut"];
+redTim[con_, var_:{}, time_:300] := TimeConstrained[Reduce[con, var], time, "timeOut"];
 
 whenP=Function[exprs,
   Module[{params,reducedConditions},
@@ -61,16 +60,6 @@ GetVec[mat_] := Module[{vals, vecs},
 Deg[poly_, var_] := Exponent[poly, var];
 (* Deg[x^3 + 2 x^2 + 1, x] *)
 
-Stab[mat_] := Eigenvalues[mat];
-(* Stab[{{0, 1}, {-2, 0}}] *)
-
-(*
-BadModule[] := Module[{mat = {{x + y, x - y}, {x, y}}},
-  mat[[3]]
-];
-(* BadModule[] *)
-*)
-
 Grobpol[RHS_, var_, par_, ind_, cn_ : {}] := Module[{dyn, X, eq, elim, pol, ratsub},
   dyn = RHS;
   X = var;
@@ -89,7 +78,3 @@ onlyP[-a]
 onlyP[a - b]
 onlyP[0]
 *)
-
-
-
-

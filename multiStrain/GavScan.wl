@@ -232,5 +232,3 @@ re=FullSimplify[Reduce[Join[cp,c12]],cp]
 ?EpidCRN`*
 
 
-
-

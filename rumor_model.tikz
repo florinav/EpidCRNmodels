@@ -1,0 +1,65 @@
+\documentclass[tikz,border=3mm]{standalone}
+\usetikzlibrary{positioning,arrows.meta,calc}
+
+\begin{document}
+\begin{tikzpicture}[
+    scale=1.0, % Change this to scale the entire diagram
+    node distance=2cm and 2.5cm,
+    state/.style={circle, draw, minimum size=1cm, font=\Large},
+    compartment/.style={rectangle, draw, minimum width=1.2cm, minimum height=0.8cm, font=\large},
+    arrow/.style={-Stealth, thick},
+    label/.style={font=\small, align=center}
+]
+
+% Main horizontal flow: x1 -> x2
+\node[state] (x1) {$x_1$};
+\node[state, right=of x1] (x2) {$x_2$};
+
+% Upper branch: S1 -> B1
+\node[compartment, above right=1.5cm and 1.5cm of x2] (S1) {$S_1$};
+\node[compartment, right=of S1] (B1) {$B_1$};
+
+% Lower branch: S2 -> B2
+\node[compartment, below right=1.5cm and 1.5cm of x2] (S2) {$S_2$};
+\node[compartment, right=of S2] (B2) {$B_2$};
+
+% R node to the right of B nodes
+\node[compartment, right=2cm of $(B1)!0.5!(B2)$] (R) {$R$};
+
+% x3 to the right of R, continuing the flow
+\node[state, right=of R] (x3) {$x_3$};
+
+% Influx to x1
+\node[left=0.8cm of x1] (source) {};
+\draw[arrow] (source) -- node[above, label] {$\phi(x_1)$} (x1);
+
+% x1 -> x2: platform adoption
+\draw[arrow] (x1) -- node[above, label] {$\alpha x_1 x_2$} (x2);
+
+% x2 -> S1: rumor 1 creation
+\draw[arrow] (x2) -- node[above left, label] {$\frac{\beta_1 B_1 x_2}{B_1\epsilon_1+\alpha_1 x_2+1}$} (S1);
+
+% x2 -> S2: rumor 2 creation
+\draw[arrow] (x2) -- node[below left, label] {$\frac{\beta_2 B_2 x_2}{B_2\epsilon_2+\alpha_2 x_2+1}$} (S2);
+
+% S1 -> B1: rumor 1 conversion
+\draw[arrow] (S1) -- node[above, label] {$\gamma_1 S_1$} (B1);
+
+% S2 -> B2: rumor 2 conversion
+\draw[arrow] (S2) -- node[above, label] {$\gamma_2 S_2$} (B2);
+
+% B1 -> R: rumor 1 get skeptic
+\draw[arrow] (B1) -- node[above right, label] {$\mu_1 B_1$} (R);
+
+% B2 -> R: rumor 2 get skeptic
+\draw[arrow] (B2) -- node[below right, label] {$\mu_2 B_2$} (R);
+
+% R -> x3: skeptics disconnect
+\draw[arrow] (R) -- node[above, label] {$\omega R$} (x3);
+
+% x2 -> x3: platform abandonment (going above, bending through point above S1)
+% To lift higher if it crosses: increase bend left value (try 45, 50, etc.)
+\draw[arrow] (x2) to[bend left=35] node[above, label, pos=0.5] {$\eta x_2 x_3$} (x3);
+
+\end{tikzpicture}
+\end{document}
