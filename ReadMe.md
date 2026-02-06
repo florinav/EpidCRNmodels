@@ -1,5 +1,7 @@
 # EpidCRN Package - ReadMe
 
+## Important: rts = full rates (monomials * constants), cts (constants alone) basically never used
+
 ## Standard Notebook Startup (for RN-input notebooks)
 
 ```mathematica
@@ -469,6 +471,12 @@ chk[RHS];  (* Warns if any variables conflict with reserved names *)
 ```
 
 **Function Signatures**: All package functions MUST use reserved names in their input/output signatures (e.g., return `V` not `VV`). Internal implementations may use alternative names (e.g., `VV` internally) but must map back to reserved names before returning.
+
+---
+
+## Future Plans
+
+**Python Port**: Core.wl (containing the fundamental CRN functions: ODE2RN, extMat, minSiph, NGM, etc.) is planned to be implemented in Python. The Mathematica version serves as the reference implementation.
 
 ---
 

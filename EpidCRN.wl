@@ -5,23 +5,30 @@ BeginPackage["EpidCRN`"];
 (* Global variables *)
 Global`ome;
 
-(*epi funtions*)
+(*Core funtions*)
+cSo::usage = "cSo[RHS,var] solves RHS==0, classifies solutions by algebraic degree";
+cSol::usage = "cSol[RHS,var] or cSol[RHS,var,prF] solves RHS==0, classifies solutions; with prF applies pretty printing";
+(*chkSol;*)
 minSiph::usage = "minSiph[var, reactions, RHS] 
 finds minimal siphons. RHS optional (default Null). 
 Returns {mSi, cDFE, E0, nonm} if RHS given, or {mSi, nonm} if RHS=Null";
-extMat::usage = "{spe, al, be, gamma, Rv, RHS, def} = extMat[reactions] 
-Returns species list, alpha matrix (reactants), beta matrix (products), 
-gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs, 
+extMat::usage = "{spe, al, be, gamma, Rv, RHS, def} = extMat[reactions]
+Returns species list, alpha matrix (reactants), beta matrix (products),
+gamma matrix (net stoichiometric), reaction rate vector, RHS of mass action ODEs,
 and deficiency as {formula, terms, result}.";
-NGM::usage = "NGM[mod, infVars, F] computes Next Generation Matrix. 
-mod={RHS,var,par}. If F provided, validates Inverse[V] all positive under par>0. 
-If not or invalid, uses posM. Returns {Jx,F,V,K,Jy,Jxy,Jyx,Kd}.";
+NGM::usage = "NGM[mod, infVars, F] computes Next Generation Matrix.
+mod={RHS,var,par}. If F provided, validates Inverse[V] all positive under par>0.
+If not or invalid, uses posM. Returns {Jx,F,V,K,Jy,Jxy,fx,Kd} where fx=RHS[[inf]]/.{infVars->0}.";
 staPP::usage = "{lSta,qSta,hDeg,lFac,qFac}=staPP[pol,par]
 analyzes polynomial stability by factoring. Automatically assumes par>0.
 Linear factors (au+b): requires b>0. Quadratic factors (au^2+bu+c): requires b>0 && c>0 (Routh-Hurwitz).
 Returns lSta, qSta as logical expressions (simplified using par>0), hDeg as list of higher-degree factors (deg>=3),
 lFac as list of linear factors, qFac as list of quadratic factors.";
-Hur3::usage="ine=Hur3[pol,var] computes Routh-Hurwitz stability for degree-3 polynomial in variable var. Assumes leading coefficient positive. Returns ine (list of 3 stability inequalities).";
+Hur3::usage="ine=Hur3[pol,var] computes Routh-Hurwitz stability for degree-3 polynomial
+ in variable var. Assumes leading coefficient positive.
+Returns ine (list of 3 stability inequalities).";
+Hur4::usage="ine=Hur4[pol,var] computes Routh-Hurwitz stability for degree-4 polynomial in variable var. Returns ine (list of 4 stability inequalities).";
+Hur4M::usage="{co,h4,ine}=Hur4M[mat] computes Hurwitz determinant for 4x4 matrix. Returns coefficients co, determinant h4, inequalities ine.";
 cons::usage="cons[gam] finds positive conservation laws from gamma matrix. Returns list of positive left nullspace vectors w such that w.gam=0.";
 ODE2RN::usage="{RN,rts,spe,alp,bet,gam}=ODE2RN[RHS,var] converts ODE system to reaction network. RHS is list of expressions, var is list of variables. Returns reaction network RN, rates vector rts, species list spe, reactant matrix alp (alpha), product matrix bet (beta), and net stoichiometric matrix gam (gamma). Algorithm: identifies monomials, uses negative terms to define rates, constructs stoichiometric matrices where sources use alpha=0, then beta=gamma+alpha. Inverse operation to extMat";
 ODE2RNp::usage="{RN,rts,spe,alp,bet,gam,rnRed}=ODE2RNp[RHS,var,prF] 
@@ -30,8 +37,6 @@ Separates numerators/denominators, analyzes polynomial model, returns
 true rates multiplied by 1/denominators. Prints also rnRed, a version of RN where common factors 
 appearing
 both in alp and bet are printed above the transition arrow";
-
-(* Core functions *)
 
 compToAsso::usage = "(Core1)compToAsso[side] parses a reaction side (left or right) and returns an association of species names to stoichiometric coefficients. Example: compToAsso[k*\"i\" + 2*\"s\"] returns <|\"i\"->k, \"s\"->2|>";
 extSpe::usage = "(Core1)extSpe[reactions] extracts all species names from a reaction network. Returns a list of unique species strings.";
@@ -78,13 +83,16 @@ two boundary points, and one coexistence equilibrium).";
 invN2::usage = "(Boundary1)invNr[E1t,E2t,R0A,E0,par,cp,in1,in2,fval,ins] computes invasion numbers 
 and persistence conditions for two-strain models. Takes lists of boundary equilibria E1t, E2t, basic reproduction numbers R0A, disease-free equilibrium E0, parameters par with constraints cp, solution indices in1,in2 to select specific equilibria, optional parameter values fval and indices ins for parameter fixing. Returns {E1,E2,R12,R21,coP} where E1,E2 are selected equilibria, R12,R21 are invasion numbers, 
 and coP are parameter conditions ensuring both invasion numbers >1 for coexistence.";
-invN::usage = "invN[E1t, E2t, R0A, E0, par, cp, in1, in2, fval, ins] computes invasion numbers and persistence conditions for multi-strain epidemic models. E1t and E2t are lists of boundary fixed points for strains 1 and 2. R0A contains basic reproduction numbers. E0 is the disease-free equilibrium. par and cp are model parameters and constraints. in1 and in2 are indices selecting equilibria from E1t and E2t (use -1 for irrational equilibria). Optional: fval gives values for fixed parameters, ins specifies which parameters to fix. Returns {E1, E2, R12, R21, coP} where R12, R21 are invasion numbers and coP contains coexistence parameter values. For irrational equilibria, returns 'nonRat' 
+invN::usage = "invN[E1t, E2t, R0A, E0, par, cp, in1, in2, fval, ins] computes invasion numbers and persistence conditions for multi-strain Coredemic models. E1t and E2t are lists of boundary fixed points for strains 1 and 2. R0A contains basic reproduction numbers. E0 is the disease-free equilibrium. par and cp are model parameters and constraints. in1 and in2 are indices selecting equilibria from E1t and E2t (use -1 for irrational equilibria). Optional: fval gives values for fixed parameters, ins specifies which parameters to fix. Returns {E1, E2, R12, R21, coP} where R12, R21 are invasion numbers and coP contains coexistence parameter values. For irrational equilibria, returns 'nonRat' 
 for the equilibrium and invasion number, 'unknown' for coP.";bdCo::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, infVars, ElTRat}=bdCo[RN,rts,var] boundary analysis for two strains with nondisjoint minSiph. Pass var from ODE2RN to preserve variable order. Returns RHS, var, par, cp, mSi, Jx, Jy, cDFE (DFE conditions), E0 (DFE), K (NGM), R0A (reproduction numbers), infVars (infection variable symbols labeling K rows/columns), ElTRat (boundary equilibrium solutions for each siphon).";
 bdCom::usage="(Boundary){RHS, var, par, cp, mSi, Jx, Jy, cDFE, E0, K, R0A, Esys, EA}=bdCom[RN,rts,var] boundary analysis using bdFp. Uses complementarity principle: for siphon constraints, non-siphon variables are positive so equations can be divided by them, reducing polynomial degree (e.g., degree 2 instead of 4). Esys contains unsolved systems (each {equations, variables}), EA contains rational boundary equilibrium solutions.";
-NGMRN::usage="(epi){RHS, var, par, cp, mSi, Jx, Jy, cDFE, cE0, F, V, K, R0A, infV}=
-NGMRN[RN,rts,var]  Pass var and gam from ODE2RN to preserve variable order. 
-{RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; 
- infV are infection variable symbols corresponding to rows/columns of K), ngm (full NGM output).";
+NGMRN::usage="(Core){RHS, var, par, cp, mSi, Jx, Jy, Jxy, fx, cDFE, cE0, F, V, K, R0A, infV}=
+NGMRN[RN,rts,var]  Pass var and gam from ODE2RN to preserve variable order.
+{RN,rts,spe,alp,bet,gam}=ODE2RN[RHS1,var]; fx=RHS[[inf]]/.{infVars->0} (inf flow on siphon).
+ infV are infection variable symbols corresponding to rows/columns of K).";
+comp2Asso1::usage="(Cl)comp2Asso1[expr] parses complex expression with parametric coefficients. Handles arbitrary Times like be*et*\"Vd\".";
+extMat1::usage="(Cl)extMat1[RN,var] like extMat but uses comp2Asso1 for parametric stoichiometry.";
+NGMRN1::usage="(Cl)NGMRN1[RN,rts,var] like NGMRN but uses extMat1 for parametric stoichiometry.";
 bdAnC::usage="(Boundary){RHS,var,par,cp,mSi,Jx,Jy,cDFE,E0,K,R0A,infVars,ngm}=bdAnC[RN,rts,var] 
 boundary analysis for closed systems (N conserved). Checks if Sum[RHS]==0. If yes, assumes N=1 and eliminates first variable using conservation law, then applies bdAn to reduced system. Returns same outputs as bdAn but for reduced system.";
 bdFp::usage = "bdFp[RHS, var, mSi] computes boundary equilibria on siphon facets. RHS is the ODE right-hand side, var is the list of variables, mSi is the list of minimal siphons (strings). For each siphon, sets siphon variables to 0, solves the system, and filters using onlyNN to remove DFE and negative solutions. Returns list where bdFp[[j]] is either positive solutions (list of rule lists) or {equations, variables} if no positive solutions exist. Typically bdFp[[j,1]] is the biologically relevant endemic equilibrium.";
@@ -96,6 +104,7 @@ slvAll::usage="(Equilibria)slvAll[eqs,vars,sipRules,dfe] iteratively solves all 
 clsEqb::usage="(Equilibria)clsEqb[RHS,var,mSi,E0] classifies equilibria per siphon facet. Returns list of {siphon, nRat, nRur, {ratSols, rurSols}} for each siphon (excluding cDFE). nRat includes DFE, nRur counts equations not solutions. If Sp/Time limit reached, returns \"limit\". DFE filtered from stored solutions.";
 clsEq::usage="(Equilibria)clsEq[RHS,var,mSi,E0,prF,tim,keepVar] first runs clsEqb to print all siphon results, then finds endemic equilibrium using unrestricted Solve with timeout tim. If timeout, attempts RUR approach. keepVar (optional) is variable to keep for RUR extraction (default: first var not in any siphon). Prints nSol with Short solutions if successful, nRUR with RUR polynomials if RUR used, or TIME-OUT if both timeout. Filters out DFE and siphon-zero equilibria. Returns list of solutions.";
 clsEq1::usage="(Equilibria)clsEq1[RHS,var,mSi,E0,prF,tim,keepVar] same as clsEq. keepVar (optional) allows user to suggest which variable to keep for RUR polynomial extraction.";
+clsEqR::usage="(Equilibria)clsEqR[RHS,var,mSi,E0,prF,tim,S1,S2] restricted clsEq excluding siphons overlapping S1 or S2. S1,S2 are siphons from mSi (e.g. {v1,y1}). S2 optional.";
 
 (* Bifurcation analysis functions *)
 fpHopf::usage="(Bifurcation)fpHopf[RHS,var,par,p0val] finds positive fixed points and analyzes for Hopf bifurcations. Returns {posSols,complexEigs,angle,eigs} where angle is ArcTan[Re/Im]*180/Pi of complex eigenvalues";
@@ -111,7 +120,7 @@ Bifp::usage="(Bifurcation)Bifp[RHS,var,par] performs bifurcation point analysis"
 mSim::usage="(Bifurcation)mSim[RHS,var,par,p0val,opts] performs multiple simulations 
 for bifurcation analysis";
 scan::usage = "(Bifurcation)scan[RHS,var,par,coP,plotInd,mSi,mode,steTol,staTol,choTol,
-R01,R02,R12,R21] performs  parameter space scanning for multi-strain epidemic models 
+R01,R02,R12,R21] performs  parameter space scanning for multi-strain Coredemic models 
 with siphon-aware analysis. Takes ODE system RHS, variables var, parameters par, 
 constraints coP (as rules), plot parameter indices plotInd, minimal siphons mSi for 
 invasion analysis, scanning mode, step tolerance steTol for numerical integration, 
@@ -122,7 +131,7 @@ for strain interaction analysis. Returns {fPl,unC,res} where fPl is final plot w
 equilibrium classification, unC contains uncategorized points requiring further analysis, 
 res is raw scanning results with detailed siphon and invasion number computations. 
 Designed for models where minimal siphons and invasion dynamics are central to the analysis. 
-Uses specialized tolerance controls for multi-scale epidemic dynamics.";
+Uses specialized tolerance controls for multi-scale Coredemic dynamics.";
 
 scanPar::usage = "(Bifurcation)scanPar[RHS,var,par,p0val,plotInd,gridRes,plot,hTol,delta,
 wRan,hRan,R01,R02,R21,R12] performs comprehensive parameter space scanning with 
@@ -130,7 +139,7 @@ flexible grid resolution and range controls. Takes ODE system RHS, variables var
 parameters par, reference parameter values p0val (as list), plot parameter indices plotInd,
  grid resolution gridRes (or Automatic for range mode), base plot to overlay on, 
 Hopf tolerance hTol for bifurcation detection, step size delta for range mode, width range wRan and height range hRan as fractions of reference values. Reproduction numbers R01,R02 for individual strains and invasion numbers R21,R12 (note reversed order from scan). Returns {finalPlot,errors,res} where finalPlot is publication-ready plot with color-coded equilibrium types and counts, errors contains diagnostic information, res is scanning results with equilibrium stability classification. Supports both grid mode (fixed NxN resolution) and range mode (adaptive stepping). Optimized for general dynamical systems analysis with automatic equilibrium detection and stability analysis via eigenvalue computation. Does not require siphon analysis, 
-making it suitable for broader classes of models beyond epidemic systems.";
+making it suitable for broader classes of models beyond Coredemic systems.";
 
 (* Siphon and persistence functions *)
 isSiph::usage="(Siphons)isSiph[species,reactions,siphon] checks if a given set forms a siphon in the reaction network";
@@ -256,7 +265,7 @@ Get[FileNameJoin[{root, "Visualize.wl"}]];
 Get[FileNameJoin[{root, "Extra.wl"}]];
 (*Get[FileNameJoin[{root, "bdCom.wl"}]];*)
 Get[FileNameJoin[{root, "Cl.wl"}]];  (* Experimental versions for testing *)
-Get[FileNameJoin[{root, "epi.wl"}]];  (* ODE2RN, extMat with rnRed,... *)
+Get[FileNameJoin[{root, "Core.wl"}]];  (* ODE2RN, extMat with rnRed,... *)
 (*
 
 *)

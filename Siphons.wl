@@ -407,17 +407,23 @@ persistenceReport[RN_] :=
 
 
 
-cons[gamma_, {}] := 
-  Module[{leftKernel, positiveConservationLaws, nullSpace, dims}, 
-   dims = Dimensions[gamma];
-   nullSpace = Quiet[NullSpace[Transpose[gamma]]];
-   
-   If[nullSpace === {} || nullSpace === $Failed, {}, 
-    positiveConservationLaws = Select[nullSpace, AllTrue[#, # >= 0 &] && AnyTrue[#, # > 0 &] &];
-    If[Length[positiveConservationLaws] == 0, 
-     positiveConservationLaws = Select[nullSpace, AllTrue[-#, # >= 0 &] && AnyTrue[-#, # > 0 &] &];
-     positiveConservationLaws = -# & /@ positiveConservationLaws;];
-    positiveConservationLaws]];
+(* cons moved to Core.wl *)
+
+(* ========================================================================= *)
+(* INVARIANT FACET CHECK *)
+(* ========================================================================= *)
+(* Mathematical condition for facet F = {x : x_i = 0 for i in I} to be forward invariant:
+   For each i in I: f_i(x)|_{F} >= 0, i.e., flow can't exit positive orthant.
+
+   WHY THIS WORKS WITHOUT EXPLICIT RATE VALUES:
+   reaToRHS creates symbolic rates k1, k2, ... (all assumed > 0).
+   For mass action kinetics: rate_j = k_j * (product of substrates)
+   On facet F (where facet vars = 0):
+   - Reactions CONSUMING a facet var have rate = 0 (substrate = 0)
+   - Reactions PRODUCING a facet var contribute k_j * (positive stuff) >= 0
+   Thus invariance depends ONLY on stoichiometric structure, not rate values!
+   The check f_i <= 0 succeeds because only non-negative production terms survive. *)
+(* ========================================================================= *)
 
 isInvariantFacet[facetSet_, reactions_] := 
   Module[{vf, vars, facetIndices, facetRules, isInvariant, derivative, varSymbols}, 
@@ -444,7 +450,8 @@ invFace[reactions_, maxCodim_:10] :=
    
    Do[subsets = Subsets[species, {k}];
     Do[candidateSet = subsets[[i]];
-     If[isInvariantFacet[candidateSet, reactions], AppendTo[invariantFacets, candidateSet]];, {i, Length[subsets]}];, {k, 1, Min[maxCodim, n]}];
+     If[isInvariantFacet[candidateSet, reactions], AppendTo[invariantFacets, candidateSet]];, 
+     {i, Length[subsets]}];, {k, 1, Min[maxCodim, n]}];
    invariantFacets];
 
 

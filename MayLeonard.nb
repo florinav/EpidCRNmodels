@@ -9,6 +9,11 @@
 (* ========================================================================== *)
 
 ClearAll["Global`*"];
+SetDirectory[NotebookDirectory[]];
+SetOptions[$FrontEndSession,NotebookAutoSave->True];
+NotebookSave[];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+<<EpidCRN`;
 
 (* General May-Leonard ODE system from tex:
    dot{x}_1 = x_1(1 - x_1 - al*x_2 - be*x_3)
@@ -17,8 +22,46 @@ ClearAll["Global`*"];
 
    For al < 1 < be, boundary equilibria form heteroclinic cycle causing persistence failure *)
 
-Print["========== SYMBOLIC MAY-LEONARD MODEL =========="];
-Print["ODE: x1'=x1*(1-x1-al*x2-be*x3), x2'=x2*(1-be*x1-x2-al*x3), x3'=x3*(1-al*x1-be*x2-x3)"];
+prF[ex_] := ex /. {al -> \[Alpha], be -> \[Beta], la -> \[Lambda], mu -> \[Mu]};
+
+RN = {
+  0 -> "s",
+  "s" -> 0,
+
+  "x1" -> 2*"x1",
+  2*"x1" -> "x1",
+  "x1" + "x2" -> "x2",
+  "x1" + "x3" -> "x3",
+
+  "x2" -> 2*"x2",
+  2*"x2" -> "x2",
+  "x2" + "x3" -> "x3",
+  "x2" + "x1" -> "x1",
+
+  "x3" -> 2*"x3",
+  2*"x3" -> "x3",
+  "x3" + "x1" -> "x1",
+  "x3" + "x2" -> "x2"
+};
+
+rts = {
+  la, mu,
+
+  1, 1, al, be,
+  1, 1, al, be,
+  1, 1, al, be
+};
+
+var = {s, x1, x2, x3};
+
+Print["Reactions and transitions:"];
+Print[Transpose[{RN, rts}] //prF// MatrixForm];
+{RHS,  par, cp, mSi, Jx, Jy,Jxy, fx, cDFE, cE0, F, V, K, R0A, sipars} = NGMRN[RN, rts, var];
+Print["RN has ", Length[RN], " reactions,  mSi=", mSi," cE0=", cE0," K=",Jx//MatrixForm];
+V//MatrixForm
+V//MatrixRank
+
+
 
 (* ========================================================================== *)
 (* BOUNDARY EQUILIBRIA AND STABILITY ANALYSIS *)
@@ -51,43 +94,16 @@ Print["Condition: al<1<be => E1->E2->E3->E1 heteroclinic cycle => PERSISTENCE FA
 (* PART 2: NUMERICAL CASE (al=0.8, be=1.2) AND CRN REPRESENTATION *)
 (* ========================================================================== *)
 
+
+
 Print["\n========== NUMERICAL CASE: al=0.8, be=1.2 =========="];
 
-SetDirectory[NotebookDirectory[]];
-AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
-<<EpidCRN`;
+
 
 al = 0.8;
 be = 1.2;
 Print["al=", al, " be=", be, " satisfies al<1<be"];
 
-(* ========================================================================== *)
-(* REACTION NETWORK *)
-(* ========================================================================== *)
-(* Each species i: birth (x_i -> 2x_i), death by crowding (2x_i -> x_i), *)
-(* competitive interactions with other species *)
-
-RN = {
-  "x1" -> 2*"x1",         (* x1 birth *)
-  "x1" + "x1" -> "x1",    (* x1 self-limitation *)
-  "x1" + "x2" -> "x2",    (* x2 outcompetes x1 *)
-  "x1" + "x3" -> "x3",    (* x3 outcompetes x1 *)
-  "x2" -> 2*"x2",         (* x2 birth *)
-  "x2" + "x2" -> "x2",    (* x2 self-limitation *)
-  "x2" + "x3" -> "x3",    (* x3 outcompetes x2 *)
-  "x2" + "x1" -> "x1",    (* x1 outcompetes x2 *)
-  "x3" -> 2*"x3",         (* x3 birth *)
-  "x3" + "x3" -> "x3",    (* x3 self-limitation *)
-  "x3" + "x1" -> "x1",    (* x1 outcompetes x3 *)
-  "x3" + "x2" -> "x2"     (* x2 outcompetes x3 *)
-};
-
-(* Reaction rates (mass-action kinetics) *)
-rts = {x1, x1*x1, al*x1*x2, be*x1*x3, x2, x2*x2, al*x2*x3, be*x2*x1,
-   x3, x3*x3, al*x3*x1, be*x3*x2};
-
-Print["Reactions and transitions:"];
-Print[Transpose[{RN, rts}] // MatrixForm];
 
 (* ========================================================================== *)
 (* CRN ANALYSIS *)
@@ -107,6 +123,8 @@ Print["\nNext Generation Matrix K at DFE:"];
 Print[K // MatrixForm];
 (* NOTE: K is zero matrix because F1=0 at DFE (all populations extinct) *)
 (* Standard NGM theory doesn't apply here - need different approach *)
+
+
 
 (* ========================================================================== *)
 (* ODE SIMULATION *)
@@ -221,6 +239,7 @@ Print["1. Fig 1: Linear in log scale => exponential approach to boundary"];
 Print["2. Fig 2: Each species dominates cyclically (rock-paper-scissors)"];
 Print["3. Fig 3: Trajectory spirals outward, approaching edges but not corners"];
 Print["This is a HETEROCLINIC CYCLE connecting saddle points on simplex faces"];
+
 
 
 
