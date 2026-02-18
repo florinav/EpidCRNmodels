@@ -132,9 +132,12 @@
 \makeatother
 % PRINT COMMAND
 \newcommand{\printboth}{%
-  \glsaddall  % Add all entries to glossary
-  \printglossary[style=unifiedstyle, title={Definitions, Theorems, Examples and  Problems}]%
+  \clearpage  % Optional: start on new page
+  \printglossary[style=unifiedstyle, title={0 \hspace{.22em} Definitions, Theorems, Examples and Open Problems}]]%
 }
+
+
+
 
 %% ========================================
 %% Other THEOREM ENVIRONMENTS
@@ -212,10 +215,10 @@
 
 
 %% ========================================
-%% GREEK LETTERS (2+ character abbreviations)
+%% GREEK LETTERS (2+ character abbreviations) greek
 %% ========================================
 \def\al{\alpha}\def\ba{\bff \alpha}
-\def\bbe{B}
+\def\w{\omega}\def\Lgn{\ga+\mu+\de}
 \def\de{\delta}\def\De{\Delta}\def\bde{\bff \delta}
 \def\ep{\epsilon}\def\eps{\varepsilon}
 \def\f{\varphi}  % Kept as requested
@@ -256,7 +259,7 @@
 \def\v1{\vec {\bff 1}}
 \def\vn{\vec \de}
 \def\vz{\vec 0}
-\def\vi{\overset{\rightarrow}{\mathsf \i}}
+\def\vi{\overset{\rightarrow}{\mathsf i}}
 \def\vv{\overset{\rightarrow}{v}}
 \def\vr{\; \vec {\mathsf r}}
 \newcommand{\va}{\bff a}
@@ -271,8 +274,7 @@
 \def\mI{\mathcal I}\def\mL{\mathcal{L}}\def\mM{{\mathcal M}}
 \def\mN{{\mathcal N}}\def\mP{\mathcal{P}}\def\mR{{\mathcal R}}
 \def\mS{{\mathcal S}}\def\mT{\mathcal{T}}\def\mV{{\mathcal V}}
-\newcommand{\cH}{{\mathcal H}}\newcommand{\cT}{\mathcal T}
-\newcommand{\cK}{\mathcal K}
+\def\mK{\mathcal K}\def\mA{{\mathcal A}}
 
 % Mathscr
 \newcommand{\Rs}{{\mathscr R}}
@@ -534,5 +536,7 @@
 \def\num{numerator}
 \def\rap{rational approximation} \def\DSR{directed species-reaction bipartite graph}\def\PCP{polynomial complementarity problem}\def\rat{rational substitution}
 \def\QSS{quasi steady state} \def\RHS{right hand side} \def\LHS{left hand side}
-\def\OSN{online social network}\def\VdD{Van den Driessche} 
-\def\wli{$\omega$-limit}
+\def\OSN{online social network}\def\VdD{Van den Driessche}
+\def\wli{$\omega$-limit} \def\rk{rich kinetics}\def\sJ{symbolic Jacobian}
+\def\cV{\cite{Vas,VasSta,BSV,GSV}} \def\spf{semi-parametric -semi functional} 
+\def\CRW{Capasso-Ruan-Wang}

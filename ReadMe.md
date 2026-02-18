@@ -480,3 +480,20 @@ chk[RHS];  (* Warns if any variables conflict with reserved names *)
 
 ---
 
+## NCB Oscillatory Core Analysis (February 2025)
+
+**File:** `SIRWS.wl` -- NCB (Negative Coefficient Bundle) approach for detecting Hopf/oscillatory cores in CRNs, applied to the SIRWS (Susceptible-Infected-Recovered-Waning) model with 4 species and 12 reactions.
+
+**Method (following Bi.R.Ne/ChatGPT formulation):**
+1. Build symbolic reactivity matrix RM where RM[j,k] = r[j,k] if species k is reactant of reaction j
+2. Form symbolic Jacobian G = gam . RM (stoichiometric matrix times reactivity)
+3. Expand characteristic polynomial coefficients into summands; each monomial = a k-child-selection (bijection from species subset to reactions subset)
+4. Negative summands identify destabilizing feedbacks. A k-CS is an unstable positive feedback (UPF) if sign(det(gam[kappa])) = (-1)^(k-1)
+5. Build Hasse diagram by r-set inclusion, apply transitive reduction
+6. Oscillatory core = UPF whose Hasse descendants include a Hurwitz-stable CS-matrix (checked via Hur3/Hur4)
+
+**Reuses (read-only):** `allT`, `isN`, `Hur3`, `Hur4` from Core.wl; `ODE2RN`, `NGMRN` from epi.wl
+
+**Expected result:** Oscillatory cores involving the infection feedback loop {S, i} and the immunity waning cycle {R, W}.
+
+---

@@ -1,0 +1,311 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+
+\title{Proposed improvements to \texttt{EpidCRN} based on SubFF.pdf}
+\author{Generated from SubFF.pdf analysis}
+\date{February 2026}
+
+\begin{document}
+\maketitle
+
+\section{Recipe~II implementation (\texttt{oscRII})}
+
+The paper defines (Definition~4, item~2): \emph{An Oscillatory Core of Class~II
+is a minimal $k \times k$ CS-matrix which is an unstable negative feedback, and
+which has a $(k-1) \times (k-1)$ Hurwitz-stable principal submatrix.}
+
+Currently only Recipe~I (\texttt{oscRI}) is implemented. The analogous function
+\texttt{oscRII} would:
+\begin{enumerate}[nosep]
+  \item Select all UNF nodes (using \texttt{unfQ}).
+  \item For each UNF of size $k$, enumerate its $(k-1)\times(k-1)$ principal
+        submatrices (delete one row and the corresponding column).
+  \item Check Hurwitz stability of each submatrix via \texttt{hurQ}.
+  \item Keep minimal UNFs (no proper UNF sub-CS also satisfies the condition).
+\end{enumerate}
+
+Proposed Mathematica code (for \texttt{Core.wl}, after \texttt{oscRI}):
+\begin{verbatim}
+(* oscRII: Recipe II -- Oscillatory Cores of Class II.
+   A core is a UNF (unstable negative feedback) of size k
+   that has a (k-1)x(k-1) Hurwitz-stable principal submatrix.
+   Keep only minimal such UNFs. *)
+oscRII[nCS_, gH_, spe_, rts_] := Module[
+  {unfIdx, cores, k, Sk, subMats},
+  unfIdx = Select[Range[Length[nCS]], unfQ[nCS[[#]]] &];
+  cores = Select[unfIdx, Function[u,
+    k = nCS[[u, 1]]; Sk = nCS[[u, 5]];
+    If[k < 2, False,
+      subMats = Table[
+        Sk[[Delete[Range[k], j], Delete[Range[k], j]]],
+        {j, k}];
+      AnyTrue[subMats, hurQ]]]];
+  (* minimality: remove if a smaller UNF core is a sub-CS *)
+  cores = Select[cores, Function[d,
+    !AnyTrue[Complement[cores, {d}],
+      MemberQ[VertexOutComponent[gH, #], d] &]]];
+  If[Length[cores] == 0,
+    Print["Recipe II: no oscillatory cores of Class II found"],
+    Print["Recipe II: ", Length[cores], " cores of Class II"];
+    Do[Module[{c = cores[[j]]},
+      Print["RII#", j,
+        " species=", spe[[nCS[[c, 3]]]],
+        " reactions=", rts[[nCS[[c, 4]]]],
+        " Sk=", nCS[[c, 7]] // MatrixForm]],
+      {j, Length[cores]}]];
+  cores];
+\end{verbatim}
+
+
+\section{Recipe~0: fixed-sign determinant test (\texttt{fixSgn})}
+
+Corollary~5.7/5.8 of Vassena states: the coefficient $c_k$ is of fixed sign
+for all positive $\mathbf{r}'$ iff all $k$-CS have sign-modified determinants of the
+same sign. If the Jacobian $G$ has a nonzero determinant of fixed sign, and the
+network admits both stability and instability, then $G(\mathbf{r}')$ has purely
+imaginary eigenvalues (Recipe~0).
+
+Currently checked manually in \texttt{SIRWS.wl} (lines 84--89). Proposed
+function:
+\begin{verbatim}
+(* fixSgn: test fixed-sign condition for each coefficient c_k.
+   Returns list of {k, isFixedSign, allSigns} for k=1..n.
+   If c_n has fixed sign AND UPFs exist AND stable n-CS exist -> Hopf. *)
+fixSgn[nCS_, n_] := Module[{csK, dets, sgns},
+  Table[
+    csK = Select[nCS, #[[1]] == k &];
+    dets = #[[6]] & /@ csK;
+    sgns = Sign /@ dets;
+    {k, And @@ (# >= 0 & /@ dets) || And @@ (# <= 0 & /@ dets),
+     Union[sgns]},
+    {k, n}]];
+\end{verbatim}
+
+Proposed script addition (for the notebooks, after \texttt{negCS}):
+\begin{verbatim}
+fs = fixSgn[nCS, n];
+Print["Fixed sign by order: ",
+  Table[{k, fs[[k, 2]]}, {k, n}]]
+\end{verbatim}
+
+
+\section{Symbolic Hopf hunt via resultants (\texttt{hopfRes})}
+
+Section~5.4 describes the ``symbolic hunt'' method for Hopf bifurcations:
+\begin{enumerate}[nosep]
+  \item Compute characteristic polynomial $P(\lambda) = \det(G - \lambda\,\mathrm{Id})$.
+  \item Evaluate at $\lambda = i\omega$ and split into real and imaginary parts.
+  \item Divide imaginary part by $\omega$ (removing trivial root $\omega=0$).
+  \item Set $\Omega = \omega^2$ and compute $\mathrm{resultant}(\Re(P),\,\tilde\Im(P),\,\Omega)$.
+  \item Hopf occurs where the resultant vanishes with $\Omega > 0$.
+\end{enumerate}
+
+Proposed Mathematica function:
+\begin{verbatim}
+(* hopfRes: symbolic Hopf hunt via resultant of Re/Im parts.
+   G = symbolic Jacobian (n x n matrix, entries may contain symbols).
+   Returns {resultant, Omega=omega^2, ReP, ImPtilde}. *)
+hopfRes[G_] := Module[{n, cp, PG, rP, iP, iPt, Om, res},
+  n = Length[G];
+  cp = CharacteristicPolynomial[G, lam];
+  PG = cp /. lam -> I om;
+  rP = ComplexExpand[Re[PG]];
+  iP = ComplexExpand[Im[PG]];
+  iPt = Cancel[iP/om];
+  Om = om^2;
+  rP = rP /. om^k_?EvenQ :> Om^(k/2);
+  iPt = iPt /. om^k_?EvenQ :> Om^(k/2);
+  res = Resultant[rP, iPt, Om];
+  {Simplify[res], Om, rP, iPt}];
+\end{verbatim}
+
+This directly implements equations (5.29)--(5.30) of the paper.
+
+
+\section{Necessary conditions for bifurcation (\texttt{bifNec})}
+
+Theorem~4 and Lemma~3 prove that for any bifurcation at an endemic
+equilibrium $(\bar s,\bar\imath,\bar r) > 0$, it is necessary that
+$G_{ii}(\bar s,\bar\imath) > 0$, equivalently
+$f'_i(\bar s,\bar\imath) > h'(\bar\imath) + \mu_i$.
+
+Observation~3: if $f'_i \le 0$ then $G$ is weakly-diagonally dominant and no
+bifurcation is possible. This excludes decreasing infection rates.
+
+These are analytic results, but could be checked numerically at a given
+equilibrium:
+\begin{verbatim}
+(* bifNec: check necessary condition G_ii > 0 at endemic equilibrium.
+   jac = Jacobian matrix, iIdx = index of infected variable.
+   Returns True if necessary condition is satisfied. *)
+bifNec[jac_, iIdx_] := jac[[iIdx, iIdx]] > 0;
+\end{verbatim}
+
+
+\section{Purely imaginary eigenvalue theorem for ME (\texttt{meHopf})}
+
+Theorem~2 proves that any epidemiological system including reactions
+$S+I \to 2I$ (infection) and $I \to \ldots$ (recovery/death) admits purely
+imaginary eigenvalues of the symbolic Jacobian.
+
+This is a structural test that could be automated: given the reaction network
+representation, check if it contains an autocatalytic infection reaction and a
+removal reaction for $I$:
+\begin{verbatim}
+(* meHopf: check if ME model structurally admits Hopf.
+   Requires: infection S+I -> 2I (autocatalysis) present in RN,
+   and a removal reaction I -> ... (not producing S or I).
+   By Theorem 2, symbolic Jacobian then admits purely imaginary eigenvalues. *)
+meHopf[RN_, var_, alp_, bet_] := Module[{n, sIdx, iIdx, autoQ, remQ, j},
+  n = Length[var];
+  (* find S and I candidates: I is autocatalytic (alp and bet both > 0),
+     S is consumed (alp > 0, bet = 0 or bet < alp) *)
+  autoQ = False; remQ = False;
+  Do[
+    If[alp[[iIdx, j]] > 0 && bet[[iIdx, j]] > alp[[iIdx, j]],
+      (* autocatalytic in species iIdx for reaction j *)
+      autoQ = True],
+    {iIdx, n}, {j, Length[RN]}];
+  Do[
+    If[alp[[iIdx, j]] > 0 && bet[[iIdx, j]] == 0 &&
+       Total[bet[[All, j]]] > 0,
+      remQ = True],
+    {iIdx, n}, {j, Length[RN]}];
+  autoQ && remQ];
+\end{verbatim}
+
+
+\section{Equilibrium flux vector (\texttt{eqFlux})}
+
+The paper (equation~5.6) emphasizes that the existence of a positive
+equilibrium requires a positive right kernel vector $\bar{\mathbf{v}} > 0$
+of $\Gamma$, called an equilibrium flux vector. This is a prerequisite
+check before attempting bifurcation analysis:
+\begin{verbatim}
+(* eqFlux: find equilibrium flux vector v > 0 such that gam.v = 0.
+   Returns {} if no positive kernel vector exists (deficiency 0),
+   or a symbolic parametrization of the kernel. *)
+eqFlux[gam_] := Module[{ker},
+  ker = NullSpace[gam];
+  If[ker === {}, Print["No kernel: rank = dimension"]; Return[{}]];
+  ker];
+\end{verbatim}
+
+This is useful for the scripts: if $\Gamma$ has full column rank,
+no positive equilibrium can exist in the stoichiometric compatibility class,
+which rules out endemic equilibria.
+
+
+\section{Commutative diagram: projection to Boros--Rost witness (\texttt{projBR})}
+
+Section~4.8 describes the commutative diagram:
+\[
+\mathcal{N}_{\mathrm{SIRWS}} \xrightarrow{\pi} \mathcal{N}_{\mathrm{BR}}
+\]
+where $\pi$ projects out intermediaries (e.g.\ $R$) and collapses pathways.
+Given a Recipe~I core $(\kappa, \kappa')$, the projection constructs a
+reduced mass-action network (the Boros--Rost witness).
+
+This is model-specific and difficult to automate in general, but the
+\emph{detection} of the core structure is already done by \texttt{oscRI}.
+A useful addition would be to print the reduced stoichiometric matrix
+of the core alongside the full system, to help identify the projection
+manually:
+\begin{verbatim}
+(* In oscRI, after printing each core, also print the
+   block structure of the full n x n CS containing it: *)
+(* Already partially done: oscRI prints Sk for both core and UPFs.
+   Improvement: print eigenvalues of the core Sk block to show
+   the oscillatory pair explicitly. *)
+Do[Module[{c = cores[[j]], eigC},
+  eigC = Eigenvalues[N[nCS[[c, 5]]]];
+  Print["RI#", j, " eigenvalues=", eigC]],
+  {j, Length[cores]}];
+\end{verbatim}
+
+
+\section{Improve \texttt{upfCS} output with determinant and size}
+
+Currently \texttt{upfCS} prints species and rates but not the determinant sign
+or the CS order $k$. The paper emphasizes that the sign
+$\sigma(A) = \mathrm{sign}((-1)^k \det A)$ determines the type of instability
+(Lemma~1). Adding the determinant and order $k$ to the print would help match
+the paper's analysis:
+\begin{verbatim}
+(* In upfCS, change the print to include k and det: *)
+Print["UPF#", j,
+  " k=", nCS[[ui, 1]],
+  " species=", spe[[nCS[[ui, 3]]]],
+  " rates=", rts[[nCS[[ui, 4]]]],
+  " det=", nCS[[ui, 6]],
+  " stable supersets=", spe[[nCS[[#, 3]]]] & /@ di]
+\end{verbatim}
+
+
+\section{Notation alignment with paper}
+
+The paper uses specific notation that differs from the code in some places.
+Aligning would help readers cross-reference:
+
+\begin{center}
+\begin{tabular}{lll}
+\textbf{Paper} & \textbf{Current code} & \textbf{Proposed change} \\
+\hline
+$\Gamma$ (stoichiometric matrix) & \texttt{gam} & keep \\
+$\alpha$ (reactant matrix) & \texttt{alp} & keep \\
+$\mathcal{R}$ (reactivity matrix) & \texttt{RM} & keep \\
+$G = \Gamma \cdot \mathcal{R}$ (symbolic Jacobian) & \texttt{G} & keep (in scripts) \\
+$c_k$ (char poly coefficients) & \texttt{co[[k]]} & keep \\
+$\alpha_{\mathbf{J}^{(k)}} = \det S[\mathbf{J}^{(k)}]$ & \texttt{nCS[[i,6]]} & add comment: ``sign-modified det'' \\
+$\sigma(A) = \mathrm{sign}((-1)^k \det A)$ & \texttt{upfQ}/\texttt{unfQ} & add comment referencing Lemma~1 \\
+$(\kappa, E_\kappa, J)$ (child selection) & \texttt{csInfo} output & document: \texttt{sIdx}$=\kappa$, \texttt{rBij}$=J$ \\
+\end{tabular}
+\end{center}
+
+Concrete: update the \texttt{csInfo} comment header to read:
+\begin{verbatim}
+(* csInfo: given order k, a negative term from co[[k]], and gam,
+   extract the k-child selection (kappa, E_kappa, J):
+   - kappa = sIdx (species subset),
+   - J = rBij (bijection: species -> reactions, in species order),
+   - S[J] = Sk = gam[[sIdx, rIdx]] (stoich submatrix, sorted columns),
+   - alpha_J = Det[Sk] (sign-modified determinant),
+   - SkB = gam[[sIdx, rBij]] (bijection-ordered, for display).
+   Returns {k, term, sIdx, rBij, Sk, Det[Sk], SkB}. *)
+\end{verbatim}
+
+
+\section{Add \texttt{oscRII} usage to \texttt{EpidCRN.wl}}
+
+When \texttt{oscRII} is added to \texttt{Core.wl}, its usage statement
+must be added to \texttt{EpidCRN.wl}:
+\begin{verbatim}
+oscRII::usage = "oscRII[nCS,gH,spe,rts]: Recipe II oscillatory cores";
+\end{verbatim}
+
+Similarly for any new functions (\texttt{fixSgn}, \texttt{hopfRes}, etc.).
+
+
+\section{Summary of priorities}
+
+\begin{enumerate}
+  \item \textbf{Recipe~II} (\texttt{oscRII}): highest priority, directly extends
+    the existing Recipe~I and completes the oscillatory core classification from
+    Definition~4.
+  \item \textbf{Fixed-sign test} (\texttt{fixSgn}): simple, replaces hardcoded
+    checks in notebooks.
+  \item \textbf{Hopf resultant} (\texttt{hopfRes}): implements the symbolic hunt
+    from Section~5.4, useful for the SIRScrw model analysis.
+  \item \textbf{Notation/comment updates}: low effort, high clarity.
+  \item \textbf{\texttt{upfCS} output enhancement}: minor, adds $k$ and $\det$.
+  \item \textbf{ME Hopf structure test} (\texttt{meHopf}): useful but narrow
+    (only confirms what Theorem~2 guarantees for ME models).
+  \item \textbf{Equilibrium flux vector}: informational, already implicitly
+    checked in NGMRN.
+  \item \textbf{Bifurcation necessary condition}: analytic check, useful for
+    the SIRScrw analysis.
+\end{enumerate}
+
+\end{document}

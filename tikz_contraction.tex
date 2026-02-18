@@ -1,0 +1,265 @@
+% Cut-and-paste TikZ diagram for Section 4.4--4.8
+% Requires: \usepackage{tikz} and \usetikzlibrary{arrows.meta,positioning,decorations.pathmorphing,calc,
+fit,backgrounds}
+
+\begin{figure}[h!]
+\centering
+\newcommand{\sep}{7.5}% horizontal distance to right network (adjust as needed)
+\begin{tikzpicture}[scale=0.75, every node/.style={transform shape},
+  node distance=1.8cm,
+  species/.style={circle, draw, thick, minimum size=8mm, inner sep=1pt},
+  upf/.style={circle, draw, thick, fill=red!15, minimum size=8mm, inner sep=1pt},
+  stab/.style={circle, draw, thick, fill=blue!10, minimum size=8mm, inner sep=1pt},
+  rxn/.style={-{Stealth[length=2.5mm]}, thick},
+  death/.style={-{Stealth[length=2mm]}, thin, dashed, gray},
+  proj/.style={-{Stealth[length=3mm]}, very thick, blue!60!black},
+  enlarge/.style={-{Stealth[length=3mm]}, very thick, red!60!black},
+  lbl/.style={font=\small, midway},
+]
+
+% === LEFT: SIRWS (4 species) ===
+\node[stab] (S) at (0, 1.8) {$S$};
+\node[upf]  (i) at (1.8, 1.8) {$i$};
+\node[upf]  (R) at (1.8, 0) {$R$};
+\node[upf]  (W) at (0, 0) {$W$};
+
+% Reactions in SIRWS
+\draw[rxn] (S) -- node[lbl, above] {\footnotesize $\beta i S$} (i);
+\draw[rxn] (i) -- node[lbl, right] {\footnotesize $\gamma_i i$} (R);
+\draw[rxn] (R) -- node[lbl, below] {\footnotesize $\gamma_r R$} (W);
+\draw[rxn] (W) -- node[lbl, left]  {\footnotesize $\gamma_w W$} (S);
+
+% Death terms (outgoing dashed)
+\draw[death] (S) -- ++(0, 0.7) node[above, font=\tiny] {$\mu_s S$};
+\draw[death] (i) -- ++(0.7, 0) node[right, font=\tiny] {$\mu_i i$};
+\draw[death] (R) -- ++(0.7, 0) node[right, font=\tiny] {$\mu_r R$};
+\draw[death] (W) -- ++(0, -0.7) node[below, font=\tiny] {$\mu_w W$};
+
+% Birth
+\draw[rxn, gray] (-0.9, 1.8) node[left, font=\tiny] {$\Lambda$} -- (S);
+
+% Boosting: i+W -> i+R (net effect: W consumed, R produced)
+\draw[rxn, dotted] (W) to[bend right=25]
+  node[lbl, below, font=\tiny, pos=0.5] {$\nu i W$} (R);
+
+% UPF highlight
+\begin{scope}[on background layer]
+  \node[draw=red, dashed, rounded corners=6pt,
+    fit=(i)(R)(W), inner sep=4pt,
+    label={[font=\scriptsize, red!70!black]below left:UPF $\{i,R,W\}$}] {};
+\end{scope}
+
+% Label
+\node[font=\footnotesize\bfseries, anchor=south] at (0.9, 2.7) {$\mathcal{N}_{\mathrm{SIRWS}}$};
+
+% === RIGHT: Boros--Rost (3 species) ===
+\node[stab] (S2) at (\sep, 1.8) {$S\!2$};
+\node[upf]  (i2) at (\sep+1.8, 1.8) {$i$};
+\node[upf]  (W2) at (\sep+0.9, 0) {$W$};
+
+% Reactions in BR
+\draw[rxn] (S2) -- node[lbl, above] {\footnotesize $\beta i S\!2$} (i2);
+\draw[rxn] (W2) -- node[lbl, below left, pos=0.4] {\footnotesize $\gamma W$} (S2);
+\draw[rxn] (i2) to[bend right=20] node[lbl, right, pos=0.4] {\footnotesize $\nu i W$} (W2);
+
+% Death terms
+\draw[death] (S2) -- ++(0, 0.7) node[above, font=\tiny] {$\mu_2 S\!2$};
+\draw[death] (i2) -- ++(0.7, 0) node[right, font=\tiny] {$\mu_3 i$};
+\draw[death] (W2) -- ++(0, -0.7) node[below, font=\tiny] {$\mu_1 W$};
+
+% Birth
+\draw[rxn, gray] (\sep-0.8, 0) node[left, font=\tiny] {$\Lambda$} -- (W2);
+
+% Label
+\node[font=\footnotesize\bfseries, anchor=south] at (\sep+0.9, 2.7) {$\mathcal{N}_{\mathrm{BR}}$};
+
+% === ARROWS between networks ===
+% Projection (top)
+\draw[proj] (2.5, 2.4) -- node[above, font=\small] {$\pi$}
+  node[below, font=\scriptsize, text=blue!60!black] {collapse $R$} (\sep-0.7, 2.4);
+
+% Enlargement (bottom)
+\draw[enlarge] (\sep-0.7, -0.6) -- node[below, font=\small] {$\mathcal{E}$}
+  node[above, font=\scriptsize, text=red!60!black] {inheritance} (2.5, -0.6);
+
+% === Identification annotations ===
+\node[font=\scriptsize, text=gray, anchor=west] at (3.8, 1.0) {
+  \begin{tabular}{@{}l@{}}
+  $S2 \leftrightarrow S$\\
+  $W \leftrightarrow W$\\
+  $i \leftrightarrow i$\\
+  $i{\to}R{\to}W \rightsquigarrow i{\to}W$
+  \end{tabular}
+};
+
+\end{tikzpicture}
+
+\caption{Contraction and enlargement between the SIRWS network
+$\mathcal{N}_{\mathrm{SIRWS}}$ and the Boros--Rost witness
+$\mathcal{N}_{\mathrm{BR}}$.
+The projection $\pi$ collapses the immune pathway $i\to R\to W$
+into the direct interaction $i\to W$, eliminating $R$ and identifying
+$S2\leftrightarrow S$.
+The red dashed region marks the UPF $\{i,R,W\}$ detected by BiRNe.
+The enlargement $\mathcal{E}$ (in the sense of Banaji--Boros--Hofbauer)
+reverses this, inserting $R$ as an intermediate and recovering the full
+SIRWS dynamics. By the inheritance theorem, Hopf bifurcation transfers
+from $\mathcal{N}_{\mathrm{BR}}$ to $\mathcal{N}_{\mathrm{SIRWS}}$.}
+\label{fig:contraction}
+\end{figure}
+
+% =====================================================================
+% Remark on "contractions" in the CRN literature
+% (can be placed after the figure or in Section 4.7/4.8)
+% =====================================================================
+
+\begin{remark}[Network contractions in the CRN literature]\label{rem:contraction}
+The projection $\pi\colon \mathcal{N}_{\mathrm{SIRWS}} \to \mathcal{N}_{\mathrm{BR}}$
+that collapses the pathway $i\to R\to W$ into $i\to W$ is an instance of
+\emph{species elimination} or \emph{intermediate reduction}, which appears
+in several related guises in the CRN literature:
+
+\begin{enumerate}[nosep]
+\item \textbf{Intermediate complexes and network translation.}
+  Johnston \cite{Johnston14} and Tonello--Johnston \cite{TJ18} develop
+  ``network translation" methods that identify intermediate species whose
+  elimination preserves qualitative dynamics.
+  The collapse of $R$ (which acts as a transient intermediate in the
+  immune pathway $i\to R\to W$) fits this framework.
+
+\item \textbf{Variable elimination and quasi-steady-state.}
+  Classical QSSA elimination of fast intermediates
+  (Briggs--Haldane, Segel--Slemrod \cite{SS89}) contracts pathways
+  $A\to B\to C$ to effective reactions $A\to C$ when $B$ equilibrates rapidly.
+  Feliu and Wiuf \cite{FW13} formalize this for CRNs, showing that
+  intermediate elimination preserves the stoichiometric structure
+  relevant for multistationarity.
+
+\item \textbf{Admissible enlargements (the reverse direction).}
+  Banaji and Boros \cite{BB22} and Banaji, Boros, and Hofbauer \cite{BBH25}
+  define \emph{admissible enlargements}---operations such as species insertion,
+  reaction addition, and flow addition that preserve Hopf
+  bifurcations via the inheritance theorem.
+  Our enlargement $\mathcal{E}\colon \mathcal{N}_{\mathrm{BR}} \to
+  \mathcal{N}_{\mathrm{SIRWS}}$ is exactly such a sequence: inserting
+  the intermediate $R$, replacing $i+W\to i$ by
+  $i+W\to i+R,\; R\to W$, and adding demography.
+
+\item \textbf{Lumping and model reduction.}
+  In chemical kinetics, ``lumping" (Wei--Kuo \cite{WK69},
+  Li--Rabitz \cite{LR89}) groups species into macro-variables,
+  producing a reduced network.
+  The identification $\{R,W\}\rightsquigarrow W$ (treating $R$ as a
+  transient state of the waning class) is a form of exact lumping
+  when the $R\to W$ transition is fast relative to other timescales.
+\end{enumerate}
+
+To our knowledge, the term ``contraction" for species-elimination
+projections between CRNs has not been standardized.
+The closest existing terminology is ``intermediate elimination"
+(Feliu--Wiuf) or ``admissible reduction" (viewed as the inverse of
+admissible enlargement).
+We use ``projection" to emphasize that the map $\pi$ preserves the
+local Jacobian feedback structure (the UPF loop) while reducing the
+network dimension.
+\end{remark}
+
+\begin{remark}[BBH enlargements from $\mathcal{N}_{\mathrm{BR}}$ to
+$\mathcal{N}_{\mathrm{SIRWS}}$]\label{rem:enlargements}
+The inheritance path $\mathcal{E}\colon \mathcal{N}_{\mathrm{BR}} \to
+\mathcal{N}_{\mathrm{SIRWS}}$ decomposes into three admissible enlargements
+in the sense of \cite{BBH25}:
+
+\begin{enumerate}[nosep]
+\item \textbf{E6 (Splitting reactions).}
+  Split the reaction $i+W \to i$ by inserting the new species~$R$
+  as an intermediate:
+  \[
+    i + W \to i \qquad\leadsto\qquad
+    i + W \to i + R,\quad R \to W.
+  \]
+  This introduces one new species ($R$) for one split reaction.
+  The stoichiometric submatrix for~$R$ in the two new reactions is
+  $(+1,\;-1)$, which has rank~$1$ equal to the number of splits,
+  satisfying the E6 rank condition.
+  Biologically, this ``unfolds" the collapsed loop
+  $i \to W$ in $\mathcal{N}_{\mathrm{BR}}$ into the mechanistic
+  pathway $i \to R \to W$ in SIRWS.
+
+\item \textbf{E2 (Fully open extension).}
+  Add inflow and outflow reactions for the new species:
+  $0 \to R$ and $R \to 0$.
+  This ensures the enlarged network is fully open with respect to~$R$,
+  providing the dissipation needed for boundedness.
+
+\item \textbf{E1 (New linearly dependent reaction).}
+  Add the recovery reaction $i \to R$.
+  This is a new reaction among existing species
+  (both $i$ and $R$ are present after steps~1--2).
+  %It preserves the rank of the stoichiometric matrix
+  %since the column $(-1,+1,0,0)^T$ (in the $(S,i,R,W)$ basis)
+  %is a linear combination of existing columns.
+\end{enumerate}
+
+The E6 step is the structurally decisive one: it is the inverse of the
+projection~$\pi$ that collapses $R$ out of the immune pathway.
+By the inheritance theorem \cite{BBH25}, each enlargement preserves the
+Hopf bifurcation established for $\mathcal{N}_{\mathrm{BR}}$ by
+Boros and Rost, and therefore the full SIRWS network inherits Hopf.
+\end{remark}
+
+\begin{remark}[Complementary species sets: UPF vs.\ witness]\label{rem:complement}
+The BiRNe maximal UPF $\{i,R,W\}$ and the Boros--Rost witness
+$\{S,i,W\}$ share the species $\{i,W\}$ but differ in the third:
+
+\begin{center}
+\begin{tabular}{lll}
+ & \textbf{Species} & \textbf{Role of 3rd species} \\
+\hline
+BiRNe maximal UPF & $\{i,R,W\}$ & $R$ = intermediate in immune pathway \\
+Boros--Rost witness & $\{S,i,W\}$ & $S$ = catalytic environment for infection \\
+\end{tabular}
+\end{center}
+
+Both are three-species projections of the full Recipe~I oscillatory core,
+which consists of the UPF $\{i,R,W\}$ embedded in the stable superset
+$\{S,i,R,W\}$.
+The two sets arise by dropping complementary species from this
+four-species core:
+\[
+\{S,i,R,W\} \setminus \{S\} = \{i,R,W\} \quad\text{(UPF)},
+\qquad
+\{S,i,R,W\} \setminus \{R\} = \{S,i,W\} \quad\text{(witness)}.
+\]
+They play complementary roles:
+\begin{itemize}[nosep]
+\item The \textbf{UPF} $\{i,R,W\}$ captures the \emph{destabilizing feedback
+  loop} $i\to R\to W\to S\to i$: the species whose cyclic interaction
+  produces instability at the Jacobian level.
+\item The \textbf{witness} $\{S,i,W\}$ captures the \emph{minimal
+  mass--action realization}: the species needed for a concrete Hopf
+  bifurcation, replacing the intermediate~$R$ with the direct
+  interaction $i\to W$ and retaining the susceptible reservoir~$S$
+  for autocatalysis ($S+i\to 2i$).
+\end{itemize}
+The shared pair $\{i,W\}$ is the essential interface where infection meets
+waning immunity.
+The third species is either the intermediate waystation ($R$, needed for
+the Jacobian sign structure) or the susceptible reservoir ($S$, needed for
+the mass--action dynamics), depending on whether the analysis is symbolic
+(BiRNe) or constructive (Boros--Rost).
+\end{remark}
+
+% Suggested references to add to the bibliography:
+%
+%
+%
+%
+%
+%
+% [WK69] J. Wei and C.D. Kuo, A lumping analysis in monomolecular
+%   reaction systems, Industrial \& Engineering Chemistry Fundamentals 8
+%   (1969), 114--123.
+%
+% [LR89] G. Li and H. Rabitz, A general analysis of exact lumping in
+%   chemical kinetics, Chemical Engineering Science 44 (1989), 1413--1430.

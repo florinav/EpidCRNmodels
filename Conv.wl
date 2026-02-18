@@ -17,8 +17,8 @@ remZ[li_] := Select[li, # =!= 0 &];
 selZR[con_] := Select[con, MatchQ[#, Rule[_, 0]] &];
 (* selZR[{a -> 1, b -> 0, c -> 3}] returns {b -> 0} *)
 
-seZF[expr_] := Select[expr, FreeQ[#, 0] &];
-(* seZF[{{1, 2}, {0, 3}, {4, 5}}] returns {{1, 2}, {4, 5}} *)
+selZF[expr_] := Select[expr, FreeQ[#, 0] &];
+(* selZF[{{1, 2}, {0, 3}, {4, 5}}] returns {{1, 2}, {4, 5}} *)
 
 (* String conversion utilities *)
 strEdg[edges_List] := Map[ToString, edges, {2}];

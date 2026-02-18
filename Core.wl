@@ -89,7 +89,7 @@ chk[RHS_] := Module[{vars, reserved, conflicts},
   vars = ToString /@ Variables[RHS];
   reserved = {"RHS","var", "rts", "RN","V", "F", "K", "Jx", "Jy", "Jxy", "Jyx", "Kd", "mSi",
               "alp", "bet", "gam", "spe", "E0", "cE0", "cDFE",
-               "inf", "infc", "mod", "par", "cp","I","E"};
+               "inf", "infc", "mod", "par", "cp","I","E","rt"};
   conflicts = Intersection[vars, reserved];
   If[Length[conflicts] > 0,
     Print["WARNING: RHS variables conflict with package names: ", conflicts, " from ", reserved];
@@ -108,25 +108,6 @@ extSpe[reactions_] := Module[{allSpecies, reactants, products},
 ];
 
 (* Main extMat function - now handles symbolic stoichiometry *)
-
-allT[expr_] := Module[{expanded},
-  expanded = Expand[expr];
-  If[Head[expanded] === Plus, List @@ expanded, {expanded}]
-];
-
-(* isN: Detect if a term has negative sign (complement of posM logic) *)
-isN[term_] := Module[{},
-  Which[
-    (* Numeric negative *)
-    NumericQ[term] && Negative[term], True,
-    (* Times expression starting with -1 *)
-    Head[term] === Times && MemberQ[List @@ term, -1], True,
-    (* Times expression with negative numeric coefficient *)
-    Head[term] === Times && NumericQ[First[List @@ term]] && Negative[First[List @@ term]], True,
-    (* Otherwise not negative *)
-    True, False
-  ]
-];
 
 ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
   n, allTermsByEq, allTermsFlat, sources, sinks, rtsRaw,
@@ -284,9 +265,9 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
 
   Print[Length[RN], " reactions and rts=",
     Row[{
-      Transpose[{prF[RN], prF[Factor /@ rts]}] // MatrixForm,
+      Prepend[Transpose[{prF[RN], prF[Factor /@ rts]}], {"RN", "rts"}] // MatrixForm,
       Spacer[20],
-      Transpose[{prF[rnRed], prF[Factor /@ rts]}] // MatrixForm
+      Prepend[Transpose[{prF[rnRed], prF[Factor /@ rts]}], {"RNr", "rts"}] // MatrixForm
     }]
   ];
 
@@ -363,9 +344,9 @@ ODE2RNp[RHS_List, var_List, prF_:Identity] := Module[{
   (* STEP 6: Print always *)
   Print[Length[RN], " reactions and rts=",
     Row[{
-      Transpose[{prF[RN], prF[Factor /@ rtsTrue]}] // MatrixForm,
+      Prepend[Transpose[{prF[RN], prF[Factor /@ rtsTrue]}], {"RN", "rts"}] // MatrixForm,
       Spacer[20],
-      Transpose[{prF[rnRed], prF[Factor /@ rtsTrue]}] // MatrixForm
+      Prepend[Transpose[{prF[rnRed], prF[Factor /@ rtsTrue]}], {"RNr", "rts"}] // MatrixForm
     }]
   ];
 
@@ -757,49 +738,41 @@ K, R0A, cDFE, RDFE, eq0, var0, cE0, Jx, Jy, Jxy, fx, F, VV, eigenvals, ngm, infV
   {RHS, par, cp, mSi, Jx, Jy, Jxy, fx, cDFE, cE0, F, V, K, R0A, infV}
 ];
 
-Hur3[pol_, var_] := Module[{co, h3, inec, ineSys, polExpanded, deg},
-  (* Expand polynomial *)
+Hur3[pol_, var_] := Hur3[pol, var, 5];
+Hur3[pol_, var_, tmo_] := Module[{co, h3, inec, ineSys, polExpanded, deg, par, cp, red},
   polExpanded = Expand[pol];
-
-  (* Check degree *)
   deg = Exponent[polExpanded, var];
-  If[deg != 3,
-    Print["Error: Expected degree-3 polynomial, got degree ", deg];
-    Return[{}]
-  ];
-
-  (* Extract coefficients [a0, a1, a2, a3] using Coefficient *)
-  co = {
-    Coefficient[polExpanded, var, 0],
-    Coefficient[polExpanded, var, 1],
-    Coefficient[polExpanded, var, 2],
-    Coefficient[polExpanded, var, 3]
-  };
-
-  (* Compute Hurwitz determinant h3 *)
+  If[deg != 3, Print["Hur3: deg ", deg, " != 3"]; Return[{}]];
+  co = Table[Coefficient[polExpanded, var, j], {j, 0, 3}];
   h3 = co[[2]]*co[[3]] - co[[1]]*co[[4]];
-
-  (* Form stability inequalities *)
   inec = {co[[2]] > 0, co[[3]] > 0};
   ineSys = Append[inec, h3 > 0];
-
-  ineSys
+  par = Complement[Variables[pol], {var}];
+  cp = Thread[par > 0];
+  red = TimeConstrained[
+    FullSimplify[Reduce[FullSimplify[Join[cp, ineSys]]], cp], tmo, $Failed];
+  {red, ineSys}
 ];
 
-Hur4[pol_, var_] := Module[{ co, H4, h4, inec, ineSys, polExpanded, deg, a4},
+Hur4[pol_, var_] := Hur4[pol, var, 5];
+Hur4[pol_, var_, tmo_] := Module[{co, H4, h4, inec, ineSys, polExpanded, deg, par, cp, red},
   polExpanded = Expand[pol];
   deg = Exponent[polExpanded, var];
-  co = Table[Coefficient[polExpanded, var, i], {i, 0, deg}];
+  co = Table[Coefficient[polExpanded, var, j], {j, 0, deg}];
   H4 = {
-  {co[[4]], co[[2]], 0,       0},
-  {co[[5]], co[[3]], co[[1]], 0},
-  {0,       co[[4]], co[[2]], 0},
-  {0,       co[[5]], co[[3]], co[[1]]}
-};
+    {co[[4]], co[[2]], 0,       0},
+    {co[[5]], co[[3]], co[[1]], 0},
+    {0,       co[[4]], co[[2]], 0},
+    {0,       co[[5]], co[[3]], co[[1]]}
+  };
   h4 = Det[H4];
   inec = {co[[1]] > 0, co[[2]] > 0, co[[3]] > 0};
   ineSys = Append[inec, h4 > 0];
-  ineSys
+  par = Complement[Variables[pol], {var}];
+  cp = Thread[par > 0];
+  red = TimeConstrained[
+    FullSimplify[Reduce[FullSimplify[Join[cp, ineSys]]], cp], tmo, $Failed];
+  {red, ineSys}
 ];
 
 Hur4M[mat_] := Module[{lm, ch, cot, co, H4, h4, ine},
@@ -1462,10 +1435,7 @@ Par[RHS_,X_]:=Complement[Variables[RHS],X];
 (* ========================================================================= *)
 
 (* allT: Extract all terms from expanded polynomial *)
-allT[expr_] := Module[{expanded},
-  expanded = Expand[expr];
-  If[Head[expanded] === Plus, List @@ expanded, {expanded}]
-];
+allT[expr_] := If[Head[#] === Plus, List @@ #, {#}] &[Expand[expr]];
 
 (* isN: Detect if a term has negative sign (complement of posM logic) *)
 isN[term_] := Module[{},
@@ -2106,6 +2076,323 @@ subsCon[expr_] := expr;
 (* Test subsCon *)
 (*Print["subsCon[\"i12\"]=", subsCon["i12"], " subsCon[\"i1\"]=", subsCon["i1"], " subsCon[\"s\"]=", subsCon["s"]];*)
 
+(* ========================================================================= *)
+(* CHILD SELECTION ANALYSIS (Cauchy-Binet)
+   ALGORITHM (called from scripts after computing co from char poly of G=gam.RM):
+   1. symRM builds symbolic reactivity matrix RM (m x n, entries rt[j,k] or 0).
+      G = gam.RM is the symbolic Jacobian. Its char poly cpG has coefficients
+      co[[k]] (k=1..n) for lam^(n-k), each a sum of k-minors of G (Cauchy-Binet).
+   2. negCS extracts negative summands from each co[[k]] via allT+isN,
+      then csInfo maps each to {k, term, sIdx, rIdx, Sk, det} where
+      Sk = gam[[sIdx,rIdx]] is the INTEGER stoichiometric submatrix.
+      Result: nCS list.
+   3. upfQ keeps entries with Sign[det]==(-1)^(k-1), det!=0
+      (unstable positive feedback).
+   4. hasseCS builds directed graph on nCS by r-set inclusion:
+      edge a->b when rSet(a) is strict subset of rSet(b) and k(a)<k(b).
+      TransitiveReductionGraph gives Hasse diagram.
+   5. oscCS: for each UPF node u, finds descendants via VertexOutComponent,
+      tests hurQ (Hurwitz stability of the integer Sk). If any descendant
+      is stable, {u, stableDescendants} is an oscillatory core.
+   6. Hopf via CS inheritance (Cor 5.21):
+      csN = n-CS (full-size child selections from coeff of lam^0 = det G).
+      stabN = Hurwitz-stable n-CS. If stabN nonempty AND upf nonempty -> Hopf. *)
+(* ========================================================================= *)
+
+(* symRM: symbolic reactivity matrix RM (m x n), entry rt[j,k] if species k
+   appears as reactant in reaction j (alp[k,j]>0), else 0. *)
+symRM[alp_, n_, m_] := Table[If[alp[[k, j]] > 0, Global`rt[j, k], 0], {j, m}, {k, n}];
+
+(* rSet: extract all rt[j,k] symbols from a term (reactivity set). *)
+rSet[term_] := Cases[term, Global`rt[_, _], Infinity];
+
+(* csInfo: given order k, a negative term from co[[k]], and gam,
+   extract the CS bijection J: species -> reaction from the rt[j,k] symbols,
+   build Sk = gam[[sIdx, rBij]] with columns in bijection order,
+   return {k, term, sIdx, rBij, Sk, Det[Sk]}. *)
+csInfo[k_, term_, gam_] := Module[{rs, pairs, sIdx, rIdx, rBij, Sk, SkB},
+  rs = rSet[term];
+  pairs = {#[[1]], #[[2]]} & /@ (rs /. Global`rt -> List);
+  sIdx = Sort[Last /@ pairs];
+  rIdx = Sort[First /@ pairs];
+  If[Length[Union[sIdx]] != Length[Union[rIdx]], Return[Nothing]];
+  (* rBij: reactions in bijection order (matching species order) for display *)
+  rBij = Table[First[Select[pairs, #[[2]] == s &]][[1]], {s, sIdx}];
+  (* Sk: sorted columns for det/sign computations; SkB: bijection order for display *)
+  Sk = gam[[sIdx, rIdx]];
+  SkB = gam[[sIdx, rBij]];
+  {k, term, sIdx, rBij, Sk, Det[Sk], SkB}];
+
+(* upfQ: True if child selection has unstable positive feedback,
+   i.e. Sign[det] == (-1)^(k-1) and det != 0. *)
+upfQ[{k_, _, sIdx_, _, Sk_, detSk_, _}] :=
+  Sign[detSk] == (-1)^(k - 1) && detSk =!= 0;
+
+(* unfQ: True if child selection has unstable negative feedback,
+   i.e. Sign[det] == (-1)^k and det != 0. *)
+unfQ[{k_, _, sIdx_, _, Sk_, detSk_, _}] :=
+  Sign[detSk] == (-1)^k && detSk =!= 0;
+
+(* hurQ: Hurwitz stability test for k x k integer matrix Sk.
+   k=1,2: direct conditions. k=3,4: via Hur3/Hur4. k>=5: numeric eigenvalues.
+   For symbolic Sk, Hur3/Hur4 return inequality lists; And@@{..} stays
+   unevaluated, so Select treats it as non-True (entry skipped). *)
+hurQ[Sk_] := Module[{k = Length[Sk], cp1},
+  Which[
+    k == 1, Sk[[1, 1]] < 0,
+    k == 2, Tr[Sk] < 0 && Det[Sk] > 0,
+    k == 3, And @@ Hur3[CharacteristicPolynomial[Sk, lam], lam][[2]],
+    k == 4, And @@ Hur4[CharacteristicPolynomial[Sk, lam], lam][[2]],
+    True, cp1 = Eigenvalues[N[Sk]]; And @@ (Re[#] < 0 & /@ cp1)
+  ]];
+
+(* negCS: from coefficients co[[1..n]] of char poly, extract all negative
+   summands (child selections with negative sign) via allT+isN,
+   then map csInfo to get {k, term, sIdx, rIdx, Sk, det} for each. *)
+negCS[co_, gam_, n_] := Module[{summ, neg},
+  summ = Table[allT[Expand[co[[k]]]], {k, n}];
+  neg = Table[Select[summ[[k]], isN], {k, n}];
+  Flatten[Table[csInfo[k, #, gam] & /@ neg[[k]], {k, n}], 1]];
+
+(* hasseCS: Hasse diagram on nCS by r-set inclusion.
+   Edge a->b when rSet(a) strict subset of rSet(b) and k(a)<k(b).
+   Returns {TransitiveReductionGraph, edges}. *)
+hasseCS[nCS_] := Module[{edges = {}, gH},
+  Do[Do[
+    If[nCS[[a, 1]] < nCS[[b, 1]] &&
+       SubsetQ[rSet[nCS[[b, 2]]], rSet[nCS[[a, 2]]]] &&
+       rSet[nCS[[a, 2]]] =!= rSet[nCS[[b, 2]]],
+      AppendTo[edges, a -> b]],
+    {b, Length[nCS]}], {a, Length[nCS]}];
+  gH = If[edges === {},
+    Graph[Range[Length[nCS]], {}],
+    TransitiveReductionGraph[Graph[Range[Length[nCS]], edges]]];
+  {gH, edges}];
+
+(* upfCS: UPF feedbacks with stable supersets. For each UPF node u, find
+   descendants via VertexOutComponent, test hurQ on each descendant's Sk.
+   If any descendant is Hurwitz-stable, {u, stableDescendants} is a UPF feedback.
+   Prints summary and each feedback with species names and rates. *)
+upfCS[nCS_, gH_, spe_, rts_] := Module[{res = {}, desc, stab, ui, di},
+  Do[
+    desc = Complement[Normal@VertexOutComponent[gH, u], {u}];
+    stab = Select[desc, hurQ[nCS[[#, 5]]] &];
+    If[stab =!= {}, AppendTo[res, {u, stab}]],
+    {u, Select[Range[Length[nCS]], upfQ[nCS[[#]]] &]}];
+  Print["upfCS found ", Length[res], " UPF feedbacks with stable supersets"];
+  Do[ui = res[[j, 1]]; di = res[[j, 2]];
+    Print["UPF#", j,
+      " species=", spe[[nCS[[ui, 3]]]],
+      " rates=", rts[[nCS[[ui, 4]]]],
+      " stable supersets=", spe[[nCS[[#, 3]]]] & /@ di],
+    {j, Length[res]}];
+  res];
+
+(* oscRI: Recipe I — Oscillatory Cores of Class I.
+   A core is a stable CS that is MINIMAL with the property of being
+   Hurwitz-stable and containing a UPF as a principal submatrix.
+   Algorithm:
+   1. Find all stable CS (hurQ True) that have at least one UPF ancestor.
+   2. Among those, keep minimal ones: d is minimal if no other stable CS
+      with a UPF ancestor sits strictly between a UPF and d in the Hasse graph.
+   3. For each core, report which UPFs it contains. *)
+oscRI[nCS_, gH_, spe_, rts_] := Module[
+  {upfIdx, allStab, stabWithUPF, cores, ui, coreUPFs},
+  upfIdx = Select[Range[Length[nCS]], upfQ[nCS[[#]]] &];
+  (* all stable CS that are descendants of at least one UPF *)
+  allStab = Select[Range[Length[nCS]], hurQ[nCS[[#, 5]]] &];
+  stabWithUPF = Select[allStab, Function[d,
+    AnyTrue[upfIdx, MemberQ[Normal@VertexOutComponent[gH, #], d] &]]];
+  (* minimal: no other stabWithUPF member is an ancestor of d *)
+  cores = Select[stabWithUPF, Function[d,
+    !AnyTrue[Complement[stabWithUPF, {d}],
+      MemberQ[Normal@VertexOutComponent[gH, #], d] &]]];
+  If[Length[cores] == 0,
+    Print["Recipe I does not hold: no oscillatory cores of Class I found"],
+    Print["Recipe I holds: ", Length[cores], " oscillatory cores of Class I"];
+    Do[Module[{c = cores[[j]], cS, cR},
+      cS = nCS[[c, 3]]; cR = nCS[[c, 4]];
+      coreUPFs = Select[upfIdx,
+        MemberQ[Normal@VertexOutComponent[gH, #], c] &];
+      Print["RI#", j, " stable ", nCS[[c, 1]], "-CS: species=", spe[[cS]],
+        " reactions=", rts[[cR]], " det=", nCS[[c, 6]],
+        " Sk=", nCS[[c, 7]] // MatrixForm];
+      Do[Print["  contains UPF ", nCS[[u, 1]], "-CS: species=", spe[[nCS[[u, 3]]]],
+          " reactions=", rts[[nCS[[u, 4]]]], " det=", nCS[[u, 6]],
+          " Sk=", nCS[[u, 7]] // MatrixForm],
+        {u, coreUPFs}]],
+      {j, Length[cores]}]];
+  cores];
+
+(* oscRII: Recipe II -- Oscillatory Cores of Class II [BSV25, Def 4].
+   A core is a UNF (unstable negative feedback) of size k whose Sk has
+   a (k-1)x(k-1) Hurwitz-stable principal submatrix.
+   Keep only minimal such UNFs (no smaller UNF sub-CS also qualifies).
+   Prints only the smallest core; returns all cores. *)
+oscRII[nCS_, gH_, spe_, rts_] := Module[
+  {unfIdx, cands, k, Sk, cores, sorted},
+  unfIdx = Select[Range[Length[nCS]], unfQ[nCS[[#]]] &];
+  cands = Select[unfIdx, Function[u,
+    k = nCS[[u, 1]]; Sk = nCS[[u, 5]];
+    k >= 2 && AnyTrue[
+      Table[Sk[[Delete[Range[k], j], Delete[Range[k], j]]], {j, k}],
+      hurQ]]];
+  cores = Select[cands, Function[d,
+    !AnyTrue[Complement[cands, {d}],
+      MemberQ[Normal@VertexOutComponent[gH, #], d] &]]];
+  If[Length[cores] == 0,
+    Print["Recipe II: no cores of Class II found"],
+    sorted = SortBy[cores, nCS[[#, 1]] &];
+    Print["Recipe II: ", Length[cores], " cores (showing smallest)"];
+    Module[{c = sorted[[1]], cK, cSk, cSpe, stSub},
+      cK = nCS[[c, 1]]; cSk = nCS[[c, 5]]; cSpe = nCS[[c, 3]];
+      stSub = Select[Range[cK],
+        hurQ[cSk[[Delete[Range[cK], #], Delete[Range[cK], #]]]] &];
+      Print["RII UNF ", cK, "-CS: spe=", spe[[cSpe]],
+        " rts=", rts[[nCS[[c, 4]]]], " det=", nCS[[c, 6]]];
+      Do[Print["  stable ", (cK - 1), "-sub: spe=",
+          spe[[cSpe[[Delete[Range[cK], s]]]]]],
+        {s, stSub}]]];
+  cores];
+
+(* fixSgn: fixed-sign determinant test [Vas23, Cor 5.7/5.8].
+   For each order k, checks if all k-CS have sign-modified determinants
+   of the same sign. Returns list of {k, isFixedSign, signs} for k=1..n. *)
+fixSgn[nCS_, n_] := Table[Module[{csK, dets},
+  csK = Select[nCS, #[[1]] == k &];
+  dets = #[[6]] & /@ csK;
+  {k, And @@ (# >= 0 & /@ dets) || And @@ (# <= 0 & /@ dets),
+   Union[Sign /@ dets]}],
+  {k, n}];
+
+(* csAna: full Child Selection analysis pipeline.
+   Input: gam (stoichiometric), alp (reactant), spe (species), rts (rates).
+   Runs: symRM, negCS, hasseCS, upfCS, oscRI, oscRII, fixSgn.
+   Prints summary with unstable orders and Hopf(5.21) conclusion.
+   Returns {G, co, nCS, upf, gH, fs, riC, riiC}. *)
+csAna[gam_, alp_, spe_, rts_] := Module[
+  {n, m, RM, G, cpG, co, nCS, upf, gH, edges,
+   csN, stabN, fs, nf, riC, riiC},
+  {n, m} = Dimensions[alp];
+  RM = symRM[alp, n, m];
+  G = gam . RM;
+  cpG = CharacteristicPolynomial[G, lam];
+  co = Rest@Reverse@CoefficientList[Expand[cpG], lam];
+  nCS = negCS[co, gam, n]; upf = Select[nCS, upfQ];
+  {gH, edges} = hasseCS[nCS];
+  Print["CS: dim=", {n, m}, " #nCS=", Length[nCS], " #upf=", Length[upf]];
+  upfCS[nCS, gH, spe, rts];
+  riC = oscRI[nCS, gH, spe, rts];
+  riiC = oscRII[nCS, gH, spe, rts];
+  csN = Select[nCS, #[[1]] == n &];
+  stabN = Select[csN, hurQ[#[[5]]] &];
+  fs = fixSgn[nCS, n];
+  nf = Select[fs, !#[[2]] &];
+  Print["fixSgn: unstable orders=", #[[1]] & /@ nf,
+        " Hopf(5.21)=", Length[stabN] > 0 && Length[upf] > 0];
+  {G, co, nCS, upf, gH, fs, riC, riiC}];
+
+(* ========================================================================= *)
+(* ODE TO RN WITH SYMBOLIC RATES *)
+(* ========================================================================= *)
+(* ODE2RNs: like ODE2RN but handles opaque function calls f[S,i], T[i] etc.
+   Uses Coefficient to extract integer stoichiometry, Level to get reactant species.
+   Polynomial terms go to ODE2RN; function reactions are appended. *)
+
+ODE2RNs[RHS_, var_] := Module[
+  {n, spe, fC, nf, gamF, alpF, betF, pRHS, pO, funRN, funRNs},
+  n = Length[var];
+  spe = ToString /@ var;
+  (* Detect opaque function calls h[x..] where h is a user symbol
+     (not arithmetic, not NumericFunction like Sin/Exp/Log)
+     and at least one argument is a state variable *)
+  fC = DeleteDuplicates[Cases[RHS,
+    h_[x__] /; AtomQ[h] &&
+      !MemberQ[{Times, Plus, Power, List, Rational, Complex}, h] &&
+      !MemberQ[Attributes[h], NumericFunction] &&
+      !FreeQ[{x}, Alternatives @@ var] :> h[x], {0, Infinity}]];
+  nf = Length[fC];
+  If[nf == 0, Return[ODE2RN[RHS, var]]];
+  gamF = Table[Coefficient[RHS[[j]], fC[[k]]], {j, n}, {k, nf}];
+  alpF = Table[Boole[MemberQ[Level[fC[[k]], {1}], var[[j]]]], {j, n}, {k, nf}];
+  betF = gamF + alpF;
+  (* Fix negative stoichiometry: move negatives from bet to alp *)
+  Do[If[TrueQ[betF[[ii, jj]] < 0],
+    alpF[[ii, jj]] = alpF[[ii, jj]] - betF[[ii, jj]];
+    betF[[ii, jj]] = 0], {ii, n}, {jj, nf}];
+  pRHS = Expand[RHS - gamF . fC];
+  pO = Block[{Print = (Null &)}, ODE2RN[pRHS, var]];
+  (* String-species RN format (consistent with ODE2RN element 1) *)
+  funRN = Table[Module[{lT, rT, left, right},
+    lT = Table[If[alpF[[kk, jj]] === 0, Nothing,
+      If[alpF[[kk, jj]] === 1, spe[[kk]], alpF[[kk, jj]] spe[[kk]]]], {kk, n}];
+    left = If[lT === {}, 0, If[Length[lT] == 1, lT[[1]], Plus @@ lT]];
+    rT = Table[If[betF[[kk, jj]] === 0, Nothing,
+      If[betF[[kk, jj]] === 1, spe[[kk]], betF[[kk, jj]] spe[[kk]]]], {kk, n}];
+    right = If[rT === {}, 0, If[Length[rT] == 1, rT[[1]], Plus @@ rT]];
+    left -> right], {jj, nf}];
+  (* Symbol-species reduced reactions (element 7) *)
+  funRNs = Table[Total[alpF[[All, k]] var] -> Total[betF[[All, k]] var], {k, nf}];
+  Module[{aRN, aRts, aRnR},
+    aRN = Join[pO[[1]], funRN]; aRts = Join[pO[[2]], fC]; aRnR = Join[pO[[7]], funRNs];
+    Print[Length[aRN], " reactions and rts=",
+      Row[{Prepend[Transpose[{aRN, Factor /@ aRts}], {"RN", "rts"}] // MatrixForm,
+        Spacer[20],
+        Prepend[Transpose[{aRnR, Factor /@ aRts}], {"RNr", "rts"}] // MatrixForm}]]];
+  {Join[pO[[1]], funRN], Join[pO[[2]], fC], pO[[3]],
+   Join[pO[[4]], alpF, 2], Join[pO[[5]], betF, 2], Join[pO[[6]], gamF, 2],
+   Join[pO[[7]], funRNs]}];
+
+ODE2RNs[RHS_, var_, prF_] := Module[
+  {n, spe, fC, nf, gamF, alpF, betF, pRHS, pO, funRN, funRNs},
+  n = Length[var];
+  spe = ToString /@ var;
+  fC = DeleteDuplicates[Cases[RHS,
+    h_[x__] /; AtomQ[h] &&
+      !MemberQ[{Times, Plus, Power, List, Rational, Complex}, h] &&
+      !MemberQ[Attributes[h], NumericFunction] &&
+      !FreeQ[{x}, Alternatives @@ var] :> h[x], {0, Infinity}]];
+  nf = Length[fC];
+  If[nf == 0, Return[ODE2RN[RHS, var, prF]]];
+  gamF = Table[Coefficient[RHS[[j]], fC[[k]]], {j, n}, {k, nf}];
+  alpF = Table[Boole[MemberQ[Level[fC[[k]], {1}], var[[j]]]], {j, n}, {k, nf}];
+  betF = gamF + alpF;
+  Do[If[TrueQ[betF[[ii, jj]] < 0],
+    alpF[[ii, jj]] = alpF[[ii, jj]] - betF[[ii, jj]];
+    betF[[ii, jj]] = 0], {ii, n}, {jj, nf}];
+  pRHS = Expand[RHS - gamF . fC];
+  pO = Block[{Print = (Null &)}, ODE2RN[pRHS, var, prF]];
+  funRN = Table[Module[{lT, rT, left, right},
+    lT = Table[If[alpF[[kk, jj]] === 0, Nothing,
+      If[alpF[[kk, jj]] === 1, spe[[kk]], alpF[[kk, jj]] spe[[kk]]]], {kk, n}];
+    left = If[lT === {}, 0, If[Length[lT] == 1, lT[[1]], Plus @@ lT]];
+    rT = Table[If[betF[[kk, jj]] === 0, Nothing,
+      If[betF[[kk, jj]] === 1, spe[[kk]], betF[[kk, jj]] spe[[kk]]]], {kk, n}];
+    right = If[rT === {}, 0, If[Length[rT] == 1, rT[[1]], Plus @@ rT]];
+    left -> right], {jj, nf}];
+  funRNs = Table[Total[alpF[[All, k]] var] -> Total[betF[[All, k]] var], {k, nf}];
+  Module[{aRN, aRts, aRnR},
+    aRN = Join[pO[[1]], funRN]; aRts = Join[pO[[2]], fC]; aRnR = Join[pO[[7]], prF /@ funRNs];
+    Print[Length[aRN], " reactions and rts=",
+      Row[{Prepend[Transpose[{prF[aRN], prF[Factor /@ aRts]}], {"RN", "rts"}] // MatrixForm,
+        Spacer[20],
+        Prepend[Transpose[{prF[aRnR], prF[Factor /@ aRts]}], {"RNr", "rts"}] // MatrixForm}]]];
+  {Join[pO[[1]], funRN], Join[pO[[2]], fC], pO[[3]],
+   Join[pO[[4]], alpF, 2], Join[pO[[5]], betF, 2], Join[pO[[6]], gamF, 2],
+   Join[pO[[7]], prF /@ funRNs]}];
+
+resHopf[M_] := Module[{lam, ch, lc, co, pIw, reP, imP, res, w},
+  ch = Expand[CharacteristicPolynomial[M, lam]];
+  lc = Coefficient[ch, lam, Length[M]];
+  ch = Expand[ch/lc];
+  co = Reverse[CoefficientList[ch, lam]];
+  pIw = Expand[ch /. lam -> I*w];
+  reP = ComplexExpand[Re[pIw]] // Expand;
+  imP = ComplexExpand[Im[pIw]] // Expand;
+  reP = Expand[reP/w^Exponent[reP, w, Min]];
+  imP = Expand[imP/w^Exponent[imP, w, Min]];
+  res = Resultant[reP, imP, w];
+  {co, res}];
 
 (* ========================================================================= *)
 (* TEST ODE2RN *)

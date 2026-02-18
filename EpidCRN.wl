@@ -24,10 +24,9 @@ analyzes polynomial stability by factoring. Automatically assumes par>0.
 Linear factors (au+b): requires b>0. Quadratic factors (au^2+bu+c): requires b>0 && c>0 (Routh-Hurwitz).
 Returns lSta, qSta as logical expressions (simplified using par>0), hDeg as list of higher-degree factors (deg>=3),
 lFac as list of linear factors, qFac as list of quadratic factors.";
-Hur3::usage="ine=Hur3[pol,var] computes Routh-Hurwitz stability for degree-3 polynomial
- in variable var. Assumes leading coefficient positive.
-Returns ine (list of 3 stability inequalities).";
-Hur4::usage="ine=Hur4[pol,var] computes Routh-Hurwitz stability for degree-4 polynomial in variable var. Returns ine (list of 4 stability inequalities).";
+Hur3::usage="ine=Hur3[pol,var] Routh-Hurwitz for degree-3 polynomial. Assumes parameters positive (cp=Complement[Variables[pol],{var}]). Prints Reduce result if it evaluates within 5s. Returns ine (list of 3 inequalities).";
+Hur4::usage="ine=Hur4[pol,var] Routh-Hurwitz for degree-4 polynomial. Assumes parameters positive (cp=Complement[Variables[pol],{var}]). Prints Reduce result if it evaluates within 5s. Returns ine (list of 4 inequalities).";
+resHopf::usage="{co,res}=resHopf[M] monic char poly coefficients (c0=1,..,cn) and Hopf resultant (Resultant of Re,Im parts of p(I*w) w.r.t. w).";
 Hur4M::usage="{co,h4,ine}=Hur4M[mat] computes Hurwitz determinant for 4x4 matrix. Returns coefficients co, determinant h4, inequalities ine.";
 cons::usage="cons[gam] finds positive conservation laws from gamma matrix. Returns list of positive left nullspace vectors w such that w.gam=0.";
 ODE2RN::usage="{RN,rts,spe,alp,bet,gam}=ODE2RN[RHS,var] converts ODE system to reaction network. RHS is list of expressions, var is list of variables. Returns reaction network RN, rates vector rts, species list spe, reactant matrix alp (alpha), product matrix bet (beta), and net stoichiometric matrix gam (gamma). Algorithm: identifies monomials, uses negative terms to define rates, constructs stoichiometric matrices where sources use alpha=0, then beta=gamma+alpha. Inverse operation to extMat";
@@ -55,6 +54,19 @@ Par::usage="(Core1)Par[RHS,var] extracts parameters from dynamics";
 chk::usage="(Core1)chk[RHS] checks if RHS variables conflict with package names (V,F,K,mSi,RN,alp,bet,gam,etc). Returns list of conflicts and prints warning.";
 allT::usage="(Core1)allT[expr] extracts all terms from expanded polynomial as list";
 isN::usage="(Core1)isN[term] returns True if term has negative sign, False otherwise";
+symRM::usage="(Core)symRM[alp,n,m] builds m x n symbolic reactivity matrix of r[j,k] or 0";
+rSet::usage="(Core)rSet[term] extracts list of r[j,k] symbols from a monomial";
+csInfo::usage="(Core)csInfo[k,term,gam] returns {k,term,sIdx,rIdx,Sk,det} for a child selection, or Nothing if non-square";
+upfQ::usage="(Core)upfQ[{k,...,detSk}] returns True if child selection has unstable positive feedback";
+hurQ::usage="(Core)hurQ[Sk] returns True if matrix Sk is Hurwitz-stable (all eigenvalues have negative real part)";
+negCS::usage="(Core)negCS[co,gam,n] extracts all negative child selections from char poly coefficients co";
+hasseCS::usage="(Core){gH,edges}=hasseCS[nCS] builds Hasse diagram of r-set inclusions among child selections";
+unfQ::usage="(Core)unfQ[{k,...,detSk}] returns True if child selection has unstable negative feedback";
+upfCS::usage="(Core)upfCS[nCS,gH,spe,rts] finds UPF feedbacks with Hurwitz-stable supersets, prints species and rates";
+oscRI::usage="(Core)oscRI[nCS,gH,spe,rts] Recipe I: finds minimal stable supersets for each UPF (Oscillatory Cores of Class I), prints whether Recipe I holds and the networks that achieve it";
+oscRII::usage="(Core)oscRII[nCS,gH,spe,rts] Recipe II: finds minimal UNFs with a Hurwitz-stable principal submatrix (Oscillatory Cores of Class II)";
+fixSgn::usage="(Core)fixSgn[nCS,n] fixed-sign test [Cor 5.7/5.8]: for each order k=1..n, checks if all k-CS determinants share the same sign. Returns {{k,isFixed,signs},...}";
+ODE2RNs::usage="(Core){RN,rts,spe,alp,bet,gam,rnR}=ODE2RNs[RHS,var] like ODE2RN but handles fully symbolic functional rates f[S,i], T[i]. Detects opaque function calls (excludes NumericFunction heads), extracts stoichiometry via Coefficient, delegates polynomial remainder to ODE2RN.";
 
 ODE2WY::usage="(Core){W,Y}=ODE2WY[RHS,var] converts ODE system to W,Y matrix format for wr0RealODE. W is coefficient matrix, Y is exponent matrix. Satisfies RHS==W.x^Y.";
 ab2RN::usage="(Core)RN=ab2RN[alp,bet,spe] converts alpha/beta matrices to reaction network format. alp is reactant matrix, bet is product matrix, spe is species list.";
@@ -165,11 +177,11 @@ toSum::usage="(Conv)toSum[expr] converts expression to sum format";
 toProd::usage="(Conv)toProd[expr] converts expression to product format";
 l2L::usage="(Conv)l2L[list] converts lowercase list format to uppercase format";
 m2toM::usage="(Conv)m2toM[expr] converts m2 expressions to M format";
-remZ::usage="(Conv)remZ[li] removes zeroes from list";
+remZ::usage="(Conv)remZ[li]=Select[li,#=!=0&] removes zeroes from list. See also selZF for removing sublists containing 0.";
 remN::usage="(Utils)remN[expr] removes negative terms from expression. Applies DeleteCases to remove all negative numbers and terms with negative coefficients at all levels.";
 redTim::usage="(Utils)redTout[con,var,time] applies Reduce[con,var] with timeout. Returns 'timeOut' if computation exceeds time limit (default 300 seconds = 5 minutes). var defaults to empty list, time defaults to 300.";
 selZR::usage="(Conv)selZR[con] selects zero rules from conditions";
-seZF::usage="(Conv)seZF[so] removes in a list of lists those with a 0";
+selZF::usage="(Conv)selZF[so] removes in a list of lists those with a 0";
 strEdg::usage="(Conv)strEdg[edges] processes edge structures for graph operations";
 countMS::usage="(Conv)countMS[matrix] counts negative coefficients in a matrix";
 onlyP::usage="(Conv)onlyP[m] checks whether all the coefficients of the numerator of a rational expression m are nonnegative";
