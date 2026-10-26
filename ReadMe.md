@@ -497,3 +497,5 @@ chk[RHS];  (* Warns if any variables conflict with reserved names *)
 **Expected result:** Oscillatory cores involving the infection feedback loop {S, i} and the immunity waning cycle {R, W}.
 
 ---
+
+- [Full-waning coexistence proof and exact verification](notes/waning-coexistence/README.md): for the full eight-compartment model with all finite positive model parameters and nonnegative waning rates, ordered invasion implies positive coexistence; when `p<q<=s0`, it is also necessary. The broad abstract Conjecture 1 and Question 2 root-count classification remain unresolved. This self-contained note adds no uniqueness, stability or persistence claim.
