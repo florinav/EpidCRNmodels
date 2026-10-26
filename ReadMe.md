@@ -497,3 +497,5 @@ chk[RHS];  (* Warns if any variables conflict with reserved names *)
 **Expected result:** Oscillatory cores involving the infection feedback loop {S, i} and the immunity waning cycle {R, W}.
 
 ---
+
+- [Full-waning coexistence proof and exact verification](notes/waning-coexistence/README.md): complete feasible-root and scalar-multiplicity classification for actual-model Question 2 with all finite positive model parameters and nonnegative waning, including coincident thresholds. Ordered invasion gives unique coexistence; for `p<q<=s0`, it is also necessary. Fresh AI mathematical review passed; author correctness and overlap review are pending. Broad abstract Conjecture 1, stability and persistence remain unresolved here.
