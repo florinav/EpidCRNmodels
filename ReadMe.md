@@ -498,4 +498,4 @@ chk[RHS];  (* Warns if any variables conflict with reserved names *)
 
 ---
 
-- [Full-waning coexistence proof and exact verification](notes/waning-coexistence/README.md): for the full eight-compartment model with all finite positive model parameters and nonnegative waning rates, ordered invasion implies positive coexistence; when `p<q<=s0`, it is also necessary. The broad abstract Conjecture 1 and Question 2 root-count classification remain unresolved. This self-contained note adds no uniqueness, stability or persistence claim.
+- [Full-waning coexistence proof and exact verification](notes/waning-coexistence/README.md): complete feasible-root and scalar-multiplicity classification for actual-model Question 2 with all finite positive model parameters and nonnegative waning, including coincident thresholds. Ordered invasion gives unique coexistence; for `p<q<=s0`, it is also necessary. Fresh AI mathematical review passed; author correctness and overlap review are pending. Broad abstract Conjecture 1, stability and persistence remain unresolved here.
