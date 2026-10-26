@@ -2,6 +2,7 @@ name: Boundary-relay isola exact checks
 
 on:
   push:
+    branches: [main]
     paths:
       - 'notes/relay-isola/**'
       - '.github/workflows/relay-isola.yml'
