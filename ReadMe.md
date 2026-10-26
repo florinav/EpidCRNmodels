@@ -497,3 +497,8 @@ chk[RHS];  (* Warns if any variables conflict with reserved names *)
 **Expected result:** Oscillatory cores involving the infection feedback loop {S, i} and the immunity waning cycle {R, W}.
 
 ---
+
+
+## Boundary-relay conjecture: exact scope check
+
+[An eight-reaction mass-action isola](notes/relay-isola/README.md) gives a counterexample to the given-one-parameter-family reading of Conjecture 2 in Mathematics 14(18), 3271, §6.3. The note includes the full reaction witness, proof, two exact checkers, and the explicit reason it does not refute a formulation with all kinetic rates independently variable. This addition asks for author scope and correctness review; it does not change the package.
