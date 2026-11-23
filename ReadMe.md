@@ -8,7 +8,7 @@
 ClearAll["Global`*"]
 SetDirectory[NotebookDirectory[]]; SetOptions[$FrontEndSession, NotebookAutoSave -> True];
 NotebookSave[];
-AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "EpidCRNmodels"}]];
 <<EpidCRN`;
 (* 0: Latex dictionary *)
 prF[ex_] := ex /. {
@@ -1119,3 +1119,23 @@ with the `.wl` script that reproduces its own claimed numbers exactly.
 `compu.tex` itself is untouched; this section is the authoritative plan.
 
 ---
+
+## Directory layout (since 23 November 2026)
+
+The repository root holds **only the package**: `EpidCRN.wl` (the loader) and the
+parts it `Get`s — `Siphons`, `Boundary`, `Equilibria`, `Bifurcation`, `Conv`,
+`Utils`, `Core`, `CRNT`, `Visualize`, `Extra`, `Cl`, `NGMFD`, `Organizations`,
+`CEP`, `ClaudeFuckups`, `Plot`, `BoolNet`.
+
+Everything else lives in subfolders:
+
+| Folder | Contents |
+|---|---|
+| `applications/` | model notebooks and application scripts, plus `multiStrain/` and `ViroImmune/` |
+| `tests/` | test scripts and test notebooks |
+| `doc/` | `.tex`, `.bib`, `.pdf` write-ups and their build artifacts |
+| `misc/` | data and non-Mathematica code (`.py`, `.jl`, `.json`, `.xml`, `.txt`, `.tikz`) |
+| `legacy/` | superseded package versions (`EpidCRNo.wl`, `EpidCRN1.wl`) |
+
+Load paths are `{$HomeDirectory, "EpidCRNmodels"}` — the GitHub clone. The old
+`Dropbox\EpidCRNmodels` copy is gone; do not reintroduce it.

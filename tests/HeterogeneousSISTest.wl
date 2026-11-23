@@ -4,7 +4,7 @@ ClearAll["Global`*"];
 SetDirectory[NotebookDirectory[]];
 SetOptions[$FrontEndSession, NotebookAutoSave -> True];
 NotebookSave[];
-AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "EpidCRNmodels"}]];
 <<EpidCRN`;
 
 (* Task 5: Heterogeneous 2-patch SIS counterexample.

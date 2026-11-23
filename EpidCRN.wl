@@ -423,7 +423,7 @@ Get[FileNameJoin[{root, "Organizations.wl"}]];  (* Chemical Organization Theory,
 (* Buffering.wl is NOT loaded here.  Nothing in EpidCRN calls it, and buffering
    is studied in a handful of files; loading it made its self-test run in every
    session.  The files that need it load it themselves, right after <<EpidCRN`:
-     Get[FileNameJoin[{$HomeDirectory,"Dropbox","EpidCRNmodels","Buffering.wl"}]];
+     Get[FileNameJoin[{$HomeDirectory, "EpidCRNmodels", "applications", "Buffering.wl"}]];
    The usage statements for buffS,isOutC,locIdx,isBuff,allBuff stay above, so the
    definitions still attach to the EpidCRN` symbols when that Get runs. *)
 Get[FileNameJoin[{root, "CEP.wl"}]];  (* CEP lattice-walk decision algorithm *)

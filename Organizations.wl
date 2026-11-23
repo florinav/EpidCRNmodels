@@ -118,7 +118,7 @@ reaction.
 
 ClearAll["Global`*"];
 SetDirectory[NotebookDirectory[]];
-AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "EpidCRNmodels"}]];
 <<EpidCRN`;
 
 RNa = {0 -> "S", "S" -> 0, "S" + "I1" -> 2*"I1", "I1" -> 0, "S" + "I2" -> 2*"I2", "I2" -> 0};

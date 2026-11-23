@@ -4,7 +4,7 @@ ClearAll["Global`*"];
 SetDirectory[NotebookDirectory[]];
 SetOptions[$FrontEndSession, NotebookAutoSave -> True];
 NotebookSave[];
-AppendTo[$Path, FileNameJoin[{$HomeDirectory, "Dropbox", "EpidCRNmodels"}]];
+AppendTo[$Path, FileNameJoin[{$HomeDirectory, "EpidCRNmodels"}]];
 <<EpidCRN`;
 
 (* 2-patch SEIR graph-diffusion test.
