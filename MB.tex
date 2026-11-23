@@ -1,0 +1,586 @@
+\section{Mathematical background}\lbl{s:MB}
+
+
+
+\ssec{The next-generation matrix theorem and beyond: from siphons to right and left Perron eigenvectors of Metzler transversal Jacobians}
+
+There is no doubt that the
+next-generation matrix (NGM) theorem is a fundamental law of mathematical epidemiology.
+This classical result~\cNGM, probably the most cited  in the field of positive
+ODEs,   is emblematic of the fragmentation of positive ODE sciences, by being not enough known   outside  ME.
+
+It provides a  striking invasion criterion of the form $R_0 >1$ at the DFE ($R_0$ is called  reproduction number), which is motivated by the theory of population models
+\cite{Lotka} and their branching process  approximations \cite{kendall1966branching}. This result implicitly relies on
+three distinct mechanisms that are not enough disentangled:
+
+(i) The fact that forward invariance of a boundary face  enforces a {\bf triangular block structure of
+the Jacobian  evaluated on it} \cite{AAH26},
+with  the obvious ensuing {\bf reduction of  stability to that of the  lower--dimensional tangential and transversal blocks} -- see for example \cite{JA}.
+
+
+(ii) The {\bf Metzler structure of the transversal Jacobian
+block on a siphon face}, recently proved in \cite{AAHK}.
+
+(iii)  {\bf Regular splitting}. A convenient  feature of Metzler matrices, and hence of the models studied in ME, is that the classic stability criteria for the transversal Jacobian may be replaced by a criterion specific to  Metzler matrices which admit regular splittings $M=F-V$, with $F, V^{-1}$ \nne\ componentwise.
+For such matrices, the equivalence between the sign of the spectral abscissa of $M$ and that of $R_0-1$, where $R_0$ is the spectral abscissas of $F V^{-1}$, goes
+back to
+\cite{Varga,Berman,Van}. At first,
+this equivalence suggests preferring spectral abscissa, like in ecology, which are unique,
+while regular splittings and reproduction numbers aren't. However, in this paper we  use also the latter, both due to empirical observations that sparseness renders reproduction numbers  often simpler, and to possible probabilistic interpretations which might turn out useful in future works.
+
+\beD [ME-type siphon, \NGM]\label{d:VdD}
+Let $\x$ denote the \var s which are $0$ on a siphon face $L_\si$,  let  $\y$ denote the positive (resident) \var s, and recall that the Jacobian $J_x(\y)$ on $L_\si$ is Metzler (equivalently, the ODE is locally  increasing in $\y$ on $L_\si$)  \cite{AAH26,AAHK}. We will call ME-type siphon a siphon which     admits some regular splitting  $J_x=F-V$
+in the sense of \cite{Varga,Van} ($F$ is \nne, an $V^{-1}$ exists and is \nne).
+
+The matrix $K=F V^{-1}$ is called \NGM\ (NGM).
+\eeD
+
+\beR[Three aspects of NGM theory are relevant at every siphon face]
+With NGM decomposed as above, we realize immediately that its three parts identified above are relevant at every siphon face: the first two apply always, and the third may be occasionally useful, when regular splitting to the transversal Jacobian
+on that face may be  applied.
+\eeR
+
+\beD [transversal Jacobian blocks]\label{d:tJb}
+For a chemical dynamical system, put  the (Metzler) Jacobian of the  DFE equations with respect to the DFE variables in its Perron-Frobenius normal form.  The irreducible diagonal blocks of this decomposition will be called transversal Jacobian blocks.
+\eeD
+
+
+\ssec{Rank one ME models with essentially rank one transversal Jacobians}
+\beD[essentially rank one irreducible Metzler matrix]
+An irreducible Metzler matrix will be called essentially rank one if its off-diagonal
+part is of  rank one. \eeD
+
+%\beR [``essentially" rank-one ME models enjoy explicit rational formulas] Papers like \cite{Fall,IggidrCEP,Bonzi,EarnMc,AAHK} and others have noted and exploited  that  ``essentially" rank-one blocks in the Jacobian lead to   explicit  left and right Perron eigenvectors, and explicit stability formulas.\eeR
+
+
+
+
+
+\beD[rank one ME models] A chemical  ODE is called a rank one (ME) model if the
+transversal
+ Jacobians blocks $J_\Sigma^\perp$ of minimal siphons $\Sigma$ (which  are  Metzler, irreducible, and intervene as blocks in the Perron-Frobenius normal form of the Jacobian) admit all regular splittings $J_\Sigma=F_\Sigma-V_\Sigma$  such that the corresponding \NGM\  $K_\Sigma=F_\Sigma V_\Sigma^{-1}$  have rank one, \ie\   $K_\Sigma$ is the tensor product
+ of  left and right  Perron
+eigenvectors  $\pi_\Sigma\gg0$,
+ $w_\Sigma\gg0$.
+
+Note:  we will
+write $\hat\pi_\Sigma, \hat w_\Sigma$ for   left and right
+Perron eigenvectors of the cyclically permuted NGM $\T K_\Sigma:= V_\Sigma^{-1} F_\Sigma$.
+\eeD
+
+
+\beR [An advantage of using NGM blocks over the corresponding Jacobian blocks] is that the concept of rank-one NGM block is weaker than that of the corresponding Jacobian block being of rank-one. This may explain the preference   in ME of using NGM blocks over  Jacobian blocks.\eeR
+
+
+
+\beD [simple ME models]\label{d:simpM}
+A rank one  ME model for which the NGM of the DFE has only zero eigenvalues and   unconditionally positive eigenvalues, one for each minimal siphon block,  which  were called
+\repF\ in \cite{AABH25}, will be called simple.
+\eeD
+
+%Note that the important ``vector ME models" are not simple.
+
+
+\ssec{Is the persistence criterion explicit for ME models?}
+
+The answer to this question is somewhat hidden in
+the literature.  A fundamental result of \cite{FreRuan} -- see also
+\cite{wangZika2017,Bulh} -- based on Morse decomposition theory,
+implies that when the maximal invariant sets on the boundary are fixed
+points, uniform persistence follows from two ingredients:
+
+\begin{enumerate}
+
+\item \textbf{Transversal repulsivity of every boundary equilibrium.}
+
+This may be expressed as
+\be{plaw}
+        \min_{(\Sigma,E)}
+        \alpha_\Sigma(E)
+        >0,
+\ee
+where
+\[
+        \alpha_\Sigma(E)
+        :=
+        \alpha\!\left(
+        J_\Sigma^\perp(E)
+        \right)
+\]
+is the spectral abscissa of the Jacobian block transversal to the
+siphon face \(F_\Sigma\) at a boundary equilibrium \(E\in F_\Sigma\).
+(Equivalently, all ``ME invasibility numbers" associated must be  larger than one.)
+
+The computation of these transversal spectral quantities can be carried
+out numerically, and in low-dimensional cases often symbolically as
+well.
+
+An important point is that positivity of the invasibility numbers yields
+more than instability: because the transversal Jacobians are Metzler,
+Perron--Frobenius theory provides positive left eigenvectors which
+yield local linear repelling Lyapunov functions,  certifying transversal repulsion from
+the siphon boundary faces.
+
+\item \textbf{Acyclicity of the boundary connection graph.}
+
+This prevents trajectories from circulating indefinitely along chains of
+boundary faces.  Geometrically, it ensures that tangential motion along
+siphon faces cannot compensate for the transversal repulsion created by
+positive invasibility numbers.
+
+\end{enumerate}
+
+In the one- and two-siphon cases, acyclicity is essentially automatic;
+see Theorem~\ref{t:per}.  For general \(n\)-strain models, however,
+acyclicity becomes a genuinely nontrivial combinatorial problem and may
+require additional hypotheses; see the ArXiv version.
+
+\ssec{Coexistence, the relay property, and the complete exclusion partition principle}
+
+Beyond persistence, another fundamental question in ME is coexistence,
+\ie\ existence of a strictly positive endemic equilibrium (EE).
+While the disease-free equilibrium (DFE) always exists, the EE typically
+appears only after certain boundary equilibria lose stability.
+Moreover, in all explicit examples known to us, persistence and EE
+existence coincide:
+\[
+        \text{persistence}
+        \qquad\Longleftrightarrow\qquad
+        \exists\,EE\in\R^n_{>0}.
+\]
+Whether this equivalence holds beyond explicit low-dimensional cases
+remains, to our knowledge, an  open problem.
+
+A possible explanation emerges from the ``escape paths from the
+boundary'' generated by positive invasibility numbers, already emphasized in
+ecology by Schuster and Sigmund
+\cite{SchusSig,SigSchus}.  Along these paths one repeatedly observes
+the following:
+
+\paragraph{Relay principle}
+The same invasion inequality which causes transversal instability of a
+boundary equilibrium also guarantees existence of a successor equilibrium
+on a strictly larger invariant face.  We refer to this mechanism as a
+\emph{boundary transcritical relay} (BTR).
+
+Although reminiscent of classical transcritical bifurcation theory
+(e.g.\ \cite{Boldin}), the present setting is richer, being structured
+by positivity constraints and invariant face geometry.
+The bifurcation does not occur along a single coordinate direction, but
+along an entire \emph{siphon block}.
+%Indeed, multi-strain models are naturally organized by the lattice
+%generated by minimal siphons.  Each inhabited siphon face corresponds to
+%a resident community, and
+Invasions occur through transversal Jacobian
+blocks associated with missing siphons, and the relevant invasion quantity
+is therefore not a scalar derivative, but the spectral abscissa (or
+equivalently the reproduction number) of a Metzler transversal block.
+
+The relay principle asserts that crossing the instability threshold
+\[
+        \alpha_\Sigma(E)=0
+        \qquad
+        (\text{equivalently }R_\Sigma(E)=1)
+\]
+simultaneously:
+\begin{enumerate}
+\item destroys transversal stability of the resident equilibrium \(E\),
+\item creates a new equilibrium on the adjacent larger siphon face.
+\end{enumerate}
+
+Thus invasion and equilibrium creation are two manifestations of the
+same geometric event.  See relay theorem in \cite{AH26}.
+
+While verification of each relay follows the standard transcritical
+bifurcation scheme, the resulting relay tables
+(Table~\ref{tab:Gav}) reveal a richer organizational structure:
+the global dynamics is partitioned into regions where exactly one
+equilibrium can be locally asymptotically stable.
+
+This phenomenon appears repeatedly in epidemic models and suggests a
+general \emph{complete exclusion partition principle}:
+parameter space decomposes into regions indexed by resident equilibria,
+with transitions occurring only through relays generated by invasion
+numbers.
+
+At a heuristic level, this principle seems related to monotonicity of
+the siphon reproduction functions with respect to resident variables,
+although no general theorem in this direction appears to be available.
+
+\paragraph{Relation to invasion graphs in ecology}
+The relay graphs introduced below are closely related to the invasion
+graphs of Hofbauer and collaborators \cite{HofSch,HofSch10}, which encode which resident
+communities can be invaded through positive invasion rates.
+There are, however, two important differences.
+
+First, our nodes are not arbitrary equilibria, but equilibria indexed by
+\emph{inhabited siphon faces}, partially ordered by inclusion in the
+minimal-siphon lattice.
+
+Second, edges are labeled by explicit invasibility numbers obtained from
+transversal reproduction functions.  Adjacency in the relay graph
+therefore corresponds to distance-one moves in the siphon lattice,
+yielding a direct correspondence between:
+\[
+        \text{loss of transversal stability}
+        \quad\Longleftrightarrow\quad
+        \text{appearance of a successor equilibrium}.
+\]
+
+This makes the relay graph algorithmic: once the minimal siphons and
+their reproduction functions are known, one can in principle enumerate
+candidate equilibria, determine their stability, and predict the relay
+transitions between them.
+
+
+
+% Corrected relay graph for the two-strain Feng–Gavish model
+% Requires: \usepackage{tikz}
+%            \usetikzlibrary{arrows.meta, positioning, fit, calc}
+
+
+
+
+\begin{figure}[H]
+\centering
+\scalebox{0.8}{
+\begin{tikzpicture}[
+    every node/.style = {align=center},
+    %% -- node styles --------------------------------------------------
+    eqnode/.style = {
+        rectangle, rounded corners=7pt,
+        draw, thick,
+        minimum width  = 6.8cm,
+        minimum height = 1.4cm,
+        inner sep      = 9pt,
+        font           = \normalsize
+    },
+    thmbox/.style = {
+        rectangle, rounded corners=6pt,
+    draw, thick, dashed,
+    text width     = 5.4cm,
+    align          = center,
+    inner sep      = 6pt,
+    font           = \footnotesize
+    },
+    %% -- arrow styles -------------------------------------------------
+    btr/.style = {->, dashed,  very thick, >=Stealth, shorten >=2pt},
+    dot/.style = {->, dotted,  thick,      >=Stealth, shorten >=2pt},
+    lbl/.style = {font=\small, fill=white, inner xsep=3pt, inner ysep=2pt}
+]
+
+%% ════════════════════════════════════════════════════════════════════
+%%  EQUILIBRIUM NODES
+%% ════════════════════════════════════════════════════════════════════
+
+%% E0 — top centre
+\node[eqnode, fill=gray!12] (E0) at (0, 0) {
+    \textbf{$E_0$ \,(DFE)} \\[4pt]
+    \small LAS iff $\mathcal{R}_1 < 1$ and $\mathcal{R}_2 < 1$ \\
+    \small unstable if $\mathcal{R}_1 > 1$ or $\mathcal{R}_2 > 1$
+};
+
+%% E1 — left
+\node[eqnode, fill=blue!9] (E1) at (-4.6, -4.2) {
+    \textbf{$E_1 \in \mathrm{relint}\,F_1$} \\[4pt]
+    \small exists iff $\mathcal{R}_1 > 1$ \\
+    \small LAS iff $\mathcal{R}_1 > \mathcal{R}_2$
+           \;and\; $\mathcal{R}_2^{E_1} < 1$
+};
+
+%% E2 — right
+\node[eqnode, fill=teal!9] (E2) at ( 4.6, -4.2) {
+    \textbf{$E_2 \in \mathrm{relint}\,F_2$} \\[4pt]
+    \small exists iff $\mathcal{R}_2 > 1$ \\
+    \small LAS iff $\mathcal{R}_2 > \mathcal{R}_1$
+           \;and\; $\mathcal{R}_1^{E_2} < 1$
+};
+
+%% E12 — centre bottom
+\node[eqnode, fill=violet!9] (E12) at (0, -8.2) {
+    \textbf{$E_{12} \in \mathrm{relint}\,\Gamma$} \\[4pt]
+    \small all boundary equilibria transversally unstable
+};
+
+%% ════════════════════════════════════════════════════════════════════
+%%  RELAY ARROWS  (boundary transcritical relays)
+%% ════════════════════════════════════════════════════════════════════
+
+\draw[btr] (E0) -- (E1)
+    node[lbl, midway, left=4pt]
+        {$\mathcal{R}_1(E_0) > 1$};
+
+\draw[btr] (E0) -- (E2)
+    node[lbl, midway, right=4pt]
+        {$\mathcal{R}_2(E_0) > 1$};
+
+\draw[btr] (E1) -- (E12)
+    node[lbl, midway, left=4pt]
+        {$\mathcal{R}_2^{E_1} > 1$};
+
+\draw[btr] (E2) -- (E12)
+    node[lbl, midway, right=4pt]
+        {$\mathcal{R}_1^{E_2} > 1$};
+
+%% ════════════════════════════════════════════════════════════════════
+%%  THEOREM BOXES
+%% ════════════════════════════════════════════════════════════════════
+
+%% -- Persistence box (parallel left) -------------------------------
+\node[thmbox, fill=orange!6]
+    (pers) at (-3.4,-12.0)
+{
+\textbf{Persistence Thm.~4.3}\\[4pt]
+
+$\mathcal{R}_1>1,\;
+\mathcal{R}_2>1,\;
+\mathcal{R}_2^{E_1}>1,\;
+\mathcal{R}_1^{E_2}>1$
+
+$\Longrightarrow$ uniform persistence
+
+\vspace{3pt}
+\rule{0.9\linewidth}{0.3pt}
+
+\smallskip
+\itshape
+Note: in this model
+$\mathcal{R}_1>1$ and
+$\mathcal{R}_2>1$ are implied by
+$\mathcal{R}_2^{E_1}>1$ and
+$\mathcal{R}_1^{E_2}>1$, but this is
+not established in general
+(open problem)
+};
+
+%% -- Coexistence box (parallel right) ------------------------------
+\node[thmbox, fill=violet!6]
+    (coex) at (3.4,-12.0)
+{
+\textbf{Coexistence Thm.~5.9}\\[4pt]
+
+$\bigl(\mathcal{R}_1>\mathcal{R}_2
+\;\text{and}\;
+\mathcal{R}_2^{E_1}>1\bigr)$
+
+or
+
+$\bigl(\mathcal{R}_2>\mathcal{R}_1
+\;\text{and}\;
+\mathcal{R}_1^{E_2}>1\bigr)$
+
+$\Longrightarrow
+\exists\,E_{12}\in\mathbb{R}^n_{>0}$
+
+\vspace{3pt}
+\rule{0.9\linewidth}{0.3pt}
+
+\smallskip
+\itshape
+Note: persistence
+$\Leftrightarrow$ coexistence
+in all known explicit cases,
+but the equivalence remains
+open in general
+(open problem)
+};
+
+%% ── dotted connectors from E12 to the two boxes ─────────────────────
+\draw[dot] (E12.south) -- ++(0,-0.55) -| (pers.north);
+\draw[dot] (E12.south) -- ++(0,-0.55) -| (coex.north);
+
+\end{tikzpicture}
+ }
+\caption{%
+The relay graph for the two-strain Feng--Gavish model.
+Nodes correspond to equilibria indexed by inhabited siphon faces:
+$E_0$ (DFE), one-strain equilibria $E_1\in\mathrm{relint}\,F_1$
+and $E_2\in\mathrm{relint}\,F_2$, and the coexistence equilibrium
+$E_{12}\in\mathrm{relint}\,\Gamma$.
+Dashed arrows are boundary transcritical relays (BTRs): the invasion
+inequality on each arrow simultaneously destroys transversal stability
+of the source equilibrium and creates a successor equilibrium on the
+adjacent siphon face (Thm.~6.1).
+LAS conditions at $E_1$ and $E_2$ include the strain-ordering
+requirement ($\mathcal{R}_1>\mathcal{R}_2$ or $\mathcal{R}_2>\mathcal{R}_1$,
+respectively) from Table~3.
+Dotted arrows lead to two downstream results.
+\emph{Persistence Thm.~4.3}: all four invasion inequalities together
+imply uniform persistence; in this model the first two
+($\mathcal{R}_k>1$) are implied by the last two, but that
+implication is not established in general (open problem).
+\emph{Coexistence Thm.~5.9}: the ordered invasion condition
+guarantees existence of $E_{12}\in\mathbb{R}^n_{>0}$; the
+equivalence persistence\,$\Leftrightarrow$\,coexistence holds in
+all known explicit cases but remains open in general.%
+}
+\label{fig:relay-graph}
+\end{figure}
+
+
+
+
+
+
+\iffalse
+
+
+
+
+
+
+
+
+
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    scale=1.2,
+    >=stealth,
+    eq/.style={
+        rectangle,
+        draw,
+        rounded corners=3pt,
+        minimum width=1.7cm,
+        minimum height=0.9cm,
+        align=center,
+        font=\small
+    },
+    lbl/.style={
+        font=\scriptsize,
+        align=center
+    },
+    relay/.style={
+        ->,
+        thick,
+        dashed
+    },
+    persist/.style={
+        rectangle,
+        draw,
+        rounded corners=3pt,
+        minimum width=7cm,
+        minimum height=1.5cm,
+        align=center,
+        font=\scriptsize
+    }
+]
+
+%------------------------------------------------
+% Nodes
+%------------------------------------------------
+\node[eq] (E0) at (0,0) {$E_0$\\(DFE)};
+
+\node[eq] (E1) at (4,2) {$E_1$\\$\in \mathrm{relint}(F_1)$};
+
+\node[eq] (E2) at (4,-2) {$E_2$\\$\in \mathrm{relint}(F_2)$};
+
+\node[eq] (E12) at (8,0)
+{$E_{12}$\\$\in \mathrm{relint}(\Gamma)$};
+
+%------------------------------------------------
+% Conditions above nodes
+%------------------------------------------------
+\node[lbl, above=0.08cm of E0]
+{
+LAS iff\\
+$R_1<1,\ R_2<1$
+};
+
+\node[lbl, above=0.08cm of E1]
+{
+exists iff $R_1>1$\\
+LAS iff\\
+$R_1>R_2,$\\
+$R^{E_1}_2<1$
+};
+
+\node[lbl, below=0.08cm of E2]
+{
+exists iff $R_2>1$\\
+LAS iff\\
+$R_2>R_1,$\\
+$R^{E_2}_1<1$
+};
+
+\node[lbl, above=0.08cm of E12]
+{
+exists (Thm.\ 5.9) when
+$
+(R_1>R_2,\ R^{E_1}_2>1)
+$
+or
+$
+(R_2>R_1,\ R^{E_2}_1>1)
+$
+};
+
+%------------------------------------------------
+% Relay arrows
+%------------------------------------------------
+\draw[relay]
+(E0) -- (E1)
+node[midway, above]
+{$R_1(E_0)>1$};
+
+\draw[relay]
+(E0) -- (E2)
+node[midway, below]
+{$R_2(E_0)>1$};
+
+\draw[relay]
+(E1) -- (E12)
+node[midway, above]
+{$R^{E_1}_2>1$};
+
+\draw[relay]
+(E2) -- (E12)
+node[midway, below]
+{$R^{E_2}_1>1$};
+
+%------------------------------------------------
+% Persistence theorem box
+%------------------------------------------------
+\node[persist] (P) at (4,-5.3)
+{
+\textbf{Uniform persistence (Thm.\ 4.3)}\\[1mm]
+If
+$
+R_1>1,\quad R_2>1,\quad
+R^{E_1}_2>1,\quad
+R^{E_2}_1>1,
+$
+then the system is uniformly persistent.
+};
+
+%------------------------------------------------
+% Connections to persistence theorem
+%------------------------------------------------
+\draw[dotted, thick] (E1.south) -- (P.north west);
+\draw[dotted, thick] (E2.south) -- (P.north);
+\draw[dotted, thick] (E12.south) -- (P.north east);
+
+\end{tikzpicture}
+
+\caption{
+Relay graph for the two-strain Feng--Gavish model.
+Nodes correspond to equilibria indexed by inhabited siphon faces:
+$E_0$ (DFE), one-strain equilibria
+$E_1\in\mathrm{relint}(F_1)$ and
+$E_2\in\mathrm{relint}(F_2)$,
+and coexistence equilibrium
+$E_{12}\in\mathrm{relint}(\Gamma)$.
+Dashed arrows represent boundary transcritical relays (BTRs):
+the invasion inequality labeling an arrow simultaneously destroys
+transversal stability of the resident equilibrium and creates a successor
+equilibrium on an adjacent siphon face.
+The LAS conditions at $E_1$ and $E_2$ include the ordering requirements
+$R_1>R_2$ and $R_2>R_1$, respectively.
+Existence of $E_{12}$ follows from Theorem~5.9 under the ordered
+invasion condition.
+The bottom theorem box summarizes the mutual invasibility condition
+yielding uniform persistence (Theorem~4.3).
+}
+\end{figure}
+\fi

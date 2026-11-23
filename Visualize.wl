@@ -1019,3 +1019,27 @@ Print["Spe nod=", DSRres["SpeciesNodes"], " Rea nod=",
 Print["Edg dat=", DSRres["EdgeData"]];
 Print[DSRres["Graph"]];*)
 
+
+(* picture of hsGr: supports layered by size, green = invadable (or full),
+   edges K -> L when every population of L\K invades K *)
+hsPlot[hs_List] := Module[{vtx, edg, inv, lev, xy},
+  {vtx, edg, inv} = {hs[[1]], hs[[4]], hs[[6]]};
+  lev = Length /@ vtx;
+  xy = Table[With[{same = Flatten[Position[lev, lev[[k]]]]},
+      {Position[same, k][[1, 1]] - (Length[same] + 1)/2, lev[[k]]}], {k, Length[vtx]}];
+  Graph[Range[Length[vtx]], DirectedEdge @@@ edg, VertexCoordinates -> xy,
+    VertexLabels -> Table[k -> Placed[Framed[If[vtx[[k]] === {}, "\[EmptySet]", Row[vtx[[k]], ","]],
+        Background -> If[inv[[k]], LightGreen, LightRed], FrameStyle -> Gray, RoundingRadius -> 3,
+        FrameMargins -> 2], Center], {k, Length[vtx]}],
+    VertexSize -> 0, BaseStyle -> {FontSize -> 9}, EdgeStyle -> GrayLevel[0.35],
+    EdgeShapeFunction -> ({Arrowheads[{{0.07, 0.55}}], Arrow[#1]} &),
+    ImagePadding -> 12, ImageSize -> {UpTo[220], UpTo[45 (Max[lev] + 1)]}]];
+
+(* picture of invSen: rows (resident support, missing population), columns
+   parameters; white = protected (zero derivative), red/blue = sign *)
+senPlot[sen_List, prs_List] := Module[{m = sen[[All, 3]]},
+  ArrayPlot[Sign[m], ColorRules -> {0 -> White, 1 -> RGBColor[0.85, 0.3, 0.3], -1 -> RGBColor[0.3, 0.45, 0.85]},
+    Mesh -> All, MeshStyle -> LightGray, Frame -> True, FrameTicks -> {
+      {Table[{k, Row[{If[sen[[k, 1]] === {}, "\[EmptySet]", Row[sen[[k, 1]], ","]], " : ", sen[[k, 2]]}]}, {k, Length[sen]}], None},
+      {None, Table[{j, Rotate[prs[[j]], Pi/2]}, {j, Length[prs]}]}},
+    BaseStyle -> {FontSize -> 8}, ImageSize -> {UpTo[300], UpTo[25 Length[sen] + 40]}]];

@@ -1,0 +1,85 @@
+
+\lbl{ss:cone-crosslist}
+\ssec{Admissible  cones of Perron--Volterra Lyapunov functions for ecology and mathematical epidemiology models}
+The three papers included in this  monograph study the set of positive coefficients for which combinations of prescribed
+Volterra or Perron--Volterra-type functions are actually a Lyapunov function.  Three  related
+cones intervene:
+
+\BEN
+
+\im
+In the scalar GLV paper (\emph{Siphon calculus and Lyapunov functions for GLV systems}), the admissibility
+cone for an equilibrium $x^*$ is built from the \emph{Volterra} Lyapunov function $V_a$ (that paper's own
+name for the general $L_\theta$ Ansatz of Definition~\ref{d:general-admissible-cone} below, in the special
+case where every coordinate carries its own free weight $a_i$):
+\[
+\mathcal W(x^*)
+=
+\left\{
+a\gg0:
+\dot V_a(x)\leq0
+\text{ for every }x\gg0
+\right\},
+\qquad
+V_a(x)
+=
+\sum_{i=1}^n
+a_i x_i^*
+G\!\left(\frac{x_i}{x_i^*}\right), G(u)=u-1-\ln u.
+\]
+
+\im
+In the block-GLV paper, the Perron directions inside each block are fixed by
+the chosen regular splitting, while their relative block multipliers are free. The Lyapunov ansatz at an equilibrium where a single strain $p$ is resident and all the others are invading is:
+\[
+L_p^{\,b,(a)}
+=
+bH_p
++
+\sum_{k\neq p}
+a_k\widetilde\pi_k^\top z_k,
+\qquad
+a=(a_k)_{k\ne p},
+\qquad
+\widetilde\pi_k^\top
+=
+\frac{\pi_k^\top V_k^{-1}}{\mR_k}
+\]
+(see section \ref{s:not} for notations).
+The corresponding cone is denoted by \(\mathcal W_p\).
+
+\im
+The \cite{RecBro} immuno-virology paper has, like \cite{AAHRah}, a whole family of resident equilibria (virus-only
+$E_i$, dedicated- or shared-immune successors $E_{i,z},E_{i,w}$, and mixed-support equilibria beyond these).
+Unlike \cite{AAHRah}, however, where a global Lyapunov certificate is a \emph{proved theorem} at every resident
+equilibrium (the GAS-CEP theorem above), GAS of the disease-free equilibrium is the only globally proved case
+so far; GAS of the virus-only equilibrium $E_1$ itself is an \emph{open conjecture}, since the canonical
+Perron--Volterra Ansatz that settles the analogous case in \cite{AAHRah} demonstrably fails here (the virion-
+absorption term makes the transversal transition matrix state-dependent, outside that theorem's hypotheses).
+The admissible-cone question below is therefore not a refinement on top of an already-solved existence
+problem, as it is for the other two papers, but a direct attempt at that open existence problem itself,
+carried out on the immune coordinates' vanishing locus (where the model reduces to the three-coordinate
+virion-absorption block $(x,v,y)$; the immune coordinates are added back only in a later, separately-treated
+extension). On this block, the entropy family and cone are
+\[
+L_{c_v,c_y}
+=
+G(x/x_1)
++
+c_vG(v/v_1)
++
+c_yG(y/y_1),
+\qquad
+\mathcal W_{E_1}
+=
+\left\{
+(c_v,c_y)\gg0:
+\dot L_{c_v,c_y}\leq0
+\text{ on }\mathbb R_{>0}^3
+\right\},
+\]
+and, on one parameter slice, a nonempty $\mathcal W_{E_1}$ found below is not merely a wider certificate set
+but the \emph{first proof} of GAS at $E_1$ that the conjecture has ever had.
+
+\EEN
+

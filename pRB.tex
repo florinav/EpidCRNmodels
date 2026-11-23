@@ -1,0 +1,87 @@
+\ssec{Some results and open problems of the Recker--Browne type immuno-virological model}
+
+The results below are listed in the order in which they are built, which is also the order of increasing
+depth in the relay graph: first  the disease-free threshold, then the first relay
+layer, then arbitrary resident supports, then the exceptional full-coexistence configuration, then the third
+relay layer, and finally the modular multi-resource generalization.
+
+\emph{Boundary structure and the first relay layer.}
+Theorem~\ref{t:virus-CTL-minimal-siphons} determines the $2m+1$ minimal siphons of the model, which determine the
+siphon lattice.
+Theorem~\ref{t:virus-CTL-DFE} gives the block decomposition, the regular splitting and the
+resulting disease-free stability threshold, with Corollary~\ref{c:immune-invisible-DFE} recording that no immune
+parameter appears in it --- the immune layer becomes visible only from the second relay layer on;
+Theorem~\ref{t:DFE-GAS-full} upgrades that threshold from local to global by a scalar Perron--Frobenius
+comparison bound; and Theorem~\ref{t:first-layer-exclusion} with
+Corollary~\ref{c:virus-only-coexistence} classifies the first relay layer, showing that generically exactly
+one virus-only resident community survives, ordered by the break-even resource levels.
+
+\emph{Arbitrary resident supports.}
+Theorem~\ref{t:virus-invasion-arbitrary-resident} gives the exact invasion number of an absent strain at a
+resident equilibrium of \emph{arbitrary} immune support, and
+Theorem~\ref{t:support-complementarity-virus-CTL} is the structural heart of the paper: every such support
+reduces to pinned infected-cell levels, residual immune-budget identities, common-fitness conditions, and a
+finite-dimensional linear reconstruction problem. Theorem~\ref{t:mixed-support-reduction} is the converse
+reconstruction, turning that system back into explicit equilibria; its first two levels are written out in
+Corollaries~\ref{c:one-unprotected-resident} and~\ref{c:two-unprotected-residents}.
+
+\emph{Full coexistence is exceptional.}
+Theorem~\ref{t:full-coexistence-characterization} shows that simultaneous positivity of all strains, all
+dedicated CTLs and the shared effector forces an explicit immune-balance tie
+$\mu_w/(\xi_w\eta)=m\,\mu_z/\xi_z$ involving \emph{no strain parameter at all}, and that on that
+codimension-one surface the positive equilibria form a one-parameter segment indexed by the shared-CTL level,
+with every dedicated CTL decreasing linearly along it. Consequently there is generically no isolated top
+equilibrium (Corollary~\ref{c:no-generic-top-equilibrium}).
+
+\emph{The third relay layer.}
+Theorem~\ref{t:third-layer-quadratic} reduces shared-CTL-mediated re-invasion exactly to a quadratic
+$P_{ij}(x)=A_{ij}x^2+B_{ij}x+C_{ij}=0$, separating regular reconstruction, singular reconstruction, and
+identical-fitness continua; Corollary~\ref{c:third-layer-root-classification} classifies its roots and
+Corollary~\ref{c:identical-shared-fitness} isolates the degenerate case, whose geometry is then settled by
+Propositions~\ref{p:identical-fitness-continuum}--\ref{p:no-immune-first-integral-identical-continuum} and
+by the asymptotic-phase Theorems~\ref{t:identical-continuum-asymptotic-phase}
+and~\ref{t:symmetric-continuum-phase}. Proposition~\ref{p:quadratic-not-stability} is stated to prevent a
+natural misreading: the eliminated quadratic decides existence and count, not stability, for which
+Theorem~\ref{t:third-layer-Hurwitz-reduction} supplies the corresponding quadratic-quotient Hurwitz test.
+Theorem~\ref{t:shared-CTL-support-condition} with Corollary~\ref{c:shared-CTL-generic-support} bounds
+shared-CTL resident diversity generically, and Theorem~\ref{t:generic-finite-equilibria} closes the
+finite-dimensional analysis with a generic bound on the total number of equilibria, obtained by combining the
+support lattice with the linear, scalar and quadratic reductions above.
+
+\emph{The modular multi-resource model.}
+Theorem~\ref{t:modular-immune-invisible} shows that the invisibility of the immune architecture in the DFE
+threshold is not an artifact of the running example but a structural feature of the whole modular class;
+Theorem~\ref{t:multi-resource-break-even} establishes the affine break-even geometry once several
+target-cell resources compete, and Theorem~\ref{t:multi-resource-existence-uniqueness} gives existence and
+uniqueness at a multi-resource break-even intersection via the positive-cone criterion
+$q(x^*)\in\operatorname{cone}_{>0}\{b_i:i\in I\}$ together with rank and kernel uniqueness alternatives.
+Proposition~\ref{p:isolated-multi-resource-unstable} is the cautionary companion: an isolated coexistence
+equilibrium can be linearly unstable, so isolation is not stability
+(Remark~\ref{r:isolation-not-stability}).
+
+\emph{Open problems.} Global competitive exclusion on the immune-free face
+(Open Problem~\ref{p:virus-only-winner-GAS-conjectural}, with the numerical evidence of
+Remark~\ref{r:virus-only-winner-numerical-evidence}); stability and Hopf bifurcation at and beyond the third
+relay layer (Open Problems~\ref{op:shared-CTL-Hopf}, \ref{op:third-layer-Hurwitz},
+\ref{op:third-layer-Hurwitz-explicit}, \ref{op:certified-third-layer-Hopf},
+\ref{op:third-relay-dynamics}); transverse stability and asymptotic phase on the identical-fitness continuum
+(Open Problems~\ref{op:identical-continuum-stability}, \ref{op:symmetric-phase-closed-form}); the exact
+maximal equilibrium count for two strains (Open Problem~\ref{op:true-m2-equilibrium-count}) and the layers
+of the relay graph beyond the third (Open Problem~\ref{op:relaym2}); stability of multi-resource coexistence
+and the role of diagonal symmetrizability
+(Open Problems~\ref{op:multi-resource-stability}, \ref{p:linear-multi-resource-Volterra},
+\ref{op:linear-multi-resource-Hopf}, \ref{op:linear-resource-Hopf-still-open}); and, cutting across the whole
+programme, whether uniform persistence implies existence of a positive equilibrium
+(Open Problem~\ref{op:persistence-vs-coexistence}).
+
+\emph{Illustrated by:} the running virus--CTL model of \S\ref{s:recbrowne} throughout --- it is both the
+object of the theory and its worked example, so the support-classification, coexistence, third-relay-layer
+and global-threshold theorems above are each stated on it directly; the single-strain specialization
+\S\S\ref{s:relay}--\ref{s:m1bd}, where those general theorems are written out in explicit coordinates and
+are easiest to check; the growth of the relay graph at $m=2$ in \S\ref{s:m2}, the smallest case in which the
+shared CTL creates a third layer; and the modular resource--pathogen--immune model of \S\ref{s:modular},
+which shows that nothing above depended on having exactly one shared resource.
+
+The global-stability counterpart of this list --- admissible cones, the rank-one Perron--Volterra ansatz and
+its alignment obstruction, the logarithmic immune-balance first integral, and the normal hyperbolicity of
+the coexistence segment --- is developed in the companion Paper~B and is not restated here.

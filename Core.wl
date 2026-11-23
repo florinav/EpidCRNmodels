@@ -8,8 +8,17 @@
 (* IMPORTANT: This conains ODE2RN , extMat, minSiph, ... *)
 (* Goal: Serve as foundation for future Python port *)
 (* NOTE: Backup versions exist in Core1.wl and EpidCRNo.wl *)
+reS[ine_,cp_]:=FullSimplify[Reduce[Join[cp,ine]]//FullSimplify,cp];
+reS[in1_,in2_,cp_]:=Module[{toL},
+  toL[True]     := {};
+  toL[False]    := {False};
+  toL[x_List]   := x;
+  toL[And[a__]] := {a};
+  toL[x_]       := {x};
+  FullSimplify[Reduce[Join[cp,toL[in1],toL[in2]]]//FullSimplify,cp]];
 
-cSo[RHS_, var_] := Module[
+(*solve RHS==0, classifies solutions by algebraic degree*)
+cSol[RHS_, var_] := Module[
   {so, idx, irrPows, rootDegs, surdDegs, powDegs, algDeg, allNonzeroQ,
    ratIdx, sqrtIdx, deg3Idx, degGT3Idx, nzIdx, summary},
 
@@ -54,9 +63,8 @@ cSo[RHS_, var_] := Module[
   Join[summary, {{"Solutions", so}}]
 ];
 
-cSol[RHS_, var_] := cSo[RHS, var]
 cSol[RHS_, var_, pf_] := Module[{res, so},
-  res = cSo[RHS, var];
+  res = cSol[RHS, var];
   so = res[[-1, 2]];
   Append[Most[res], {"Solutions", pf /@ so}]
 ]
@@ -79,6 +87,28 @@ posM=
 Replace[#,{_?Negative->0,e_:>Replace[Expand[e],
 {Times[_?Negative,_]->0,
 t_Plus:>Replace[t,_?Negative|Times[_?Negative,_]->0,1]}]},{2}]&;
+
+(* zeroOpaque[expr, rules]: apply rules, then zero admissible opaque function
+   values and selected partial derivatives on the resulting siphon face.
+
+   VALUE rule: f[...,0,...] = 0 whenever any siphon argument is 0.
+
+   DERIVATIVE rule: Derivative[ords][f][args] = 0 iff there exists j such that
+     ords[[j]] == 0  AND  args[[j]] == 0.
+   Justification: if f[..., 0_j, ...] = 0 for all values of the other arguments
+   (admissibility at siphon j), then differentiating that identity in any direction
+   OTHER than j gives zero.  Derivatives in direction j itself (ords[[j]] >= 1)
+   are NOT covered \[LongDash] e.g. df/dB1 at B1=0, x2>0 is the invasion rate and is
+   normally non-zero. *)
+zeroOpaque[expr_, rules_List] := Module[{e = expr /. rules},
+  e //. {
+    (h_Symbol)[args__] /; Context[h] =!= "System`" && MemberQ[{args}, 0] :> 0,
+    Derivative[ords__][(h_Symbol)][args__] /;
+      Context[h] =!= "System`" &&
+      AnyTrue[Transpose[{{ords}, {args}}], #[[1]] === 0 && #[[2]] === 0 &] :> 0
+  }
+];
+
 (* ========================================================================= *)
 (* FROM CORE.WL *)
 (* ========================================================================= *)
@@ -117,7 +147,12 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
   },
 
   n = Length[var];
-  spe = ToString /@ var;  (* CRITICAL: spe must equal ToString[var], NOT lowercase *)
+  (* CRITICAL: names must preserve case AND ignore Format definitions.  Plain
+     ToString respects Format, so a variable p1 carrying Format[p1]:=Subscript[P,1]
+     came out as the species "P1", which exists nowhere in var and breaks the
+     symbol->string->symbol round trip used by minSiph and NGMRN.  SymbolName
+     never applies Format; InputForm is the fallback for non-Symbol variables. *)
+  spe = If[Head[#] === Symbol, SymbolName[#], ToString[#, InputForm]] & /@ var;
 
   (* STEP 1: Extract all terms from each equation using allT *)
   allTermsByEq = Table[allT[RHS[[ii]]], {ii, n}];
@@ -263,13 +298,10 @@ ODE2RN[RHS_List, var_List, prF_:Identity] := Module[{
     {jj, Length[rts]}
   ];
 
-  Print[Length[RN], " reactions and rts=",
-    Row[{
-      Prepend[Transpose[{prF[RN], prF[Factor /@ rts]}], {"RN", "rts"}] // MatrixForm,
-      Spacer[20],
-      Prepend[Transpose[{prF[rnRed], prF[Factor /@ rts]}], {"RNr", "rts"}] // MatrixForm
-    }]
-  ];
+  (* No Print here.  A library function must not print: this table appeared on
+     every call, including calls made by load-time tests in other subpackages,
+     where it looked like output of the user's own model.  RN, rts and rnRed are
+     returned, so a caller that wants the table prints it itself. *)
 
   {RN, rts, spe, alp, bet, gam, rnRed}
 ];
@@ -585,7 +617,7 @@ minSiph[vars_, reactions_, RHS_:Null] := Module[{
     (* cE0: solve RHS==0 under cDFE constraint *)
     nonSiphonVars = Complement[vars, ToExpression[cDFEspecies]];
     If[Length[nonSiphonVars] > 0,
-      eqsAtDFE = Thread[(RHS /. cDFE) == 0];
+      eqsAtDFE = Thread[zeroOpaque[RHS, cDFE] == 0];
       sol = Quiet[Solve[eqsAtDFE, nonSiphonVars], Solve::svars];
       If[sol === {} || sol === $Failed,
         cE0 = cDFE,
@@ -638,28 +670,26 @@ comp2Asso[expr_] := Module[{terms, result, coeff, species, stringParts, otherPar
 ];
 NGM[mod_, infVars_, Fuser_: {}] :=
   Module[{dyn, X, par, inf, infc, Jx, Jy, Jxy, fx, V1, F1, F, V, K, Kd, Vinv, allPos,
-  dfeRules, n, JxDFE, Fdiag},
+  dfeRules, JxDFE},
    dyn = mod[[1]];
    X = mod[[2]];
    par = If[Length[mod] >= 3, mod[[3]], {}];
    inf = Flatten[Position[X, #] & /@ infVars];
    infc = Complement[Range[Length[X]], inf];
+   dfeRules = Thread[X[[inf]] -> 0];
    Jx = Grad[dyn[[inf]], X[[inf]]];
    Jy = If[Length[infc] > 0, Grad[dyn[[infc]], X[[infc]]], {}];
    Jxy = If[Length[infc] > 0, Grad[dyn[[inf]], X[[infc]]], {}];
-   fx = dyn[[inf]] /. Thread[X[[inf]] -> 0];  (* RHS for inf vars, evaluated on siphon facet *)
+   fx = zeroOpaque[dyn[[inf]], dfeRules];  (* RHS for inf vars on siphon facet; admissible opaque f[...,0,...]=0 *)
    V1 = If[Length[infc] > 0, (-Jx) /. Thread[X[[infc]] -> 0], -Jx];
-   F1 = (Jx + V1) /. Thread[X[[inf]] -> 0];
-   (* Extract positive diagonal terms from Jx at DFE *)
-   n = Length[inf];
-   JxDFE = Jx /. Thread[X[[inf]] -> 0];
-   Fdiag = DiagonalMatrix[Table[posM[{{JxDFE[[i, i]]}}][[1, 1]], {i, n}]];
+   F1 = zeroOpaque[Jx + V1, dfeRules];  (* positive-infection part at DFE; opaque derivatives vanish on siphon face *)
+   JxDFE = zeroOpaque[Jx, dfeRules];  (* Jx at DFE; all opaque derivative entries zeroed by admissibility *)
    If[Fuser === {},
-     F = posM[F1] + Fdiag;
+     F = posM[F1];
      V = F - Jx;,
      V = Fuser - Jx;
      (* Check if V is nonsingular - accept user F if Inverse[V] exists *)
-     Module[{Vdfe = V /. Thread[X[[inf]] -> 0]},
+     Module[{Vdfe = zeroOpaque[V, dfeRules]},
        If[MatrixQ[Vdfe] && MatrixRank[Vdfe] == Length[Vdfe],
          F = Fuser;
          Print["NGM: user F accepted (V nonsingular)"],
@@ -672,10 +702,10 @@ NGM[mod_, infVars_, Fuser_: {}] :=
    ];
 
    (* Check if V is nonsingular at DFE before computing K *)
-   Module[{Vdfe = V /. Thread[X[[inf]] -> 0]},
+   Module[{Vdfe = zeroOpaque[V, dfeRules]},
      If[MatrixQ[Vdfe] && MatrixRank[Vdfe] == Length[Vdfe],
-       K = (F . Inverse[V]) /. Thread[X[[inf]] -> 0] // Simplify;
-       Kd = (Inverse[V] . F) /. Thread[X[[inf]] -> 0] // Simplify;
+       K = Simplify[F . Inverse[Vdfe]];
+       Kd = Simplify[Inverse[Vdfe] . F];
      ,
        (* V is singular - set dummy values *)
        K = 0;
@@ -684,6 +714,21 @@ NGM[mod_, infVars_, Fuser_: {}] :=
    ];
    {Jx, F, V, K, Jy, Jxy, fx, Kd}
   ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -719,18 +764,27 @@ K, R0A, cDFE, RDFE, eq0, var0, cE0, Jx, Jy, Jxy, fx, F, VV, eigenvals, ngm, infV
 
   (* Check if VV is singular (K = 0 from NGM) *)
   If[K === 0,
-    (* VV is singular - print informative warning and set dummy values *)
     Module[{Vdfe, rnk, dim},
-      Vdfe = VV /. Thread[infV -> 0];
+      Vdfe = zeroOpaque[VV, Thread[infV -> 0]];
       rnk = MatrixRank[Vdfe];
       dim = Length[Vdfe];
       Print["VV with dim=", dim, " has rank=", rnk, ", so is singular"];
     ];
-    R0A = {};
+    R0A = ConstantArray[0, Length[mSi]];
   ,
-    (* VV is nonsingular - compute R0A *)
-    eigenvals = Eigenvalues[K];
-    R0A = Select[eigenvals, # =!= 0 &];
+    (* Per-siphon reproduction numbers: spectral radius of NGM restricted to each minimal siphon *)
+    R0A = Table[
+      Module[{sigSyms, ngmK, KK, evals},
+        sigSyms = ToExpression /@ mSi[[k]];
+        ngmK = NGM[mod, sigSyms];
+        KK = ngmK[[4]];
+        If[KK === 0, 0,
+          evals = FullSimplify /@ Eigenvalues[KK];
+          First[Select[evals, !PossibleZeroQ[#] &], 0]
+        ]
+      ],
+      {k, Length[mSi]}
+    ];
   ];
 
   (* Return with standard reserved names in signature *)
@@ -738,20 +792,19 @@ K, R0A, cDFE, RDFE, eq0, var0, cE0, Jx, Jy, Jxy, fx, F, VV, eigenvals, ngm, infV
   {RHS, par, cp, mSi, Jx, Jy, Jxy, fx, cDFE, cE0, F, V, K, R0A, infV}
 ];
 
-Hur3[pol_, var_] := Hur3[pol, var, 5];
-Hur3[pol_, var_, tmo_] := Module[{co, h3, inec, ineSys, polExpanded, deg, par, cp, red},
+Hur3[pol_, var_] := Module[{co, h3, cn, polExpanded, deg, par, cp, ine},
   polExpanded = Expand[pol];
   deg = Exponent[polExpanded, var];
   If[deg != 3, Print["Hur3: deg ", deg, " != 3"]; Return[{}]];
   co = Table[Coefficient[polExpanded, var, j], {j, 0, 3}];
-  h3 = co[[2]]*co[[3]] - co[[1]]*co[[4]];
-  inec = {co[[2]] > 0, co[[3]] > 0};
-  ineSys = Append[inec, h3 > 0];
+  cn = co[[4]]; (* leading coeff -- may be negative after Together/Numerator *)
+  h3 = co[[2]]*co[[3]] - co[[1]]*co[[4]]; (* Routh term: sign-invariant *)
+  (* multiply each individual condition by cn so inequalities flip correctly
+     when cn<0; h3 needs no correction *)
+  ine = {cn*co[[1]] > 0, cn*co[[2]] > 0, cn*co[[3]] > 0, h3 > 0};
   par = Complement[Variables[pol], {var}];
-  cp = Thread[par > 0];
-  red = TimeConstrained[
-    FullSimplify[Reduce[FullSimplify[Join[cp, ineSys]]], cp], tmo, $Failed];
-  {red, ineSys}
+  cp = And @@ Thread[par > 0];
+  FullSimplify[ine, cp]
 ];
 
 Hur4[pol_, var_] := Hur4[pol, var, 5];
@@ -902,7 +955,8 @@ clsEqb[RHS_, vars_, mSi_, cE0_, prF_, tim_, keepVarUser_:Null] := Module[{
   allSiphonVars = DeleteDuplicates[Flatten[mSiSymbols, 1]];
   x1 = If[keepVarUser =!= Null && MemberQ[vars, keepVarUser],
     keepVarUser,
-    First[Select[vars, !MemberQ[allSiphonVars, #]&]]];
+    With[{nonSip = Select[vars, !MemberQ[allSiphonVars, #]&]},
+      If[nonSip =!= {}, First[nonSip], First[vars]]]];
   x1Idx = Position[vars, x1][[1, 1]];
 
   isDFEsol[s_] := Module[{completed},
@@ -2141,7 +2195,7 @@ hurQ[Sk_] := Module[{k = Length[Sk], cp1},
   Which[
     k == 1, Sk[[1, 1]] < 0,
     k == 2, Tr[Sk] < 0 && Det[Sk] > 0,
-    k == 3, And @@ Hur3[CharacteristicPolynomial[Sk, lam], lam][[2]],
+    k == 3, And @@ Hur3[CharacteristicPolynomial[Sk, lam], lam],
     k == 4, And @@ Hur4[CharacteristicPolynomial[Sk, lam], lam][[2]],
     True, cp1 = Eigenvalues[N[Sk]]; And @@ (Re[#] < 0 & /@ cp1)
   ]];
@@ -2179,16 +2233,10 @@ upfCS[nCS_, gH_, spe_, rts_] := Module[{res = {}, desc, stab, ui, di},
     stab = Select[desc, hurQ[nCS[[#, 5]]] &];
     If[stab =!= {}, AppendTo[res, {u, stab}]],
     {u, Select[Range[Length[nCS]], upfQ[nCS[[#]]] &]}];
-  Print["upfCS found ", Length[res], " UPF feedbacks with stable supersets"];
-  Do[ui = res[[j, 1]]; di = res[[j, 2]];
-    Print["UPF#", j,
-      " species=", spe[[nCS[[ui, 3]]]],
-      " rates=", rts[[nCS[[ui, 4]]]],
-      " stable supersets=", spe[[nCS[[#, 3]]]] & /@ di],
-    {j, Length[res]}];
+  Print["upfCS: ", Length[res], " UPF feedbacks with stable supersets"];
   res];
 
-(* oscRI: Recipe I — Oscillatory Cores of Class I.
+(* oscRI: Recipe I \[LongDash] Oscillatory Cores of Class I.
    A core is a stable CS that is MINIMAL with the property of being
    Hurwitz-stable and containing a UPF as a principal submatrix.
    Algorithm:
@@ -2215,11 +2263,11 @@ oscRI[nCS_, gH_, spe_, rts_] := Module[
       coreUPFs = Select[upfIdx,
         MemberQ[Normal@VertexOutComponent[gH, #], c] &];
       Print["RI#", j, " stable ", nCS[[c, 1]], "-CS: species=", spe[[cS]],
-        " reactions=", rts[[cR]], " det=", nCS[[c, 6]],
-        " Sk=", nCS[[c, 7]] // MatrixForm];
+        " reactions=", rts[[Sort[cR]]], " det=", nCS[[c, 6]],
+        " Sk=", nCS[[c, 5]] // MatrixForm];
       Do[Print["  contains UPF ", nCS[[u, 1]], "-CS: species=", spe[[nCS[[u, 3]]]],
-          " reactions=", rts[[nCS[[u, 4]]]], " det=", nCS[[u, 6]],
-          " Sk=", nCS[[u, 7]] // MatrixForm],
+          " reactions=", rts[[Sort[nCS[[u, 4]]]]], " det=", nCS[[u, 6]],
+          " Sk=", nCS[[u, 5]] // MatrixForm],
         {u, coreUPFs}]],
       {j, Length[cores]}]];
   cores];
@@ -2265,9 +2313,32 @@ fixSgn[nCS_, n_] := Table[Module[{csK, dets},
    Union[Sign /@ dets]}],
   {k, n}];
 
+(* csExamples: print one illustrative UPF and one NF child selection with eigenvalues.
+   Prefers k=2 (2x2 matrix, exact eigenvalues); falls back to smallest k available.
+   Uses unfQ for NF (negative feedback, Sign[det]=(-1)^k) to exclude det=0 cases. *)
+csExamples[nCS_, spe_, rts_] := Module[
+  {upfs, nfs, pickOne, printEx},
+  upfs = Select[nCS, upfQ];
+  nfs  = Select[nCS, unfQ];
+  pickOne[lst_] := Module[{k2 = Select[lst, #[[1]] == 2 &]},
+    If[k2 =!= {}, First[k2],
+       If[lst =!= {}, First@SortBy[lst, #[[1]] &], {}]]];
+  printEx[{}, _] := Null;
+  printEx[cs_List, label_] := Module[{k, sIdx, rSorted, Sk, d, ev},
+    k = cs[[1]]; sIdx = cs[[3]]; rSorted = Sort[cs[[4]]];
+    Sk = cs[[5]]; d = cs[[6]];
+    ev = If[k <= 2, Eigenvalues[Sk], N[Eigenvalues[Sk]]];
+    Print[label, " (", k, "-CS):  species=", spe[[sIdx]],
+      "  reactions=", rts[[rSorted]],
+      "\n  Sk=", MatrixForm[Sk],
+      "  det=", d, "  (-1)^", k, "*det=", (-1)^k * d,
+      "  eigenvalues=", ev]];
+  If[upfs === {}, Print["csExamples: no UPFs found"], printEx[pickOne[upfs], "UPF"]];
+  If[nfs  === {}, Print["csExamples: no NFs found"],  printEx[pickOne[nfs],  "NF"]]];
+
 (* csAna: full Child Selection analysis pipeline.
    Input: gam (stoichiometric), alp (reactant), spe (species), rts (rates).
-   Runs: symRM, negCS, hasseCS, upfCS, oscRI, oscRII, fixSgn.
+   Runs: symRM, negCS, hasseCS, upfCS, oscRI, oscRII, fixSgn, csExamples.
    Prints summary with unstable orders and Hopf(5.21) conclusion.
    Returns {G, co, nCS, upf, gH, fs, riC, riiC}. *)
 csAna[gam_, alp_, spe_, rts_] := Module[
@@ -2290,6 +2361,7 @@ csAna[gam_, alp_, spe_, rts_] := Module[
   nf = Select[fs, !#[[2]] &];
   Print["fixSgn: unstable orders=", #[[1]] & /@ nf,
         " Hopf(5.21)=", Length[stabN] > 0 && Length[upf] > 0];
+  csExamples[nCS, spe, rts];
   {G, co, nCS, upf, gH, fs, riC, riiC}];
 
 (* ========================================================================= *)
@@ -2302,7 +2374,8 @@ csAna[gam_, alp_, spe_, rts_] := Module[
 ODE2RNs[RHS_, var_] := Module[
   {n, spe, fC, nf, gamF, alpF, betF, pRHS, pO, funRN, funRNs},
   n = Length[var];
-  spe = ToString /@ var;
+  (* SymbolName, not ToString: ToString applies Format definitions.  See ODE2RN. *)
+  spe = If[Head[#] === Symbol, SymbolName[#], ToString[#, InputForm]] & /@ var;
   (* Detect opaque function calls h[x..] where h is a user symbol
      (not arithmetic, not NumericFunction like Sin/Exp/Log)
      and at least one argument is a state variable *)
@@ -2335,10 +2408,8 @@ ODE2RNs[RHS_, var_] := Module[
   funRNs = Table[Total[alpF[[All, k]] var] -> Total[betF[[All, k]] var], {k, nf}];
   Module[{aRN, aRts, aRnR},
     aRN = Join[pO[[1]], funRN]; aRts = Join[pO[[2]], fC]; aRnR = Join[pO[[7]], funRNs];
-    Print[Length[aRN], " reactions and rts=",
-      Row[{Prepend[Transpose[{aRN, Factor /@ aRts}], {"RN", "rts"}] // MatrixForm,
-        Spacer[20],
-        Prepend[Transpose[{aRnR, Factor /@ aRts}], {"RNr", "rts"}] // MatrixForm}]]];
+    (* No Print: see ODE2RN.  aRN, aRts, aRnR are returned. *)
+    Null];
   {Join[pO[[1]], funRN], Join[pO[[2]], fC], pO[[3]],
    Join[pO[[4]], alpF, 2], Join[pO[[5]], betF, 2], Join[pO[[6]], gamF, 2],
    Join[pO[[7]], funRNs]}];
@@ -2346,7 +2417,8 @@ ODE2RNs[RHS_, var_] := Module[
 ODE2RNs[RHS_, var_, prF_] := Module[
   {n, spe, fC, nf, gamF, alpF, betF, pRHS, pO, funRN, funRNs},
   n = Length[var];
-  spe = ToString /@ var;
+  (* SymbolName, not ToString: ToString applies Format definitions.  See ODE2RN. *)
+  spe = If[Head[#] === Symbol, SymbolName[#], ToString[#, InputForm]] & /@ var;
   fC = DeleteDuplicates[Cases[RHS,
     h_[x__] /; AtomQ[h] &&
       !MemberQ[{Times, Plus, Power, List, Rational, Complex}, h] &&
@@ -2404,3 +2476,174 @@ var0 = {s, i};
 Print["RN0=", RN0];
 Print["ODE2RN: ", Simplify[gam0 . rts0 - RHS0] == {0, 0}]*)
 
+(* ========================================================================= *)
+(* FLAWS \[LongDash] ABa ENDEMIC EQUILIBRIUM via FOUR LAWS (Fall/Bonzi) *)
+(* ========================================================================= *)
+(* {y0,mR,R0,Dw,ye,k,xe} = FLaws[A,vbe,ba,AS,La]                          *)
+(* A:  n x n Metzler Hurwitz (infected transition).                          *)
+(* vbe: m x n WAIFW matrix. ba: n-entry-probability vector.                 *)
+(* AS: m x m Metzler Hurwitz (susceptible transition). La: m-recruitment.   *)
+(* Law1: y0=(-AS)^-1 La, mR=vbe(-A)^-1 ba, R0=y0.mR.                      *)
+(* Law2: Dw=(-A)^-1 ba, xe=k*Dw.                                            *)
+(* Law3: ye=(k*Diag[mR]-AS)^-1 La.                                          *)
+(* Law4: ye.mR=1 determines k.                                               *)
+
+FLaws[A_, vbe_, ba_, AS_, La_] := Module[
+  {y0, Dw, mR, R0, kv, yeSym, kSol, ye, xe},
+  y0    = LinearSolve[-AS, La];                          (* DFE: (-AS)^-1 La *)
+  Dw    = LinearSolve[-A, ba];                           (* dwell times *)
+  mR    = FullSimplify[vbe . Dw];                        (* replacement vector *)
+  R0    = FullSimplify[y0 . mR];                         (* Law 1 *)
+  yeSym = LinearSolve[kv*DiagonalMatrix[mR] - AS, La];  (* ye as fn of kv *)
+  kSol  = kv /. First[Solve[FullSimplify[mR . yeSym] == 1, kv]];  (* Law 4 *)
+  ye    = FullSimplify[yeSym /. kv -> kSol];             (* Law 3 *)
+  xe    = FullSimplify[kSol * Dw];                       (* Law 2 *)
+  {y0, mR, R0, Dw, ye, kSol, xe}
+];
+
+(* ========================================================================= *)
+(* extABa \[LongDash] EXTRACT ABa MATRICES FROM BILINEAR ODE                          *)
+(* ========================================================================= *)
+extABa[RHS_, var_, yvar_, xvar_] := Module[
+  {ny, nx, ypos, xpos, yRHS, xRHS, zero, LaV, ASM, AM, vbeM, FM, FMtot, baV, yABa, res},
+  ny   = Length[yvar];
+  nx   = Length[xvar];
+  ypos = Flatten[Position[var, Alternatives @@ yvar]];
+  xpos = Flatten[Position[var, Alternatives @@ xvar]];
+  yRHS = RHS[[ypos]];
+  xRHS = RHS[[xpos]];
+  zero = Thread[Join[yvar, xvar] -> ConstantArray[0, ny + nx]];
+  LaV  = yRHS /. zero;
+  ASM  = Table[D[yRHS[[i]], yvar[[j]]] /. zero, {i, ny}, {j, ny}];
+  AM   = Table[D[xRHS[[j]], xvar[[k]]] /. Thread[yvar -> ConstantArray[0, ny]],
+               {j, nx}, {k, nx}];
+  (* Coefficient-based vbe: reads bilinear term yvar[[i]]*xvar[[k]] in yRHS[[i]] *)
+  vbeM = Table[-Coefficient[yRHS[[i]], yvar[[i]]*xvar[[k]]], {i, ny}, {k, nx}];
+  If[Total[Flatten[vbeM]] === 0, Message[extABa::novbe]; Return[{LaV, ASM, vbeM, ConstantArray[0, nx], AM}]];
+  (* FM[j,k] = new-infection matrix (nx x nx) at y=1: D[xRHS[j]-AM.xvar, xvar[k]] | y->1 *)
+  FM     = Table[D[xRHS[[j]] - Sum[AM[[j,l]]*xvar[[l]], {l, nx}], xvar[[k]]]
+                   /. Thread[yvar -> ConstantArray[1, ny]], {j, nx}, {k, nx}];
+  If[MatrixRank[FM] =!= 1, Message[extABa::notrank1, FM]; Return[{LaV, ASM, vbeM, ConstantArray[0, nx], AM}]];
+  FMtot  = Total[Flatten[FM]];
+  baV    = Total[FM, {2}] / FMtot;            (* row sums / grand total: ba normalized to sum 1 *)
+  (* ABa structure check: verify each y-equation has zero residual *)
+  yABa = Table[
+    LaV[[i]] + Sum[ASM[[i,j]]*yvar[[j]], {j, ny}]
+              - yvar[[i]]*Sum[vbeM[[i,k]]*xvar[[k]], {k, nx}],
+    {i, ny}];
+  Do[
+    If[MemberQ[vbeM[[i]], Except[0]],           (* only check y-classes with bilinear incidence *)
+      res = FullSimplify[yRHS[[i]] - yABa[[i]]];
+      If[res =!= 0, Message[extABa::notABa, i, yvar[[i]], res]]],
+    {i, ny}];
+  {LaV, ASM, vbeM, baV, AM}
+];
+
+(* ========================================================================= *)
+(* Sh \[LongDash] CLASSIFY MONOMIALS AND EXTRACT SHUAI TRANSPORT MATRIX             *)
+(* {res} = Sh[RHS, var]                                                      *)
+(*   RHS  : list of ODE right-hand sides (Expanded)                          *)
+(*   var  : list of state variables                                           *)
+(* Returns Association with keys:                                             *)
+(*   "Variables"      \[LongDash] var                                                *)
+(*   "RemovedTerms"   \[LongDash] monomials classified as inflow/outflow leakage     *)
+(*   "ReducedRHS"     \[LongDash] RHS with removed terms subtracted                 *)
+(*   "Edges"          \[LongDash] ShuaiTransport monomials with source/target/weight *)
+(*   "NonShuaiTerms"  \[LongDash] monomials not fitting Shuai pattern                *)
+(*   "IsShuaiModel"   \[LongDash] True iff NonShuaiTerms is empty                   *)
+(*   "ShuaiMatrix"    \[LongDash] (n x n) Laplacian of species graph (A - diag(colsums)) *)
+(* ========================================================================= *)
+
+ClearAll[negQ, posQ, absQ, Sh];
+Sh::usage = "Sh[RHS, var] classifies each monomial of Expand/@RHS by its sign \
+pattern across the equations in var: exactly one negative + one positive coefficient \
+=> Shuai transport edge; only negative (resp. positive) => RemovedOutflow (resp. \
+RemovedInflow); otherwise NonShuai. Returns {shMat, redRHS, nSh} where shMat is \
+the n x n out-degree Laplacian of the species graph, redRHS is RHS with all \
+removed monomials subtracted, and nSh is the list of NonShuai monomials \
+(empty iff the model is a pure Shuai model).";
+negQ[c_] := TrueQ[Simplify[c < 0]];
+posQ[c_] := TrueQ[Simplify[c > 0]];
+absQ[c_] := Simplify[If[negQ[c], -c, c]];
+
+Sh[RHS_, var_] := Module[
+  {rhs = Expand /@ RHS, n = Length[var], mons, data, iNeg, iPos, cvec, wt,
+   transportTerms, removedTerms, nonShuaiTerms, reducedRHS, A},
+  mons = DeleteCases[
+    DeleteDuplicates @ Flatten[(MonomialList[#, var] &) /@ rhs], 0];
+  data = Table[
+    cvec = Simplify[(Coefficient[#, mon] &) /@ rhs];
+    iNeg = Flatten @ Position[negQ /@ cvec, True];
+    iPos = Flatten @ Position[posQ /@ cvec, True];
+    Which[
+      Length[iNeg] == 1 && Length[iPos] == 1,
+      wt = Simplify[absQ[cvec[[iNeg[[1]]]]] mon];
+      <|"Monomial"->mon, "CoeffVector"->cvec, "Type"->"ShuaiTransport",
+        "SourceIndex"->iNeg[[1]], "TargetIndex"->iPos[[1]],
+        "Source"->var[[iNeg[[1]]]], "Target"->var[[iPos[[1]]]], "Weight"->wt|>,
+      Length[iNeg] <= 1 && Length[iPos] == 0,
+      <|"Monomial"->mon, "CoeffVector"->cvec, "Type"->"RemovedOutflow"|>,
+      Length[iNeg] == 0 && Length[iPos] <= 1,
+      <|"Monomial"->mon, "CoeffVector"->cvec, "Type"->"RemovedInflow"|>,
+      True,
+      <|"Monomial"->mon, "CoeffVector"->cvec, "Type"->"NonShuai"|>
+    ],
+    {mon, mons}
+  ];
+  transportTerms = Select[data, #["Type"] === "ShuaiTransport" &];
+  removedTerms   = Select[data, MemberQ[{"RemovedInflow","RemovedOutflow"}, #["Type"]] &];
+  nonShuaiTerms  = Select[data, #["Type"] === "NonShuai" &];
+  reducedRHS = Simplify[rhs - Total[
+    Table[removedTerms[[k,"CoeffVector"]] * removedTerms[[k,"Monomial"]],
+      {k, Length[removedTerms]}], 1]];
+  A = ConstantArray[0, {n, n}];
+  Do[
+    A[[transportTerms[[k,"TargetIndex"]], transportTerms[[k,"SourceIndex"]]]] =
+      Simplify[A[[transportTerms[[k,"TargetIndex"]], transportTerms[[k,"SourceIndex"]]]] +
+               transportTerms[[k,"Weight"]]],
+    {k, Length[transportTerms]}];
+  {Simplify[A - DiagonalMatrix[Total[A]]], reducedRHS, nonShuaiTerms}
+];
+
+(* --- test ---
+RHS = {la - be*s*b - mu*s, be*s*b - (ga + mu)*i, (ga + mu)*i - de*b};
+var = {s, i, b};
+{shMat, redRHS, nSh} = Sh[RHS, var];
+MatrixForm[shMat]
+redRHS
+nSh   (* expect {} *)
+--- *)
+
+
+
+(* ── allRatSub: enumerate all rational QSS reductions ─────────────────────── *)
+allRatSub[RHS_, var_, prF_:Identity] := Module[
+  {isRatQ, RHSc = RHS, results},
+  isRatQ[expr_] := FreeQ[expr, Sqrt | Power[_, Except[_Integer]] | Root | Complex];
+  results = Flatten[DeleteCases[
+    Table[
+      Module[{zSub = sub, ySub, iZs, iYs, sols, ratSols},
+        ySub  = Complement[var, zSub];
+        iZs   = Flatten[Position[var, #] & /@ zSub];
+        iYs   = Flatten[Position[var, #] & /@ ySub];
+        sols  = Quiet @ Solve[RHSc[[iZs]] == Table[0, Length[zSub]], zSub];
+        ratSols = Select[sols, isRatQ];
+        If[Length[ratSols] == 0, Nothing,
+          Sequence @@ Table[
+            Module[{bSub = FullSimplify[RHSc[[iYs]] /. sol]},
+              If[isRatQ[bSub],
+                <|"fast"  -> zSub,  "slow" -> ySub,
+                  "zStar" -> (zSub /. sol),
+                  "b"     -> bSub|>,
+                Nothing]],
+            {sol, ratSols}]]],
+      {sub, Rest @ Subsets[var, {1, Length[var] - 1}]}],
+    Nothing], 1];
+  If[prF =!= Identity,
+    Print["allRatSub: ", Length[results], " rational QSS reduction(s)"];
+    Do[Module[{d = results[[k]]},
+      Print["  [", k, "] fast=", d["fast"] // prF,
+            "  z*(y)=", d["zStar"] // prF,
+            "  b(y)=",  d["b"] // prF]],
+      {k, Length[results]}]];
+  results];

@@ -1,0 +1,57 @@
+\subsection{The m-strain block GLV model with  rank one invading blocks}
+One of the most convincing results for the utility of CRN-ME tools is the
+Lyapunov Ansatz below for a  model with  $m$ competing irreducible
+rank-one blocks, and with no direct block-to-block coupling in the
+transversal equations:
+\be{eq:rankone-m}
+\begin{cases}
+s'
+=
+\Lambda-\mu s-s\displaystyle\sum_{k=1}^m\phi_k,
+\\[1mm]
+z_k'
+=
+\left(sw_k\pi_k^\top-V_k\right)z_k,
+\qquad
+k=1,\ldots,m,
+\\[1mm]
+\phi_k
+=
+\pi_k^\top z_k.
+\end{cases}
+\ee
+Here $z_k\in\R_{\ge0}^{n_k}$, $w_k\gg0$, $\pi_k\gg0$,
+${\bf 1}^\top\pi_k=1$, and    $V_k$ are  nonsingular
+$M$-matrices, with  $V_k^{-1}\gg0$ (internal transitions/removal).
+
+Note the ``structure aware" writing of the ODE, which partitions the variables into  $m$ non-interacting disjoint minimal siphon/maximal invariant faces/``vector Lotka-Volterra"/invading  groups, and a non-siphon/non-DFE variable $s$, and the rank-one regular splitting of the transversal Jacobian/invading matrices for each block:
+\[
+J_k^\perp(s)=F_k(s)-V_k,
+\qquad
+F_k(s)=sw_k\pi_k^\top\ \gg0(\text{rank one, new infections}).
+\]
+
+
+We assume that
+\be{wr}
+{\bf 1}^\top V_k\geq\mu{\bf 1}^\top,
+\qquad
+k=1,\ldots,m
+\ee
+(in epidemiologic terms, the decay of the invading strain compartments surpasses
+that of the input, ensuring the invariance of the set below).
+Then
+\[
+\Omega
+=
+\left\{
+s\geq0,\ z_k\geq0:
+s+\sum_{k=1}^m{\bf 1}^\top z_k\leq s_0
+=\frac{\Lambda}{\mu}
+\right\}
+\]
+is forward invariant.
+
+The monograph considers  variations of this model. When all blocks have dimension 1, we have a subclass of GLV models, studied in Part I (without the non-interaction assumption).  Part II considers the cases when $V_k$ are diagonal, and also the general case of  
+of Metzler-Hurwicz   $-V_k$, but only when $m=2$. Finally, Part III considers a model which extends the models of Recker-Gupta and Smith-Browne in immuno-virology.
+

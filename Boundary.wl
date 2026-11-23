@@ -501,3 +501,52 @@ Hur5M[jac_] := Module[{lm, ch, cot, co, H5, h5, ine},
   ine = Append[Thread[co > 0], co[[1]] co[[2]] > co[[3]]];
   {co, h5, ine, H5}
 ];
+
+
+(* Hofbauer-Schreiber invasion graph of populations in per-capita form
+   x_i' = x_i f_i(x,y), at numerical parameter values. *)
+hsGr[RHS_List, var_List, pop_List, par_List : {}] := Module[
+  {rhs = RHS /. par, pI, fI, sup, eqs, sol, vtx = {}, eqL = {}, rts = {}, edg, acy, inv},
+  pI = Flatten[Position[var, #] & /@ pop];
+  fI = Simplify[rhs[[pI]]/pop];
+  sup = Subsets[pop];
+  Do[
+    With[{ab = Complement[pop, K]},
+      eqs = Join[Thread[ab == 0], Thread[(fI[[Flatten[Position[pop, #] & /@ K]]]) == 0],
+        Thread[rhs[[Complement[Range[Length[var]], pI]]] == 0]];
+      sol = Quiet[NSolve[(And @@ eqs) && And @@ Thread[Complement[var, pop] >= 0] && And @@ Thread[K > 0],
+          var, Reals]];
+      sol = DeleteDuplicates[sol, Norm[N[(var /. #1) - (var /. #2)]] < 10^-6 &];
+      Do[AppendTo[vtx, K]; AppendTo[eqL, var /. s];
+        AppendTo[rts, Thread[pop -> Chop[fI /. s, 10^-9]]], {s, sol}]],
+    {K, sup}];
+  edg = Select[Flatten[Table[{a, b}, {a, Length[vtx]}, {b, Length[vtx]}], 1],
+    With[{a = #[[1]], b = #[[2]]}, a != b && SubsetQ[vtx[[b]], vtx[[a]]] && vtx[[a]] =!= vtx[[b]] &&
+       AllTrue[Complement[vtx[[b]], vtx[[a]]], (# /. rts[[a]]) > 0 &]] &];
+  acy = AcyclicGraphQ[Graph[Range[Length[vtx]], DirectedEdge @@@ edg]];
+  inv = Table[Length[vtx[[k]]] == Length[pop] || AnyTrue[Complement[pop, vtx[[k]]], (# /. rts[[k]]) > 0 &],
+    {k, Length[vtx]}];
+  {vtx, eqL, rts, edg, acy, inv}];
+
+(* derivatives of the invasion rates of missing populations with respect to
+   parameters prs, by implicit differentiation on the face of each boundary
+   equilibrium; zero rows mean the rate is protected (Theorem t:bufInv). *)
+invSen[RHS_List, var_List, pop_List, par_List, prs_List, hs_List] := Module[
+  {pI, fI, vtx, eqL, out = {}, res, rI, J, dE, rhs},
+  {vtx, eqL} = hs[[1 ;; 2]];
+  pI = Flatten[Position[var, #] & /@ pop];
+  fI = Simplify[RHS[[pI]]/pop];
+  Do[
+    If[Length[vtx[[k]]] < Length[pop],
+      res = Complement[var, Complement[pop, vtx[[k]]]];
+      rI = Flatten[Position[var, #] & /@ res];
+      rhs = Join[RHS[[Complement[rI, pI]]], fI[[Flatten[Position[pop, #] & /@ vtx[[k]]]]]];
+      rhs = rhs /. Thread[Complement[pop, vtx[[k]]] -> 0];
+      J = D[rhs, {res}];
+      dE = -Inverse[J] . D[rhs, {prs}];
+      Do[AppendTo[out, {vtx[[k]], i,
+          Chop[(D[fI[[Position[pop, i][[1, 1]]]], {res}] . dE + D[fI[[Position[pop, i][[1, 1]]]], {prs}]) /.
+             Thread[Complement[pop, vtx[[k]]] -> 0] /. par /. Thread[var -> eqL[[k]]], 10^-8]}],
+        {i, Complement[pop, vtx[[k]]]}]],
+    {k, Length[vtx]}];
+  out];

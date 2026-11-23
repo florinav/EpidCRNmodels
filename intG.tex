@@ -1,0 +1,122 @@
+%\section{Introduction}
+
+\section{What are the ``general principles/laws" of positive ODEs?}\lbl{s:wha}
+
+Population dynamics,  ecology,  mathematical epidemiology (ME), immuno-virology, rumour spreading,  chemical reaction networks (CRN) theory, are a few of the biological
+interaction networks (BIN) subfields, which study all positive dynamical systems, and have similar preoccupations: the existence and multiplicity of equilibria, their local and
+global stability, the occurrence of bifurcations,   persistence, permanence, extinction, etc.
+
+\beD[Positive / non-negative ODE]
+An ODE
+\[
+u_t=f(u),
+\]
+ is called \emph{positive}~\cite{rantzer2015scalable} or
+\emph{non-negative}~\cite{haddad2010} if the non-negative orthant
+\[
+\mathbb{R}^n_{\ge 0} := \{ u \in \mathbb{R}^n : u_i \ge 0,\; i = 1,\dots,n \}
+\]
+is forward invariant under the flow; equivalently,
+\[
+u_i=0,\qquad u_j\ge0\ (j\ne i)
+\quad\Longrightarrow\quad
+f_i(u)\ge0 .
+\]
+\eeD
+
+
+
+
+
+
+Although the  fields enumerated above are aware of each other  -- see  for  example \cite{AndKurtz}, they have grown quite disconnected due to different examples of interest.  For example, ecology has focused a lot on Lotka-Volterra equations
+which factor $u_i'= g_i(u) u_i, i=1, ..., u_i \in \R_+$, and mathematical epidemiology (ME) has focused a lot on models with ``strains" characterized by  factorizations $u_i'= M_i(u) u_i, i=1, ...$, where each $u_i$ is a vector, and $M_i(u)$ are matrices; note that in \CRN s (CRNs), the boundary faces $u_i=0$ are called  siphon faces.
+The increased complexity of ME models is compensated by the fact that $M_i(u)$ admit regular splittings \cite{Varga,Van}, which allow defining \NGMs, which are quite often of rank one.
+
+It seems fair to say that with the exception of CRN, the other positive ODE fields have evolved historically mainly as collections of examples, with few general principles/laws, the most notable exception being the next generating matrix (NGM) theorem of \cNGM.
+Many other theorems have been developed, but they pertain mostly to examples.
+
+The fact that  ecology and epidemiology models  share lots of common points has led to the term eco-epidemiology -- see  for  example \cite{BateHil}, which is justified by the fact that while ecology and epidemiology are separated practically by their preferences of models,
+mathematically  they are quite hard to distinguish.
+
+  We make below the point that  for producing general results which apply equally to examples from ecology,  mathematical epidemiology (ME), immuno-virology, rumour spreading, ...,  the adoption of the CRN framework is a possibly useful  step.
+  This suggests rigorous definitions (maybe not final) for concepts which have been previously heuristic, like \DFE\ (DFE), epidemiological model and multi-strain model, and transforms isolated results which might have been known essentially to only few researchers, like the Freedman--Ruan-Tang uniform persistence theorem \cite{FreRuan}, or  the Rahman-Zou competitive exclusion
+partitions \cite{Rahman} into the foundations of a unified theory for multi-strain
+models.
+
+\subsection{Why CRN theory?}
+An important characteristic of the  models in mathematical epidemiology (ME),
+ecology, and immuno-virology, etc is that  important phenomena like extinction or persistence occur
+when trajectories reach the boundary of the positive orthant, and hence that the notion
+of forward--invariant coordinate faces is crucial (these appear in ME  as disease--free or
+partially disease--free manifolds).
+
+Now, while boundary faces have been touched upon also in
+classical ODE theory, the systematic study of phenomena arising for
+ positive ODEs was initiated in  CRN works, see notably \cite{hun,Erdi}, who showed that
+all positive polynomial models admit (non-unique) mass-action representations.
+
+
+
+The CRN framework we use here is encapsulated by the following definition \cite{AdLS}:
+\beD[Stoichiometric and chemical representation]\lbl{d:crn}
+
+A stoichiometric representation of $f$ is a pair $(\Gamma,r)$ such that
+\[
+f(u)\eq\Gamma r(u),
+\qquad
+r(u)\ge0,
+\]
+where $\Gamma\in\R^{n\times n_R}$ is constant and
+\[
+r:\R_{\ge0}^n\to\R_{\ge0}^{n_R}
+\]
+is locally Lipschitz.
+
+The representation is called \emph{chemical} if, for every reaction
+$\rho$ and every species $i$ satisfying
+\[
+\Gamma_{i\rho}<0,
+\]
+there exists a nonnegative locally Lipschitz function
+$\widetilde r_{\rho i}$ such that
+\[
+r_\rho(u)
+=
+u_i\,\widetilde r_{\rho i}(u).
+\]
+
+Equivalently,
+\[
+u_i=0
+\quad\Longrightarrow\quad
+r_\rho(u)=0
+\qquad
+\text{whenever }\Gamma_{i\rho}<0.
+\]
+
+Furthermore, for every reaction $\rho$, the rate $r_\rho$ depends only
+on species consumed by that reaction and on catalyst species which are
+not consumed.  In particular, if
+\[
+\Gamma_{i\rho}<0,
+\]
+then $r_\rho$ is non-decreasing in $u_i$.
+
+\eeD
+
+
+
+The class of chemical ODEs is very general and is in fact a classic favorite in ME.
+Note that for computational implementations, we restrict always  to rational models, which we call ``perturbed" mass-action, and define informally as models which become mass-action after a subset of \para s is set to $0$.  This restriction provides the possibility of investigating first the   computationally easier mass-action case.
+
+
+
+A crucial development for the CRN-ME interface was the discovery in \cite{AdLS}
+that forward--invariant coordinate faces  correspond to the combinatorial object of  \emph{siphons}  in the theory of Petri nets, and that boundary $\omega-$ limit points with interior starting points must lie in siphon  faces.
+
+%%%%%%%%%
+
+
+
+

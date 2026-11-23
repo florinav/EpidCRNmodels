@@ -168,6 +168,132 @@ minSiph0[vars_, reactions_, RHS_:Null] := Module[{
 (* clsEq1/clsEqb1 removed - use clsEq/clsEqb from epi.wl *)
 
 (* ========================================================================= *)
+(* FLaws: Four Laws of ABa models (Fall/Bonzi)                              *)
+(* Inputs: A (n×n MH infected), vbe (m×n WAIFW), ba (n-vec entry probs),   *)
+(*         AS (m×m MH susceptible), La (m-vec recruitment)                  *)
+(* Output: {y0, mR, R0, Dw, ye, k, xe}                                     *)
+(* ========================================================================= *)
+
+FLaws[A_, vbe_, ba_, AS_, La_] := Module[
+  {y0, Dw, mR, R0, kv, yeSym, kSol, ye, xe},
+  y0    = LinearSolve[-AS, La];                           (* DFE: (-AS)^-1 La *)
+  Dw    = LinearSolve[-A, ba];                            (* dwell times: (-A)^-1 ba *)
+  mR    = FullSimplify[vbe . Dw];                         (* replacement vector *)
+  R0    = FullSimplify[y0 . mR];                          (* Law 1: R0 = y0.mR *)
+  yeSym = LinearSolve[kv*DiagonalMatrix[mR] - AS, La];   (* ye as function of kv *)
+  Module[{ksols = Solve[FullSimplify[mR . yeSym] == 1, kv]},
+    If[ksols === {}, Print["FLaws: Solve for k failed"]; Return[$Failed]];
+    kSol = kv /. First[ksols]];                           (* Law 4: ye.mR=1 *)
+  ye    = FullSimplify[yeSym /. kv -> kSol];              (* Law 3 *)
+  xe    = FullSimplify[kSol * Dw];                        (* Law 2: xe = k*Dw *)
+  Print["FLaws: y0=", y0, " mR=", mR, " R0=", R0];
+  Print["FLaws: Dw=", Dw, " ye=", ye, " k=", kSol, " xe=", xe];
+  {y0, mR, R0, Dw, ye, kSol, xe}
+];
+
+(* ========================================================================= *)
+(* extABa: Extract ABa model matrices from a bilinear ODE                   *)
+(* Input:  RHS, var (full system), yvar (susceptible), xvar (infected)      *)
+(* Output: {La, AS, vbe, ba, A}                                             *)
+(* Algorithm:                                                                *)
+(*   vbe[i,j] = -Coeff(yRHS_i, y_i*x_j)    from y-equations               *)
+(*   La = constant part of y-equations (at y=x=0)                          *)
+(*   AS[i,j] = Coeff(yRHS_i - bilinear - La_i, y_j)                       *)
+(*   A[k,l]  = Coeff(xRHS_k, x_l)           from x-equations               *)
+(*   ba[k]   = Coeff(rem_k, y_i0*x_j0) / vbe[i0,j0]  (any nonzero entry) *)
+(* ========================================================================= *)
+
+extABa[RHS_, var_, yvar_, xvar_] := Module[
+  {m, n, posY, posX, yRHS, xRHS, vbe, phi, La, AS, A, rem, ba, ij0},
+  m    = Length[yvar];
+  n    = Length[xvar];
+  posY = Flatten[Position[var, #] & /@ yvar];
+  posX = Flatten[Position[var, #] & /@ xvar];
+  yRHS = RHS[[posY]];
+  xRHS = RHS[[posX]];
+  (* Step 1: extract vbe from bilinear terms in y-equations *)
+  vbe  = Table[-Coefficient[yRHS[[i]], yvar[[i]]*xvar[[j]]], {i,m},{j,n}];
+  If[AllTrue[Flatten[vbe], PossibleZeroQ],
+    Message[extABa::novbe]; Return[$Failed]];
+  (* Step 2: remove bilinear, extract La and AS *)
+  phi  = Table[Expand[yRHS[[i]] + yvar[[i]]*(vbe[[i]] . xvar)], {i,m}];
+  La   = phi /. Thread[Join[yvar,xvar] -> Table[0,{m+n}]];
+  AS   = Table[Coefficient[phi[[i]] - La[[i]], yvar[[j]]], {i,m},{j,m}];
+  Do[If[!PossibleZeroQ[Expand[phi[[i]] - La[[i]] - AS[[i]] . yvar]],
+       Message[extABa::notABa, i, yvar[[i]], phi[[i]]-La[[i]]-AS[[i]].yvar]],
+     {i,m}];
+  (* Step 3: linear part A from x-equations — zero yvar first to avoid bilinear contamination *)
+  A    = Table[Coefficient[(xRHS[[k]] /. Thread[yvar -> 0]), xvar[[l]]], {k,n},{l,n}];
+  rem  = Table[Expand[xRHS[[k]] - A[[k]] . xvar], {k,n}];
+  (* Step 4: recover ba from any nonzero vbe[i0,j0] *)
+  ij0  = First[Cases[Flatten[Table[{i,j},{i,m},{j,n}],1],
+                     {i_,j_}/;!PossibleZeroQ[vbe[[i,j]]]]];
+  ba   = Table[
+    FullSimplify[Coefficient[rem[[k]], yvar[[ij0[[1]]]]*xvar[[ij0[[2]]]]]
+                / vbe[[ij0[[1]],ij0[[2]]]]],
+    {k,n}];
+  Print["extABa: La=", La, " ba=", ba, " vbe=", vbe];
+  Print["extABa: AS=", AS, " A=", A];
+  {La, AS, vbe, ba, A}
+];
+
+(* ========================================================================= *)
+(* extABP: General DSI bilinear decomposition — extracts {La,AS,B,A,P}     *)
+(* Input:  RHS, var (all variables), xvar (infected/x-class variables)      *)
+(* yvars = complement of xvar in var (preserving order)                     *)
+(* Output: {La, AS, B, A, P, yvar}                                         *)
+(*   B (m×n WAIFW): B[i,j] = -Coeff(yRHS_i, y_i*x_j)                     *)
+(*   A (n×n infected): A[k,l] = Coeff(xRHS_k, x_l)                        *)
+(*   P (n×m insertion): P[k,i] = bilcoeff[k,i,j]/B[i,j] (first nonzero j) *)
+(* rank(P)=1 iff ABa (ba*ones^t); rank(B)=1 iff rank-one WAIFW             *)
+(* ========================================================================= *)
+
+extABP[RHS_, var_, xvar_] := Module[
+  {yvar, m, n, posY, posX, yRHS, xRHS, B, phi, La, AS, A, rem, bil, P,
+   rowB, rowC, ratios, res, k, i, j},
+  yvar = Select[var, !MemberQ[xvar, #]&];   (* preserve var order *)
+  m    = Length[yvar];
+  n    = Length[xvar];
+  posY = Flatten[Position[var, #] & /@ yvar];
+  posX = Flatten[Position[var, #] & /@ xvar];
+  yRHS = Expand[RHS[[posY]]];
+  xRHS = Expand[RHS[[posX]]];
+  (* Step 1: B[i,j] from y-equations *)
+  B   = Table[-Coefficient[yRHS[[i]], yvar[[i]]*xvar[[j]]], {i,m},{j,n}];
+  phi = Table[Expand[yRHS[[i]] + yvar[[i]]*(B[[i]] . xvar)], {i,m}];
+  Do[If[!PolynomialQ[phi[[i]], yvar] || Max[Exponent[phi[[i]], yvar]] > 1,
+       Message[extABP::notbil, i]; Return[$Failed]], {i,m}];
+  La  = phi /. Thread[yvar -> 0];
+  AS  = Table[Coefficient[phi[[i]], yvar[[j]]], {i,m},{j,m}];
+  (* Step 2: A[k,l] from x-equations — zero yvar first to avoid bilinear contamination *)
+  A   = Table[Coefficient[(xRHS[[k]] /. Thread[yvar -> 0]), xvar[[l]]], {k,n},{l,n}];
+  rem = Expand[xRHS - A . xvar];
+  Do[res = Expand[rem[[k]] - Sum[Coefficient[rem[[k]], yvar[[i]]*xvar[[j]]]*yvar[[i]]*xvar[[j]], {i,m},{j,n}]];
+     If[!PossibleZeroQ[res], Message[extABP::notbil, n+k]; Return[$Failed]],
+     {k,n}];
+  (* Step 3: bilcoeff[k,i,j] = P[k,i]*B[i,j] *)
+  bil = Table[Coefficient[rem[[k]], yvar[[i]]*xvar[[j]]], {k,n},{i,m},{j,n}];
+  (* Step 4: recover P *)
+  P   = Table[0, {n},{m}];
+  Do[
+    rowB = B[[i]];
+    rowC = bil[[k,i]];
+    If[AllTrue[rowB, PossibleZeroQ],
+      If[!AllTrue[rowC, PossibleZeroQ],
+        Message[extABP::badP, k, i, rowC]; Return[$Failed]
+        (* else P[k,i]=0 *)],
+      ratios = DeleteDuplicates[
+        Table[If[!PossibleZeroQ[rowB[[j]]], Simplify[rowC[[j]]/rowB[[j]]], Nothing], {j,n}]];
+      If[Length[ratios] != 1,
+        Message[extABP::badP, k, i, ratios]; Return[$Failed]];
+      P[[k,i]] = First[ratios]],
+    {k,n},{i,m}];
+  Print["extABP: La=", La, " B=", B // MatrixForm, " P=", P // MatrixForm];
+  Print["extABP: AS=", AS // MatrixForm, " A=", A // MatrixForm, " rank(P)=", MatrixRank[P], " rank(B)=", MatrixRank[B]];
+  {La, AS, B, A, P, yvar}
+];
+
+(* ========================================================================= *)
 (* invFQ: Invariant Facet Query - cleaner version of isInvariantFacet *)
 (* ========================================================================= *)
 (* MATHEMATICAL CONDITION:

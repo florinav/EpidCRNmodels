@@ -1,0 +1,207 @@
+\section{Coexistence criterion for two-strain models with essentially rank-one siphon invasion matrices and one
+input species}
+
+\beT[Coexistence criterion for two-strain models with essentially rank-one siphon invasion matrices and one
+input species]
+\lbl{t:2}
+Consider a two-strain model with one susceptible/input coordinate $s$,
+two minimal siphons $\Sigma_1,\Sigma_2$, and siphon variables
+\[
+        I_k\in\RR^{m_k}_{\ge0},
+        \qquad k\eq1,2.
+\]
+Let $E_1,E_2$ be the one-strain boundary equilibria, with susceptible
+coordinates $s_1,s_2$, and let
+\[
+        R_2^{E_1},
+        \qquad
+        R_1^{E_2}
+\]
+denote the invasion numbers.
+
+Assume:
+\begin{enumerate}[label=\textup{(A\arabic*)},
+                  align=left, leftmargin=*, labelindent=0pt]
+
+\item\label{A:rankone}\textup{(RANK ONE)}
+The strain equations may be written as
+\[
+        I_k'=M_k(s,z_k)I_k,
+        \qquad
+        M_k(s,z_k)=w_k(s,z_k)\pi_k^T-\diag(v_k),
+\]
+with
+\[
+        w_k(s,z_k)>0,
+        \qquad
+        \pi_k>0,
+        \qquad
+        v_k>0,
+\]
+and $M_k(s,0)$ irreducible for every $s>0$.
+
+\item\label{A:RUR}\textup{(SCALAR RUR POLYNOMIAL)}
+After imposing the rank-one degeneracy equations
+\[
+        \pi_k^T\diag(v_k)^{-1}w_k\eq1,
+        \qquad k\eq1,2,
+\]
+all variables outside
+\[
+        \{s\}\cup\Sigma_1\cup\Sigma_2
+\]
+are algebraically eliminated, and the remaining fixed-point equations
+reduce to a scalar polynomial
+\[
+        P(s)\eq0.
+\]
+
+\item\label{A:norm}\textup{(BOUNDARY SIGN CONDITIONS)}
+The polynomial $P$ satisfies the following sign condition at the
+boundary of the positive reconstruction interval:
+\[
+        P(0)\cdot P(s_j) < 0
+        \qquad
+        \text{whenever } R_{3-j}^{E_j}>1,\quad j\eq1,2.
+\]
+In the generic case $P(0)>0$ this reduces to $P(s_j)<0$ when
+$R_{3-j}^{E_j}>1$, which is then implied by \textup{(A4)} below.
+In the case $P(0)<0$ (e.g.\ when the coexistence polynomial has a
+unique positive root with $P\to+\infty$), the same sign-change
+argument applies with the inequality reversed.
+
+\item\label{A:factor}\textup{(POSITIVE BOUNDARY FACTORIZATION)}
+Direct evaluation at $s=s_1,s_2$ gives
+\[
+        P(s_1)
+        \eq
+        -K_1\bigl(R_2^{E_1}-1\bigr),
+\]
+\[
+        P(s_2)
+        \eq
+        -K_2\bigl(R_1^{E_2}-1\bigr),
+\]
+with
+\[
+        K_1,K_2>0.
+\]
+
+\item\label{A:recon}\textup{(POSITIVE RECONSTRUCTION)}
+Every root
+\[
+        s^*\in(0,\min\{s_1,s_2\})
+\]
+of $P(s)\eq0$ satisfies $R_k(s^*)>1$ for $k\eq1,2$, yields positive
+values for all eliminated variables, and yields positive amplitudes
+\[
+        c_1^*,c_2^*>0
+\]
+in the two siphon blocks.
+
+\end{enumerate}
+
+Then
+\[
+\begin{cases}
+s_1<s_2,\ R_2^{E_1}>1
+&\Longrightarrow
+\exists\,E_{12}\in\RR^n_{>0},
+\\[1ex]
+s_2<s_1,\ R_1^{E_2}>1
+&\Longrightarrow
+\exists\,E_{12}\in\RR^n_{>0}.
+\end{cases}
+\]
+Moreover, the susceptible coordinate of $E_{12}$ satisfies
+$s^*<\min\{s_1,s_2\}$, so both reproduction functions
+$R_k(s^*)>1$, $k\eq1,2$, confirming that both siphon blocks are
+active at $E_{12}$.
+\eeT
+
+\begin{proof}
+Assume first $s_1<s_2$.  If $R_2^{E_1}>1$, then by \ref{A:factor},
+\[
+        P(s_1)\eq-K_1(R_2^{E_1}-1)<0.
+\]
+By \ref{A:norm}, $P(0)$ and $P(s_1)$ have opposite signs, so the
+intermediate value theorem gives $s^*\in(0,s_1)$ with $P(s^*)\eq0$.
+Because $s_1<s_2$,
+\[
+        s^*<s_1<s_2,
+        \qquad\text{hence}\qquad
+        s^*\in(0,\min\{s_1,s_2\}).
+\]
+
+By \ref{A:recon}, all eliminated variables are positive,
+$R_k(s^*)>1$ for $k\eq1,2$, and the amplitudes satisfy
+$c_1^*,c_2^*>0$.
+
+It remains to reconstruct the siphon variables $I_k^*$.
+At $s=s^*$, the rank-one degeneracy equations in \ref{A:RUR} give
+\[
+        \pi_k^T\diag(v_k)^{-1}w_k(s^*,z_k(s^*))\eq1,
+        \qquad k\eq1,2.
+\]
+Therefore
+\begin{align*}
+        M_k(s^*,z_k(s^*))
+        \diag(v_k)^{-1}w_k(s^*,z_k(s^*))
+        &\eq
+        \bigl[w_k(s^*,z_k(s^*))\pi_k^T-\diag(v_k)\bigr]
+        \diag(v_k)^{-1}w_k(s^*,z_k(s^*))
+        \\
+        &\eq
+        w_k(s^*,z_k(s^*))
+        \underbrace{\pi_k^T\diag(v_k)^{-1}w_k(s^*,z_k(s^*))}_{\eq1}
+        -w_k(s^*,z_k(s^*))
+        \eq0.
+\end{align*}
+Thus $\diag(v_k)^{-1}w_k(s^*,z_k(s^*))\in\ker M_k(s^*,z_k(s^*))$.
+Since $R_k(s^*)>1$ and $M_k(s^*,0)$ is irreducible by \ref{A:rankone},
+Theorem~\ref{t:relayRF} guarantees that the Perron eigenvalue of
+$M_k(s^*,0)$ is positive and simple; hence $\ker M_k(s^*,z_k(s^*))$
+is one-dimensional (as $M_k(s^*,z_k(s^*))$ is a rank-one perturbation
+of the nonsingular diagonal $-\diag(v_k)$ with exactly one imposed
+degeneracy).  Consequently
+\[
+        \ker M_k(s^*,z_k(s^*))
+        \eq
+        \bigl\langle
+        \diag(v_k)^{-1}w_k(s^*,z_k(s^*))
+        \bigr\rangle.
+\]
+The reconstructed siphon variables are therefore
+\[
+        I_k^*
+        \eq
+        c_k^*\diag(v_k)^{-1}w_k(s^*,z_k(s^*)),
+        \qquad c_k^*>0.
+\]
+Since $v_k>0$ and $w_k(s^*,z_k(s^*))>0$, we obtain $I_k^*>0$ for
+$k\eq1,2$.  Together with the positive reconstruction of the
+eliminated variables, the reconstructed fixed point belongs to
+$\RR^n_{>0}$.
+
+The case $s_2<s_1$ is symmetric.  If $R_1^{E_2}>1$, then
+\ref{A:factor} gives $P(s_2)<0$, and \ref{A:norm} gives a sign change
+on $(0,s_2)$, yielding $s^*\in(0,s_2)\subset(0,\min\{s_1,s_2\})$.
+The same rank-one kernel calculation gives $I_k^*>0$ for $k\eq1,2$,
+hence $E_{12}\in\RR^n_{>0}$.
+\end{proof}
+
+\beR[role of elimination theory in coexistence results]
+The coexistence criterion uses CRNT and NGM structure to identify the
+rank-one degeneracy equations, but it also requires a genuinely
+elimination-theoretic input.  The scalar polynomial $P(s)$ must exist,
+its boundary values must factor through the two invasion quantities via
+\ref{A:factor}, and its roots in $(0,\min\{s_1,s_2\})$ must
+reconstruct positive coordinates via \ref{A:recon}.  The sign
+condition \ref{A:norm} replaces the naive requirement $P(0)>0$: in
+models such as the OSN model with $D_0>0$, one has $P(0)<0$ and the
+IVT argument runs in the opposite direction, but the conclusion is
+the same.  Thus coexistence is not obtained from siphon or NGM
+structure alone; it is obtained when the elimination problem is
+compatible with the invasion inequalities and the sign-change condition
+holds at the boundary of the positive reconstruction interval.
+\eeR

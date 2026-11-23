@@ -1,0 +1,1099 @@
+\section{A GAS competitive exclusion partition theorem \cite{AAHRah}}
+\lbl{s:Rah}
+
+One of the most convincing results pointing to the interest of unification is the GAS competitive exclusion partition theorem of \cite{AAHRah}. It  is  naturally
+separated into two parts.  The first is an abstract GAS criterion, requiring a
+reproduction-function ordering property, tangential GAS on resident faces, and
+a compatible family of Lyapunov functions.  The second is the rank-one block theorem, which verifies these
+hypotheses explicitly for a bimolecular one-input class.
+
+\beD[reproduction-function ordering of equilibria]
+\lbl{d:RFOE}
+
+Consider a positive ODE with $m$ minimal siphon blocks
+\[
+\sigma_1,\ldots,\sigma_m,
+\]
+a unique disease-free equilibrium $E_0$, and, for each block
+$\sigma_k$, let
+\[
+R_k
+\]
+denote the corresponding reproduction function introduced in
+Definition~\ref{d:RepFun}.
+
+The system is said to satisfy the
+\emph{reproduction-function ordering of equilibria (RFOE) property} if a
+resident equilibrium $E_p$ lying in the relative interior of a minimal
+siphon face $F_{\sigma_p}$ cannot be invaded by strains $\sigma_q$,
+$q\ne p$, with lower reproduction numbers, \ie,
+\[
+R_p(E_0)>R_q(E_0)
+\quad\Longrightarrow\quad
+R_q(E_p)<1
+\qquad(q\ne p).
+\]
+
+In other words, whenever block $p$ has the larger reproduction function
+at the disease-free equilibrium, block $q$ cannot invade the
+resident equilibrium $E_p$.
+
+For one-input models where every reproduction function depends only on
+an input variable $s$, the RFOE property reduces to
+\[
+R_p(s_0)>R_q(s_0)
+\quad\Longrightarrow\quad
+R_q(s_p)<1,
+\]
+where $s_p$ denotes the input coordinate of the resident equilibrium
+$E_p$.
+
+\eeD
+
+\beD[CEP Lyapunov family]
+\lbl{d:CEP-Lyap}
+
+Let $\Omega$ be a compact positively invariant set, and suppose that
+\[
+E_0,E_1,\ldots,E_m
+\]
+are the disease-free and resident equilibria.
+
+A family of continuously differentiable functions
+\[
+L_0,L_1,\ldots,L_m:\Omega\to\R
+\]
+is called a \emph{competitive-exclusion-partition (CEP) Lyapunov family}
+if the following conditions hold.
+
+\begin{enumerate}
+
+\item[(i)]
+If
+\[
+R_k(E_0)\le1,
+\qquad
+k\eq1,\ldots,m,
+\]
+then
+\[
+\dot L_0\le0
+\quad\text{on }\Omega,
+\]
+and the largest invariant subset of
+\[
+\{x\in\Omega:\dot L_0(x)\eq0\}
+\]
+is $\{E_0\}$.
+
+\item[(ii)]
+For every resident equilibrium $E_p$ for which
+\[
+R_p(E_0)>1,
+\qquad
+R_p(E_0)>R_k(E_0)
+\quad(k\ne p),
+\]
+there exists a positively invariant set
+\[
+\Omega_p^+\subset\Omega
+\]
+containing $E_p$ such that
+\[
+\dot L_p\le0
+\quad\text{on }\Omega_p^+,
+\]
+and the largest invariant subset of
+\[
+\{x\in\Omega_p^+:\dot L_p(x)\eq0\}
+\]
+is precisely $\{E_p\}$.
+
+\end{enumerate}
+
+\eeD
+
+\beT[GAS strict competitive exclusion from RFOE and a CEP Lyapunov family]
+\lbl{t:GAS-CEP-RF}
+
+Consider a positive ODE with $m$ minimal siphon blocks
+$z_1,\ldots,z_m$, a unique disease-free equilibrium $E_0$, and suppose
+that every transversal Jacobian block admits the usual regular
+next-generation splitting.
+
+Assume:
+
+\begin{enumerate}
+
+\item[(RFOE)]
+Definition~\ref{d:RFOE} holds.
+
+\item[(TLS)]
+Every resident equilibrium is locally asymptotically stable on its
+resident face.
+
+\item[(LY)]
+There exists a CEP Lyapunov family in the sense of
+Definition~\ref{d:CEP-Lyap}.
+
+\end{enumerate}
+
+Then:
+
+\begin{enumerate}
+
+\item
+If
+\[
+R_k(E_0)\le1,
+\qquad
+k\eq1,\ldots,m,
+\]
+then $E_0$ is GAS on $\Omega$.
+
+\item
+Let $E_p$ be a resident equilibrium satisfying
+\[
+R_p(E_0)>1,
+\qquad
+R_p(E_0)>R_k(E_0)
+\quad(k\ne p).
+\]
+Then $E_p$ is LAS and GAS on the positively invariant set
+\[
+\Omega_p^+.
+\]
+
+\end{enumerate}
+
+\eeT
+
+\begin{proof}
+
+Suppose first that
+\[
+R_k(E_0)\le1,
+\qquad
+k\eq1,\ldots,m.
+\]
+By Definition~\ref{d:CEP-Lyap},
+\[
+\dot L_0\le0
+\]
+throughout $\Omega$, and the largest invariant subset of
+$\{\dot L_0\eq0\}$ is $\{E_0\}$.  LaSalle's invariance principle
+therefore yields global asymptotic stability of $E_0$.
+
+Now let $E_p$ be a resident equilibrium satisfying
+\[
+R_p(E_0)>1,
+\qquad
+R_p(E_0)>R_k(E_0)
+\quad(k\ne p).
+\]
+By assumption \textup{(TLS)}, $E_p$ is locally asymptotically stable on
+its resident face.
+
+For every missing block $k\ne p$, define
+\[
+R_{k|p}
+\eq
+R_k(E_p).
+\]
+Since RFOE holds,
+\[
+R_p(E_0)>R_k(E_0)
+\Longrightarrow
+R_k(E_p)<1,
+\]
+that is,
+\[
+R_{k|p}<1.
+\]
+The next-generation matrix theorem applied to the regular splitting of
+the transversal block $J^\perp_{k|p}$ gives
+\[
+s(J^\perp_{k|p})<0.
+\]
+Hence every missing siphon is transversally stable at $E_p$.
+
+Combining tangential local stability with transversal local stability
+shows that $E_p$ is locally asymptotically stable for the full system.
+
+Finally, Definition~\ref{d:CEP-Lyap} gives
+\[
+\dot L_p\le0
+\quad\text{on }\Omega_p^+,
+\]
+and the largest invariant subset of
+\[
+\{\dot L_p\eq0\}\cap\Omega_p^+
+\]
+is $\{E_p\}$.  LaSalle's invariance principle therefore yields global
+asymptotic stability of $E_p$ on $\Omega_p^+$.
+
+\end{proof}
+
+We now verify the hypotheses of Theorem~\ref{t:GAS-CEP-RF} for the
+explicit bimolecular rank-one block model: $m$ competing irreducible
+rank-one blocks, with no direct block-to-block coupling in the
+transversal equations,
+\be{eq:rankone-m}
+\begin{cases}
+s'
+=
+\Lambda-\mu s-s\displaystyle\sum_{k=1}^m\phi_k,
+\\[1mm]
+z_k'
+=
+\left(sw_k\pi_k^\top-V_k\right)z_k,
+\qquad
+k=1,\ldots,m,
+\\[1mm]
+\phi_k
+=
+\pi_k^\top z_k.
+\end{cases}
+\ee
+Here $z_k\in\R_{\ge0}^{n_k}$, $w_k\gg0$, $\pi_k\gg0$,
+${\bf 1}^\top\pi_k=1$.  We assume that each $V_k$ is a nonsingular
+$M$-matrix and that
+\[
+{\bf 1}^\top V_k\geq\mu{\bf 1}^\top,
+\qquad
+k=1,\ldots,m.
+\]
+Then
+\[
+\Omega
+=
+\left\{
+s\geq0,\ z_k\geq0:
+s+\sum_{k=1}^m{\bf 1}^\top z_k\leq\frac{\Lambda}{\mu}
+\right\}
+\]
+is forward invariant.
+
+For each block set
+\[
+\mR_k
+=
+\pi_k^\top V_k^{-1}w_k,
+\qquad
+s_0
+=
+\frac{\Lambda}{\mu},
+\qquad
+R_k
+=
+s_0\mR_k,
+\qquad
+R_k(s)
+=
+s\mR_k.
+\]
+Thus $\mR_k$ is the per-susceptible reproduction coefficient, $R_k$ is
+the DFE reproduction number, and $R_k(s)$ is the reproduction
+function.  The next theorem records the equilibrium and invasion data
+for the two generic equilibrium types; the degenerate coexistence
+case is treated separately in Remark~\ref{r:generic-rankone} below.
+
+\beT[Equilibria and invasion data for rank-one block competition]
+\lbl{t:rankone-m-data}
+
+For \eqref{eq:rankone-m}, put
+\[
+\mR_k
+\eq
+\pi_k^\top V_k^{-1}w_k,
+\qquad
+R_k
+\eq
+s_0\mR_k,
+\qquad
+s_0
+\eq
+\frac{\Lambda}{\mu}.
+\]
+Thus $\mR_k$ is the per-susceptible reproduction coefficient of block $k$,
+$R_k$ is the basic reproduction number of block $k$ at the DFE, and the
+reproduction function at susceptible level $s$ is
+\[
+R_k(s)
+\eq
+s\mR_k.
+\]
+The equilibria supported on rank-one blocks and their invasion numbers are
+determined as follows.
+
+\BEN
+
+\im
+The disease-free equilibrium is
+\[
+E_0
+\eq
+(s_0,0,\ldots,0).
+\]
+The transversal eigenvalue of block $k$ at $E_0$ has the sign of
+\[
+R_k-1.
+\]
+
+\im
+For a single block $p$, a boundary equilibrium supported only on block $p$
+exists if and only if
+\[
+R_p>1.
+\]
+It is
+\[
+E_p
+\eq
+(s_p,0,\ldots,0,z_p^*,0,\ldots,0),
+\]
+where
+\[
+s_p
+\eq
+\frac1{\mR_p},
+\qquad
+\xi_p
+\eq
+\Lambda-\mu s_p
+\eq
+\Lambda-\frac{\mu}{\mR_p},
+\qquad
+z_p^*
+\eq
+\xi_pV_p^{-1}w_p.
+\]
+For $k\ne p$, the invasion number of block $k$ at $E_p$ is
+\[
+R_k(E_p)
+\eq
+s_p\mR_k
+\eq
+\frac{\mR_k}{\mR_p}
+\eq
+\frac{R_k}{R_p}.
+\]
+Hence block $k$ invades $E_p$ if and only if
+\[
+R_k>R_p,
+\]
+equivalently $\mR_k>\mR_p$.
+
+\EEN
+\eeT
+
+\begin{proof}
+At $E_0$, the transversal block for $z_k$ is
+\[
+s_0w_k\pi_k^\top-V_k.
+\]
+Since
+\[
+V_k^{-1}s_0w_k\pi_k^\top
+\]
+has spectral radius
+\[
+s_0\pi_k^\top V_k^{-1}w_k
+\eq
+s_0\mR_k
+\eq
+R_k,
+\]
+the sign of the Perron eigenvalue of
+\[
+s_0w_k\pi_k^\top-V_k
+\]
+is the sign of
+\[
+R_k-1.
+\]
+
+Now consider an equilibrium with block $p$ positive and all other blocks
+zero. The equation
+\[
+0
+\eq
+(sw_p\pi_p^\top-V_p)z_p
+\]
+with $z_p>0$ implies
+\[
+z_p
+\eq
+s\T i_pV_p^{-1}w_p.
+\]
+Applying $\pi_p^\top$ gives
+\[
+\T i_p
+\eq
+s\T i_p\pi_p^\top V_p^{-1}w_p
+\eq
+s\T i_p\mR_p.
+\]
+Since $\T i_p>0$, this gives
+\[
+s
+\eq
+\frac1{\mR_p}.
+\]
+The $s$-equation then gives
+\[
+0
+\eq
+\Lambda-\frac{\mu}{\mR_p}-\frac1{\mR_p}\T i_p,
+\]
+hence
+\[
+\T i_p
+\eq
+\mR_p\left(\Lambda-\frac{\mu}{\mR_p}\right)
+\eq
+\mR_p\xi_p.
+\]
+Thus
+\[
+z_p
+\eq
+s\T i_pV_p^{-1}w_p
+\eq
+\frac1{\mR_p}\mR_p\xi_pV_p^{-1}w_p
+\eq
+\xi_pV_p^{-1}w_p.
+\]
+This equilibrium is positive exactly when $\xi_p>0$, equivalently
+\[
+\Lambda-\frac{\mu}{\mR_p}>0,
+\]
+equivalently
+\[
+s_0\mR_p>1,
+\]
+that is,
+\[
+R_p>1.
+\]
+
+At $E_p$, the missing block $k$ sees susceptible level $s_p$. Hence its
+invasion number is
+\[
+R_k(E_p)
+\eq
+s_p\mR_k
+\eq
+\frac{\mR_k}{\mR_p}
+\eq
+\frac{R_k}{R_p}.
+\]
+\end{proof}
+
+\beR[Genericity, and the non-generic coexistence stratum]
+\lbl{r:generic-rankone}
+
+The equilibrium structure of \eqref{eq:rankone-m} is determined
+entirely by the $m$ reproduction functions $R_k(s)=s\mR_k$.  Each
+positive block forces $s=1/\mR_k$, so a putative equilibrium with
+support $I\subset\{1,\ldots,m\}$, $|I|\ge2$, requires
+\[
+\mR_k\eq\mR_I
+\qquad\text{for every }k\in I
+\]
+for some common value $\mR_I$ -- that is, two or more of the $m$ real
+numbers $\mR_1,\ldots,\mR_m$ must coincide exactly.  For generic
+parameter values $\mR_1,\ldots,\mR_m$ are pairwise distinct, since
+coincidence is a codimension-$(|I|-1)$ condition on the parameter
+space.  Consequently, \emph{coexistence of two or more rank-one
+blocks is non-generic}: for generic parameters the only equilibria of
+\eqref{eq:rankone-m} are
+\[
+E_0,E_1,\ldots,E_m,
+\]
+as given by Theorem~\ref{t:rankone-m-data}, and the GAS partition
+theorem below (Theorem~\ref{t:blo}) settles the dynamics
+completely in this generic case: either $E_0$ or exactly one $E_p$ is
+GAS.
+
+On the non-generic tie surface where $\mR_k=\mR_I$ for $k\in I$, a
+short computation -- repeating the argument above for each $k\in I$
+simultaneously -- shows that the equilibrium is not isolated: writing
+$s=1/\mR_I$, $\xi_I=\Lambda-\mu/\mR_I$, the set of equilibria
+supported on $I$ is the simplex
+\[
+E_I(\xi)
+\eq
+\left(
+\frac1{\mR_I},
+z_1(\xi),\ldots,z_m(\xi)
+\right),
+\qquad
+z_k(\xi)
+\eq
+\begin{cases}
+\xi_kV_k^{-1}w_k, & k\in I,\\
+0, & k\notin I,
+\end{cases}
+\qquad
+\xi_k>0,\ \sum_{k\in I}\xi_k\eq\xi_I,
+\]
+with invasion number $R_q(E_I)=\mR_q/\mR_I=R_q/R_I$ at any point of
+the continuum, for $q\notin I$.  Since this stratum has codimension
+$\ge1$ and supports a continuum (rather than an isolated point) of
+equilibria, no point of it can be GAS in the ordinary sense; we do not
+pursue its stability further here, and Theorem~\ref{t:blo}
+below makes no GAS claim on this stratum, recording only that the
+tied equilibrium is non-isolated.
+\eeR
+
+\beL[Canonical normalization cancels all resident--invader coupling terms]
+\lbl{l:can-nor}
+
+Fix a resident block $p$. For every invading block $k\ne p$, define
+\[
+c_k^\top
+\eq
+a\,\frac{\pi_k^\top V_k^{-1}}{\mR_k},
+\qquad
+a>0.
+\]
+Then
+\[
+c_k^\top w_k
+\eq
+a,
+\]
+and along solutions of \eqref{eq:rankone-m},
+\[
+c_k^\top z_k'
+\eq
+a\left(s-\frac1{\mR_k}\right)\T i_k.
+\]
+Consequently, when the resident susceptible level is
+\[
+s_p
+\eq
+\frac1{\mR_p},
+\]
+the invader part in the derivative of the Lyapunov function $L_p$ reduces
+simultaneously for all $k\ne p$ to
+\[
+a\sum_{k\ne p}
+\left(
+\frac1{\mR_p}-\frac1{\mR_k}
+\right)\T i_k.
+\]
+\eeL
+
+\begin{proof}
+By definition,
+\[
+c_k^\top w_k
+\eq
+a\frac{\pi_k^\top V_k^{-1}w_k}{\mR_k}
+\eq
+a.
+\]
+Moreover,
+\[
+c_k^\top z_k'
+\eq
+c_k^\top(sw_k\pi_k^\top-V_k)z_k.
+\]
+Using $\T i_k\eq\pi_k^\top z_k$, this gives
+\[
+c_k^\top z_k'
+\eq
+s(c_k^\top w_k)\T i_k-c_k^\top V_kz_k.
+\]
+The first term is
+\[
+s(c_k^\top w_k)\T i_k
+\eq
+as\T i_k.
+\]
+For the second term,
+\[
+c_k^\top V_kz_k
+\eq
+a\frac{\pi_k^\top V_k^{-1}V_kz_k}{\mR_k}
+\eq
+a\frac{\pi_k^\top z_k}{\mR_k}
+\eq
+a\frac{\T i_k}{\mR_k}.
+\]
+Therefore
+\[
+c_k^\top z_k'
+\eq
+a\left(s-\frac1{\mR_k}\right)\T i_k.
+\]
+In the derivative of $L_p$, the $s$-entropy term contributes
+\[
+-a(s-s_p)\T i_k
+\]
+for each invading block. Hence the total contribution of block $k\ne p$ is
+\[
+a\left(s-\frac1{\mR_k}\right)\T i_k
+-
+a(s-s_p)\T i_k
+\eq
+a\left(s_p-\frac1{\mR_k}\right)\T i_k.
+\]
+Since $s_p\eq1/\mR_p$, this is
+\[
+a\left(
+\frac1{\mR_p}-\frac1{\mR_k}
+\right)\T i_k.
+\]
+Summing over all $k\ne p$ proves the claim.
+\end{proof}
+
+\beR[Canonical choice of the resident and invader weights]
+\lbl{r:canonical}
+
+The resident part of the Perron--Volterra Lyapunov function is essentially
+determined by the resident equilibrium. Indeed, the equilibrium identity
+\[
+z_p^*=\xi_pV_p^{-1}w_p
+\]
+forces the weighted Volterra entropy
+\[
+s_pG\!\left(\frac{s}{s_p}\right)
++
+\sum_{j=1}^{n_p}
+\frac{\pi_{p,j}}{\mR_pv_{p,j}}\,
+z_{p,j}^*
+G\!\left(\frac{z_{p,j}}{z_{p,j}^*}\right),
+\]
+up to multiplication by a positive constant, since these are precisely the
+weights for which the resident derivative collapses to the entropy bracket
+of Lemma~\ref{l:weighted-rankone-entropy}.
+
+The remaining freedom lies in the linear invader term. Lemma~\ref{l:can-nor}
+shows that requiring the resident--invader coupling terms to cancel
+simultaneously for every invading block uniquely determines the normalized
+row vector
+\[
+c_k^\top=\frac{\pi_k^\top V_k^{-1}}{\mR_k},
+\]
+again up to a common positive scaling.
+\eeR
+
+\beL[Weighted rank-one entropy inequality]
+\lbl{l:weighted-rankone-entropy}
+
+Let
+\[
+u>0,
+\qquad
+y_j>0,
+\qquad
+\T w_j>0,
+\qquad
+\sum_{j=1}^n\T w_j=1.
+\]
+Put
+\[
+Y
+=
+\sum_{j=1}^n\T w_jy_j,
+\qquad
+H
+=
+\sum_{j=1}^n\frac{\T w_j}{y_j}.
+\]
+Then
+\[
+B(u,y)
+=
+\left(1-\frac1u\right)(1-uY)
++
+\sum_{j=1}^n
+\T w_j
+\left(1-\frac1{y_j}\right)
+\left(uY-y_j\right)
+\leq0.
+\]
+Moreover,
+\[
+B(u,y)=0
+\]
+if and only if
+\[
+u=1
+\qquad
+\hbox{and}
+\qquad
+y_1= y_2=\cdots= y_n.
+\]
+\eeL
+
+\begin{proof}
+We first simplify $B(u,y)$.  The first term is
+\[
+\left(1-\frac1u\right)(1-uY)
+=
+1-\frac1u-uY+Y.
+\]
+For the second term,
+\[
+\sum_{j=1}^n
+\T w_j
+\left(1-\frac1{y_j}\right)
+\left(uY-y_j\right)
+\]
+equals
+\[
+\sum_{j=1}^n\T w_j(uY-y_j)
+-
+\sum_{j=1}^n\T w_j\left(\frac{uY}{y_j}-1\right).
+\]
+Since
+\[
+\sum_{j=1}^n\T w_jy_j= Y,
+\qquad
+\sum_{j=1}^n\T w_j=1,
+\]
+this becomes
+\[
+uY-Y-uY\sum_{j=1}^n\frac{\T w_j}{y_j}+1
+=
+uY-Y-uYH+1.
+\]
+Therefore
+\[
+B(u,y)
+=
+2-\frac1u-uYH.
+\]
+By the weighted Cauchy inequality,
+\[
+\left(\sum_{j=1}^n\T w_jy_j\right)
+\left(\sum_{j=1}^n\frac{\T w_j}{y_j}\right)
+\geq
+\left(\sum_{j=1}^n\T w_j\right)^2
+=1,
+\]
+that is,
+\[
+YH\geq1.
+\]
+Consequently
+\[
+B(u,y)
+\leq
+2-\frac1u-u.
+\]
+Finally,
+\[
+u+\frac1u\geq2
+\]
+for $u>0$, and hence
+\[
+2-\frac1u-u\leq0.
+\]
+This proves $B(u,y)\leq0$.
+
+Equality requires equality in both inequalities.  Equality in
+$u+1/u\geq2$ gives
+\[
+u=1.
+\]
+Equality in the weighted Cauchy inequality gives
+\[
+y_1= y_2=\cdots= y_n.
+\]
+Conversely, these two conditions plainly give $B(u,y)=0$.
+\end{proof}
+
+\beR[role of canonical normalization]
+The Perron--Volterra Lyapunov function is not claimed to be unique.
+However, within the ansatz
+\[
+L
+=
+H(\text{resident})
++
+\sum_{k\neq p}c_k^\top z_k,
+\]
+the normalization
+\[
+c_k^\top
+=
+\,\frac{\pi_k^\top V_k^{-1}}{\mathcal R_k} \Lra c_k^\top w_k=1
+\]
+is canonical in the sense that it  eliminates the resident--invader coupling terms and it
+ reduces the resident-invader coupling contribution to
+\[
+\sum_{k\neq p}
+\left(
+\frac1{\mathcal R_p}
+-
+\frac1{\mathcal R_k}
+\right)\T i_k.
+\]
+ Other Lyapunov functions may exist, but
+they would require a different cancellation mechanism.
+\eeR
+
+\beL[Forward invariance of the open resident face]
+\lbl{l:open-face-invariance}
+
+Fix $p\in\{1,\ldots,m\}$ and let
+\[
+\Omega_p^{++}
+\eq
+\{(s,z_1,\ldots,z_m)\in\Omega : z_{p,j}>0 \text{ for all }j\}.
+\]
+Then $\Omega_p^{++}$ is positively invariant, and every trajectory
+starting in
+\[
+\Omega_p^+\eq\{(s,z_1,\ldots,z_m)\in\Omega:z_p\ne0\}
+\]
+enters $\Omega_p^{++}$ in finite time.
+\eeL
+
+\begin{proof}
+For each component $j$, the equation for $z_{p,j}$ in
+\eqref{eq:rankone-m} reads
+\[
+z_{p,j}'
+\eq
+sw_{p,j}\T i_p-v_{p,j}z_{p,j}.
+\]
+On the face $\{z_{p,j}=0\}$ with $z_p\ne0$, this reduces to
+$z_{p,j}'=sw_{p,j}\T i_p\ge0$, with equality only if $\T i_p=\pi_p^\top
+z_p=0$.  Since $\pi_p\gg0$ and $z_p\ge0$, $z_p\ne0$, this forces
+$\T i_p>0$ whenever some other component of $z_p$ is positive; hence
+$z_{p,j}'>0$ on the face $\{z_{p,j}=0,\,z_p\ne0\}$ as soon as $w_{p,j}>0$,
+which holds since $w_p\gg0$.  Thus the face $\{z_{p,j}=0\}$ is
+repelling from within $\Omega_p^+$, and a standard comparison argument
+shows that once all components of $z_p$ are positive they remain so:
+$\Omega_p^{++}$ is positively invariant.  Moreover, since each
+$z_{p,j}=0$ face is strictly repelling whenever $z_p\ne0$, a trajectory
+starting in $\Omega_p^+$ reaches $\Omega_p^{++}$ in finite time.
+\end{proof}
+
+\beT[Global rank-one block competition theorem]
+\lbl{t:blo}
+
+For \eqref{eq:rankone-m}, put
+\[
+\mR_k
+\eq
+\pi_k^\top V_k^{-1}w_k,
+\qquad
+R_k
+\eq
+s_0\mR_k,
+\qquad
+s_0
+\eq
+\frac{\Lambda}{\mu}.
+\]
+The following global stability partition holds generically (away from
+the non-generic coexistence stratum of Remark~\ref{r:generic-rankone}).
+
+\BEN
+
+\im
+If
+\[
+R_k\leq1,
+\qquad
+k\eq1,\ldots,m,
+\]
+then
+\[
+E_0
+\eq
+(s_0,0,\ldots,0)
+\]
+is globally asymptotically stable on $\Omega$.
+
+\im
+Suppose that, for some $p$,
+\[
+R_p>1,
+\qquad
+R_p>R_k
+\quad
+(k\ne p).
+\]
+Then the single-block equilibrium
+\[
+E_p
+\eq
+(s_p,0,\ldots,0,z_p^*,0,\ldots,0),
+\]
+where
+\[
+s_p
+\eq
+\frac1{\mR_p},
+\qquad
+\xi_p
+\eq
+\Lambda-\mu s_p
+\eq
+\Lambda-\frac{\mu}{\mR_p},
+\qquad
+z_p^*
+\eq
+\xi_pV_p^{-1}w_p,
+\]
+is globally asymptotically stable on the persistence class
+\[
+\Omega_p^+
+\eq
+\{(s,z_1,\ldots,z_m)\in\Omega:z_p\ne0\}.
+\]
+
+\im
+On the non-generic tie surface of Remark~\ref{r:generic-rankone}, the
+corresponding resident equilibrium is not isolated, and no point of
+the continuum is GAS in the ordinary sense.
+
+\EEN
+\eeT
+
+This theorem is an instance of the abstract Theorem~\ref{t:GAS-CEP-RF}.
+We verify its three hypotheses for \eqref{eq:rankone-m} and exhibit the
+explicit Perron--Volterra Lyapunov family
+$L_0,L_1,\ldots,L_m$; the GAS conclusions (1) and (2) then follow
+directly from Theorem~\ref{t:GAS-CEP-RF}, without re-deriving
+LaSalle's argument.
+
+\begin{proof}
+\emph{(RFOE).} By Theorem~\ref{t:rankone-m-data},
+\[
+R_p>R_k
+\;\Longleftrightarrow\;
+\mR_p>\mR_k
+\;\Longleftrightarrow\;
+R_k(E_p)=\frac{\mR_k}{\mR_p}<1,
+\]
+which is exactly the one-input form of RFOE (Definition~\ref{d:RFOE}).
+
+\smallskip
+\noindent\emph{(TLS).} On the resident face $z_k\equiv0$ ($k\ne p$),
+\eqref{eq:rankone-m} reduces to the classical scalar-block subsystem
+in $(s,z_p)$, whose local stability at $E_p$ is the rank-one Lotka--Volterra
+case; the Lyapunov computation for $L_p$ below, restricted to
+$z_k\equiv0$ ($k\ne p$), already gives $\dot L_p\le0$ with equality
+set $\{E_p\}$ on the face, which is local (in fact global on the
+face) asymptotic stability.
+
+\smallskip
+\noindent\emph{(LY): the Lyapunov family.}
+Define
+\[
+L_0
+\eq
+s_0G\!\left(\frac{s}{s_0}\right)
++
+\sum_{k=1}^m
+\frac{\pi_k^\top V_k^{-1}}{\mR_k}z_k.
+\]
+A direct computation (using $s'=\mu(s_0-s)-s\sum_k\T i_k$ and
+$\pi_k^\top V_k^{-1}w_k=\mR_k$) gives
+\[
+\dot L_0
+\eq
+-\mu\frac{(s-s_0)^2}{s}
++
+\sum_{k=1}^m
+\frac{R_k-1}{\mR_k}\T i_k.
+\]
+If $R_k\le1$ for every $k$, then $\dot L_0\le0$, and the largest
+invariant subset of $\{\dot L_0=0\}$ is $\{E_0\}$: if $s=s_0$ and some
+$\T i_k>0$ with $R_k=1$, then $s'=-s_0\sum_k\T i_k<0$, so such a point
+is not invariant. This verifies Definition~\ref{d:CEP-Lyap}(i).
+
+Fix $p$ with $R_p>1$, $R_p>R_k$ ($k\ne p$), and set $s_p=1/\mR_p$,
+$\xi_p=\Lambda-\mu s_p$, $z_p^*=\xi_pV_p^{-1}w_p$.  By
+Lemma~\ref{l:open-face-invariance} it suffices to work on
+$\Omega_p^{++}$ (where $z_p\gg0$), since trajectories in
+$\Omega_p^+\setminus\Omega_p^{++}$ enter $\Omega_p^{++}$ in finite
+time. Define
+\[
+u\eq\frac{s}{s_p},
+\qquad
+y_j\eq\frac{z_{p,j}}{z_{p,j}^*},
+\qquad
+\T w_j\eq\frac{\pi_{p,j}w_{p,j}/v_{p,j}}{\mR_p},
+\qquad
+Y\eq\sum_{j=1}^{n_p}\T w_jy_j,
+\]
+so that $\sum_j\T w_j=\pi_p^\top V_p^{-1}w_p/\mR_p=1$ and
+$\T i_p=\pi_p^\top z_p=\xi_p\mR_pY$.  Define, for $a>0$,
+\[
+L_p
+\eq
+a s_pG\!\left(\frac{s}{s_p}\right)
++
+a\sum_{j=1}^{n_p}
+\frac{\pi_{p,j}}{\mR_pv_{p,j}}\,
+z_{p,j}^*
+G\!\left(\frac{z_{p,j}}{z_{p,j}^*}\right)
++
+a\sum_{k\ne p}
+\frac{\pi_k^\top V_k^{-1}}{\mR_k}z_k.
+\]
+Writing $s'=\xi_p(1-uY)-\mu s_p(u-1)-s\sum_{k\ne p}\T i_k$ (from
+$s_p\mR_p=1$), the $s$-entropy term contributes
+\[
+a\left(1-\frac1u\right)s'
+\eq
+-a\mu\frac{(s-s_p)^2}{s}
++a\xi_p\left(1-\frac1u\right)(1-uY)
+-a(s-s_p)\sum_{k\ne p}\T i_k.
+\]
+For the resident block, $z_{p,j}'=sw_{p,j}\T i_p-v_{p,j}z_{p,j}$
+becomes, in the normalized coordinates, $z_{p,j}'=\xi_pw_{p,j}(uY-y_j)$,
+so the resident Volterra term contributes
+\[
+a\sum_{j=1}^{n_p}\frac{\pi_{p,j}}{\mR_pv_{p,j}}
+\left(1-\frac1{y_j}\right)z_{p,j}'
+\eq
+a\xi_p\sum_{j=1}^{n_p}\T w_j\left(1-\frac1{y_j}\right)(uY-y_j).
+\]
+For each $k\ne p$, Lemma~\ref{l:can-nor} gives
+\[
+a\frac{\pi_k^\top V_k^{-1}}{\mR_k}z_k'-a(s-s_p)\T i_k
+\eq
+a\left(\frac1{\mR_p}-\frac1{\mR_k}\right)\T i_k.
+\]
+Summing the three contributions,
+\[
+\dot L_p
+\eq
+-a\mu\frac{(s-s_p)^2}{s}
++a\xi_p\T H_p(u,y)
++a\sum_{k\ne p}\left(\frac1{\mR_p}-\frac1{\mR_k}\right)\T i_k,
+\]
+where $\T H_p(u,y)$ is exactly the bracket of
+Lemma~\ref{l:weighted-rankone-entropy}, applicable since $u>0$,
+$y_j>0$ on $\Omega_p^{++}$.  Thus $\T H_p(u,y)\le0$, with equality
+iff $u=1$ and $y_1=\cdots=y_{n_p}$; and since $R_p>R_k\Leftrightarrow
+\mR_p>\mR_k$, each coefficient $1/\mR_p-1/\mR_k<0$.  Hence
+$\dot L_p\le0$ on $\Omega_p^{++}$.
+
+Equality forces $\T i_k=0$ ($k\ne p$, hence $z_k=0$), $s=s_p$, and
+$y_1=\cdots=y_{n_p}=:c$ for some $c>0$, i.e.\ $z_p=cz_p^*$.  On this
+set $\T i_p=c\,\pi_p^\top z_p^*=c\xi_p\mR_p$, so the $s$-equation
+gives $s'=\xi_p(1-c)$; invariance forces $c=1$.  Thus the largest
+invariant subset of $\{\dot L_p=0\}$ in $\Omega_p^{++}$, and hence in
+$\Omega_p^+$ by Lemma~\ref{l:open-face-invariance}, is $\{E_p\}$.
+This verifies Definition~\ref{d:CEP-Lyap}(ii) with
+$\Omega_p^+\eq\{z_p\ne0\}$.
+
+\smallskip
+With (RFOE), (TLS), and (LY) verified, Theorem~\ref{t:GAS-CEP-RF}
+gives parts (1) and (2) directly.  Part (3) was already established
+in Remark~\ref{r:generic-rankone}: on the tie surface the
+corresponding equilibria form a non-isolated continuum, so no point
+of it can be globally asymptotically stable in the ordinary sense.
+\end{proof}
